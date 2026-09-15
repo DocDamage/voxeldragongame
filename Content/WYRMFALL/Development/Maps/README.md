@@ -1,0 +1,5 @@
+# L_DEV_Bootstrap created through Unreal only; later separate bounded G1 map
+
+Integration reservation, not imported content. Gate: **BOOT-01**.
+
+Read the relevant specification at `Documentation/DesignPack/docs/systems/EDITABLE_WORLD_RULES.md` from project root. Preserve source asset identities and mount paths; do not copy paid packs into public source control. This folder does not mean the feature is implemented.

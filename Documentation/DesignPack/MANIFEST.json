@@ -1,0 +1,190 @@
+{
+  "package": "WYRMFALL_Documentation_Pack",
+  "version": "0.1",
+  "basis_story_bible": "0.3",
+  "date": "2026-09-14",
+  "kind": "documentation_only_not_unreal_project",
+  "self_hash_policy": "MANIFEST.json deliberately excluded from files",
+  "payload_file_count": 35,
+  "markdown_count": 33,
+  "authored_acceptance_procedures": 118,
+  "gameplay_tests_run": 0,
+  "local_links_checked": 89,
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 4832,
+      "sha256": "8a8034dc72758e565584f4faf8184c6d3ea523e01e5e24d5504b5861fb9264ea"
+    },
+    {
+      "path": "PACKAGE_VALIDATION.md",
+      "bytes": 3335,
+      "sha256": "c580158877ffe45dcd3b29924884c83fcd586ec68cf81c1fc2d7c47f9e428776"
+    },
+    {
+      "path": "README.md",
+      "bytes": 4335,
+      "sha256": "29e8ed80a2cdcecf1b84ab69b3bda3f5a17059f3838bd9292f519b05609c17c6"
+    },
+    {
+      "path": "docs/ART_DIRECTION.md",
+      "bytes": 8972,
+      "sha256": "7dd17d87b156b62a452486008b6e70425308cd4a796ad636cbdadf5999da0cc6"
+    },
+    {
+      "path": "docs/ASSET_REGISTRY.md",
+      "bytes": 10310,
+      "sha256": "703a9242cf651a032c2371d2a4edc90daed6a81eddaaa8b6594ff2c8ee09cc15"
+    },
+    {
+      "path": "docs/DECISIONS_AND_SCOPE.md",
+      "bytes": 10215,
+      "sha256": "d1926913965263fa7cf2d98ff104f9da698db47f93e50dabe5e7f4f488b1ca47"
+    },
+    {
+      "path": "docs/DOCUMENT_INDEX.md",
+      "bytes": 5430,
+      "sha256": "10c62f69a201fe8850fde3a92c8e0f1a1d6e9b3812080035036d50eeb6a63596"
+    },
+    {
+      "path": "docs/GAME_DESIGN.md",
+      "bytes": 11012,
+      "sha256": "d9602cee14bc7d5577b35148083d153394ff40c5a739e6c61feadf3d4bc8f71d"
+    },
+    {
+      "path": "docs/PLUGIN_MATRIX.md",
+      "bytes": 7813,
+      "sha256": "ecf482c7b92786ea964b2d3ca2aad4d7c509b6bf361bc1de777fff5f73bcb3c3"
+    },
+    {
+      "path": "docs/REGION_01.md",
+      "bytes": 18621,
+      "sha256": "4744c5b964ddc6bbf15ab4b95e5ed9ccc8dc64205097cc8f2911ad8bc0ac8472"
+    },
+    {
+      "path": "docs/SOURCES_AND_EVIDENCE.md",
+      "bytes": 6754,
+      "sha256": "5ecf1f0d28ba91eb34dc68cd15181c2b10ad7cee11f191cbf3f3a8bd91033a1c"
+    },
+    {
+      "path": "docs/TECHNICAL_ARCHITECTURE.md",
+      "bytes": 10820,
+      "sha256": "2dfd43c3603343c63cda489aa75d334475608b643f40da7b26a9dff3c7a323d7"
+    },
+    {
+      "path": "docs/UI_UX_CONTROLS.md",
+      "bytes": 10844,
+      "sha256": "7f1c3f84c38bb1870ec5c212c1f2b6be8102c3bbbe0c88b3020f31e272b3cf88"
+    },
+    {
+      "path": "docs/VERTICAL_SLICE.md",
+      "bytes": 8605,
+      "sha256": "e8ff4344e035895bb8e35c8b7d079677a39b378bb19a016841cd6cecec159bda"
+    },
+    {
+      "path": "docs/production/ACCEPTANCE_TESTS.md",
+      "bytes": 33510,
+      "sha256": "3cbdea644c5d0f0a4089822c503678c3abed98104926787b6a32699f8c1800fa"
+    },
+    {
+      "path": "docs/production/CAMPAIGN_PROGRESSION.md",
+      "bytes": 9856,
+      "sha256": "c773d047a77e0705e285e65e85f0ca1c6f6f41262105da1b01e64019609c55e8"
+    },
+    {
+      "path": "docs/production/CURRENT_HANDOFF.md",
+      "bytes": 4668,
+      "sha256": "5b7801d142728817b0089d81eb085f280e0346f83041df8443e4d0cdaf02a753"
+    },
+    {
+      "path": "docs/production/G0_G1_READINESS_AND_TERRAIN_PROOF.md",
+      "bytes": 7891,
+      "sha256": "029c41aec3ec5dde0bcf6c1c9abe1ea0056b78e40a0d87a413c5f53e228cae46"
+    },
+    {
+      "path": "docs/production/IMPLEMENTATION_BACKLOG.md",
+      "bytes": 15939,
+      "sha256": "d5084dd054a6010252dd94072031c691f77ab10a987756ced0877ecc668aa4e6"
+    },
+    {
+      "path": "docs/production/acceptance_catalogue.json",
+      "bytes": 22380,
+      "sha256": "838f17a4426dd832bc4893d14e6dccb55c90a265224dce05c0cf1794ba1cc843"
+    },
+    {
+      "path": "docs/systems/ACTIVITIES_AND_BUILDING.md",
+      "bytes": 8910,
+      "sha256": "3089d7ca87240f12a34450c1b8b4a47239a4565aa280a3cc804ee80b0a1e6b2d"
+    },
+    {
+      "path": "docs/systems/COMBAT_AND_NIGHTMARE_ECHOES.md",
+      "bytes": 17581,
+      "sha256": "c678218594569535afb957cba4db1575a563a2d35cb00f8dfa255b2416d7f805"
+    },
+    {
+      "path": "docs/systems/DRAGON_HEARTFOLD_SPEC.md",
+      "bytes": 12886,
+      "sha256": "640d0f6361dbfdef997c7146e610a4f09da1116af6083fba4197b88c9f346c87"
+    },
+    {
+      "path": "docs/systems/EDITABLE_WORLD_RULES.md",
+      "bytes": 11736,
+      "sha256": "7ce12c0b6e65568c8ea60cd5cabc41d8889e012d01220d0b1566fcc247c2c578"
+    },
+    {
+      "path": "docs/systems/FLYING_CARS_AND_COLONY.md",
+      "bytes": 10563,
+      "sha256": "8c866b901c02080822b850d546a2e247aa21a2ebc2482c3ce4c1e125b19ae2be"
+    },
+    {
+      "path": "docs/systems/MUTABLE_CHARACTER_INTEGRATION.md",
+      "bytes": 7572,
+      "sha256": "4a000cd9da164a9991c977021b313033b36983083993031f9c281b3bc912a170"
+    },
+    {
+      "path": "docs/systems/SAVE_AND_CONTROL_CONTRACT.md",
+      "bytes": 13255,
+      "sha256": "90aa6a212b10feeabffc597373a353885f2e459c297571d0c6abfe3a4b5e988d"
+    },
+    {
+      "path": "references/originals/Voxel_ARPG_Core_Loop_Progression_Architecture_v0_1(1).md",
+      "bytes": 46433,
+      "sha256": "36443fcebbe9ef91e2425a92c5d54668b7c2b60dc10a28063d54100d0e3fac30"
+    },
+    {
+      "path": "references/originals/WYRMFALL_Chapter_01_The_First_Unbound_Expanded.md",
+      "bytes": 41456,
+      "sha256": "930125c187f2f1b0d8ecc6b688eaff59027ae6cf6af2c53528c9cd31f5b41cd7"
+    },
+    {
+      "path": "references/originals/WYRMFALL_Project_Aligned_Story_Bible_v0_2(1).md",
+      "bytes": 31716,
+      "sha256": "7fe22174608a97270769f041a838cb805a59be89aa1f9006ed9145fb0cc7db1d"
+    },
+    {
+      "path": "references/originals/WYRMFALL_Project_Aligned_Story_Bible_v0_3.md",
+      "bytes": 138005,
+      "sha256": "fd1eca16236fad91735dde402a988ecaf57bb0934f6c25464dbce7261beeb193"
+    },
+    {
+      "path": "references/originals/wyrmfall-world-bible(1).md",
+      "bytes": 11773,
+      "sha256": "4afc72b73c660de845873fc3c0a963a22b8f23bdd41129cddb19685b182d6475"
+    },
+    {
+      "path": "references/retrieved/C01_MUTABLE_PLAN_RETRIEVED_SUMMARY.md",
+      "bytes": 4319,
+      "sha256": "94f8ed742f35673c96d00102ba399d6bfd8f0fce9e87209284060671f7140d1b"
+    },
+    {
+      "path": "references/retrieved/H01_PROJECT_HANDOFF_RETRIEVED_SUMMARY.md",
+      "bytes": 4746,
+      "sha256": "96ac8768aa3f69eda60c31c3646f9344c18e2e0c76733f45697ca36938296830"
+    },
+    {
+      "path": "tools/verify_package.py",
+      "bytes": 4568,
+      "sha256": "55df32124fa43d579ed56d84b4c2415370509b9eca7318620e0f531213fe1941"
+    }
+  ]
+}

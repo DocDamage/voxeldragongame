@@ -1,0 +1,38 @@
+# Generated engine/build data, never source evidence.
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+dist/
+.vs/
+*.sln
+*.slnx
+*.suo
+*.VC.db
+*.VC.opendb
+*.opensdf
+*.sdf
+*.xcodeproj/
+*.xcworkspace/
+# Machine paths and secrets.
+.local/
+.env
+.env.*
+!.env.example
+.codex/auth.json
+.codex/sessions/
+.codex/history.jsonl
+# Python caches.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+# Owned archives stay outside source control until license/LFS policy is agreed.
+ExternalAssets/*
+!ExternalAssets/README.md
+# Supplied archives and imported vendor samples remain local.
+/assets and old docs/
+/Content/WYRMFALL/Development/Intake/
+/Content/Developers/
+# Retain source-side VS Code tasks; do not add machine-specific settings.
+.vscode/*
+!.vscode/tasks.json

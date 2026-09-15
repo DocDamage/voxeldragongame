@@ -1,0 +1,286 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "WYRMFALL: verify",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "verify"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "verify"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: test",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "test"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "test"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: doctor",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "doctor"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "doctor"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: generate",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "generate"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "generate"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: build",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "build"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "build"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "WYRMFALL: bootstrap",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "bootstrap"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "bootstrap"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: ue-test",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "ue-test"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "ue-test"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: open",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "open"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "open"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: plan",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "plan",
+        "--native"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "plan",
+          "--native"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: onboard offline",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "onboard"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "onboard"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: onboard native",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "onboard",
+        "--native"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "onboard",
+          "--native"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: report",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "report"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "report"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "WYRMFALL: native-tests",
+      "type": "process",
+      "command": "python",
+      "args": [
+        "tools/wyrm.py",
+        "native-tests"
+      ],
+      "windows": {
+        "command": "py",
+        "args": [
+          "-3",
+          "tools/wyrm.py",
+          "native-tests"
+        ]
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

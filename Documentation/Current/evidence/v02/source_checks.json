@@ -1,0 +1,24 @@
+{
+  "python_files": [
+    "Documentation/DesignPack/tools/verify_package.py",
+    "tests/test_hardening.py",
+    "tests/test_tooling.py",
+    "tools/wyrm.py",
+    "tools/wyrm_onboarding.py",
+    "tools/wyrm_process.py",
+    "tools/wyrm_support.py",
+    "tools/unreal/create_bootstrap_map.py"
+  ],
+  "source_verification": "PASS",
+  "python_ast": "PASS",
+  "native": "NOT_RUN",
+  "preserved_originals": 36,
+  "source_verification_errors": [],
+  "native_onboarding": "EXPECTED_BLOCKED_AT_DOCTOR_EXIT_2",
+  "remaining_native_steps": "NOT_RUN",
+  "tooling_tests": {
+    "run": 123,
+    "failures": 0,
+    "warnings_as_errors": true
+  }
+}

@@ -1,0 +1,624 @@
+{
+  "schema": 1,
+  "release": "0.2",
+  "date": "2026-09-15",
+  "kind": "source_release_integrity_not_native_validation",
+  "self_excluded": "SCAFFOLD_MANIFEST.json",
+  "files": [
+    {
+      "path": ".codex/config.toml",
+      "bytes": 469,
+      "sha256": "7bf6e3129395eabef89dbf98deb4ed29ed86a3493e0b370b0e5b70844fb8e529"
+    },
+    {
+      "path": ".editorconfig",
+      "bytes": 222,
+      "sha256": "27f2870473342105d4cc70bbe53269e24516b53d223e7b5572eb8d053fe8fd8b"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 268,
+      "sha256": "347a6e797ac70deaad29aedfb2af255542a6fa58332055cecd6148d33466ad9b"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 591,
+      "sha256": "345ba26ecbcc84d3fc1b3cfa02d04cfc97b290e7460162dda5dc0913ef2e9a8d"
+    },
+    {
+      "path": ".vscode/tasks.json",
+      "bytes": 5452,
+      "sha256": "33cd93c0b6906163d2b88493253a425d7f0d04779bcee0e3a2c587fa9e1fc339"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 5211,
+      "sha256": "ce777131293ea32196ea248089090f462b45f6528edebd2a40fec280f6cd13eb"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 3712,
+      "sha256": "a1c2a6dbbdcae4d4aba5468a4c5d1fe530758080d30c5fce3b84551dd0bbea83"
+    },
+    {
+      "path": "CODEX_FIRST_TASK.txt",
+      "bytes": 2611,
+      "sha256": "8557882a3154b49ba8841d47889062ac2c0f6690c87f9bd946cd69e7621a70ad"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "bytes": 4132,
+      "sha256": "d70ffc621e5c26d1958c575156f444f078a2b0db7c4e58a784dba15ca7554b73"
+    },
+    {
+      "path": "Config/DefaultEngine.ini",
+      "bytes": 509,
+      "sha256": "206aa4030549852b5e2c464dd778255b592eb61254544015677c82e0fbe342bb"
+    },
+    {
+      "path": "Config/DefaultGame.ini",
+      "bytes": 391,
+      "sha256": "df20a2c38a880eb6ff1728e9764b2b577d225dfbfe67cd89038cdf94653b3f57"
+    },
+    {
+      "path": "Config/DefaultGameplayTags.ini",
+      "bytes": 502,
+      "sha256": "97a1a3e93352499a1e92e71d68f56b66d4df5e839f9c58c6a1310566585285d4"
+    },
+    {
+      "path": "Config/DefaultInput.ini",
+      "bytes": 193,
+      "sha256": "cbb0838bb501c085f0cbcaa44672bb5b9070696732a12ab835a9aca8004636cf"
+    },
+    {
+      "path": "Config/IntegrationReadiness.json",
+      "bytes": 3389,
+      "sha256": "8cb00827b809f13bc8b036613e11e00f304af7d66748c4a2b5a73a9f75795772"
+    },
+    {
+      "path": "Content/AGENTS.md",
+      "bytes": 698,
+      "sha256": "52d45ee89326ba8cd0132653364d80added5942627b27b04cd1c4dc571690b63"
+    },
+    {
+      "path": "Content/WYRMFALL/Abilities/README.md",
+      "bytes": 417,
+      "sha256": "82ca1dd3cfbc5467b856c371e3fc347bc50a3582cfdfcd8cbaa023944bbda4df"
+    },
+    {
+      "path": "Content/WYRMFALL/Activities/README.md",
+      "bytes": 402,
+      "sha256": "67b3ccdaab7767f3d4f85034fe20c737186ec21e866ce6399ef4831b336741ea"
+    },
+    {
+      "path": "Content/WYRMFALL/Audio/README.md",
+      "bytes": 436,
+      "sha256": "6352f3a95c12598b38532195634013c27f9097f1551eaf1f7cd13e0e6574bb70"
+    },
+    {
+      "path": "Content/WYRMFALL/Building/README.md",
+      "bytes": 397,
+      "sha256": "711db38a5a016e5c391a74ee032f97a41083641564151c269151b19f59bb5042"
+    },
+    {
+      "path": "Content/WYRMFALL/Characters/Dragons/README.md",
+      "bytes": 426,
+      "sha256": "93b22eafe7699fb20e989255abff2f4af26f415c0a426a75d1f78cf76a0c909c"
+    },
+    {
+      "path": "Content/WYRMFALL/Characters/Enemies/README.md",
+      "bytes": 403,
+      "sha256": "1d20354ce7e115c893a9462f4f5a6c3b7fb78dfb17d8cc8325f033a3498df080"
+    },
+    {
+      "path": "Content/WYRMFALL/Characters/Horror/README.md",
+      "bytes": 435,
+      "sha256": "3de9a0d18154119413529ef7378f17df179460c07e2626fc99d200a1b5a537c6"
+    },
+    {
+      "path": "Content/WYRMFALL/Characters/Player/README.md",
+      "bytes": 375,
+      "sha256": "57a35455a750a668c9e38a6edb8bdbd205b37f37e5742a34a8c44f31046fa4e3"
+    },
+    {
+      "path": "Content/WYRMFALL/Development/Maps/README.md",
+      "bytes": 418,
+      "sha256": "60214a7cea1e9f232b6591a1a5a27aaa2d47bd5222c59fb441cb373cc471bd82"
+    },
+    {
+      "path": "Content/WYRMFALL/Items/README.md",
+      "bytes": 436,
+      "sha256": "c290a4a3cee8b63e25f6b597c8b0f6aeb8926e1e3473fa7c69210d8c3ec4c8d3"
+    },
+    {
+      "path": "Content/WYRMFALL/UI/README.md",
+      "bytes": 434,
+      "sha256": "af1331efd1018aea236b34a2fb2d8d18842d1f63218b91543a7de72330ca143d"
+    },
+    {
+      "path": "Content/WYRMFALL/Vehicles/README.md",
+      "bytes": 413,
+      "sha256": "90b2bed08ad0b831d8a20cafccf234bf328b9c005bb222fe445d8d2fdab2120a"
+    },
+    {
+      "path": "Content/WYRMFALL/World/Regions/README.md",
+      "bytes": 422,
+      "sha256": "c6bc3b2fe91cfbd9364047ca14ab5022223d140cefcfb121ae2022a00e72b548"
+    },
+    {
+      "path": "Content/WYRMFALL/World/Terrain/README.md",
+      "bytes": 392,
+      "sha256": "e9ac3153c6c6cbad0ed99227a36f285ddc68d28a1b0bf0c6b97c5ab5d3d12abe"
+    },
+    {
+      "path": "Content/WYRMFALL/World/Water/README.md",
+      "bytes": 399,
+      "sha256": "b4022034c649635c58165ac5df69b4b2b59fc8a1b8a1f2947ca40869a12c90c9"
+    },
+    {
+      "path": "Documentation/Current/ASSET_INTAKE.md",
+      "bytes": 2626,
+      "sha256": "a2770a9ee6de8357c3013c70b4f9eb3593f135ad97b278ab755be2000bb910d6"
+    },
+    {
+      "path": "Documentation/Current/PROVENANCE.json",
+      "bytes": 628,
+      "sha256": "5207136286cf65820fed2ecfab7bab1c154f815d197fa0fe0268c8185588bd71"
+    },
+    {
+      "path": "Documentation/Current/SCAFFOLD_ARCHITECTURE.md",
+      "bytes": 5482,
+      "sha256": "a5f5b1c25195a7a03b65ef61e6ae8cfbcdd6e0ddf9a945feef4ebb2b44bc0362"
+    },
+    {
+      "path": "Documentation/Current/SESSION_REPORT_TEMPLATE.md",
+      "bytes": 1078,
+      "sha256": "27a9f8bd92998c6a3803123861b6a8fe4aa32148c1d839249c60b9e93219c983"
+    },
+    {
+      "path": "Documentation/Current/STATUS.md",
+      "bytes": 3772,
+      "sha256": "1b9c1416b4d1bd6e29f15723f552cd8bb92376e6926ef26b8efefc5848cf2ac6"
+    },
+    {
+      "path": "Documentation/Current/TECHNICAL_REFERENCES.md",
+      "bytes": 4706,
+      "sha256": "7eca75e553b438c5f913f9cb3ee95a53a3a4ac6f27be58e4aa648bca4fd51999"
+    },
+    {
+      "path": "Documentation/Current/WINDOWS_SETUP.md",
+      "bytes": 7167,
+      "sha256": "a7917954d42e1eb224aff3880f17d1ba057fc2ed8dac2cfa8280ff6c2da691b8"
+    },
+    {
+      "path": "Documentation/Current/evidence/authoring_host_doctor.json",
+      "bytes": 682,
+      "sha256": "1297ff702ef0e9d33f6810b65757303c8fe39f1f41872ad415b1a90aec60415c"
+    },
+    {
+      "path": "Documentation/Current/evidence/design_pack_verification.txt",
+      "bytes": 189,
+      "sha256": "bb0e033f499fa9e57b3f1d198a8afe982bcddcb31893236fed46f55e958c7f56"
+    },
+    {
+      "path": "Documentation/Current/evidence/missing_engine_build_gate.txt",
+      "bytes": 191,
+      "sha256": "762691d3ce5ed9f40a07c0875ff0e1f630d1301ec5ed6c386cb67e0d81ec9fd3"
+    },
+    {
+      "path": "Documentation/Current/evidence/source_config_verification.txt",
+      "bytes": 77,
+      "sha256": "2adbb6584a4e0a9750af10ba9025dbc64971a37567d29e483f507e82979f499b"
+    },
+    {
+      "path": "Documentation/Current/evidence/source_preservation.json",
+      "bytes": 6397,
+      "sha256": "f0c816f463a25c691a10851af3a1da09d85d8abcf43ade32252cca61a3743c7a"
+    },
+    {
+      "path": "Documentation/Current/evidence/tooling_unittest.txt",
+      "bytes": 6952,
+      "sha256": "f8946ade91b183f899b9d9e28e5fcc4d3cd4401cdbad9d03f8d037601382cd4c"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/changes_from_v01.json",
+      "bytes": 9154,
+      "sha256": "573d854f6bce8e4cd57bb99cf9a542263514e362220295be22378536584a9c45"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/native_blocked_onboarding.log",
+      "bytes": 5232,
+      "sha256": "19a8cd59da1f792ffc7aa9e97a703df5c2fb887a37773fcf92234960b044e3c5"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/offline_onboarding.log",
+      "bytes": 4171,
+      "sha256": "689a3a2c8c2c197efd998f6cd49341a339a3bfbbada3689c1ceb1d342cd39c7b"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_native_authoring.json",
+      "bytes": 11010,
+      "sha256": "1241a5c5d6611bb0a6d0127eb2352311812dd926e20db09ac551ae9ab2d2d702"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_native_authoring.md",
+      "bytes": 1030,
+      "sha256": "4995f34d069b8097a63df34c96b2eee34e8c2533e2803536ccb20265ded41af5"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_offline_authoring.json",
+      "bytes": 8776,
+      "sha256": "d8c47d27fe186ed723ce1fc94f2f2ca9eeddb11c0fc04fef2f69d4f97c88dc3f"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_offline_authoring.md",
+      "bytes": 805,
+      "sha256": "7e2045e52ddbf0dc3a520a27b86a2a0c5fe0ebb718132ccb539139314be078b9"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/source_checks.json",
+      "bytes": 634,
+      "sha256": "7b58a00d82566bfac29136330338d9cd0cc5300c39c982586f60125010ff4aa9"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/tooling_unittest.txt",
+      "bytes": 13341,
+      "sha256": "3fcf37fa2c4a95bf9ea5022e66aca84d0cd5938348c9f18b332c97c74cd47259"
+    },
+    {
+      "path": "Documentation/Current/tasks/BOOT-01.md",
+      "bytes": 2419,
+      "sha256": "82edaf4f8ee3a9ac5ceeee1c498a71aabcc876cc3f12e81500c91339ea66e446"
+    },
+    {
+      "path": "Documentation/Current/tasks/WP-00.md",
+      "bytes": 1559,
+      "sha256": "e4c94a66fb9898ddac7b6ed971d89a8f043121561c3c7a298f78ad95906f4bdd"
+    },
+    {
+      "path": "Documentation/Current/tasks/WP-01.md",
+      "bytes": 2072,
+      "sha256": "7272ce3f9dce0e50928be9f366ae59f40d48156e3fb60d1fe025b64b18dc152c"
+    },
+    {
+      "path": "Documentation/DesignPack/AGENTS.md",
+      "bytes": 4832,
+      "sha256": "8a8034dc72758e565584f4faf8184c6d3ea523e01e5e24d5504b5861fb9264ea"
+    },
+    {
+      "path": "Documentation/DesignPack/MANIFEST.json",
+      "bytes": 6435,
+      "sha256": "c02c0fa429aa236c4771b7c2c08ced529e533cc6befbfc4f72ed45737a007e97"
+    },
+    {
+      "path": "Documentation/DesignPack/PACKAGE_VALIDATION.md",
+      "bytes": 3335,
+      "sha256": "c580158877ffe45dcd3b29924884c83fcd586ec68cf81c1fc2d7c47f9e428776"
+    },
+    {
+      "path": "Documentation/DesignPack/README.md",
+      "bytes": 4335,
+      "sha256": "29e8ed80a2cdcecf1b84ab69b3bda3f5a17059f3838bd9292f519b05609c17c6"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/ART_DIRECTION.md",
+      "bytes": 8972,
+      "sha256": "7dd17d87b156b62a452486008b6e70425308cd4a796ad636cbdadf5999da0cc6"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/ASSET_REGISTRY.md",
+      "bytes": 10310,
+      "sha256": "703a9242cf651a032c2371d2a4edc90daed6a81eddaaa8b6594ff2c8ee09cc15"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/DECISIONS_AND_SCOPE.md",
+      "bytes": 10215,
+      "sha256": "d1926913965263fa7cf2d98ff104f9da698db47f93e50dabe5e7f4f488b1ca47"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/DOCUMENT_INDEX.md",
+      "bytes": 5430,
+      "sha256": "10c62f69a201fe8850fde3a92c8e0f1a1d6e9b3812080035036d50eeb6a63596"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/GAME_DESIGN.md",
+      "bytes": 11012,
+      "sha256": "d9602cee14bc7d5577b35148083d153394ff40c5a739e6c61feadf3d4bc8f71d"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/PLUGIN_MATRIX.md",
+      "bytes": 7813,
+      "sha256": "ecf482c7b92786ea964b2d3ca2aad4d7c509b6bf361bc1de777fff5f73bcb3c3"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/REGION_01.md",
+      "bytes": 18621,
+      "sha256": "4744c5b964ddc6bbf15ab4b95e5ed9ccc8dc64205097cc8f2911ad8bc0ac8472"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/SOURCES_AND_EVIDENCE.md",
+      "bytes": 6754,
+      "sha256": "5ecf1f0d28ba91eb34dc68cd15181c2b10ad7cee11f191cbf3f3a8bd91033a1c"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/TECHNICAL_ARCHITECTURE.md",
+      "bytes": 10820,
+      "sha256": "2dfd43c3603343c63cda489aa75d334475608b643f40da7b26a9dff3c7a323d7"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/UI_UX_CONTROLS.md",
+      "bytes": 10844,
+      "sha256": "7f1c3f84c38bb1870ec5c212c1f2b6be8102c3bbbe0c88b3020f31e272b3cf88"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/VERTICAL_SLICE.md",
+      "bytes": 8605,
+      "sha256": "e8ff4344e035895bb8e35c8b7d079677a39b378bb19a016841cd6cecec159bda"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/ACCEPTANCE_TESTS.md",
+      "bytes": 33510,
+      "sha256": "3cbdea644c5d0f0a4089822c503678c3abed98104926787b6a32699f8c1800fa"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/CAMPAIGN_PROGRESSION.md",
+      "bytes": 9856,
+      "sha256": "c773d047a77e0705e285e65e85f0ca1c6f6f41262105da1b01e64019609c55e8"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/CURRENT_HANDOFF.md",
+      "bytes": 4668,
+      "sha256": "5b7801d142728817b0089d81eb085f280e0346f83041df8443e4d0cdaf02a753"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/G0_G1_READINESS_AND_TERRAIN_PROOF.md",
+      "bytes": 7891,
+      "sha256": "029c41aec3ec5dde0bcf6c1c9abe1ea0056b78e40a0d87a413c5f53e228cae46"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/IMPLEMENTATION_BACKLOG.md",
+      "bytes": 15939,
+      "sha256": "d5084dd054a6010252dd94072031c691f77ab10a987756ced0877ecc668aa4e6"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/production/acceptance_catalogue.json",
+      "bytes": 22380,
+      "sha256": "838f17a4426dd832bc4893d14e6dccb55c90a265224dce05c0cf1794ba1cc843"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/ACTIVITIES_AND_BUILDING.md",
+      "bytes": 8910,
+      "sha256": "3089d7ca87240f12a34450c1b8b4a47239a4565aa280a3cc804ee80b0a1e6b2d"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/COMBAT_AND_NIGHTMARE_ECHOES.md",
+      "bytes": 17581,
+      "sha256": "c678218594569535afb957cba4db1575a563a2d35cb00f8dfa255b2416d7f805"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/DRAGON_HEARTFOLD_SPEC.md",
+      "bytes": 12886,
+      "sha256": "640d0f6361dbfdef997c7146e610a4f09da1116af6083fba4197b88c9f346c87"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/EDITABLE_WORLD_RULES.md",
+      "bytes": 11736,
+      "sha256": "7ce12c0b6e65568c8ea60cd5cabc41d8889e012d01220d0b1566fcc247c2c578"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/FLYING_CARS_AND_COLONY.md",
+      "bytes": 10563,
+      "sha256": "8c866b901c02080822b850d546a2e247aa21a2ebc2482c3ce4c1e125b19ae2be"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/MUTABLE_CHARACTER_INTEGRATION.md",
+      "bytes": 7572,
+      "sha256": "4a000cd9da164a9991c977021b313033b36983083993031f9c281b3bc912a170"
+    },
+    {
+      "path": "Documentation/DesignPack/docs/systems/SAVE_AND_CONTROL_CONTRACT.md",
+      "bytes": 13255,
+      "sha256": "90aa6a212b10feeabffc597373a353885f2e459c297571d0c6abfe3a4b5e988d"
+    },
+    {
+      "path": "Documentation/DesignPack/references/originals/Voxel_ARPG_Core_Loop_Progression_Architecture_v0_1(1).md",
+      "bytes": 46433,
+      "sha256": "36443fcebbe9ef91e2425a92c5d54668b7c2b60dc10a28063d54100d0e3fac30"
+    },
+    {
+      "path": "Documentation/DesignPack/references/originals/WYRMFALL_Chapter_01_The_First_Unbound_Expanded.md",
+      "bytes": 41456,
+      "sha256": "930125c187f2f1b0d8ecc6b688eaff59027ae6cf6af2c53528c9cd31f5b41cd7"
+    },
+    {
+      "path": "Documentation/DesignPack/references/originals/WYRMFALL_Project_Aligned_Story_Bible_v0_2(1).md",
+      "bytes": 31716,
+      "sha256": "7fe22174608a97270769f041a838cb805a59be89aa1f9006ed9145fb0cc7db1d"
+    },
+    {
+      "path": "Documentation/DesignPack/references/originals/WYRMFALL_Project_Aligned_Story_Bible_v0_3.md",
+      "bytes": 138005,
+      "sha256": "fd1eca16236fad91735dde402a988ecaf57bb0934f6c25464dbce7261beeb193"
+    },
+    {
+      "path": "Documentation/DesignPack/references/originals/wyrmfall-world-bible(1).md",
+      "bytes": 11773,
+      "sha256": "4afc72b73c660de845873fc3c0a963a22b8f23bdd41129cddb19685b182d6475"
+    },
+    {
+      "path": "Documentation/DesignPack/references/retrieved/C01_MUTABLE_PLAN_RETRIEVED_SUMMARY.md",
+      "bytes": 4319,
+      "sha256": "94f8ed742f35673c96d00102ba399d6bfd8f0fce9e87209284060671f7140d1b"
+    },
+    {
+      "path": "Documentation/DesignPack/references/retrieved/H01_PROJECT_HANDOFF_RETRIEVED_SUMMARY.md",
+      "bytes": 4746,
+      "sha256": "96ac8768aa3f69eda60c31c3646f9344c18e2e0c76733f45697ca36938296830"
+    },
+    {
+      "path": "Documentation/DesignPack/tools/verify_package.py",
+      "bytes": 4568,
+      "sha256": "55df32124fa43d579ed56d84b4c2415370509b9eca7318620e0f531213fe1941"
+    },
+    {
+      "path": "ExternalAssets/README.md",
+      "bytes": 525,
+      "sha256": "5781e382ecefd8da26747445f676059d50be31ceccc6e50b4b62e764b47054ba"
+    },
+    {
+      "path": "Plugins/README.md",
+      "bytes": 598,
+      "sha256": "b82420a990e7a57f32d2cb51a7aeadfbc6d2f25a0d4cd55082bf5375494e3ec7"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5526,
+      "sha256": "6381d0b524f334b075eaa1b029921727a33b1085cee802440965562cd8105abd"
+    },
+    {
+      "path": "Setup.ps1",
+      "bytes": 1075,
+      "sha256": "608f6c1e2dd0e79b0ca15acacb0dbf0114a985fff9e565b021d33a8e842952f9"
+    },
+    {
+      "path": "Source/AGENTS.md",
+      "bytes": 736,
+      "sha256": "16cbf2299c51a318501c672fe52ffc28d094c152ea33caf22b59901c1dde411a"
+    },
+    {
+      "path": "Source/WYRMFALL.Target.cs",
+      "bytes": 373,
+      "sha256": "9184d00b066bab2935f3adbf8ffc4c797cd1c37d4eedd2b53454a4595924969a"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Combat/WyrmAttributeSet.cpp",
+      "bytes": 2143,
+      "sha256": "caa5b80ab8d19e43eeaea760c1960674ed2b83f5ccd51b30080676ba8b2ca43a"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Core/WyrmGameMode.cpp",
+      "bytes": 344,
+      "sha256": "a22fe86c72a9b53718801c31911a0bb9d61a6fd954957c3de9397e041801a3a9"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Development/WyrmDebugHUD.cpp",
+      "bytes": 1369,
+      "sha256": "9e824166e03af85df48d089e05c2702b5d25b03ae0016cd829b9f936dff002f3"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Player/WyrmCharacter.cpp",
+      "bytes": 2599,
+      "sha256": "798cb5a50af2ad30c661e9c181f52edfc73cb93335406c5f400debda5593e680"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Player/WyrmPlayerController.cpp",
+      "bytes": 8518,
+      "sha256": "fe0ee4e56a7bd06863723c4a22433101f8dd601b77f0216a55c6933fade221d3"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Terrain/WyrmTerrainProvider.cpp",
+      "bytes": 501,
+      "sha256": "302050cdc8b4e205b4b5e36eec67a41ec18d5b853b2b9b4f521c389fef3d9ada"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Tests/WyrmScaffoldTests.cpp",
+      "bytes": 5451,
+      "sha256": "780a0c9e0d54a2cc41cc8b03829cb5629602774c193f49c3d9de710836f9ba07"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/WYRMFALL.cpp",
+      "bytes": 168,
+      "sha256": "cf2e48de78c5166c9c614678b98931fb4e31469f0a4cb481118b55847b5a5be4"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Combat/WyrmAttributeSet.h",
+      "bytes": 1442,
+      "sha256": "d23078863cb25aee0d31c3f97a5c1c0afef92e1ef43dd41e4a0e266d278d61ea"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Core/WyrmGameMode.h",
+      "bytes": 234,
+      "sha256": "91046a00bd87369751a3340d0e6cffc3f5efdffb047cbf5936f37287d38bea69"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Development/WyrmDebugHUD.h",
+      "bytes": 232,
+      "sha256": "e6731eece2ea9e617cc9e243aa73e108a14ec47759286326f4e1f38275c5a69a"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Player/WyrmCharacter.h",
+      "bytes": 1573,
+      "sha256": "54de74a442b154973c4264fcbb081203bbe1cc58ed15cc872dc058e2ab8edbd5"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Player/WyrmPlayerController.h",
+      "bytes": 1567,
+      "sha256": "568927d3123ffffd7a270fbd50bb0de7276be78554066e18b9628f245e09af8a"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Terrain/WyrmTerrainProvider.h",
+      "bytes": 2406,
+      "sha256": "1aaee35af1c168cb54dcffa68415de24148bc789d34ceb680ec5e36a0da0594e"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/WYRMFALL.h",
+      "bytes": 90,
+      "sha256": "5730307192d0c695e5d42dfbdbac4d13a4b08a1bea43672621b46cb0c25a7eb0"
+    },
+    {
+      "path": "Source/WYRMFALL/WYRMFALL.Build.cs",
+      "bytes": 682,
+      "sha256": "09e4d9431a1d0ed8fa37e463e7bac6fff6a177963891ecce201100dba600b1e5"
+    },
+    {
+      "path": "Source/WYRMFALLEditor.Target.cs",
+      "bytes": 387,
+      "sha256": "5c2c511ee5ac009a2f63bbeeba1ff52f46593569b8874112e16bd8cad58a19a5"
+    },
+    {
+      "path": "VALIDATION.md",
+      "bytes": 4389,
+      "sha256": "402b53e198062e63b54d5def4fc25c8088aa58282581cf2859f14194cdc6b754"
+    },
+    {
+      "path": "WYRMFALL.uproject",
+      "bytes": 787,
+      "sha256": "eef33a82e31d0421d848a2b26bcae7bd1c35abe8e4c2d845a3de7d96764ff4f7"
+    },
+    {
+      "path": "tests/test_hardening.py",
+      "bytes": 17558,
+      "sha256": "7ba0c06fa3639ff1542449de3af7fb1860116556e4ce3fac017c3502e994ef05"
+    },
+    {
+      "path": "tests/test_tooling.py",
+      "bytes": 13885,
+      "sha256": "4b30edca717b31df1724ecb93d45a8ead536c61dc4765dd36270665f0e7d2f52"
+    },
+    {
+      "path": "tools/unreal/create_bootstrap_map.py",
+      "bytes": 5337,
+      "sha256": "0eb1c44cc6a1f7b875c18094cf82012be21816c386a9c25b99149ba1a3b72e4c"
+    },
+    {
+      "path": "tools/wyrm.py",
+      "bytes": 9408,
+      "sha256": "22ffe57a300cf92d06c3ed8fbe52855eb64fb9bfbe3bcc888c266af6d0b04af4"
+    },
+    {
+      "path": "tools/wyrm_onboarding.py",
+      "bytes": 12705,
+      "sha256": "9fab45efd746c069ca4537ad0b27f5decd467fe033aca92c0bbfa94bedbc20e7"
+    },
+    {
+      "path": "tools/wyrm_process.py",
+      "bytes": 5151,
+      "sha256": "bbf2d8f4cb7ff5eb7e11357d67bac78797050e46f47e917cf2f9209578e3d153"
+    },
+    {
+      "path": "tools/wyrm_support.py",
+      "bytes": 23024,
+      "sha256": "7ffe33ffd5f020af1580e6f46dce7e788f4c3294c80d44d529e081df796e1032"
+    }
+  ]
+}

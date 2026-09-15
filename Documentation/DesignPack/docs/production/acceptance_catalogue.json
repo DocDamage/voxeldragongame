@@ -1,0 +1,1141 @@
+{
+  "kind": "authored_test_procedures_not_executed",
+  "cases": [
+    {
+      "id": "RDY-01",
+      "name": "Actual environment",
+      "requirements": [
+        "REQ-20"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection"
+    },
+    {
+      "id": "RDY-02",
+      "name": "Real assets",
+      "requirements": [
+        "REQ-05"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection"
+    },
+    {
+      "id": "RDY-03",
+      "name": "Owner conflicts",
+      "requirements": [
+        "REQ-06",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection"
+    },
+    {
+      "id": "RDY-04",
+      "name": "Baseline provenance",
+      "requirements": [
+        "REQ-05",
+        "REQ-20"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection"
+    },
+    {
+      "id": "WRLD-01",
+      "name": "Useful dig",
+      "requirements": [
+        "REQ-02"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-02",
+      "name": "Add and fill",
+      "requirements": [
+        "REQ-02"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "WRLD-03",
+      "name": "Finite ore",
+      "requirements": [
+        "REQ-02",
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "WRLD-04",
+      "name": "New-surface nav",
+      "requirements": [
+        "REQ-01",
+        "REQ-02"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-05",
+      "name": "Stale route",
+      "requirements": [
+        "REQ-01",
+        "REQ-02"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-06",
+      "name": "Stacked cave floor",
+      "requirements": [
+        "REQ-01"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-07",
+      "name": "Narrow protection",
+      "requirements": [
+        "REQ-02",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-08",
+      "name": "Occupied fill",
+      "requirements": [
+        "REQ-02",
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-09",
+      "name": "Camp support",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-10",
+      "name": "Bounded wet bed",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-11",
+      "name": "Water boundary",
+      "requirements": [
+        "REQ-02"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "WRLD-12",
+      "name": "Representative edit stress",
+      "requirements": [
+        "REQ-02",
+        "REQ-03"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + profiling"
+    },
+    {
+      "id": "WRLD-13",
+      "name": "Region generation",
+      "requirements": [
+        "REQ-03"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "CHAR-01",
+      "name": "Real recipe",
+      "requirements": [
+        "REQ-04"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "CHAR-02",
+      "name": "Async revision",
+      "requirements": [
+        "REQ-04"
+      ],
+      "status": "NOT_RUN",
+      "method": "Focused deterministic + PIE"
+    },
+    {
+      "id": "CHAR-03",
+      "name": "Generation failure",
+      "requirements": [
+        "REQ-04",
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "CHAR-04",
+      "name": "Equipment attachment",
+      "requirements": [
+        "REQ-04",
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "CHAR-05",
+      "name": "Recipe restart",
+      "requirements": [
+        "REQ-04",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + record comparison"
+    },
+    {
+      "id": "CHAR-06",
+      "name": "Cooked runtime",
+      "requirements": [
+        "REQ-04"
+      ],
+      "status": "NOT_RUN",
+      "method": "Cooked gameplay"
+    },
+    {
+      "id": "CHAR-07",
+      "name": "Creator breadth",
+      "requirements": [
+        "REQ-04"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection + PIE"
+    },
+    {
+      "id": "CHAR-08",
+      "name": "Creator UX/randomization",
+      "requirements": [
+        "REQ-04",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + focused deterministic"
+    },
+    {
+      "id": "COM-01",
+      "name": "Damage fixture",
+      "requirements": [
+        "REQ-06"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic"
+    },
+    {
+      "id": "COM-02",
+      "name": "Critical and drain bounds",
+      "requirements": [
+        "REQ-06",
+        "REQ-14"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic"
+    },
+    {
+      "id": "COM-03",
+      "name": "Two-camera combat",
+      "requirements": [
+        "REQ-01",
+        "REQ-06"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "COM-04",
+      "name": "Cost/cooldown commit",
+      "requirements": [
+        "REQ-06"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "COM-05",
+      "name": "Status interaction",
+      "requirements": [
+        "REQ-06"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "COM-06",
+      "name": "Item rolls/equip",
+      "requirements": [
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "COM-07",
+      "name": "Transfers/full bag",
+      "requirements": [
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "COM-08",
+      "name": "Second build",
+      "requirements": [
+        "REQ-06",
+        "REQ-07"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "SAVE-01",
+      "name": "Snapshot roundtrip",
+      "requirements": [
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "SAVE-02",
+      "name": "Compound edit save",
+      "requirements": [
+        "REQ-02",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection"
+    },
+    {
+      "id": "SAVE-03",
+      "name": "Failed disk generation",
+      "requirements": [
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection"
+    },
+    {
+      "id": "SAVE-04",
+      "name": "Missing/incompatible content",
+      "requirements": [
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection"
+    },
+    {
+      "id": "SAVE-05",
+      "name": "Timer continuity",
+      "requirements": [
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "SAVE-06",
+      "name": "Grant duplication",
+      "requirements": [
+        "REQ-07",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic"
+    },
+    {
+      "id": "SAVE-07",
+      "name": "Load geometry first",
+      "requirements": [
+        "REQ-02",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection + PIE"
+    },
+    {
+      "id": "SAVE-08",
+      "name": "Remote compact save",
+      "requirements": [
+        "REQ-11",
+        "REQ-13",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart"
+    },
+    {
+      "id": "SAVE-09",
+      "name": "Mounted flight save",
+      "requirements": [
+        "REQ-12",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + PIE"
+    },
+    {
+      "id": "SAVE-10",
+      "name": "Living-defeat boundaries",
+      "requirements": [
+        "REQ-10",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart"
+    },
+    {
+      "id": "SAVE-11",
+      "name": "Beast form save",
+      "requirements": [
+        "REQ-04",
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + PIE"
+    },
+    {
+      "id": "SAVE-12",
+      "name": "Occupied/parked car save",
+      "requirements": [
+        "REQ-16",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart"
+    },
+    {
+      "id": "SAVE-13",
+      "name": "Attempt/retry distinction",
+      "requirements": [
+        "REQ-18",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + PIE"
+    },
+    {
+      "id": "DRG-01",
+      "name": "Living outcome/role conversion",
+      "requirements": [
+        "REQ-10"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "DRG-02",
+      "name": "Companion combat",
+      "requirements": [
+        "REQ-11"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-03",
+      "name": "Direct control/body",
+      "requirements": [
+        "REQ-11"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-04",
+      "name": "Remote risk/tether",
+      "requirements": [
+        "REQ-11"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-05",
+      "name": "Original mount",
+      "requirements": [
+        "REQ-12"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-06",
+      "name": "Flight and landing",
+      "requirements": [
+        "REQ-12"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-07",
+      "name": "Mounted entry/failure",
+      "requirements": [
+        "REQ-12",
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-08",
+      "name": "Compact size/collision",
+      "requirements": [
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-09",
+      "name": "Compact fight",
+      "requirements": [
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-10",
+      "name": "Form state conservation",
+      "requirements": [
+        "REQ-13",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "DRG-11",
+      "name": "Blocked growth",
+      "requirements": [
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-12",
+      "name": "Interrupted form",
+      "requirements": [
+        "REQ-13"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "DRG-13",
+      "name": "Town behavior",
+      "requirements": [
+        "REQ-13",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "DRG-14",
+      "name": "Recovery/inactive identity",
+      "requirements": [
+        "REQ-11",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + record comparison"
+    },
+    {
+      "id": "DRG-15",
+      "name": "Different rig policy",
+      "requirements": [
+        "REQ-12",
+        "REQ-13",
+        "REQ-22"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection + later PIE"
+    },
+    {
+      "id": "ECHO-01",
+      "name": "Real Counselor reward",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "ECHO-02",
+      "name": "Relentless statuses",
+      "requirements": [
+        "REQ-14"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "ECHO-03",
+      "name": "Relentless failure/time",
+      "requirements": [
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "ECHO-04",
+      "name": "Full bag/double outcome",
+      "requirements": [
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "ECHO-05",
+      "name": "Optional skip/dragon support",
+      "requirements": [
+        "REQ-11",
+        "REQ-15"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "ECHO-06",
+      "name": "Proc cap",
+      "requirements": [
+        "REQ-14"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic"
+    },
+    {
+      "id": "ECHO-07",
+      "name": "Mercy parity",
+      "requirements": [
+        "REQ-14",
+        "REQ-15"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "ECHO-08",
+      "name": "Actual beast",
+      "requirements": [
+        "REQ-04",
+        "REQ-14"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "ECHO-09",
+      "name": "Beast return blockage",
+      "requirements": [
+        "REQ-14",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection + PIE"
+    },
+    {
+      "id": "ECHO-10",
+      "name": "Final Judge unlock",
+      "requirements": [
+        "REQ-14",
+        "REQ-22"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "REG-01",
+      "name": "Arrival excavation",
+      "requirements": [
+        "REQ-04",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-02",
+      "name": "Worker facts",
+      "requirements": [
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "REG-03",
+      "name": "Sella first",
+      "requirements": [
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-04",
+      "name": "Evidence redundancy",
+      "requirements": [
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-05",
+      "name": "Rusk bypass",
+      "requirements": [
+        "REQ-02",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-06",
+      "name": "Auxiliary impact",
+      "requirements": [
+        "REQ-10",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-07",
+      "name": "Consent sequence",
+      "requirements": [
+        "REQ-10"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "REG-08",
+      "name": "Relief use",
+      "requirements": [
+        "REQ-11"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-09",
+      "name": "Late rescue",
+      "requirements": [
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "REG-10",
+      "name": "Persistent local recovery",
+      "requirements": [
+        "REQ-02",
+        "REQ-18",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + PIE"
+    },
+    {
+      "id": "REG-11",
+      "name": "Skip preparation",
+      "requirements": [
+        "REQ-08",
+        "REQ-09",
+        "REQ-15"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-12",
+      "name": "Compact cave",
+      "requirements": [
+        "REQ-13",
+        "REQ-21"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "REG-13",
+      "name": "Horror separation",
+      "requirements": [
+        "REQ-15"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "ACT-01",
+      "name": "Catch transaction",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "ACT-02",
+      "name": "Cook/use",
+      "requirements": [
+        "REQ-08",
+        "REQ-09"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "ACT-03",
+      "name": "Cancel/damage/full bag",
+      "requirements": [
+        "REQ-08",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "ACT-04",
+      "name": "Buff replacement",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "ACT-05",
+      "name": "Craft failure",
+      "requirements": [
+        "REQ-07",
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic"
+    },
+    {
+      "id": "ACT-06",
+      "name": "Useful camp",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "ACT-07",
+      "name": "Placement rejection",
+      "requirements": [
+        "REQ-08"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + deterministic"
+    },
+    {
+      "id": "ACT-08",
+      "name": "Storage identity",
+      "requirements": [
+        "REQ-07",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + restart"
+    },
+    {
+      "id": "ACT-09",
+      "name": "Demolition overflow",
+      "requirements": [
+        "REQ-08",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Deterministic + PIE"
+    },
+    {
+      "id": "ACT-10",
+      "name": "Camp persistence/pet",
+      "requirements": [
+        "REQ-08",
+        "REQ-13",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + PIE"
+    },
+    {
+      "id": "UI-01",
+      "name": "Device-only routes",
+      "requirements": [
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-02",
+      "name": "Context/chords",
+      "requirements": [
+        "REQ-01",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-03",
+      "name": "Camera continuity",
+      "requirements": [
+        "REQ-01",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-04",
+      "name": "Blocked feedback",
+      "requirements": [
+        "REQ-13",
+        "REQ-16",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-05",
+      "name": "Text/tooltips",
+      "requirements": [
+        "REQ-07",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-06",
+      "name": "Non-audio/non-color cues",
+      "requirements": [
+        "REQ-15",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-07",
+      "name": "Pause/remapping",
+      "requirements": [
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "UI-08",
+      "name": "Actual art adaptation",
+      "requirements": [
+        "REQ-05",
+        "REQ-19"
+      ],
+      "status": "NOT_RUN",
+      "method": "Visual review"
+    },
+    {
+      "id": "VEH-01",
+      "name": "Original occupant",
+      "requirements": [
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-02",
+      "name": "Actual piloting",
+      "requirements": [
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-03",
+      "name": "Collision and landing",
+      "requirements": [
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-04",
+      "name": "Blocked/air exit",
+      "requirements": [
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-05",
+      "name": "Pet passenger",
+      "requirements": [
+        "REQ-13",
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-06",
+      "name": "Disable/recover",
+      "requirements": [
+        "REQ-16",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + record comparison"
+    },
+    {
+      "id": "VEH-07",
+      "name": "Occupied/parked persistence",
+      "requirements": [
+        "REQ-16",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart"
+    },
+    {
+      "id": "VEH-08",
+      "name": "Traffic separation",
+      "requirements": [
+        "REQ-16"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "VEH-09",
+      "name": "Mecha progression",
+      "requirements": [
+        "REQ-16",
+        "REQ-22"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + quest inspection"
+    },
+    {
+      "id": "COL-01",
+      "name": "Actual destination",
+      "requirements": [
+        "REQ-17"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "COL-02",
+      "name": "Transfer identity",
+      "requirements": [
+        "REQ-17",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + record comparison"
+    },
+    {
+      "id": "COL-03",
+      "name": "Transfer failure",
+      "requirements": [
+        "REQ-17",
+        "REQ-18"
+      ],
+      "status": "NOT_RUN",
+      "method": "Fault injection"
+    },
+    {
+      "id": "COL-04",
+      "name": "Colony encounter reward",
+      "requirements": [
+        "REQ-14",
+        "REQ-17"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE"
+    },
+    {
+      "id": "COL-05",
+      "name": "Gravity/flight scope",
+      "requirements": [
+        "REQ-12",
+        "REQ-17"
+      ],
+      "status": "NOT_RUN",
+      "method": "Inspection + PIE"
+    },
+    {
+      "id": "END-01",
+      "name": "Home continuation",
+      "requirements": [
+        "REQ-18",
+        "REQ-22"
+      ],
+      "status": "NOT_RUN",
+      "method": "Restart + record comparison"
+    },
+    {
+      "id": "END-02",
+      "name": "Stay/world identity",
+      "requirements": [
+        "REQ-18",
+        "REQ-22"
+      ],
+      "status": "NOT_RUN",
+      "method": "PIE + restart"
+    }
+  ]
+}

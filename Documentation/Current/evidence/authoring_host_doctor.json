@@ -1,0 +1,19 @@
+{
+  "kind": "local_environment_inspection_not_runtime_validation",
+  "project": "/mnt/data/WYRMFALL_Codex_Starter_v0_1/WYRMFALL.uproject",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "python": "3.13.5",
+  "engine": null,
+  "plugins": {},
+  "errors": [
+    "No UE 5.8 installation located. Run configure --engine-root with your actual installation directory, or set UE_ROOT. Unreal is not bundled."
+  ],
+  "warnings": [],
+  "gameplay_status": "NOT_RUN",
+  "toolchain": {
+    "status": "NOT_BUILD_VERIFIED",
+    "compiler": "/usr/local/swift/usr/bin/clang++",
+    "note": "Not a Win64 toolchain proof; cross-compiling Win64 is not configured."
+  },
+  "status": "BLOCKED"
+}

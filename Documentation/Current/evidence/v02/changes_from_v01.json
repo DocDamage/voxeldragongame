@@ -1,0 +1,223 @@
+{
+  "parent_archive": "WYRMFALL_Codex_Starter_v0_1.zip",
+  "parent_sha256": "f1ee17fb62ccc834a9c58d51776f7db105e6a2b342cd3653455ce8bed7a21a2d",
+  "release": "0.2",
+  "purpose": "Informational diff; merge carefully into any edited workspace. No automatic overwrite/patch tool.",
+  "excluded_self_and_manifests": [
+    "Documentation/Current/evidence/v02/changes_from_v01.json",
+    "SCAFFOLD_MANIFEST.json"
+  ],
+  "changed_files": 35,
+  "changes": [
+    {
+      "path": ".vscode/tasks.json",
+      "change": "MODIFIED",
+      "old_sha256": "be669582162ef396416ea77ceeab1bb0be163e1a3987a9ba17ceab2f85f31bdd",
+      "new_sha256": "33cd93c0b6906163d2b88493253a425d7f0d04779bcee0e3a2c587fa9e1fc339"
+    },
+    {
+      "path": "AGENTS.md",
+      "change": "MODIFIED",
+      "old_sha256": "ec3639f24b31ac72bfe3f70eadcf642b5a84213c3f274828aa787d33194b2c51",
+      "new_sha256": "ce777131293ea32196ea248089090f462b45f6528edebd2a40fec280f6cd13eb"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "a1c2a6dbbdcae4d4aba5468a4c5d1fe530758080d30c5fce3b84551dd0bbea83"
+    },
+    {
+      "path": "CODEX_FIRST_TASK.txt",
+      "change": "MODIFIED",
+      "old_sha256": "8c73b4260f8455554ac86ed4a327b83c62cc097bb45a7ecb27681cb8b862f77a",
+      "new_sha256": "8557882a3154b49ba8841d47889062ac2c0f6690c87f9bd946cd69e7621a70ad"
+    },
+    {
+      "path": "CODEX_START_HERE.md",
+      "change": "MODIFIED",
+      "old_sha256": "af08074f1ae21e71797a68d725d5333ea53716e37bc73ebed4045e347d274146",
+      "new_sha256": "d70ffc621e5c26d1958c575156f444f078a2b0db7c4e58a784dba15ca7554b73"
+    },
+    {
+      "path": "Config/IntegrationReadiness.json",
+      "change": "MODIFIED",
+      "old_sha256": "5f83870c05d63857dc19811ceea6a0a33a932b5b94ccdd601f6e4f9cdc47cea1",
+      "new_sha256": "8cb00827b809f13bc8b036613e11e00f304af7d66748c4a2b5a73a9f75795772"
+    },
+    {
+      "path": "Documentation/Current/PROVENANCE.json",
+      "change": "MODIFIED",
+      "old_sha256": "4d5806fc58ea4f22fb49e43b92d9b1dba7adba1e06aead63c8c384462f2f9d8d",
+      "new_sha256": "5207136286cf65820fed2ecfab7bab1c154f815d197fa0fe0268c8185588bd71"
+    },
+    {
+      "path": "Documentation/Current/SCAFFOLD_ARCHITECTURE.md",
+      "change": "MODIFIED",
+      "old_sha256": "c177550677c56a710a974e5a9c3c9350c7817460ed2c5d147d8af10f3700ab57",
+      "new_sha256": "a5f5b1c25195a7a03b65ef61e6ae8cfbcdd6e0ddf9a945feef4ebb2b44bc0362"
+    },
+    {
+      "path": "Documentation/Current/STATUS.md",
+      "change": "MODIFIED",
+      "old_sha256": "a1cc7ad9881f743c2dcabe9e6644bd8b13cfecf03e876afae5687fb9ffb635e7",
+      "new_sha256": "1b9c1416b4d1bd6e29f15723f552cd8bb92376e6926ef26b8efefc5848cf2ac6"
+    },
+    {
+      "path": "Documentation/Current/TECHNICAL_REFERENCES.md",
+      "change": "MODIFIED",
+      "old_sha256": "3def046cb707532b0191a0216dd5965181be19071cb455915be6a9dbfa3e88a6",
+      "new_sha256": "7eca75e553b438c5f913f9cb3ee95a53a3a4ac6f27be58e4aa648bca4fd51999"
+    },
+    {
+      "path": "Documentation/Current/WINDOWS_SETUP.md",
+      "change": "MODIFIED",
+      "old_sha256": "e0fa32137bab34d8659216c84b95b999d3262bd88923faa3a8ea3e1b9d50fc60",
+      "new_sha256": "a7917954d42e1eb224aff3880f17d1ba057fc2ed8dac2cfa8280ff6c2da691b8"
+    },
+    {
+      "path": "Documentation/Current/evidence/source_preservation.json",
+      "change": "MODIFIED",
+      "old_sha256": "bc5bb90045c00d887773a886810ae76ef315c9746ba013d7db7e7b607573f2e2",
+      "new_sha256": "f0c816f463a25c691a10851af3a1da09d85d8abcf43ade32252cca61a3743c7a"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/native_blocked_onboarding.log",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "19a8cd59da1f792ffc7aa9e97a703df5c2fb887a37773fcf92234960b044e3c5"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/offline_onboarding.log",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "689a3a2c8c2c197efd998f6cd49341a339a3bfbbada3689c1ceb1d342cd39c7b"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_native_authoring.json",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "1241a5c5d6611bb0a6d0127eb2352311812dd926e20db09ac551ae9ab2d2d702"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_native_authoring.md",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "4995f34d069b8097a63df34c96b2eee34e8c2533e2803536ccb20265ded41af5"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_offline_authoring.json",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "d8c47d27fe186ed723ce1fc94f2f2ca9eeddb11c0fc04fef2f69d4f97c88dc3f"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/onboarding_offline_authoring.md",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "7e2045e52ddbf0dc3a520a27b86a2a0c5fe0ebb718132ccb539139314be078b9"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/source_checks.json",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "7b58a00d82566bfac29136330338d9cd0cc5300c39c982586f60125010ff4aa9"
+    },
+    {
+      "path": "Documentation/Current/evidence/v02/tooling_unittest.txt",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "3fcf37fa2c4a95bf9ea5022e66aca84d0cd5938348c9f18b332c97c74cd47259"
+    },
+    {
+      "path": "Documentation/Current/tasks/BOOT-01.md",
+      "change": "MODIFIED",
+      "old_sha256": "190ed9617e36065866f909b27511d654e5a68b9980bd35d9a1b2f9677e769d51",
+      "new_sha256": "82edaf4f8ee3a9ac5ceeee1c498a71aabcc876cc3f12e81500c91339ea66e446"
+    },
+    {
+      "path": "README.md",
+      "change": "MODIFIED",
+      "old_sha256": "50fbb4571ad3f1e5e9ee8a4237961cc0dd5420833121d831076ebd9972ad52c0",
+      "new_sha256": "6381d0b524f334b075eaa1b029921727a33b1085cee802440965562cd8105abd"
+    },
+    {
+      "path": "Setup.ps1",
+      "change": "MODIFIED",
+      "old_sha256": "d0f2560086feba8969314cdd9029d8d4a33295b99ca1bd2e0bb3101378ae82de",
+      "new_sha256": "608f6c1e2dd0e79b0ca15acacb0dbf0114a985fff9e565b021d33a8e842952f9"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Combat/WyrmAttributeSet.cpp",
+      "change": "MODIFIED",
+      "old_sha256": "afa460ed06f6fce8b6cb5051f59448edd81f0e3d49dcc9ccc761b89256eac3e8",
+      "new_sha256": "caa5b80ab8d19e43eeaea760c1960674ed2b83f5ccd51b30080676ba8b2ca43a"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Player/WyrmPlayerController.cpp",
+      "change": "MODIFIED",
+      "old_sha256": "756dfe454b82558abd000225e2aab3e7648f96540f466361b66e01fc4888287f",
+      "new_sha256": "fe0ee4e56a7bd06863723c4a22433101f8dd601b77f0216a55c6933fade221d3"
+    },
+    {
+      "path": "Source/WYRMFALL/Private/Tests/WyrmScaffoldTests.cpp",
+      "change": "MODIFIED",
+      "old_sha256": "d37f08d6649669a97d88e5be1b9fd491f974c0d88a87d12669b98d8b57abfad3",
+      "new_sha256": "780a0c9e0d54a2cc41cc8b03829cb5629602774c193f49c3d9de710836f9ba07"
+    },
+    {
+      "path": "Source/WYRMFALL/Public/Combat/WyrmAttributeSet.h",
+      "change": "MODIFIED",
+      "old_sha256": "cae52bce30cbbfa3138dca39a90fe46d69cccf4bb3ea72fe618617d28626db56",
+      "new_sha256": "d23078863cb25aee0d31c3f97a5c1c0afef92e1ef43dd41e4a0e266d278d61ea"
+    },
+    {
+      "path": "VALIDATION.md",
+      "change": "MODIFIED",
+      "old_sha256": "13cdf438f348c6c6e7ab6bf3862f1b9b488104bfa69f8c7bc0aba4eed4a6d53b",
+      "new_sha256": "402b53e198062e63b54d5def4fc25c8088aa58282581cf2859f14194cdc6b754"
+    },
+    {
+      "path": "tests/test_hardening.py",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "7ba0c06fa3639ff1542449de3af7fb1860116556e4ce3fac017c3502e994ef05"
+    },
+    {
+      "path": "tests/test_tooling.py",
+      "change": "MODIFIED",
+      "old_sha256": "6b803ed7de5674462380a34e76f18f7244eb4989e7f948676c1c66cc87b729b8",
+      "new_sha256": "4b30edca717b31df1724ecb93d45a8ead536c61dc4765dd36270665f0e7d2f52"
+    },
+    {
+      "path": "tools/unreal/create_bootstrap_map.py",
+      "change": "MODIFIED",
+      "old_sha256": "bc58a329588fd61f8f82436b20146ed2dd66e4672d87f1a572a4f86e74a4d49c",
+      "new_sha256": "0eb1c44cc6a1f7b875c18094cf82012be21816c386a9c25b99149ba1a3b72e4c"
+    },
+    {
+      "path": "tools/wyrm.py",
+      "change": "MODIFIED",
+      "old_sha256": "6ab670476ead2ca056b2edfce311d2313642ad552f4c0dc12de756f850b69753",
+      "new_sha256": "22ffe57a300cf92d06c3ed8fbe52855eb64fb9bfbe3bcc888c266af6d0b04af4"
+    },
+    {
+      "path": "tools/wyrm_onboarding.py",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "9fab45efd746c069ca4537ad0b27f5decd467fe033aca92c0bbfa94bedbc20e7"
+    },
+    {
+      "path": "tools/wyrm_process.py",
+      "change": "ADDED",
+      "old_sha256": null,
+      "new_sha256": "bbf2d8f4cb7ff5eb7e11357d67bac78797050e46f47e917cf2f9209578e3d153"
+    },
+    {
+      "path": "tools/wyrm_support.py",
+      "change": "MODIFIED",
+      "old_sha256": "b98823e82b7ad6d85bd6791ce47e76e0fbda081bac9df912806b648bdf5b3758",
+      "new_sha256": "7ffe33ffd5f020af1580e6f46dce7e788f4c3294c80d44d529e081df796e1032"
+    }
+  ]
+}

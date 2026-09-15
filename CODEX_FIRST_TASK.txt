@@ -1,0 +1,13 @@
+Work in this WYRMFALL folder as the authoritative local starter workspace.
+
+Read AGENTS.md, Documentation/Current/STATUS.md, CODEX_START_HERE.md and Documentation/Current/tasks/BOOT-01.md. Do not re-plan the entire game or read every archived source.
+
+Preview python tools/wyrm.py plan --native. Use python tools/wyrm.py onboard --native on the actual Unreal-equipped host; it runs offline checks first and stops at the first failed step. Use python tools/wyrm.py report to inspect the recovery action and current evidence. In an engine-less environment run onboard without --native; do not claim engine work. After a narrow fix, use the individual commands rather than repeatedly redoing successful expensive steps. Locate the actual UE 5.8.x installation (prefer 5.8.2) and inspect its Build.version and enabled plugin descriptors. Use tools/wyrm.py doctor; configure only real local paths. Preserve Mutable, GAS, shared character/camera ownership and the existing design directions. Do not substitute another character creator or terrain engine just to remove a blocker.
+
+Generate project files and build WYRMFALLEditor with the actual installed headers. Fix source compatibility errors within this scaffold. Run the bootstrap map script and the complete source-declared WYRMFALL.Scaffold suite (six cases in v0.2, discovered rather than hard-coded); verify a fresh report, then perform focused PIE checks of movement, jump, both cameras and the diagnostic HUD. This is a technical fixture, not production artwork or a playable game.
+
+After the host is verified, complete the scoped WP-00 inventory of actual approved assets/plugins and choose ONE credible available terrain provider for the next bounded G1 proof. If sufficient inputs exist, implement only that proof using the documented editable-world/save acceptance requirements. If inputs are unavailable, record the precise blocker and finish the work that does not depend on it. Do not mark G0/G1 or any feature as passed from source presence, mock tests, missing reports or unexecuted commands.
+
+Do not create CI, new repositories/branches/commits/pushes/PRs, global config changes, replacement artwork, survival mechanics, multiple providers, parallel inventories or large speculative systems. No automatic engine rebuild or full-game cook. Keep the initial session bounded to bootstrap, readiness and one eligible terrain proof.
+
+Update Documentation/Current/STATUS.md and Config/IntegrationReadiness.json with actual evidence. Report files changed, commands/actions run, test results, logs, what was not run, blockers, and one next bounded task.

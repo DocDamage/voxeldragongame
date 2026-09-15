@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "kind": "onboarding_command_evidence_not_gameplay_proof",
+  "run_id": "20260915T073601Z_555cb05df447",
+  "workspace": "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2",
+  "native_requested": true,
+  "status": "BLOCKED",
+  "source_snapshot": {
+    "scope": "host_source_config_tools_project_plugin_sources_not_engine_binaries",
+    "sha256": "1312465b82da503c076765fcab8b0c15457fe8d828ae46c5c92a40c437935846",
+    "files": [
+      {
+        "path": "Config/DefaultEngine.ini",
+        "sha256": "206aa4030549852b5e2c464dd778255b592eb61254544015677c82e0fbe342bb"
+      },
+      {
+        "path": "Config/DefaultGame.ini",
+        "sha256": "df20a2c38a880eb6ff1728e9764b2b577d225dfbfe67cd89038cdf94653b3f57"
+      },
+      {
+        "path": "Config/DefaultGameplayTags.ini",
+        "sha256": "97a1a3e93352499a1e92e71d68f56b66d4df5e839f9c58c6a1310566585285d4"
+      },
+      {
+        "path": "Config/DefaultInput.ini",
+        "sha256": "cbb0838bb501c085f0cbcaa44672bb5b9070696732a12ab835a9aca8004636cf"
+      },
+      {
+        "path": "Source/WYRMFALL.Target.cs",
+        "sha256": "9184d00b066bab2935f3adbf8ffc4c797cd1c37d4eedd2b53454a4595924969a"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Combat/WyrmAttributeSet.cpp",
+        "sha256": "caa5b80ab8d19e43eeaea760c1960674ed2b83f5ccd51b30080676ba8b2ca43a"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Core/WyrmGameMode.cpp",
+        "sha256": "a22fe86c72a9b53718801c31911a0bb9d61a6fd954957c3de9397e041801a3a9"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Development/WyrmDebugHUD.cpp",
+        "sha256": "9e824166e03af85df48d089e05c2702b5d25b03ae0016cd829b9f936dff002f3"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Player/WyrmCharacter.cpp",
+        "sha256": "798cb5a50af2ad30c661e9c181f52edfc73cb93335406c5f400debda5593e680"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Player/WyrmPlayerController.cpp",
+        "sha256": "fe0ee4e56a7bd06863723c4a22433101f8dd601b77f0216a55c6933fade221d3"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Terrain/WyrmTerrainProvider.cpp",
+        "sha256": "302050cdc8b4e205b4b5e36eec67a41ec18d5b853b2b9b4f521c389fef3d9ada"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/Tests/WyrmScaffoldTests.cpp",
+        "sha256": "780a0c9e0d54a2cc41cc8b03829cb5629602774c193f49c3d9de710836f9ba07"
+      },
+      {
+        "path": "Source/WYRMFALL/Private/WYRMFALL.cpp",
+        "sha256": "cf2e48de78c5166c9c614678b98931fb4e31469f0a4cb481118b55847b5a5be4"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Combat/WyrmAttributeSet.h",
+        "sha256": "d23078863cb25aee0d31c3f97a5c1c0afef92e1ef43dd41e4a0e266d278d61ea"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Core/WyrmGameMode.h",
+        "sha256": "91046a00bd87369751a3340d0e6cffc3f5efdffb047cbf5936f37287d38bea69"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Development/WyrmDebugHUD.h",
+        "sha256": "e6731eece2ea9e617cc9e243aa73e108a14ec47759286326f4e1f38275c5a69a"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Player/WyrmCharacter.h",
+        "sha256": "54de74a442b154973c4264fcbb081203bbe1cc58ed15cc872dc058e2ab8edbd5"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Player/WyrmPlayerController.h",
+        "sha256": "568927d3123ffffd7a270fbd50bb0de7276be78554066e18b9628f245e09af8a"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/Terrain/WyrmTerrainProvider.h",
+        "sha256": "1aaee35af1c168cb54dcffa68415de24148bc789d34ceb680ec5e36a0da0594e"
+      },
+      {
+        "path": "Source/WYRMFALL/Public/WYRMFALL.h",
+        "sha256": "5730307192d0c695e5d42dfbdbac4d13a4b08a1bea43672621b46cb0c25a7eb0"
+      },
+      {
+        "path": "Source/WYRMFALL/WYRMFALL.Build.cs",
+        "sha256": "09e4d9431a1d0ed8fa37e463e7bac6fff6a177963891ecce201100dba600b1e5"
+      },
+      {
+        "path": "Source/WYRMFALLEditor.Target.cs",
+        "sha256": "5c2c511ee5ac009a2f63bbeeba1ff52f46593569b8874112e16bd8cad58a19a5"
+      },
+      {
+        "path": "WYRMFALL.uproject",
+        "sha256": "eef33a82e31d0421d848a2b26bcae7bd1c35abe8e4c2d845a3de7d96764ff4f7"
+      },
+      {
+        "path": "tests/test_hardening.py",
+        "sha256": "7ba0c06fa3639ff1542449de3af7fb1860116556e4ce3fac017c3502e994ef05"
+      },
+      {
+        "path": "tests/test_tooling.py",
+        "sha256": "4b30edca717b31df1724ecb93d45a8ead536c61dc4765dd36270665f0e7d2f52"
+      },
+      {
+        "path": "tools/unreal/create_bootstrap_map.py",
+        "sha256": "0eb1c44cc6a1f7b875c18094cf82012be21816c386a9c25b99149ba1a3b72e4c"
+      },
+      {
+        "path": "tools/wyrm.py",
+        "sha256": "22ffe57a300cf92d06c3ed8fbe52855eb64fb9bfbe3bcc888c266af6d0b04af4"
+      },
+      {
+        "path": "tools/wyrm_onboarding.py",
+        "sha256": "9fab45efd746c069ca4537ad0b27f5decd467fe033aca92c0bbfa94bedbc20e7"
+      },
+      {
+        "path": "tools/wyrm_process.py",
+        "sha256": "bbf2d8f4cb7ff5eb7e11357d67bac78797050e46f47e917cf2f9209578e3d153"
+      },
+      {
+        "path": "tools/wyrm_support.py",
+        "sha256": "7ffe33ffd5f020af1580e6f46dce7e788f4c3294c80d44d529e081df796e1032"
+      }
+    ]
+  },
+  "expected_native_tests": [
+    "WYRMFALL.Scaffold.AttributeBaseClamps",
+    "WYRMFALL.Scaffold.AttributeInputClamps",
+    "WYRMFALL.Scaffold.NoImplicitTerrainSupport",
+    "WYRMFALL.Scaffold.TagRegistration",
+    "WYRMFALL.Scaffold.TerrainNumericBoundaries",
+    "WYRMFALL.Scaffold.TerrainRequestValidation"
+  ],
+  "steps": [
+    {
+      "id": "verify",
+      "kind": "offline_check",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "verify"
+      ],
+      "timeout": 1830,
+      "status": "COMMAND_PASSED",
+      "result": {
+        "kind": "process_attempt_not_gameplay_proof",
+        "run_id": "20260915T073601Z_2c4b2ac59f5a",
+        "label": "verify",
+        "command": [
+          "/opt/pyvenv/bin/python",
+          "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+          "verify"
+        ],
+        "state": "EXITED",
+        "exit_code": 0,
+        "log": "Saved/ScaffoldLogs/20260915T073601Z_2c4b2ac59f5a_verify.log",
+        "started_utc": "2026-09-15T07:36:01.453552+00:00",
+        "duration_seconds": 0.768,
+        "finished_utc": "2026-09-15T07:36:02.221238+00:00",
+        "log_sha256": "7c49e1712271ccebdc1a05ebdff6c7b220e75dfa0288ea5684620f6facaffa68"
+      },
+      "artifacts": []
+    },
+    {
+      "id": "test",
+      "kind": "offline_check",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "test"
+      ],
+      "timeout": 1830,
+      "status": "COMMAND_PASSED",
+      "result": {
+        "kind": "process_attempt_not_gameplay_proof",
+        "run_id": "20260915T073602Z_c978dbe7309c",
+        "label": "test",
+        "command": [
+          "/opt/pyvenv/bin/python",
+          "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+          "test"
+        ],
+        "state": "EXITED",
+        "exit_code": 0,
+        "log": "Saved/ScaffoldLogs/20260915T073602Z_c978dbe7309c_test.log",
+        "started_utc": "2026-09-15T07:36:02.223427+00:00",
+        "duration_seconds": 7.69,
+        "finished_utc": "2026-09-15T07:36:09.913073+00:00",
+        "log_sha256": "3499d60df529ec851b975faedae2126ece1168244dc15f5f6b0cc273e72e8132"
+      },
+      "artifacts": []
+    },
+    {
+      "id": "design-verify",
+      "kind": "offline_check",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Documentation/DesignPack/tools/verify_package.py"
+      ],
+      "timeout": 1830,
+      "status": "COMMAND_PASSED",
+      "result": {
+        "kind": "process_attempt_not_gameplay_proof",
+        "run_id": "20260915T073609Z_1eb3d559a064",
+        "label": "design-verify",
+        "command": [
+          "/opt/pyvenv/bin/python",
+          "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Documentation/DesignPack/tools/verify_package.py"
+        ],
+        "state": "EXITED",
+        "exit_code": 0,
+        "log": "Saved/ScaffoldLogs/20260915T073609Z_1eb3d559a064_design-verify.log",
+        "started_utc": "2026-09-15T07:36:09.915602+00:00",
+        "duration_seconds": 0.571,
+        "finished_utc": "2026-09-15T07:36:10.486540+00:00",
+        "log_sha256": "3186972935b6eb8fd9a40c5ca5c69c19279eba909547bc85d55eb2616f62ac63"
+      },
+      "artifacts": []
+    },
+    {
+      "id": "doctor",
+      "kind": "native_command",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "doctor",
+        "--write-report"
+      ],
+      "timeout": 1830,
+      "status": "BLOCKED",
+      "result": {
+        "kind": "process_attempt_not_gameplay_proof",
+        "run_id": "20260915T073610Z_744b991a694f",
+        "label": "doctor",
+        "command": [
+          "/opt/pyvenv/bin/python",
+          "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+          "doctor",
+          "--write-report"
+        ],
+        "state": "EXITED",
+        "exit_code": 2,
+        "log": "Saved/ScaffoldLogs/20260915T073610Z_744b991a694f_doctor.log",
+        "started_utc": "2026-09-15T07:36:10.488629+00:00",
+        "duration_seconds": 0.719,
+        "finished_utc": "2026-09-15T07:36:11.207205+00:00",
+        "log_sha256": "486d1ff7f6d920e8aa4ac46a5f2ea9cdc227313515c4e67c0b36f4e739d65b90"
+      }
+    },
+    {
+      "id": "generate",
+      "kind": "native_command",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "generate",
+        "--timeout",
+        "1800"
+      ],
+      "timeout": 1830,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "build",
+      "kind": "native_command",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "build",
+        "--timeout",
+        "1800"
+      ],
+      "timeout": 1830,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "bootstrap",
+      "kind": "native_command",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "bootstrap",
+        "--timeout",
+        "1800"
+      ],
+      "timeout": 1830,
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "ue-test",
+      "kind": "native_command",
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "/mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py",
+        "ue-test",
+        "--timeout",
+        "1800"
+      ],
+      "timeout": 1830,
+      "status": "NOT_RUN"
+    }
+  ],
+  "next_task": "Resolve the exact local engine/plugin/toolchain blocker in the log. Do not disable Mutable or change engine family.",
+  "pie": "NOT_RUN",
+  "cook": "NOT_RUN",
+  "finished_utc": "2026-09-15T07:36:11.210467+00:00"
+}

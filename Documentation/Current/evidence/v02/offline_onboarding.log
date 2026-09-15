@@ -1,0 +1,46 @@
+Executing: /opt/pyvenv/bin/python /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py verify
+Log: /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Saved/ScaffoldLogs/20260915T073537Z_508f9543b51d_verify.log
+/opt/pyvenv/bin/python /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py verify
+SOURCE/CONFIG CHECK: PASS | Unreal compile/PIE/cook: NOT RUN by this command
+Process state: EXITED; exit: 0
+Executing: /opt/pyvenv/bin/python /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/tools/wyrm.py test
+Log: /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Saved/ScaffoldLogs/20260915T073537Z_9cc6a2c85210_test.log
+test_atomic_json_leaves_no_tmp (test_tooling.JsonPathTests.test_atomic_json_leaves_no_tmp) ... ok
+test_atomic_replace_preserves_new_value (test_tooling.JsonPathTests.test_atomic_replace_preserves_new_value) ... ok
+test_bad_json_actionable (test_tooling.JsonPathTests.test_bad_json_actionable) ... ok
+test_digest_changes (test_tooling.JsonPathTests.test_digest_changes) ... ok
+test_invalid_local_settings_rejected (test_tooling.JsonPathTests.test_invalid_local_settings_rejected) ... ok
+test_json_roundtrip_unicode (test_tooling.JsonPathTests.test_json_roundtrip_unicode) ... ok
+test_missing_json_actionable (test_tooling.JsonPathTests.test_missing_json_actionable) ... ok
+test_missing_local_settings_is_empty (test_tooling.JsonPathTests.test_missing_local_settings_is_empty) ... ok
+test_root_not_file_rejected (test_tooling.JsonPathTests.test_root_not_file_rejected) ... ok
+test_safe_relative_path (test_tooling.JsonPathTests.test_safe_relative_path) ... ok
+test_symlink_escape_rejected (test_tooling.JsonPathTests.test_symlink_escape_rejected) ... ok
+test_traversal_rejected (test_tooling.JsonPathTests.test_traversal_rejected) ... ok
+test_utf8_bom_json (test_tooling.JsonPathTests.test_utf8_bom_json) ... ok
+test_windows_path_rejected (test_tooling.JsonPathTests.test_windows_path_rejected) ... ok
+test_actual_scaffold_structure (test_tooling.SourceValidationTests.test_actual_scaffold_structure) ... ok
+test_manifest_empty_not_pass (test_tooling.SourceValidationTests.test_manifest_empty_not_pass) ... ok
+test_manifest_escape_detected (test_tooling.SourceValidationTests.test_manifest_escape_detected) ... ok
+test_manifest_integrity_pass (test_tooling.SourceValidationTests.test_manifest_integrity_pass) ... ok
+test_manifest_modified_detected (test_tooling.SourceValidationTests.test_manifest_modified_detected) ... ok
+test_markdown_code_block_not_link_checked (test_tooling.SourceValidationTests.test_markdown_code_block_not_link_checked) ... ok
+test_markdown_existing_link_passes (test_tooling.SourceValidationTests.test_markdown_existing_link_passes) ... ok
+test_markdown_missing_link_reported (test_tooling.SourceValidationTests.test_markdown_missing_link_reported) ... ok
+test_preserved_acceptance_not_falsely_passed (test_tooling.SourceValidationTests.test_preserved_acceptance_not_falsely_passed) ... ok
+test_readiness_uses_explicit_validation_states (test_tooling.SourceValidationTests.test_readiness_uses_explicit_validation_states) ... ok
+test_walker_excludes_generated_and_local (test_tooling.SourceValidationTests.test_walker_excludes_generated_and_local) ... ok
+
+----------------------------------------------------------------------
+Ran 123 tests in 5.994s
+
+OK
+Process state: EXITED; exit: 0
+Executing: /opt/pyvenv/bin/python /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Documentation/DesignPack/tools/verify_package.py
+Log: /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Saved/ScaffoldLogs/20260915T073544Z_a5db6f5d85f0_design-verify.log
+/opt/pyvenv/bin/python /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Documentation/DesignPack/tools/verify_package.py
+PASS: 35 payload checksums; 89 local links; 118 unique NOT_RUN procedures; 22 requirements covered.
+This verifies documentation integrity only. It does not run or validate Unreal gameplay.
+Process state: EXITED; exit: 0
+Onboarding receipt: /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Saved/Onboarding/20260915T073537Z_ab33733431d4/run.json
+Readable report: /mnt/data/wyrm_work/WYRMFALL_Codex_Starter_v0_2/Saved/Onboarding/20260915T073537Z_ab33733431d4/run.md

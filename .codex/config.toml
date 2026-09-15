@@ -1,0 +1,10 @@
+# Project-local defaults. Codex loads these only after this folder is trusted.
+# Do not insert account model names, API keys, provider settings or global paths.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+model_reasoning_effort = "medium"
+
+[sandbox_workspace_write]
+network_access = false
+# Unreal/UBT may need cache writes outside this folder. Approve that specific
+# invocation or a narrow local permission; do not change to full-access globally.

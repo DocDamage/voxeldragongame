@@ -1,0 +1,16 @@
+{
+  "source_archive": "WYRMFALL_Documentation_Pack_v0_1(1).zip",
+  "source_archive_bytes": 240041,
+  "source_archive_sha256": "d65a1947e165432c00a2c364a0ce4806c7d60ad6df84960308a81b4256e66d41",
+  "preserved_destination": "Documentation/DesignPack",
+  "source_entries_preserved": 36,
+  "new_scaffold_stage": "SOURCE_AUTHORED_NATIVE_NOT_RUN",
+  "generated_production_art": false,
+  "git_operations": [],
+  "external_assets_included": false,
+  "parent_scaffold": {
+    "archive": "WYRMFALL_Codex_Starter_v0_1.zip",
+    "sha256": "f1ee17fb62ccc834a9c58d51776f7db105e6a2b342cd3653455ce8bed7a21a2d"
+  },
+  "scaffold_release": "0.2"
+}
