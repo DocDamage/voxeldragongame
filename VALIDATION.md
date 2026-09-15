@@ -1,13 +1,28 @@
 # WYRMFALL validation record
 
-## Current Windows execution — September 15, 2026
+## Latest GeoForge inspection — September 15, 2026
+
+Native editor contract probes executed against C: UE 5.8.2 / GeoForge 5.0.0.
+Async single-chunk and synchronous cross-chunk dig/prime sequences return with
+edited save cells and pending mesh work; the synchronous single-chunk control
+updates its mesh. [Exact commands, source inspection and limits](Documentation/Current/GEOFORGE_COMPLETION_INSPECTION.md).
+This is a reproduced completion-contract gap, not G1 or a gameplay pass.
+Build/scaffold automation/bootstrap/PIE/game-save/cook after installation remain
+NOT_RUN. WP-00 is PARTIAL; WP-01 and full RDY-02/03/04 remain NOT_RUN.
+Portable recheck: `py -3.12 tools/wyrm.py verify` PASS;
+`py -3.12 tools/wyrm.py test` 124 tests, OK, two skips (8.996 seconds).
+Outputs are `Saved/Diagnostics/WP00_completion_verify.txt` and
+`Saved/Diagnostics/WP00_completion_tests.txt`.
+
+## Historical BOOT-01 Windows execution — September 15, 2026
 
 UE 5.8.2 at `C:\Program Files\UE_5.8`: editor build PASS (`-NoUBA -NoPCH`),
 bootstrap creation/unchanged rerun PASS, all six native scaffold tests Success,
 and focused BOOT-01 keyboard/mouse PIE checks exercised successfully. Physical
 controller behavior is NOT_RUN (none connected). Portable suite: 124 tests,
 OK with two skips. WP-00 sample imports/bounds/bones/clips are recorded; complete
-readiness and WP-01 remain NOT_RUN at the missing-provider boundary.
+readiness and WP-01 remained NOT_RUN. GeoForge installation is now resolved;
+the latest completion/ownership boundary is described above.
 
 See [exact commands, limitations and evidence](Documentation/Current/BOOT-01_C_RECOVERY.md).
 The historical D: onboarding receipt is STALE_EVIDENCE and is not reused as a pass.

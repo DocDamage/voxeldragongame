@@ -8,10 +8,18 @@ and dependency load PASS; see [installation recovery](GEOFORGE_INSTALL_RECOVERY.
 Terrain suitability and the remaining content/owner inspections are still open.
 Earlier D: findings below remain historical evidence.
 
+**Subsequent source/native inspection:** [GeoForge completion report](GEOFORGE_COMPLETION_INSPECTION.md)
+records actual edit/save/mesh ordering, engine collision and navigation boundaries,
+and vendor drop/water/save ownership conflicts. Native probes reproduced support
+priming returning before edited geometry, even for synchronous cross-chunk edits.
+The single-chunk synchronous control updated its mesh. This supersedes the old
+source-read failure below, but does not clear WP-00 or any full WRLD/SAVE case.
+
 ## Actual environment
 
 - Project: `G:\assets\voxel project\WYRMFALL.uproject`; association 5.8;
-  runtime module WYRMFALL. No `.git`, remote or branch established.
+  runtime module WYRMFALL. Git origin is DocDamage/voxeldragongame, branch main;
+  initial clean commit `32407491f6cd9bb34848ffb6fb59a2d82be14904`.
 - Current inspected engine: `C:\Program Files\UE_5.8`, UE 5.8.2 CL 56702186,
   compatible CL 55116800. The earlier D: copy failed with device I/O errors.
 - Tooling interpreter: installed Python 3.12.10. Default `python` is 3.10.
@@ -89,10 +97,12 @@ Inspected `GeoForgeInfiniteTerrainActor.h` exposes:
 | Persistence | `BuildTerrainSaveData`, `ApplyTerrainSaveData`, compatibility ID and generation fingerprint | Full edit/depletion/inventory save transaction NOT_RUN |
 | Materials | Block specification, material layers and refresh APIs | Real source-material import/adaptation NOT_RUN |
 
-The subsequent private-source search failed with OS error 433, “A device which
+The historical D: private-source search failed with OS error 433, “A device which
 does not exist was specified.” Required implementation/callback semantics therefore
-remain unresolved. The engine-drive failure also prevents a real native provider
-proof. Do not set `HasMinimumG1APIs` flags or award rewards from these header names.
+remained unresolved at that time. The C: source is now readable and the exact
+implementation was inspected in [the current report](GEOFORGE_COMPLETION_INSPECTION.md).
+Do not set `HasMinimumG1APIs` flags or award rewards from header names or acceptance
+notifications; a validated edit-completion bridge remains missing.
 
 ## Owners and conflicts
 
@@ -180,11 +190,12 @@ and native loading are now verified in [the recovery report](GEOFORGE_INSTALL_RE
 1. RESOLVED: the approved GeoForge UE 5.8 copy is installed on C: and its native
    runtime/editor/dependency loading passed. The user authorized cache recovery
    and the installation retry. The former D: source read failure is historical.
-2. Exact edit/geometry/collision/nav readiness and save payload semantics still
-   need complete implementation inspection and real terrain tests. The C: source
-   is now readable; targeted searches found async collision cooking, navigation
-   flags, edit-request broadcasts and save methods. Their names are not proof of
-   completion semantics. No substitute callback or capability flag was invented.
+2. Exact edit/save implementation and geometry/collision/nav boundaries have now
+   been inspected. Native probes disprove `DigSphere` plus immediate support
+   prime as a completion barrier, including across chunks with async disabled.
+   See [source references, control case and reproduction](GEOFORGE_COMPLETION_INSPECTION.md).
+   A validated completion bridge remains missing; no substitute callback or
+   capability flag was invented. Full terrain gameplay/save tests remain NOT_RUN.
 3. Selected enemy/weapon opening, completed material/scale/assembled-asset review,
    full building/water/inventory/save owner inspection and complete provenance
    acceptance remain NOT_RUN. Their existing bytes/partial findings remain

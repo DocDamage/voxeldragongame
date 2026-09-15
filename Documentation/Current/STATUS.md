@@ -15,7 +15,7 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
 | PIE, input, cameras, HUD | Focused keyboard/mouse checks PASS; controller NOT_RUN (absent) | Rebinding, pause/ignore guards, click rejection and editor relaunch exercised; fixture lighting warning remains; no WP-03 pass |
 | Mutable | REQUIRED; plugin enabled in descriptor, runtime content NOT INTEGRATED | WP-02 real recipe/runtime/cooked proof |
-| Terrain | Provider NOT SELECTED; GeoForgeRuntime 5.0.0 installed on C: | Complete Epic manifest; native runtime/editor load PASS; completion/save semantics and terrain behavior NOT_RUN; [repair](GEOFORGE_INSTALL_RECOVERY.md); WP-01 NOT_RUN |
+| Terrain | Provider NOT SELECTED; GeoForgeRuntime 5.0.0 native contract probes executed | Dig changes save state before mesh completion; support prime also leaves cross-chunk work pending with async disabled. [Inspection and reproduction](GEOFORGE_COMPLETION_INSPECTION.md); WP-01 NOT_RUN |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
 | Real sample assets | Native dirt/stone/knight/Green Dragon imports inspected | Bounds/bones/clips recorded; scale/material/assembly/gameplay suitability not established |
 | GAS | Native attribute tests PASS; PIE HUD 100/100, no combat loop | WP-04/05 remain gated |
@@ -73,12 +73,16 @@ completion, assembled dragon preview, selected enemy/weapon opening, full owner
 implementation inspection and complete readiness acceptance remain unverified.
 
 The C: engine now has GeoForgeRuntime 5.0.0 with native runtime/editor/dependency
-loading verified. Its completion, collision, navigation and save semantics still
-need readiness inspection. The supplied Voxel archive has only 5.6/5.7 builds.
+loading verified. [Implementation inspection and native editor probes](GEOFORGE_COMPLETION_INSPECTION.md)
+show that edit acceptance/save capture precede geometry and support priming is
+not an edit-completion barrier, including synchronous cross-chunk edits.
+A supported geometry/collision/nav bridge remains unverified; GeoForge is not
+selected. The supplied Voxel archive has only 5.6/5.7 builds.
 All WP-01 terrain/gameplay/save/performance checks,
 full RDY-02/03/04, connected-controller behavior and cooked validation remain
 **NOT_RUN**. No G0/G1 or production feature pass is claimed.
 
-**Next bounded task:** inspect the restored GeoForge UE 5.8 private
-completion/collision/nav/save semantics, finish the
-remaining WP-00 inputs, then implement one eligible WP-01 proof.
+**Next bounded task:** establish and natively validate the GeoForge completion
+bridge described in [the reproduction report](GEOFORGE_COMPLETION_INSPECTION.md).
+Finish remaining WP-00 content/owner inspections before resource/save integration.
+WP-01 remains NOT_RUN; a tiny native contract probe is not G1.

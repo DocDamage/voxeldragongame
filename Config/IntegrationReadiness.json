@@ -44,7 +44,7 @@
     {
       "id": "terrain",
       "authority": null,
-      "state": "UNSELECTED_CANDIDATE_INSTALLED_NATIVE_LOAD_PASS",
+      "state": "UNSELECTED_NATIVE_CONTRACT_PROBE_COMPLETION_BARRIER_GAP",
       "actual_source_path": null,
       "version": null,
       "evidence": [
@@ -52,7 +52,12 @@
         "Documentation/Current/WP-00_SCOPED_READINESS.md",
         "Documentation/Current/BOOT-01_C_RECOVERY.md",
         "Saved/Diagnostics/GeoForge_load_probe.json",
-        "Documentation/Current/GEOFORGE_INSTALL_RECOVERY.md"
+        "Documentation/Current/GEOFORGE_INSTALL_RECOVERY.md",
+        "Documentation/Current/GEOFORGE_COMPLETION_INSPECTION.md",
+        "Saved/Diagnostics/GeoForge_semantics_manifest.json",
+        "Saved/Diagnostics/GeoForge_completion_probe.json",
+        "Saved/Diagnostics/GeoForge_completion_sync_control.json",
+        "Saved/Diagnostics/GeoForge_completion_boundary_probe.json"
       ],
       "gate": "WP-01",
       "candidate": "GeoForgeRuntime",
@@ -84,6 +89,16 @@
         "cache_evidence": "Saved/Diagnostics/GeoForgeInstallRepair_20260915/cache_diagnosis.json",
         "cache_setting_change": "USER_AUTHORIZED_APPLIED_AND_RESTART_VERIFIED",
         "installation_evidence": "Saved/Diagnostics/GeoForgeInstallRepair_20260915/installation_verified.json"
+      },
+      "completion_inspection": {
+        "source": "INSPECTED",
+        "async_dig_then_prime": "RETURNS_WITH_PENDING_MESH_WORK",
+        "synchronous_single_chunk_control": "MESH_UPDATED_NO_PENDING_MESH_WORK",
+        "synchronous_cross_chunk_dig_then_prime": "RETURNS_WITH_PENDING_MESH_WORK",
+        "game_world_collision": "NOT_RUN",
+        "navigation": "SOURCE_BOUNDARY_INSPECTED_RUNTIME_NOT_RUN",
+        "save": "PAYLOAD_CAPTURE_INSPECTED_AND_EXECUTED_NOT_GAME_SAVE",
+        "authority_selected": false
       }
     },
     {
@@ -212,7 +227,7 @@
     "RDY-03": "NOT_RUN",
     "RDY-04": "NOT_RUN"
   },
-  "wp00_state": "PARTIAL_NATIVE_INSPECTION_PROVIDER_AVAILABLE_COMPLETION_AND_OWNER_REVIEW_PENDING",
+  "wp00_state": "PARTIAL_NATIVE_COMPLETION_GAP_REPRODUCED_CONTENT_AND_OWNER_REVIEW_PENDING",
   "wp01_state": "NOT_RUN",
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
@@ -235,6 +250,7 @@
     "bootstrap": "NOT_RUN",
     "pie": "NOT_RUN",
     "terrain": "NOT_RUN",
-    "cook": "NOT_RUN"
+    "cook": "NOT_RUN",
+    "terrain_contract_probe": "EXECUTED_COMPLETION_BARRIER_GAP_REPRODUCED"
   }
 }
