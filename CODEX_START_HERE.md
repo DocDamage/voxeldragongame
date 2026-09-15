@@ -2,6 +2,10 @@
 
 Open the folder containing this file as the **primary local project**. Do not open only the preserved documentation. Prefer native Windows for the Unreal stage so the agent can use the engine/assets on the development machine. A cloud/Linux Codex environment may run portable source/tooling checks, but it does not acquire your Windows engine, plugins or licensed local assets automatically. [Official references](Documentation/Current/TECHNICAL_REFERENCES.md).
 
+For this existing Windows checkout, use [the current handoff](Documentation/Current/HANDOFF.md)
+after STATUS. BOOT-01 already has scoped native evidence; do not restart onboarding
+or GeoForge installation troubleshooting without a new failure.
+
 ## Initial read budget
 
 Read root [AGENTS.md](AGENTS.md), [STATUS](Documentation/Current/STATUS.md) and [BOOT-01](Documentation/Current/tasks/BOOT-01.md). Preview with `python tools/wyrm.py plan --native`. Run `python tools/wyrm.py onboard --native` on the actual Unreal host; use `onboard` without `--native` for offline-only work. Read `python tools/wyrm.py report` after the run. Read source only as needed for compile failures. Do not read every reference file or repeat a full asset search each turn.

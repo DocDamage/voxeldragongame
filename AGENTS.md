@@ -32,6 +32,6 @@ For modified C++: compile the editor target against actual headers, run the rele
 
 ## Permissions and finish
 
-Inspect existing working-tree state before edits when a repository exists. This archive has no `.git`, remote or assumed branch. Do not initialize, commit, branch, push, tag, open issues/PRs, buy/install assets or alter global machine/Codex settings without relevant authorization. Preserve unrelated local work; never infer another DocDamage repo is WYRMFALL.
+Inspect existing working-tree state before edits when a repository exists. This workspace is a Git checkout on `main` with origin `https://github.com/DocDamage/voxeldragongame.git`. Use `git -c safe.directory="G:/assets/voxel project" ...` per command for its ownership mismatch; do not change global Git settings. Do not initialize, commit, branch, push, tag, open issues/PRs, buy/install assets or alter global machine/Codex settings without relevant authorization. Preserve unrelated local work; never infer another DocDamage repo is WYRMFALL.
 
 Report changed files, exact commands and results, evidence paths, what was not run, blockers, and one next bounded task. Stop at the task's acceptance boundary. Do not inflate status from source presence to runtime proof.

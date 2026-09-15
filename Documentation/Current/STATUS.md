@@ -17,7 +17,7 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Mutable | REQUIRED; plugin enabled in descriptor, runtime content NOT INTEGRATED | WP-02 real recipe/runtime/cooked proof |
 | Terrain | Provider NOT SELECTED; bounded synchronous PIE collision/nav probe PASS | Priming alone is insufficient. Explicit visual refresh plus native nav-data submission updated collision and lower nav, and removed obsolete nav on refill. [Scope/evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md); WP-01 NOT_RUN |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
-| Real sample assets | Native dirt/stone/knight/Green Dragon imports inspected | Bounds/bones/clips recorded; scale/material/assembly/gameplay suitability not established |
+| Real sample assets | Dirt/stone/knight/44-part Green Dragon plus wolf/sword imported and statically previewed | [Measured diagnostic scales and supplied palettes](WP00_REAL_ASSET_REVIEW.md); animation, collision, Mutable and production suitability unverified |
 | GAS | Native attribute tests PASS; PIE HUD 100/100, no combat loop | WP-04/05 remain gated |
 | Saves/inventory/equipment | NOT IMPLEMENTED / owners unresolved | Preserve one-owner requirements |
 | Dragon, Heartfold, Echoes | Requirements and integration locations preserved; NOT IMPLEMENTED | Original WP-09 onward |
@@ -40,8 +40,10 @@ system was introduced. See [changes](../../CHANGELOG.md).
 
 ## What Codex should do next
 
+Use the [current handoff](HANDOFF.md) for paths, evidence and the bounded next task.
+
 Read [the current C: recovery report](BOOT-01_C_RECOVERY.md). Finish
-[WP-00](tasks/WP-00.md) at the missing-provider/remaining readiness boundary;
+[WP-00](tasks/WP-00.md) at the inventory-source/remaining acceptance boundary;
 then one eligible [WP-01](tasks/WP-01.md) proof. Do not jump to the entire first
 region. GeoForge's stale D: registration and failing D: cache were recovered with
 user approval. Fab now uses `C:\EpicVaultCache\VaultCache`; GeoForge is installed
@@ -68,9 +70,11 @@ changes; current individual execution evidence is listed in the recovery report.
 WP-00 native sample intake found real dirt/stone meshes and materials, a
 15-bone knight through the current FBX importer, and 44 Green Dragon skeletal
 parts sharing a 195-bone imported hierarchy plus 20 clips. Legacy knight import
-failed with multiple roots; the source FBX was preserved. Scale, material
-completion, assembled dragon preview, selected enemy/weapon opening, full owner
-implementation inspection and complete readiness acceptance remain unverified.
+failed with multiple roots; the source FBX was preserved. Later native wolf/sword
+imports, supplied-palette previews and static dragon assembly are recorded in
+[the real-asset review](WP00_REAL_ASSET_REVIEW.md). Diagnostic scales are measured,
+not production approvals. Animation, collision, Mutable, full ownership/provenance
+acceptance and inventory source inspection remain incomplete.
 
 The C: engine now has GeoForgeRuntime 5.0.0 with native runtime/editor/dependency
 loading verified. [Implementation inspection and native editor probes](GEOFORGE_COMPLETION_INSPECTION.md)
@@ -90,7 +94,14 @@ resource balances and save-slot/actor-reconstruction flow; Waterline has physica
 side effects as well as visuals. Neither was integrated. Advanced Inventory
 System source on D: failed with device error 433; no C: copy was found.
 
-**Next bounded task:** finish the independent real-content WP-00 review:
-materials/scale/assembled knight and Green Dragon, selected enemy/weapon.
-Inventory ownership awaits a readable candidate implementation; water-state and
-coherent save integration remain open. WP-01 and full readiness remain NOT_RUN.
+[Real-asset review](WP00_REAL_ASSET_REVIEW.md) now adds native wolf/sword imports,
+explicit diagnostic scales, supplied palette materials and two inspected renders
+of the 44-part assembled Green Dragon, knight, wolf, sword, dirt and stone.
+Static visual inspection does not clear animation, Mutable, collision or full
+RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
+
+**Next bounded task:** inspect a readable Advanced Inventory System source copy
+and reconcile capacity/overflow/reward/save ownership with EBS and GeoForge.
+Its D: implementation is unreadable; no C: copy was found. The user has been
+asked for another local source/archive path. WP-00 remains PARTIAL; WP-01 and
+full readiness remain NOT_RUN. No replacement inventory/save owner was added.

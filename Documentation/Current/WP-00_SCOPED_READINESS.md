@@ -6,7 +6,10 @@ keyboard/mouse PIE checks passed. Full readiness acceptance and WP-01 remain
 NOT_RUN. GeoForge 5.0.0 has now been restored to C: with native runtime/editor
 and dependency load PASS; see [installation recovery](GEOFORGE_INSTALL_RECOVERY.md).
 Terrain suitability and the remaining content/owner inspections are still open.
-Earlier D: findings below remain historical evidence.
+Earlier D: findings below remain historical evidence. Latest [owner inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md)
+and [native real-asset review](WP00_REAL_ASSET_REVIEW.md) supersede earlier
+filename-only/static-assembly NOT_RUN statements within their stated scopes.
+Inventory source on D: remains unreadable. See [handoff](HANDOFF.md).
 
 **Subsequent source/native inspection:** [GeoForge completion report](GEOFORGE_COMPLETION_INSPECTION.md)
 records actual edit/save/mesh ordering, engine collision and navigation boundaries,
@@ -225,3 +228,14 @@ matching C: engine copy located. This supersedes earlier filename-only owner
 inspection statements, not their runtime NOT_RUN status. Full RDY-02/03/04 and
 WP-01 remain NOT_RUN. Next: independent real-content review while preserving the
 inventory source blocker and single-owner constraints.
+
+### Later native real-asset review - September 15, 2026
+
+[Real-asset review](WP00_REAL_ASSET_REVIEW.md) supersedes earlier NOT_RUN statements
+for selected enemy/weapon opening, static dragon assembly and bounded palette/
+scale inspection only. Actual native wolf/sword imports and two inspected renders
+include the knight, all 44 Green Dragon parts, wolf, sword, dirt and stone.
+Preview scales are explicit; animation, collision, Mutable usability, production
+scale/material acceptance and full RDY-02/03/04 remain unpassed. Inventory source
+on D: remains unreadable; another local source/archive path has been requested.
+No provider/owner was selected and WP-01 remains NOT_RUN.

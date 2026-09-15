@@ -238,12 +238,15 @@
     "RDY-03": "NOT_RUN",
     "RDY-04": "NOT_RUN"
   },
-  "wp00_state": "PARTIAL_EBS_WATERLINE_GRAPHS_INSPECTED_INVENTORY_SOURCE_CONTENT_REVIEW_PENDING",
+  "wp00_state": "PARTIAL_NATIVE_ASSET_PREVIEW_OWNER_INSPECTIONS_INVENTORY_SOURCE_BLOCKED",
   "wp01_state": "NOT_RUN",
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
     "Saved/Diagnostics/WP00_native_samples.json",
-    "Saved/Diagnostics/WP00_native_rigs.json"
+    "Saved/Diagnostics/WP00_native_rigs.json",
+    "Documentation/Current/WP00_REAL_ASSET_REVIEW.md",
+    "Saved/Diagnostics/WP00_asset_review.json",
+    "Saved/Diagnostics/WP00Preview/report.json"
   ],
   "latest_descriptor_change_validation": {
     "source_config": "PASS",

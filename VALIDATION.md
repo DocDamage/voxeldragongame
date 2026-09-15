@@ -1,5 +1,22 @@
 # WYRMFALL validation record
 
+## Latest owner and real-asset inspection - September 15, 2026
+
+Native EBS eight-Blueprint and Waterline five-Blueprint exports passed their
+scoped load/export checks with unchanged source hashes. Inventory source access
+on D: failed with device error 433; no matching C: engine copy was located.
+[Owner findings and exact commands](Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md).
+
+Native wolf/sword imports and measured inspection passed; two rendered views of
+knight, 44-part assembled Green Dragon, wolf, sword, dirt and stone were opened
+and reviewed. Diagnostic scales and palette materials are recorded, not gameplay
+approval. [Asset evidence and exact commands](Documentation/Current/WP00_REAL_ASSET_REVIEW.md).
+Portable verify PASS; 124 tests OK with two skips (8.752 seconds). No C++ changed
+in these inspections; the bridge build/tests/PIE below remain the latest native
+code validation. These asset previews were editor captures, not PIE.
+WP-00 remains PARTIAL; WP-01 and full RDY-02/03/04 remain NOT_RUN.
+
+
 ## Latest synchronous GeoForge bridge — September 15, 2026
 
 Editor C++ build PASS (18.56 seconds, `-NoUBA -NoPCH`); all six source-declared
