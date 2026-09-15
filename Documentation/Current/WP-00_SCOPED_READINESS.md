@@ -15,6 +15,13 @@ priming returning before edited geometry, even for synchronous cross-chunk edits
 The single-chunk synchronous control updated its mesh. This supersedes the old
 source-read failure below, but does not clear WP-00 or any full WRLD/SAVE case.
 
+**Further bounded progress:** the [synchronous bridge probe](GEOFORGE_SYNC_BRIDGE_PROBE.md)
+compiled against C: headers, passed all six scaffold regressions with GeoForge
+loaded, and passed actual PIE collision and nav-projection checks. Explicit visual
+refresh completed both sides of a dig; native nav-data submission enabled new lower
+navigation and removed it after refill. This is not general async/streaming
+completion, traversable-cave/path-cancellation proof or completed owner readiness.
+
 ## Actual environment
 
 - Project: `G:\assets\voxel project\WYRMFALL.uproject`; association 5.8;
@@ -194,8 +201,10 @@ and native loading are now verified in [the recovery report](GEOFORGE_INSTALL_RE
    been inspected. Native probes disprove `DigSphere` plus immediate support
    prime as a completion barrier, including across chunks with async disabled.
    See [source references, control case and reproduction](GEOFORGE_COMPLETION_INSPECTION.md).
-   A validated completion bridge remains missing; no substitute callback or
-   capability flag was invented. Full terrain gameplay/save tests remain NOT_RUN.
+   A [small synchronous diagnostic bridge](GEOFORGE_SYNC_BRIDGE_PROBE.md) now has
+   compile/native-regression/PIE collision/nav-projection evidence. General
+   streaming/action-revision completion remains unverified; no capability flag
+   was granted. Full terrain gameplay/save tests remain NOT_RUN.
 3. Selected enemy/weapon opening, completed material/scale/assembled-asset review,
    full building/water/inventory/save owner inspection and complete provenance
    acceptance remain NOT_RUN. Their existing bytes/partial findings remain

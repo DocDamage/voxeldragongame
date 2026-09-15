@@ -10,12 +10,12 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Portable tooling | Test results recorded in root VALIDATION.md | Standard-library tests; no engine emulation |
 | Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
 | Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
-| UHT / UBT compile | PASS | Actual headers; final project build `-NoUBA -NoPCH` succeeded in 18.40 seconds |
-| Native automation | 6/6 Success | Fresh `Saved/Automation/Scaffold/index.json`, no warnings/failures/not-run cases |
+| UHT / UBT compile | PASS | Actual headers; latest diagnostic build `-NoUBA -NoPCH` succeeded in 18.56 seconds; [evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md) |
+| Native automation | 6/6 Success | Latest `Saved/Automation/GeoForgeBridgeFinal/index.json`, complete source-declared suite with GeoForge loaded |
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
 | PIE, input, cameras, HUD | Focused keyboard/mouse checks PASS; controller NOT_RUN (absent) | Rebinding, pause/ignore guards, click rejection and editor relaunch exercised; fixture lighting warning remains; no WP-03 pass |
 | Mutable | REQUIRED; plugin enabled in descriptor, runtime content NOT INTEGRATED | WP-02 real recipe/runtime/cooked proof |
-| Terrain | Provider NOT SELECTED; GeoForgeRuntime 5.0.0 native contract probes executed | Dig changes save state before mesh completion; support prime also leaves cross-chunk work pending with async disabled. [Inspection and reproduction](GEOFORGE_COMPLETION_INSPECTION.md); WP-01 NOT_RUN |
+| Terrain | Provider NOT SELECTED; bounded synchronous PIE collision/nav probe PASS | Priming alone is insufficient. Explicit visual refresh plus native nav-data submission updated collision and lower nav, and removed obsolete nav on refill. [Scope/evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md); WP-01 NOT_RUN |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
 | Real sample assets | Native dirt/stone/knight/Green Dragon imports inspected | Bounds/bones/clips recorded; scale/material/assembly/gameplay suitability not established |
 | GAS | Native attribute tests PASS; PIE HUD 100/100, no combat loop | WP-04/05 remain gated |
@@ -76,13 +76,16 @@ The C: engine now has GeoForgeRuntime 5.0.0 with native runtime/editor/dependenc
 loading verified. [Implementation inspection and native editor probes](GEOFORGE_COMPLETION_INSPECTION.md)
 show that edit acceptance/save capture precede geometry and support priming is
 not an edit-completion barrier, including synchronous cross-chunk edits.
-A supported geometry/collision/nav bridge remains unverified; GeoForge is not
-selected. The supplied Voxel archive has only 5.6/5.7 builds.
+A bounded synchronous diagnostic sequence now has a real editor build, six
+scaffold regressions and [PIE collision/navigation-projection evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md).
+General async/streaming/action-revision integration remains unverified; GeoForge
+is not selected. The supplied Voxel archive has only 5.6/5.7 builds.
 All WP-01 terrain/gameplay/save/performance checks,
 full RDY-02/03/04, connected-controller behavior and cooked validation remain
 **NOT_RUN**. No G0/G1 or production feature pass is claimed.
 
-**Next bounded task:** establish and natively validate the GeoForge completion
-bridge described in [the reproduction report](GEOFORGE_COMPLETION_INSPECTION.md).
-Finish remaining WP-00 content/owner inspections before resource/save integration.
-WP-01 remains NOT_RUN; a tiny native contract probe is not G1.
+**Next bounded task:** inspect actual Easy Building System resource/interaction/
+building/save graphs and supplied inventory/water implementations, then finish
+relevant WP-00 real-content gaps before resource/save integration. The
+[compiled diagnostic bridge](GEOFORGE_SYNC_BRIDGE_PROBE.md) provides bounded evidence;
+WP-01 remains NOT_RUN and full G1 is not passed.

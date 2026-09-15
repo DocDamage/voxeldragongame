@@ -12,6 +12,12 @@ WYRMFALL completion contract, not a finding that GeoForge cannot eventually
 complete edits. GeoForge remains the first candidate, not a selected authority.
 WP-00 remains PARTIAL; no eligible complete WP-01 integration was established.
 
+**Subsequent continuation:** [the synchronous bridge probe](GEOFORGE_SYNC_BRIDGE_PROBE.md)
+records a compiled development helper and actual PIE dig/fill collision plus
+navigation-projection evidence using explicit visual/nav refresh. It preserves
+this report's finding about priming alone. Validation/next-task statements below
+describe the initial inspection; the linked report records the later checks.
+
 ## Scope and evidence
 
 Read the requested current reports, WP-00/WP-01 packets, preserved asset/plugin

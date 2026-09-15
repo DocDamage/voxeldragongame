@@ -1,6 +1,19 @@
 # WYRMFALL validation record
 
-## Latest GeoForge inspection — September 15, 2026
+## Latest synchronous GeoForge bridge — September 15, 2026
+
+Editor C++ build PASS (18.56 seconds, `-NoUBA -NoPCH`); all six source-declared
+scaffold tests Success with GeoForge loaded. Actual PIE cross-chunk dig/fill
+collision, new lower nav projection and obsolete lower-nav removal on refill
+passed the scoped diagnostic assertions. Final log has no Python error or handled
+ensure. [Exact commands, attempts and limits](Documentation/Current/GEOFORGE_SYNC_BRIDGE_PROBE.md).
+This is a fixed three-chunk synchronous diagnostic, not G1 or a selected authority.
+WP-00 remains PARTIAL; full WP-01/WRLD/SAVE, owner readiness, traversal/path
+cancellation, representative stress, bootstrap rerun and cook remain NOT_RUN.
+Portable checks: verify PASS; 124 tests OK with two skips, 9.109 seconds.
+Outputs: `Saved/Diagnostics/WP00_bridge_verify.txt` and `WP00_bridge_tests.txt`.
+
+## Earlier GeoForge inspection — September 15, 2026
 
 Native editor contract probes executed against C: UE 5.8.2 / GeoForge 5.0.0.
 Async single-chunk and synchronous cross-chunk dig/prime sequences return with

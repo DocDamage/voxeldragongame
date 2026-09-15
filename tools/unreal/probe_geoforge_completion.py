@@ -13,13 +13,15 @@ import unreal
 ROOT = Path(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir()))
 SYNC_CONTROL = '-WyrmGeoForgeSyncProbe' in unreal.SystemLibrary.get_command_line()
 BOUNDARY_PROBE = '-WyrmGeoForgeBoundaryProbe' in unreal.SystemLibrary.get_command_line()
-REPORT = ROOT / ('Saved/Diagnostics/GeoForge_completion_boundary_probe.json' if BOUNDARY_PROBE
+REFRESH_PROBE = '-WyrmGeoForgeRefreshProbe' in unreal.SystemLibrary.get_command_line()
+REPORT = ROOT / ('Saved/Diagnostics/GeoForge_completion_refresh_probe.json' if REFRESH_PROBE
+                 else 'Saved/Diagnostics/GeoForge_completion_boundary_probe.json' if BOUNDARY_PROBE
                  else 'Saved/Diagnostics/GeoForge_completion_sync_control.json' if SYNC_CONTROL
                  else 'Saved/Diagnostics/GeoForge_completion_probe.json')
 result = {'kind': 'native_editor_contract_probe_not_gameplay_acceptance',
           'engine': unreal.SystemLibrary.get_engine_version(), 'status': 'ERROR',
           'pie': 'NOT_RUN', 'sync_control': SYNC_CONTROL,
-          'boundary_probe': BOUNDARY_PROBE, 'snapshots': []}
+          'boundary_probe': BOUNDARY_PROBE, 'refresh_probe': REFRESH_PROBE, 'snapshots': []}
 
 
 def snapshot(actor, label):
@@ -45,6 +47,18 @@ def snapshot(actor, label):
            'vertices': sum(len(s['vertices']) for m in meshes for s in m['sections']),
            'mesh_components': len(meshes),
            'async_components': sum(m['async_cooking'] for m in meshes)}
+    if REFRESH_PROBE:
+        row['vertical_traces'] = []
+        for x in (1550, 1450, 1650):
+            hit = unreal.SystemLibrary.line_trace_single(
+                actor, unreal.Vector(x, 850, 2000), unreal.Vector(x, 850, 100),
+                unreal.TraceTypeQuery.TRACE_TYPE_QUERY1, True, [], unreal.DrawDebugTrace.NONE, False)
+            parts = hit.to_tuple()
+            row['vertical_traces'].append({'blocking_hit': parts[0], 'distance': parts[3],
+                                          'impact_cm': [parts[5].x, parts[5].y, parts[5].z],
+                                          'actor': parts[9].get_path_name() if parts[9] else None,
+                                          'component': parts[10].get_name() if parts[10] else None})
+        row['vertical_trace'] = row['vertical_traces'][0]
     result['snapshots'].append(row)
     return row
 
@@ -111,6 +125,14 @@ try:
                          and primed['mesh_sha256'] != before['mesh_sha256']
                          and sum(primed['queues'].values()) == 0):
         result['status'] = 'SYNC_CONTROL_MESH_CHANGED_NO_QUEUED_WORK'
+    if REFRESH_PROBE:
+        if not (SYNC_CONTROL and BOUNDARY_PROBE):
+            raise RuntimeError('Refresh probe requires sync and boundary flags')
+        actor.refresh_loaded_chunk_visuals()
+        refreshed = snapshot(actor, 'after_explicit_visual_refresh')
+        result['status'] = ('REFRESH_MESH_CHANGED_NO_QUEUED_WORK'
+                            if refreshed['mesh_sha256'] != before['mesh_sha256']
+                            and sum(refreshed['queues'].values()) == 0 else 'REFRESH_NOT_SETTLED')
     result['limitation'] = 'Same-frame native editor observation; no claim that queued work never completes, or that terrain gameplay/collision/nav passed.'
 except Exception:
     result['error'] = traceback.format_exc()

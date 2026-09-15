@@ -44,7 +44,7 @@
     {
       "id": "terrain",
       "authority": null,
-      "state": "UNSELECTED_NATIVE_CONTRACT_PROBE_COMPLETION_BARRIER_GAP",
+      "state": "UNSELECTED_BOUNDED_SYNC_PIE_COLLISION_NAV_PROJECTION_PASSED",
       "actual_source_path": null,
       "version": null,
       "evidence": [
@@ -57,7 +57,10 @@
         "Saved/Diagnostics/GeoForge_semantics_manifest.json",
         "Saved/Diagnostics/GeoForge_completion_probe.json",
         "Saved/Diagnostics/GeoForge_completion_sync_control.json",
-        "Saved/Diagnostics/GeoForge_completion_boundary_probe.json"
+        "Saved/Diagnostics/GeoForge_completion_boundary_probe.json",
+        "Documentation/Current/GEOFORGE_SYNC_BRIDGE_PROBE.md",
+        "Saved/Diagnostics/GeoForge_PIE_explicit_nav_probe.json",
+        "Saved/Automation/GeoForgeBridgeFinal/index.json"
       ],
       "gate": "WP-01",
       "candidate": "GeoForgeRuntime",
@@ -95,10 +98,11 @@
         "async_dig_then_prime": "RETURNS_WITH_PENDING_MESH_WORK",
         "synchronous_single_chunk_control": "MESH_UPDATED_NO_PENDING_MESH_WORK",
         "synchronous_cross_chunk_dig_then_prime": "RETURNS_WITH_PENDING_MESH_WORK",
-        "game_world_collision": "NOT_RUN",
-        "navigation": "SOURCE_BOUNDARY_INSPECTED_RUNTIME_NOT_RUN",
+        "game_world_collision": "PASS_THREE_RAY_CROSS_CHUNK_DIG_FILL_FIXTURE",
+        "navigation": "PASS_NEW_SURFACE_PROJECTION_AND_OLD_SURFACE_REMOVAL_NOT_TRAVERSAL",
         "save": "PAYLOAD_CAPTURE_INSPECTED_AND_EXECUTED_NOT_GAME_SAVE",
-        "authority_selected": false
+        "authority_selected": false,
+        "bounded_sync_bridge": "EXPLICIT_VISUAL_AND_NAV_REFRESH_SCOPED_PIE_PASS"
       }
     },
     {
@@ -227,7 +231,7 @@
     "RDY-03": "NOT_RUN",
     "RDY-04": "NOT_RUN"
   },
-  "wp00_state": "PARTIAL_NATIVE_COMPLETION_GAP_REPRODUCED_CONTENT_AND_OWNER_REVIEW_PENDING",
+  "wp00_state": "PARTIAL_BOUNDED_SYNC_COLLISION_NAV_PROBE_PASSED_OWNER_CONTENT_REVIEW_PENDING",
   "wp01_state": "NOT_RUN",
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
@@ -245,12 +249,24 @@
   "latest_plugin_install_validation": {
     "installation": "PASS",
     "native_load": "PASS",
-    "cpp_build": "NOT_RUN",
-    "automation": "NOT_RUN",
+    "cpp_build": "PASS",
+    "automation": "PASS",
     "bootstrap": "NOT_RUN",
-    "pie": "NOT_RUN",
+    "pie": "PASS",
     "terrain": "NOT_RUN",
     "cook": "NOT_RUN",
-    "terrain_contract_probe": "EXECUTED_COMPLETION_BARRIER_GAP_REPRODUCED"
+    "terrain_contract_probe": "BOUNDED_SYNC_PIE_COLLISION_NAV_PROJECTION_PASS",
+    "pie_scope": "Fixed three-chunk synchronous dig/fill collision and navigation projection/removal only; no traversal, stale-path cancellation, stress or game-save proof."
+  },
+  "latest_geoforge_bridge_validation": {
+    "cpp_build": "PASS",
+    "native_automation": "PASS",
+    "native_test_count": 6,
+    "pie": "PASS",
+    "pie_scope": "Fixed three-chunk synchronous dig/fill collision and navigation projection/removal only; no traversal, stale-path cancellation, stress or game-save proof.",
+    "report": "Documentation/Current/GEOFORGE_SYNC_BRIDGE_PROBE.md",
+    "bootstrap": "NOT_RUN",
+    "cook": "NOT_RUN",
+    "wp01_full_acceptance": "NOT_RUN"
   }
 }
