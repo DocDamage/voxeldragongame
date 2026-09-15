@@ -213,3 +213,15 @@ and native loading are now verified in [the recovery report](GEOFORGE_INSTALL_RE
 The bounded WP-00 discovery now has an actionable missing-input list. It does
 not clear the full readiness cases. WP-01 implementation and every unexecuted
 WRLD/SAVE/performance validation remain **NOT_RUN**.
+
+### Later owner inspection - September 15, 2026
+
+[Native graph inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md) now covers eight
+EBS and five Waterline Blueprints, with source hashes unchanged. EBS resource,
+interaction, building and slot-save implementations were traced. Waterline has
+readable visual and physical paths; neither package is integrated or selected.
+Advanced Inventory System source on D: is unreadable (device error 433), with no
+matching C: engine copy located. This supersedes earlier filename-only owner
+inspection statements, not their runtime NOT_RUN status. Full RDY-02/03/04 and
+WP-01 remain NOT_RUN. Next: independent real-content review while preserving the
+inventory source blocker and single-owner constraints.

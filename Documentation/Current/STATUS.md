@@ -84,8 +84,13 @@ All WP-01 terrain/gameplay/save/performance checks,
 full RDY-02/03/04, connected-controller behavior and cooked validation remain
 **NOT_RUN**. No G0/G1 or production feature pass is claimed.
 
-**Next bounded task:** inspect actual Easy Building System resource/interaction/
-building/save graphs and supplied inventory/water implementations, then finish
-relevant WP-00 real-content gaps before resource/save integration. The
-[compiled diagnostic bridge](GEOFORGE_SYNC_BRIDGE_PROBE.md) provides bounded evidence;
-WP-01 remains NOT_RUN and full G1 is not passed.
+[Native owner inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md) now covers eight
+EBS and five Waterline Blueprints with unchanged source hashes. EBS has its own
+resource balances and save-slot/actor-reconstruction flow; Waterline has physical
+side effects as well as visuals. Neither was integrated. Advanced Inventory
+System source on D: failed with device error 433; no C: copy was found.
+
+**Next bounded task:** finish the independent real-content WP-00 review:
+materials/scale/assembled knight and Green Dragon, selected enemy/weapon.
+Inventory ownership awaits a readable candidate implementation; water-state and
+coherent save integration remain open. WP-01 and full readiness remain NOT_RUN.

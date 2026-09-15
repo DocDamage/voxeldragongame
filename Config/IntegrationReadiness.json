@@ -108,10 +108,12 @@
     {
       "id": "inventory",
       "authority": null,
-      "state": "UNSELECTED",
+      "state": "UNSELECTED_SOURCE_UNREADABLE_D_DEVICE_ERROR",
       "actual_source_path": null,
       "version": null,
-      "evidence": [],
+      "evidence": [
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+      ],
       "gate": "WP-05"
     },
     {
@@ -135,20 +137,23 @@
     {
       "id": "water",
       "authority": "Inspect Waterline Pro 6 candidate",
-      "state": "UNSELECTED",
+      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_AUTHORITY_UNSELECTED",
       "actual_source_path": null,
       "version": null,
-      "evidence": [],
+      "evidence": [
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+      ],
       "gate": "WP-07"
     },
     {
       "id": "building",
       "authority": "Inspect Easy Building System candidate",
-      "state": "CANDIDATE_BYTES_LOCATED_RUNTIME_NOT_RUN",
+      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_RUNTIME_NOT_RUN",
       "actual_source_path": null,
       "version": null,
       "evidence": [
-        "Saved/Diagnostics/G0ScopedMetadata.json"
+        "Saved/Diagnostics/G0ScopedMetadata.json",
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
       ],
       "gate": "WP-08",
       "candidate_source_path": "G:\\assets\\voxel project\\assets and old docs\\EasyBuildingSystemV10"
@@ -159,7 +164,9 @@
       "state": "NOT_IMPLEMENTED",
       "actual_source_path": null,
       "version": null,
-      "evidence": [],
+      "evidence": [
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+      ],
       "gate": "WP-05"
     },
     {
@@ -231,7 +238,7 @@
     "RDY-03": "NOT_RUN",
     "RDY-04": "NOT_RUN"
   },
-  "wp00_state": "PARTIAL_BOUNDED_SYNC_COLLISION_NAV_PROBE_PASSED_OWNER_CONTENT_REVIEW_PENDING",
+  "wp00_state": "PARTIAL_EBS_WATERLINE_GRAPHS_INSPECTED_INVENTORY_SOURCE_CONTENT_REVIEW_PENDING",
   "wp01_state": "NOT_RUN",
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
