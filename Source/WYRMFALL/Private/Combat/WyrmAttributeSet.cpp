@@ -2,6 +2,8 @@
 #include "GameplayEffectExtension.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayTagsManager.h"
+#include "Player/WyrmCharacter.h"
+#include "Activities/WyrmFishingComponent.h"
 
 UWyrmAttributeSet::UWyrmAttributeSet()
 {
@@ -296,6 +298,15 @@ void UWyrmAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
             const float OldHealth = GetHealth();
             const float NewHealth = FMath::Clamp(OldHealth - MitigatedDamage, 0.f, GetMaxHealth());
             SetHealth(NewHealth);
+
+            AActor* TargetActor = Data.Target.AbilityActorInfo.IsValid() ? Data.Target.AbilityActorInfo->AvatarActor.Get() : nullptr;
+            if (AWyrmCharacter* Character = Cast<AWyrmCharacter>(TargetActor))
+            {
+                if (Character->GetFishing())
+                {
+                    Character->GetFishing()->NotifyCombatDamageTaken(MitigatedDamage);
+                }
+            }
 
             if (NewHealth <= 0.f && TargetASC)
             {

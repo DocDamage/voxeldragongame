@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kind": "human_maintained_integration_readiness_not_runtime_state",
-  "updated": "2026-09-15",
+  "updated": "2026-09-16",
   "engine_target": {
     "family": "5.8",
     "preferred_patch": "5.8.2",
@@ -20,7 +20,7 @@
     {
       "id": "mutable",
       "authority": "Mutable",
-      "state": "WP02_VERIFIED_RECIPE_COMPILED_AND_RUNTIME_PROVED",
+      "state": "WP02_PARTIAL_RECIPE_COMPILED_NATIVE_EDITOR_WORLD_PASS_REAL_PIE_NOT_RUN",
       "actual_source_path": "C:\\Program Files\\UE_5.8\\Engine\\Plugins\\Mutable",
       "version": "1.8.0",
       "evidence": [
@@ -34,7 +34,7 @@
     {
       "id": "combat",
       "authority": "GAS",
-      "state": "WP04_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "state": "WP04_PARTIAL_NATIVE_EDITOR_WORLD_PASS_COMPLETE_PIE_NOT_RUN",
       "actual_source_path": "C:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GameplayAbilities",
       "version": "1.0",
       "evidence": [
@@ -115,7 +115,7 @@
     {
       "id": "inventory",
       "authority": "UWyrmInventoryComponent",
-      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "state": "WP05_PARTIAL_NATIVE_EDITOR_WORLD_PASS_COMPLETE_PIE_NOT_RUN",
       "actual_source_path": "Source/WYRMFALL/Public/Inventory/WyrmInventoryComponent.h",
       "version": "1.0",
       "evidence": [
@@ -134,7 +134,7 @@
     {
       "id": "equipment",
       "authority": "UWyrmInventoryComponent (GAS attributes & socket attachment)",
-      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "state": "WP05_PARTIAL_NATIVE_EDITOR_WORLD_PASS_COMPLETE_PIE_NOT_RUN",
       "actual_source_path": "Source/WYRMFALL/Public/Inventory/WyrmInventoryComponent.h",
       "version": "1.0",
       "evidence": [
@@ -154,12 +154,37 @@
     },
     {
       "id": "water",
-      "authority": "Inspect Waterline Pro 6 candidate",
-      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_AUTHORITY_UNSELECTED",
-      "actual_source_path": null,
-      "version": null,
+      "authority": "AWyrmWaterVolume",
+      "state": "WP07_PARTIAL_SCOPED_NATIVE_AND_REAL_PIE",
+      "actual_source_path": "Source/WYRMFALL/Public/Water/WyrmWaterVolume.h",
+      "version": "0.2",
       "evidence": [
-        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+        "Saved/Diagnostics/WP07_activities_proof.json",
+        "Documentation/Current/WP07_ACTIVITIES_PROOF.md"
+      ],
+      "gate": "WP-07"
+    },
+    {
+      "id": "activities_fishing",
+      "authority": "UWyrmFishingComponent",
+      "state": "WP07_PARTIAL_SCOPED_NATIVE_AND_REAL_PIE",
+      "actual_source_path": "Source/WYRMFALL/Public/Activities/WyrmFishingComponent.h",
+      "version": "0.2",
+      "evidence": [
+        "Saved/Diagnostics/WP07_activities_proof.json",
+        "Documentation/Current/WP07_ACTIVITIES_PROOF.md"
+      ],
+      "gate": "WP-07"
+    },
+    {
+      "id": "crafting",
+      "authority": "UWyrmCraftingSubsystem",
+      "state": "WP07_PARTIAL_SCOPED_NATIVE_AND_REAL_PIE",
+      "actual_source_path": "Source/WYRMFALL/Public/Crafting/WyrmCraftingSubsystem.h",
+      "version": "0.2",
+      "evidence": [
+        "Saved/Diagnostics/WP07_activities_proof.json",
+        "Documentation/Current/WP07_ACTIVITIES_PROOF.md"
       ],
       "gate": "WP-07"
     },
@@ -179,13 +204,15 @@
     {
       "id": "save",
       "authority": "UWyrmSaveSubsystem & UWyrmSaveGame",
-      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "state": "WP05_PARTIAL_COMBINED_BOUND_TERRAIN_NOT_RUN_WP07_FOOD_BUFF_PIE_PASS",
       "actual_source_path": "Source/WYRMFALL/Public/Save/WyrmSaveSubsystem.h",
       "version": "1.0",
       "evidence": [
         "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md",
         "Saved/Diagnostics/WP05_inventory_proof.json",
-        "Documentation/Current/WP05_INVENTORY_PROOF.md"
+        "Documentation/Current/WP05_INVENTORY_PROOF.md",
+        "Saved/Diagnostics/WP07_activities_proof.json",
+        "Documentation/Current/WP07_ACTIVITIES_PROOF.md"
       ],
       "gate": "WP-05"
     },
@@ -229,13 +256,13 @@
   "native_results": {
     "compile": "PASS",
     "automation": "PASS",
-    "bootstrap": "PASS",
+    "bootstrap": "NOT_RUN",
     "pie": "PASS",
     "cook": "NOT_RUN",
-    "controller": "PASS"
+    "controller": "NOT_RUN"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 18,
+  "native_test_cases_authored": 27,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -250,7 +277,7 @@
     "pie": "Saved/Diagnostics/BOOT-01_PIE_first_session.log",
     "relaunch": "Saved/Diagnostics/BOOT-01_PIE_relaunch.log",
     "onboarding_receipt_status": "STALE_EVIDENCE_HISTORICAL_D_FAILURE",
-    "pie_scope": "Focused BOOT-01 keyboard/mouse fixture checks only; controller and full WP-03 NOT_RUN. Historical configuration; latest GeoForge-install PIE NOT_RUN."
+    "pie_scope": "Fresh real PIE: WP-01 terrain, WP-06 ranged/progression, and scoped WP-07 water/fishing/crafting/food. WP-02 through WP-05 proof scripts remain editor-world commandlets; BOOT-01 keyboard/mouse PIE is historical. Physical controller NOT_RUN."
   },
   "readiness_acceptance": {
     "RDY-01": "PASS",
@@ -260,43 +287,43 @@
   },
   "wp00_state": "PARTIAL_NATIVE_ASSET_PREVIEW_OWNER_INSPECTIONS_COMPLETE_CANDIDATES_UNSELECTED",
   "wp01_state": "PASS",
-  "wp02_state": "PASS",
+  "wp02_state": "PARTIAL_NATIVE_EDITOR_WORLD_PASS_CURRENT_PIE_NOT_RUN",
   "character_acceptance": {
-    "CHAR-01": "PASS",
-    "CHAR-02": "PASS",
-    "CHAR-03": "PASS",
-    "CHAR-04": "PASS",
-    "CHAR-05": "PASS",
-    "CHAR-06": "PASS"
+    "CHAR-01": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN",
+    "CHAR-02": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN",
+    "CHAR-03": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN",
+    "CHAR-04": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN",
+    "CHAR-05": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN",
+    "CHAR-06": "PASS_EDITOR_WORLD_CURRENT_PIE_NOT_RUN"
   },
-  "wp03_state": "PASS",
+  "wp03_state": "PARTIAL_NATIVE_EDITOR_WORLD_PASS_CURRENT_FULL_PIE_NOT_RUN",
   "control_acceptance": {
-    "CTRL-00": "PASS",
-    "CTRL-01": "PASS",
-    "CTRL-02": "PASS",
-    "CTRL-03": "PASS",
-    "CTRL-04": "PASS",
-    "CTRL-05": "PASS",
-    "CTRL-06": "PASS",
-    "CTRL-07": "PASS"
+    "CTRL-00": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-01": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-02": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-03": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-04": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-05": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-06": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY",
+    "CTRL-07": "PASS_EDITOR_WORLD_HISTORICAL_BOOT01_PIE_ONLY"
   },
-  "wp04_state": "PASS",
+  "wp04_state": "PARTIAL_NATIVE_EDITOR_WORLD_PASS_COMPLETE_PIE_NOT_RUN",
   "combat_acceptance": {
-    "COM-01": "PASS",
-    "COM-02": "PASS",
-    "COM-03": "PASS",
-    "COM-04": "PASS",
-    "COM-05": "PASS"
+    "COM-01": "PASS_NATIVE_EDITOR_WORLD_WP06_SUPPORTING_PIE",
+    "COM-02": "PASS_NATIVE_EDITOR_WORLD_WP06_SUPPORTING_PIE",
+    "COM-03": "PASS_NATIVE_EDITOR_WORLD_WP06_SUPPORTING_PIE",
+    "COM-04": "PASS_NATIVE_EDITOR_WORLD_WP06_SUPPORTING_PIE",
+    "COM-05": "PASS_NATIVE_EDITOR_WORLD_WP06_SUPPORTING_PIE"
   },
-  "wp05_state": "PASS",
+  "wp05_state": "PARTIAL_CHARACTER_INVENTORY_PASS_COMBINED_TERRAIN_SAVE_NOT_RUN",
   "inventory_acceptance": {
-    "COM-06": "PASS",
-    "COM-07": "PASS",
-    "SAVE-01": "PASS"
+    "COM-06": "PASS_EDITOR_WORLD_COMMANDLET",
+    "COM-07": "PASS_NATIVE_AND_EDITOR_WORLD_COMMANDLET",
+    "SAVE-01": "PARTIAL_CHARACTER_INVENTORY_PASS_COMBINED_BOUND_TERRAIN_NOT_RUN"
   },
-  "wp06_state": "PASS",
+  "wp06_state": "PASS_NATIVE_AND_REAL_PIE",
   "progression_acceptance": {
-    "COM-08": "PASS"
+    "COM-08": "PASS_NATIVE_AND_REAL_PIE"
   },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
@@ -309,32 +336,57 @@
   "latest_descriptor_change_validation": {
     "source_config": "PASS",
     "procedural_mesh_native_load": "PASS",
-    "cpp_build": "NOT_RUN",
-    "automation": "NOT_RUN",
-    "pie": "NOT_RUN",
-    "cook": "NOT_RUN"
+    "cpp_build": "PASS",
+    "automation": "PASS_27_OF_27",
+    "pie": "PASS_SCOPED_WP01_AND_WP06",
+    "cook": "NOT_RUN",
+    "terrain": "PASS_REAL_PIE",
+    "save": "PARTIAL_TERRAIN_AND_CHARACTER_PATHS_SEPARATE"
   },
   "latest_plugin_install_validation": {
     "installation": "PASS",
     "native_load": "PASS",
     "cpp_build": "PASS",
-    "automation": "PASS",
-    "bootstrap": "NOT_RUN",
-    "pie": "PASS",
-    "terrain": "NOT_RUN",
+    "automation": "PASS_27_OF_27",
+    "bootstrap": "NOT_RUN_CURRENT_CONFIGURATION",
+    "pie": "PASS_REAL_WP01",
+    "terrain": "PASS_REAL_PIE",
     "cook": "NOT_RUN",
-    "terrain_contract_probe": "BOUNDED_SYNC_PIE_COLLISION_NAV_PROJECTION_PASS",
-    "pie_scope": "Fixed three-chunk synchronous dig/fill collision and navigation projection/removal only; no traversal, stale-path cancellation, stress or game-save proof."
+    "terrain_contract_probe": "WP01_REAL_PIE_COLLISION_NAV_FINITE_DEPLETION_AND_DIRECT_PAYLOAD_PASS",
+    "pie_scope": "WP-01 real PIE: completion queues, collision, nav projection/removal, finite depletion, occupied fill and direct GeoForge payload restoration."
   },
   "latest_geoforge_bridge_validation": {
     "cpp_build": "PASS",
     "native_automation": "PASS",
-    "native_test_count": 6,
+    "native_test_count": 27,
     "pie": "PASS",
-    "pie_scope": "Fixed three-chunk synchronous dig/fill collision and navigation projection/removal only; no traversal, stale-path cancellation, stress or game-save proof.",
+    "pie_scope": "WP-01 real PIE: queued completion, collision, navigation, finite depletion, occupied fill and direct terrain payload restoration.",
     "report": "Documentation/Current/GEOFORGE_SYNC_BRIDGE_PROBE.md",
-    "bootstrap": "NOT_RUN",
+    "bootstrap": "NOT_RUN_CURRENT_CONFIGURATION",
     "cook": "NOT_RUN",
-    "wp01_full_acceptance": "NOT_RUN"
+    "wp01_full_acceptance": "PASS"
+  },
+  "latest_verification": {
+    "date": "2026-09-16",
+    "pushed_checkpoint": "55172d0a36f787c5d7f53deff67dec17e803b390",
+    "editor_build": "PASS_NOUBA_NOPCH_FINAL_SOURCE",
+    "native_automation": "PASS_27_OF_27",
+    "wp01_real_pie": "PASS_7_OF_7_GROUPS",
+    "wp05_editor_world_commandlet": "PASS_3_OF_3_SCOPED_GROUPS",
+    "wp06_real_pie": "PASS_6_OF_6_GROUPS",
+    "portable": "PASS_124_TESTS_2_EXPECTED_SKIPS",
+    "controller": "NOT_RUN",
+    "cook": "NOT_RUN",
+    "wp07_real_pie": "PASS_8_OF_8_SCOPED_GROUPS"
+  },
+  "wp07_state": "PARTIAL_SCOPED_NATIVE_AND_REAL_PIE_NO_TASK_PACKET_FULL_ACCEPTANCE_UNDEFINED",
+  "activities_acceptance": {
+    "WRLD-10": "PASS_SCOPED_REAL_PIE",
+    "WRLD-11": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
+    "ACT-01": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
+    "ACT-02": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
+    "ACT-03": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
+    "ACT-04": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
+    "ACT-05": "PASS_NATIVE_FAILURES_AND_SCOPED_REAL_PIE_CAPACITY_TRANSACTION"
   }
 }

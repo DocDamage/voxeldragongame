@@ -1,5 +1,9 @@
 # WP-00 owner implementation inspection — September 15, 2026
 
+> **September 16, 2026 verification update:** the later WP-01 real-PIE terrain
+> proof is PASS. Candidate-owner runtime behavior and full RDY-02/03/04 remain
+> open; cook remains NOT_RUN.
+
 **PARTIAL.** Native read-only Blueprint exports now establish actual EBS resource,
 interaction, building and save behavior. This does not select a WYRMFALL owner or
 pass gameplay/save acceptance. The preceding diagnostic bridge was committed and

@@ -1,8 +1,8 @@
 # WP-03: Shared Humanoid Control, Camera & Input Proof
 
-**Date**: 2026-09-15  
-**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)  
-**Status**: PASS (All criteria CTRL-00 through CTRL-07 verified)  
+**Date**: 2026-09-15
+**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)
+**Status**: PARTIAL (native and editor-world commandlet checks pass; current full WP-03 PIE NOT_RUN)
 **Evidence Receipts**:
 - `Saved/Diagnostics/WP03_control_proof.json`
 - `Saved/Automation/Scaffold/index.json` (10/10 native tests pass, including `WYRMFALL.Scaffold.SharedControlFoundation`)
@@ -64,7 +64,7 @@ In accordance with [AGENTS.md](../../AGENTS.md), [Save and Control Contract](../
   - `WYRMFALL.Scaffold.SharedControlFoundation`: **Success** (Duration: 0.021s)
   - Full suite: **10/10 succeeded** (0 failed, 0 not run).
 
-### 3.2 Headless Proof Suite (`verify_wp03_control_proof.py`)
+### 3.2 Editor-world Commandlet Suite (`verify_wp03_control_proof.py`)
 Results recorded in `Saved/Diagnostics/WP03_control_proof.json`:
 
 | Check ID | Requirement | Result | Verified Details |
@@ -79,4 +79,6 @@ Results recorded in `Saved/Diagnostics/WP03_control_proof.json`:
 | `CTRL-07` | Third-Person Return | **PASS** | Mode: `ThirdPerson`, TargetArmLength: 450.0, FOV: 80.0, PawnControlRotation: True, MouseCursor: False. |
 | `Actor_Cleanup` | Teardown | **PASS** | Test actors cleanly unpossessed and destroyed. |
 
-Overall Proof Status: **PASS**.
+Commandlet result: **PASS**. The script did not request a PIE session, so this
+does not by itself clear the WP-03 gameplay gate. Historical BOOT-01 focused
+keyboard/mouse PIE checks remain narrower supporting evidence.

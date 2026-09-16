@@ -1,5 +1,11 @@
 # WP-00 scoped readiness — September 15, 2026
 
+> **September 16, 2026 verification update:** WP-01 is now PASS under a real
+> GeoForge PIE proof; see [WP01_TERRAIN_PROVIDER_PROOF.md](WP01_TERRAIN_PROVIDER_PROOF.md).
+> Earlier `WP-01 NOT_RUN`, terrain collision/navigation and direct terrain
+> payload statements below are historical snapshots from before that proof.
+> WP-00 itself remains PARTIAL because full RDY-02/03/04 acceptance is open.
+
 **Boundary:** scoped archive/descriptor and native sample inspection recorded.
 The replacement C: UE 5.8.2 build, six native tests, bootstrap and focused
 keyboard/mouse PIE checks passed. Full readiness acceptance and WP-01 remain

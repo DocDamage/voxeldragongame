@@ -114,19 +114,24 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
     if (Character)
     {
         UWyrmInventoryComponent* Inv = Character->GetInventory();
+        const FWyrmActiveFoodBuff& ActiveBuff = Character->GetActiveFoodBuff();
         if (UWyrmAttributeSet* Attrs = Character->GetAttributes())
         {
             float PowerBonus = Inv ? Inv->GetEquippedStatBonus(FName(TEXT("Power"))) : 0.f;
             float ArmorBonus = Inv ? Inv->GetEquippedStatBonus(FName(TEXT("Armor"))) : 0.f;
             float HealthBonus = Inv ? Inv->GetEquippedStatBonus(FName(TEXT("MaxHealth"))) : 0.f;
+            float FocusScale = (ActiveBuff.IsActive() && ActiveBuff.MaxFocusPercentBonus > 0.f)
+                ? (1.f + ActiveBuff.MaxFocusPercentBonus)
+                : 1.f;
+            const float FoodPowerBonus = ActiveBuff.IsActive() ? ActiveBuff.PowerBonus : 0.f;
 
             SaveObj->CharacterRecord.MaxHealth = FMath::Max(1.f, Attrs->GetCurrentMaxHealth() - HealthBonus);
             SaveObj->CharacterRecord.Health = FMath::Min(Attrs->GetCurrentHealth(), SaveObj->CharacterRecord.MaxHealth);
+            SaveObj->CharacterRecord.MaxFocus = FMath::Max(1.f, Attrs->GetCurrentMaxFocus() / FocusScale);
             SaveObj->CharacterRecord.Focus = Attrs->GetCurrentFocus();
-            SaveObj->CharacterRecord.MaxFocus = Attrs->GetCurrentMaxFocus();
             SaveObj->CharacterRecord.CharacterLevel = Character->GetCharacterLevel();
             SaveObj->CharacterRecord.CurrentXP = Character->GetCurrentXP();
-            SaveObj->CharacterRecord.Power = FMath::Max(0.f, Attrs->GetCurrentPower() - PowerBonus);
+            SaveObj->CharacterRecord.Power = FMath::Max(0.f, Attrs->GetCurrentPower() - PowerBonus - FoodPowerBonus);
             SaveObj->CharacterRecord.Armor = FMath::Max(0.f, Attrs->GetCurrentArmor() - ArmorBonus);
             SaveObj->CharacterRecord.Shield = Attrs->GetCurrentShield();
         }
@@ -136,6 +141,16 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.WorldLocation = Character->GetActorLocation();
         SaveObj->CharacterRecord.WorldRotation = Character->GetActorRotation();
         SaveObj->CharacterRecord.AppearanceDescriptor = Character->CaptureAppearanceDescriptor();
+
+        // Save active food buff (ACT-04)
+        SaveObj->CharacterRecord.bHasActiveBuff = ActiveBuff.IsActive();
+        SaveObj->CharacterRecord.ActiveBuffId = ActiveBuff.BuffId;
+        SaveObj->CharacterRecord.ActiveBuffName = ActiveBuff.BuffName;
+        SaveObj->CharacterRecord.ActiveBuffRemainingDuration = ActiveBuff.RemainingDuration;
+        SaveObj->CharacterRecord.ActiveBuffTotalDuration = ActiveBuff.TotalDuration;
+        SaveObj->CharacterRecord.ActiveBuffMaxFocusPercentBonus = ActiveBuff.MaxFocusPercentBonus;
+        SaveObj->CharacterRecord.ActiveBuffHealthRegenPerSecond = ActiveBuff.HealthRegenPerSecond;
+        SaveObj->CharacterRecord.ActiveBuffPowerBonus = ActiveBuff.PowerBonus;
 
         if (Inv)
         {
@@ -182,6 +197,9 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
 
     if (Character)
     {
+        // Remove any live modifier before restoring the snapshot's base attributes.
+        Character->ClearFoodBuff();
+
         if (UWyrmAttributeSet* Attrs = Character->GetAttributes())
         {
             Character->SetCharacterLevel(SaveObj->CharacterRecord.CharacterLevel);
@@ -189,7 +207,6 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             Attrs->SetCurrentMaxHealth(SaveObj->CharacterRecord.MaxHealth);
             Attrs->SetCurrentHealth(SaveObj->CharacterRecord.Health);
             Attrs->SetCurrentMaxFocus(SaveObj->CharacterRecord.MaxFocus);
-            Attrs->SetCurrentFocus(SaveObj->CharacterRecord.Focus);
             Attrs->SetCurrentPower(SaveObj->CharacterRecord.Power);
             Attrs->SetCurrentArmor(SaveObj->CharacterRecord.Armor);
             Attrs->SetCurrentShield(SaveObj->CharacterRecord.Shield);
@@ -208,6 +225,30 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             Inv->MaxBagSlots = SaveObj->InventoryRecord.MaxBagSlots;
             Inv->MaxStashSlots = SaveObj->InventoryRecord.MaxStashSlots;
             Inv->RestoreInventoryState(SaveObj->InventoryRecord.BagItems, SaveObj->InventoryRecord.StashItems, SaveObj->InventoryRecord.EquippedItems);
+        }
+
+        // Restore active food buff (ACT-04)
+        if (SaveObj->CharacterRecord.bHasActiveBuff &&
+            !SaveObj->CharacterRecord.ActiveBuffId.IsNone() &&
+            SaveObj->CharacterRecord.ActiveBuffRemainingDuration > 0.f)
+        {
+            FWyrmActiveFoodBuff RestoredBuff;
+            RestoredBuff.BuffId = SaveObj->CharacterRecord.ActiveBuffId;
+            RestoredBuff.BuffName = SaveObj->CharacterRecord.ActiveBuffName;
+            RestoredBuff.RemainingDuration = SaveObj->CharacterRecord.ActiveBuffRemainingDuration;
+            RestoredBuff.TotalDuration = SaveObj->CharacterRecord.ActiveBuffTotalDuration;
+            RestoredBuff.MaxFocusPercentBonus = SaveObj->CharacterRecord.ActiveBuffMaxFocusPercentBonus;
+            RestoredBuff.HealthRegenPerSecond = SaveObj->CharacterRecord.ActiveBuffHealthRegenPerSecond;
+            RestoredBuff.PowerBonus = SaveObj->CharacterRecord.ActiveBuffPowerBonus;
+            Character->ApplyFoodBuff(RestoredBuff);
+            // Re-apply remaining duration exactly
+            Character->SetActiveFoodBuffRemainingDuration(SaveObj->CharacterRecord.ActiveBuffRemainingDuration);
+        }
+
+        // Restore Focus only after its base and active-buff maximum are in place.
+        if (UWyrmAttributeSet* Attrs = Character->GetAttributes())
+        {
+            Attrs->SetCurrentFocus(SaveObj->CharacterRecord.Focus);
         }
     }
 

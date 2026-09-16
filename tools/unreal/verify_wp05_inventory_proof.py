@@ -1,5 +1,5 @@
 """
-Headless PIE Verification Suite for WP-05: Loot, Equipment, Inventory, and Coherent Save Snapshot
+Editor-world commandlet verification for WP-05: Loot, Equipment, Inventory, and scoped save snapshot
 Tests acceptance criteria COM-06, COM-07, and SAVE-01:
   COM-06: Item generation, rolled stats, and idempotent equipment stat modifications (zero leaks).
   COM-07: Inventory capacity, stacking, atomic bag <-> stash transfers, and overflow protection.

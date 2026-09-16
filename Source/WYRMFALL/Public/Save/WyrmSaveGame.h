@@ -51,6 +51,31 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FString AppearanceDescriptor;
+
+    // --- Active Food Preparation Buff (ACT-04) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bHasActiveBuff = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName ActiveBuffId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FText ActiveBuffName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float ActiveBuffRemainingDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float ActiveBuffTotalDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float ActiveBuffMaxFocusPercentBonus = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float ActiveBuffHealthRegenPerSecond = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float ActiveBuffPowerBonus = 0.f;
 };
 
 USTRUCT(BlueprintType)

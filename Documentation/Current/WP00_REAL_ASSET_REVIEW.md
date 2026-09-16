@@ -1,5 +1,9 @@
 # WP-00 real-asset review - September 15, 2026
 
+> **September 16, 2026 verification update:** the later GeoForge WP-01 proof is
+> PASS. This asset review remains PARTIAL for production scale, materials,
+> animation, collision and full RDY-02/03/04 acceptance.
+
 **Scoped native import, numeric inspection and static visual review completed.**
 Full WP-00/RDY acceptance remains incomplete. This is an unsaved editor preview,
 not PIE, production art approval, a playable character or a WP-01 terrain proof.

@@ -18,6 +18,12 @@
 #include "Save/WyrmSaveGame.h"
 #include "Save/WyrmSaveSubsystem.h"
 #include "Combat/Projectiles/WyrmProjectile.h"
+#include "Water/WyrmWaterVolume.h"
+#include "Crafting/WyrmCraftingTypes.h"
+#include "Crafting/WyrmCraftingStation.h"
+#include "Crafting/WyrmCraftingSubsystem.h"
+#include "Activities/WyrmFishingComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -1130,6 +1136,482 @@ bool FWyrmProgressionSaveTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Restored XP is 45.0"), Character->GetCurrentXP(), 45.f);
     TestEqual(TEXT("Restored MaxHealth is 116.0"), Character->GetAttributes()->GetCurrentMaxHealth(), 116.f);
     TestEqual(TEXT("Restored Power is 26.0"), Character->GetAttributes()->GetCurrentPower(), 26.f);
+
+    SaveSys->DeleteSaveSlot(SlotName);
+    Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmWaterVolumeTest, "WYRMFALL.Scaffold.WaterVolumeSwimmingAndWetState",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmWaterVolumeTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmWaterVolume* WaterVol = World->SpawnActor<AWyrmWaterVolume>(
+        AWyrmWaterVolume::StaticClass(), FVector(0.f, 0.f, 500.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("WaterVolume spawned"), WaterVol);
+    WaterVol->SurfaceElevation = 800.f;
+
+    // 1. Authoritative water queries
+    TestTrue(TEXT("Submerged point is in water"), WaterVol->IsPointInWater(FVector(0.f, 0.f, 700.f)));
+    TestFalse(TEXT("Point above surface is not in water"), WaterVol->IsPointInWater(FVector(0.f, 0.f, 850.f)));
+    TestEqual(TEXT("Water depth calculated accurately"), WaterVol->GetWaterDepth(FVector(0.f, 0.f, 700.f)), 100.f);
+
+    FString FishReason;
+    TestTrue(TEXT("Can fish in deep water"), WaterVol->CanFishAtLocation(FVector(0.f, 0.f, 700.f), FishReason));
+    TestFalse(TEXT("Cannot fish above water"), WaterVol->CanFishAtLocation(FVector(0.f, 0.f, 850.f), FishReason));
+
+    // 2. Character swimming & wet state (WRLD-10)
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 600.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+
+    // Initial dry walking state
+    TestFalse(TEXT("Initially dry"), Character->IsWet());
+    Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    TestEqual(TEXT("Initially walking"), Character->GetCharacterMovement()->MovementMode.GetValue(), MOVE_Walking);
+
+    // Submerge character
+    Character->GetCharacterMovement()->SetMovementMode(MOVE_Swimming);
+    Character->SetWet(true);
+    TestTrue(TEXT("Character wet when submerged"), Character->IsWet());
+    TestEqual(TEXT("Character swimming when submerged"), Character->GetCharacterMovement()->MovementMode.GetValue(), MOVE_Swimming);
+
+    static const FGameplayTag WetTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Wet")), false);
+    if (WetTag.IsValid() && Character->GetAbilitySystem())
+    {
+        TestTrue(TEXT("GAS has State.Wet tag"), Character->GetAbilitySystem()->HasMatchingGameplayTag(WetTag));
+    }
+
+    // Move to dry cave / out of water (WRLD-10)
+    Character->SetActorLocation(FVector(2500.f, 0.f, 600.f));
+    Character->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+    Character->SetWet(false);
+    TestFalse(TEXT("Dry state restored outside water"), Character->IsWet());
+    TestEqual(TEXT("Walking restored outside water"), Character->GetCharacterMovement()->MovementMode.GetValue(), MOVE_Walking);
+    if (WetTag.IsValid() && Character->GetAbilitySystem())
+    {
+        TestFalse(TEXT("State.Wet tag cleared outside water"), Character->GetAbilitySystem()->HasMatchingGameplayTag(WetTag));
+    }
+
+    Character->Destroy();
+    WaterVol->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmWaterBoundaryEditTest, "WYRMFALL.Scaffold.WaterBoundaryEditRejection",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmWaterBoundaryEditTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmWaterVolume* WaterVol = World->SpawnActor<AWyrmWaterVolume>(
+        AWyrmWaterVolume::StaticClass(), FVector(0.f, 0.f, 500.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("WaterVolume spawned"), WaterVol);
+    WaterVol->SurfaceElevation = 800.f;
+    WaterVol->OuterLipThickness = 150.f;
+    WaterVol->bProtectOuterBoundary = true;
+    WaterVol->bAllowBedExcavation = true;
+
+    // 1. Interior bed excavation is permitted (WRLD-10)
+    FWyrmTerrainEditRequest BedRequest;
+    BedRequest.ActionId = FGuid::NewGuid();
+    BedRequest.WorldCenter = FVector(0.f, 0.f, 400.f);
+    BedRequest.RadiusCm = 100.f;
+    BedRequest.Operation = EWyrmTerrainEditOperation::Remove;
+
+    FString AllowedReason;
+    TestTrue(TEXT("Interior bed excavation allowed (WRLD-10)"), WaterVol->ValidateTerrainEdit(BedRequest, AllowedReason));
+
+    // 2. Outer boundary breach excavation is rejected (WRLD-11)
+    const FBox Bounds = WaterVol->GetWaterBounds();
+    FWyrmTerrainEditRequest BreachRequest;
+    BreachRequest.ActionId = FGuid::NewGuid();
+    // Center edit on outer perimeter lip of the water basin
+    BreachRequest.WorldCenter = FVector(Bounds.Max.X - 50.f, 0.f, 400.f);
+    BreachRequest.RadiusCm = 150.f;
+    BreachRequest.Operation = EWyrmTerrainEditOperation::Remove;
+
+    FString RejectionReason;
+    TestFalse(TEXT("Outer boundary excavation rejected (WRLD-11)"), WaterVol->ValidateTerrainEdit(BreachRequest, RejectionReason));
+    TestTrue(TEXT("Rejection reason mentions basin boundary breach"), RejectionReason.Contains(TEXT("Water basin boundary breach prohibited")));
+
+    WaterVol->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmFishingComponentTest, "WYRMFALL.Scaffold.FishingStateLoopAndInventoryCommit",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmFishingComponentTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmWaterVolume* WaterVol = World->SpawnActor<AWyrmWaterVolume>(
+        AWyrmWaterVolume::StaticClass(), FVector(500.f, 0.f, 500.f), FRotator::ZeroRotator, SpawnParams);
+    WaterVol->SurfaceElevation = 800.f;
+
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 550.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+
+    UWyrmFishingComponent* FishingComp = Character->GetFishing();
+    TestNotNull(TEXT("Fishing component exists"), FishingComp);
+    TestEqual(TEXT("Initial state is Ready"), FishingComp->GetFishingState(), EWyrmFishingState::Ready);
+
+    // 1. Normal Fishing Loop: Cast -> Bite -> Reel -> Commit (ACT-01)
+    FString FailReason;
+    const FVector TargetWater(500.f, 0.f, 600.f);
+    TestTrue(TEXT("StartFishing succeeds in valid water"), FishingComp->StartFishing(TargetWater, FailReason));
+    TestEqual(TEXT("State is Casting"), FishingComp->GetFishingState(), EWyrmFishingState::Casting);
+    TestTrue(TEXT("Movement is locked during fishing"), Character->IsMovementLocked());
+
+    FishingComp->TriggerBite();
+    TestEqual(TEXT("State is BiteWindow"), FishingComp->GetFishingState(), EWyrmFishingState::BiteWindow);
+
+    TestTrue(TEXT("RespondToBite succeeds"), FishingComp->RespondToBite());
+    TestTrue(TEXT("CommitCatch succeeds"), FishingComp->CommitCatch());
+    TestEqual(TEXT("Returns to Ready after commit"), FishingComp->GetFishingState(), EWyrmFishingState::Ready);
+    TestFalse(TEXT("Movement unlocked after commit"), Character->IsMovementLocked());
+
+    // Verify fish entered inventory once (ACT-01)
+    UWyrmInventoryComponent* Inv = Character->GetInventory();
+    TestNotNull(TEXT("Inventory exists"), Inv);
+    TestEqual(TEXT("One item in bag"), Inv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Caught fish is OceanFish"), Inv->GetBagItems()[0].ItemId, FName(TEXT("Item.Fish.OceanFish")));
+
+    // 2. Interruption on Combat Damage (ACT-03)
+    TestTrue(TEXT("StartFishing second cast succeeds"), FishingComp->StartFishing(TargetWater, FailReason));
+    FishingComp->NotifyCombatDamageTaken(20.f);
+    TestEqual(TEXT("Returns to Ready after damage cancel"), FishingComp->GetFishingState(), EWyrmFishingState::Ready);
+    TestFalse(TEXT("Movement unlocked after damage cancel"), Character->IsMovementLocked());
+    TestEqual(TEXT("Zero free items awarded on damage interrupt"), Inv->GetBagItems().Num(), 1);
+
+    // 3. Interruption on Manual Cancellation (ACT-03)
+    TestTrue(TEXT("StartFishing third cast succeeds"), FishingComp->StartFishing(TargetWater, FailReason));
+    FishingComp->CancelFishing(TEXT("UserManualCancel"));
+    TestEqual(TEXT("Returns to Ready after manual cancel"), FishingComp->GetFishingState(), EWyrmFishingState::Ready);
+    TestEqual(TEXT("Bag items unchanged on cancel"), Inv->GetBagItems().Num(), 1);
+
+    // 4. Full Bag Overflow Rejection (ACT-03)
+    // Fill remaining bag slots with non-stacking items
+    for (int32 i = Inv->GetBagItems().Num(); i < Inv->MaxBagSlots; ++i)
+    {
+        FWyrmItemInstance Filler;
+        Filler.InstanceId = FGuid::NewGuid();
+        Filler.ItemId = FName(*FString::Printf(TEXT("FillerItem_%d"), i));
+        Filler.ItemType = EWyrmItemType::Resource;
+        Filler.StackCount = 1;
+        Filler.MaxStack = 1;
+        FWyrmItemInstance Rem;
+        Inv->AddItem(Filler, Rem);
+    }
+    TestEqual(TEXT("Bag is at full capacity"), Inv->GetBagItems().Num(), Inv->MaxBagSlots);
+
+    // Attempt catch commit into full bag
+    TestTrue(TEXT("Start fishing into full bag"), FishingComp->StartFishing(TargetWater, FailReason));
+    FishingComp->TriggerBite();
+    FishingComp->RespondToBite();
+
+    // Since OceanFish can stack, let's max out existing fish stack first
+    for (FWyrmItemInstance& Item : const_cast<TArray<FWyrmItemInstance>&>(Inv->GetBagItems()))
+    {
+        if (Item.ItemId == FName(TEXT("Item.Fish.OceanFish")))
+        {
+            Item.StackCount = Item.MaxStack;
+        }
+    }
+
+    TestFalse(TEXT("CommitCatch rejected on full bag (ACT-03)"), FishingComp->CommitCatch());
+    TestTrue(TEXT("WasCatchRejectedBagFull is true"), FishingComp->WasCatchRejectedBagFull());
+    TestEqual(TEXT("Bag slots remained clamped"), Inv->GetBagItems().Num(), Inv->MaxBagSlots);
+
+    Character->Destroy();
+    WaterVol->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCraftingSubsystemTest, "WYRMFALL.Scaffold.CraftingAtomicTransactionsAndFailures",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCraftingSubsystemTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+
+    UWyrmCraftingSubsystem* CraftingSys = NewObject<UWyrmCraftingSubsystem>(GI);
+    CraftingSys->RegisterDefaultRecipes();
+
+    TArray<FWyrmRecipe> Recipes = CraftingSys->GetAllRecipes();
+    TestTrue(TEXT("Recipes registered"), Recipes.Num() >= 3);
+
+    UWyrmInventoryComponent* Inv = NewObject<UWyrmInventoryComponent>(World);
+    Inv->MaxBagSlots = 5;
+
+    // 1. Station failure: GrilledFish requires Campfire, attempted at Field (ACT-05)
+    FString FailReason;
+    TestFalse(TEXT("Cannot craft campfire recipe in field (ACT-05)"),
+        CraftingSys->CanCraft(Inv, FName(TEXT("Recipe.Food.GrilledFish")), EWyrmCraftingStationType::Field, FailReason));
+    TestTrue(TEXT("Reason is InvalidStation"), FailReason.Contains(TEXT("InvalidStation")));
+
+    // 2. Missing ingredients failure (ACT-05)
+    TestFalse(TEXT("Cannot craft with empty bag (ACT-05)"),
+        CraftingSys->CanCraft(Inv, FName(TEXT("Recipe.Food.GrilledFish")), EWyrmCraftingStationType::Campfire, FailReason));
+    TestTrue(TEXT("Reason mentions MissingIngredients"), FailReason.Contains(TEXT("MissingIngredients")));
+
+    FWyrmItemInstance FailedResult;
+    TestFalse(TEXT("CraftRecipe fails with missing ingredients"),
+        CraftingSys->CraftRecipe(Inv, FName(TEXT("Recipe.Food.GrilledFish")), EWyrmCraftingStationType::Campfire, FailedResult, FailReason));
+    TestEqual(TEXT("Zero items consumed on failure"), Inv->GetBagItems().Num(), 0);
+
+    // 3. Valid Craft: Grilled Fish at Campfire (ACT-02, ACT-05)
+    FWyrmItemInstance FishItem;
+    FishItem.InstanceId = FGuid::NewGuid();
+    FishItem.ItemId = FName(TEXT("Item.Fish.OceanFish"));
+    FishItem.ItemType = EWyrmItemType::Consumable;
+    FishItem.StackCount = 1;
+    FishItem.MaxStack = 10;
+    FWyrmItemInstance Rem;
+    Inv->AddItem(FishItem, Rem);
+    TestEqual(TEXT("Added 1 fish to bag"), Inv->GetBagItems().Num(), 1);
+
+    FWyrmItemInstance CraftedResult;
+    TestTrue(TEXT("CraftRecipe succeeds with valid ingredients (ACT-02)"),
+        CraftingSys->CraftRecipe(Inv, FName(TEXT("Recipe.Food.GrilledFish")), EWyrmCraftingStationType::Campfire, CraftedResult, FailReason));
+
+    TestEqual(TEXT("Result is Grilled Ocean Fish"), CraftedResult.ItemId, FName(TEXT("Item.Food.GrilledFish")));
+    TestEqual(TEXT("Bag contains 1 item (fish consumed, cooked granted)"), Inv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Item in bag is GrilledFish"), Inv->GetBagItems()[0].ItemId, FName(TEXT("Item.Food.GrilledFish")));
+
+    // 4. Field Craft: Field Remedy (ACT-05)
+    FWyrmItemInstance Dirt1;
+    Dirt1.InstanceId = FGuid::NewGuid();
+    Dirt1.ItemId = FName(TEXT("Resource.Dirt"));
+    Dirt1.ItemType = EWyrmItemType::Resource;
+    Dirt1.StackCount = 2;
+    Dirt1.MaxStack = 100;
+    Inv->AddItem(Dirt1, Rem);
+
+    FWyrmItemInstance RemedyResult;
+    TestTrue(TEXT("Field remedy crafts without station (ACT-05)"),
+        CraftingSys->CraftRecipe(Inv, FName(TEXT("Recipe.Consumable.FieldRemedy")), EWyrmCraftingStationType::Field, RemedyResult, FailReason));
+    TestEqual(TEXT("Crafted Field Remedy"), RemedyResult.ItemId, FName(TEXT("Item.Consumable.FieldRemedy")));
+
+    // 5. A full one-slot bag may craft when consuming its ingredient frees the output slot.
+    UWyrmInventoryComponent* TightInv = NewObject<UWyrmInventoryComponent>(World);
+    TightInv->MaxBagSlots = 1;
+    FWyrmItemInstance TightFish = FishItem;
+    TightFish.InstanceId = FGuid::NewGuid();
+    TightInv->AddItem(TightFish, Rem);
+    FWyrmItemInstance TightResult;
+    TestTrue(TEXT("Consumed ingredient frees output capacity atomically"),
+        CraftingSys->CraftRecipe(TightInv, FName(TEXT("Recipe.Food.GrilledFish")),
+            EWyrmCraftingStationType::Campfire, TightResult, FailReason));
+    TestEqual(TEXT("One-slot bag contains only crafted output"), TightInv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Crafted output owns freed slot"), TightInv->GetBagItems()[0].ItemId,
+        FName(TEXT("Item.Food.GrilledFish")));
+
+    // 6. Exact output-capacity preflight rejects without consuming inputs.
+    FWyrmRecipe OversizedRecipe;
+    OversizedRecipe.RecipeId = TEXT("Recipe.Test.OversizedOutput");
+    OversizedRecipe.DisplayName = FText::FromString(TEXT("Oversized Output"));
+    OversizedRecipe.RequiredStation = EWyrmCraftingStationType::Field;
+    FWyrmIngredientCost OversizedCost;
+    OversizedCost.ItemId = TEXT("Item.Fish.OceanFish");
+    OversizedCost.Quantity = 1;
+    OversizedRecipe.Ingredients.Add(OversizedCost);
+    OversizedRecipe.OutputItem = UWyrmCraftingSubsystem::CreateConsumableItem(
+        TEXT("Item.Test.Oversized"), FText::FromString(TEXT("Oversized")), 11, 10);
+    CraftingSys->RegisterRecipe(OversizedRecipe);
+
+    UWyrmInventoryComponent* RollbackInv = NewObject<UWyrmInventoryComponent>(World);
+    RollbackInv->MaxBagSlots = 1;
+    FWyrmItemInstance RollbackFish = FishItem;
+    RollbackFish.InstanceId = FGuid::NewGuid();
+    RollbackInv->AddItem(RollbackFish, Rem);
+    FWyrmItemInstance OversizedResult;
+    TestFalse(TEXT("Oversized output is rejected before commit"),
+        CraftingSys->CraftRecipe(RollbackInv, OversizedRecipe.RecipeId,
+            EWyrmCraftingStationType::Field, OversizedResult, FailReason));
+    TestTrue(TEXT("Oversized output reports InventoryFull"), FailReason.Contains(TEXT("InventoryFull")));
+    TestEqual(TEXT("Rejected craft preserves its ingredient"), RollbackInv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Preserved ingredient identity is unchanged"), RollbackInv->GetBagItems()[0].InstanceId,
+        RollbackFish.InstanceId);
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmFoodBuffTest, "WYRMFALL.Scaffold.FoodBuffRefreshAndReplacementPersistence",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmFoodBuffTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+    Character->GrantCombatAbilities();
+
+    UWyrmAttributeSet* Attrs = Character->GetAttributes();
+    TestNotNull(TEXT("Attributes exist"), Attrs);
+    Attrs->SetCurrentMaxFocus(100.f);
+    Attrs->SetCurrentFocus(75.f);
+    Attrs->SetCurrentPower(10.f);
+
+    UWyrmInventoryComponent* Inv = Character->GetInventory();
+    TestNotNull(TEXT("Inventory exists"), Inv);
+
+    // 1. Consume Grilled Fish (+10% Max Focus, 300s duration) (ACT-02, ACT-04)
+    FWyrmFoodBuffDefinition FishBuffDef;
+    FishBuffDef.BuffId = FName(TEXT("Buff.Food.GrilledFish"));
+    FishBuffDef.Duration = 300.f;
+    FishBuffDef.MaxFocusPercentBonus = 0.10f; // +10%
+    FWyrmItemInstance Food1 = UWyrmCraftingSubsystem::CreateConsumableItem(
+        FName(TEXT("Item.Food.GrilledFish")), FText::FromString(TEXT("Grilled Fish")), 1, 10, FishBuffDef);
+    FWyrmItemInstance Rem;
+    Inv->AddItem(Food1, Rem);
+
+    TestTrue(TEXT("ConsumeItem succeeds"), Character->ConsumeItem(Food1.InstanceId));
+    TestTrue(TEXT("Active food buff is present"), Character->HasActiveFoodBuff());
+    TestEqual(TEXT("MaxFocus scaled +10% (100 -> 110) (ACT-04)"), Attrs->GetCurrentMaxFocus(), 110.f);
+    TestEqual(TEXT("Current Focus not free refilled (75) (ACT-04)"), Attrs->GetCurrentFocus(), 75.f);
+    TestEqual(TEXT("Initial remaining duration is 300s"), Character->GetActiveFoodBuff().RemainingDuration, 300.f);
+
+    // 2. Consume Same Food Buff: Refreshes Duration, Does NOT Stack Magnitude (ACT-04)
+    Character->SetActiveFoodBuffRemainingDuration(120.f);
+    TestEqual(TEXT("Simulated time passage to 120s"), Character->GetActiveFoodBuff().RemainingDuration, 120.f);
+
+    FWyrmItemInstance Food2 = UWyrmCraftingSubsystem::CreateConsumableItem(
+        FName(TEXT("Item.Food.GrilledFish")), FText::FromString(TEXT("Grilled Fish")), 1, 10, FishBuffDef);
+    Inv->AddItem(Food2, Rem);
+
+    TestTrue(TEXT("Consume same food buff succeeds"), Character->ConsumeItem(Food2.InstanceId));
+    TestEqual(TEXT("Duration refreshed back to 300s (ACT-04)"), Character->GetActiveFoodBuff().RemainingDuration, 300.f);
+    TestEqual(TEXT("MaxFocus did NOT stack (remains 110, not 120) (ACT-04)"), Attrs->GetCurrentMaxFocus(), 110.f);
+
+    // 3. Consume Different Food Buff: Clean Replacement (ACT-04)
+    FWyrmFoodBuffDefinition StewBuffDef;
+    StewBuffDef.BuffId = FName(TEXT("Buff.Food.FishStew"));
+    StewBuffDef.Duration = 300.f;
+    StewBuffDef.MaxFocusPercentBonus = 0.15f; // +15%
+    StewBuffDef.HealthRegenPerSecond = 2.0f;
+    StewBuffDef.PowerBonus = 5.f;
+    FWyrmItemInstance FoodStew = UWyrmCraftingSubsystem::CreateConsumableItem(
+        FName(TEXT("Item.Food.FishStew")), FText::FromString(TEXT("Fish Stew")), 1, 10, StewBuffDef);
+    Inv->AddItem(FoodStew, Rem);
+
+    TestTrue(TEXT("Consume different food buff succeeds"), Character->ConsumeItem(FoodStew.InstanceId));
+    TestEqual(TEXT("Active buff replaced to FishStew (ACT-04)"), Character->GetActiveFoodBuff().BuffId, FName(TEXT("Item.Food.FishStew")));
+    TestEqual(TEXT("MaxFocus replaced with +15% (115) (ACT-04)"), Attrs->GetCurrentMaxFocus(), 115.f);
+    TestEqual(TEXT("Power bonus applied once (10 -> 15)"), Attrs->GetCurrentPower(), 15.f);
+
+    // 4. Persistence & Save Roundtrip (SAVE-01, ACT-04)
+    Character->SetActiveFoodBuffRemainingDuration(245.5f);
+    const FString SlotName = TEXT("WyrmSlot_FoodBuff_UnitTest");
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmSaveSubsystem* SaveSys = NewObject<UWyrmSaveSubsystem>(GI);
+
+    TestTrue(TEXT("SaveGameSnapshot succeeds with active food buff"),
+        SaveSys->SaveGameSnapshot(SlotName, Character, nullptr));
+
+    // Clear active buff on character
+    Character->ClearFoodBuff();
+    TestFalse(TEXT("Active buff cleared"), Character->HasActiveFoodBuff());
+    TestEqual(TEXT("MaxFocus reverted to 100"), Attrs->GetCurrentMaxFocus(), 100.f);
+
+    // Reload snapshot from slot
+    TestTrue(TEXT("LoadGameSnapshot succeeds"), SaveSys->LoadGameSnapshot(SlotName, Character, nullptr));
+    TestTrue(TEXT("Active buff restored across reload (ACT-04)"), Character->HasActiveFoodBuff());
+    TestEqual(TEXT("Restored BuffId is FishStew"), Character->GetActiveFoodBuff().BuffId, FName(TEXT("Item.Food.FishStew")));
+    TestEqual(TEXT("Restored remaining duration is 245.5s (ACT-04)"), Character->GetActiveFoodBuff().RemainingDuration, 245.5f);
+    TestEqual(TEXT("Restored MaxFocus has +15% scaling (115) (ACT-04)"), Attrs->GetCurrentMaxFocus(), 115.f);
+    TestEqual(TEXT("Restored Power has one +5 bonus"), Attrs->GetCurrentPower(), 15.f);
+
+    // 5. Natural expiry removes every owned modifier.
+    Character->SetActiveFoodBuffRemainingDuration(0.05f);
+    Character->Tick(0.10f);
+    TestFalse(TEXT("Expired food buff is cleared"), Character->HasActiveFoodBuff());
+    TestEqual(TEXT("Expired MaxFocus modifier is removed"), Attrs->GetCurrentMaxFocus(), 100.f);
+    TestEqual(TEXT("Expired Power modifier is removed"), Attrs->GetCurrentPower(), 10.f);
 
     SaveSys->DeleteSaveSlot(SlotName);
     Character->Destroy();

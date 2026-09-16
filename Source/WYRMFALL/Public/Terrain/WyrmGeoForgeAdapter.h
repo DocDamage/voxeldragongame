@@ -43,6 +43,16 @@ public:
     UFUNCTION(BlueprintCallable, Category="Terrain")
     void BindTerrainActor(AGeoForgeInfiniteTerrainActor* InActor);
 
+    /** Registers a water volume to protect its basin boundaries from excavation breaches (WRLD-11) */
+    UFUNCTION(BlueprintCallable, Category="Terrain|Water")
+    void RegisterWaterVolume(class AWyrmWaterVolume* Volume);
+
+    UFUNCTION(BlueprintCallable, Category="Terrain|Water")
+    void UnregisterWaterVolume(class AWyrmWaterVolume* Volume);
+
+    UPROPERTY(Transient)
+    TArray<TWeakObjectPtr<class AWyrmWaterVolume>> RegisteredWaterVolumes;
+
     // --- IWyrmTerrainProvider interface ---
     virtual FWyrmTerrainCapabilities GetTerrainCapabilities_Implementation() const override;
     virtual EWyrmTerrainSubmitResult SubmitTerrainEdit_Implementation(const FWyrmTerrainEditRequest& Request) override;

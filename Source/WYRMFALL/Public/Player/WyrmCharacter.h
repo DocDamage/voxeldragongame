@@ -14,6 +14,36 @@ class UCustomizableSkeletalComponent;
 class UCustomizableObject;
 class UCustomizableObjectInstance;
 class UWyrmInventoryComponent;
+class UWyrmFishingComponent;
+
+USTRUCT(BlueprintType)
+struct WYRMFALL_API FWyrmActiveFoodBuff
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    FName BuffId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    FText BuffName;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    float RemainingDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    float TotalDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    float MaxFocusPercentBonus = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    float HealthRegenPerSecond = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Buff")
+    float PowerBonus = 0.f;
+
+    bool IsActive() const { return !BuffId.IsNone() && RemainingDuration > 0.f; }
+};
 
 // Humanoid host with Mutable visual authority.
 UCLASS()
@@ -107,6 +137,36 @@ public:
     UFUNCTION(BlueprintPure, Category="Inventory")
     UWyrmInventoryComponent* GetInventory() const { return InventoryComponent; }
 
+    // --- Wet / Water Status (WRLD-10) ---
+    UFUNCTION(BlueprintPure, Category="Status")
+    bool IsWet() const { return bIsWet; }
+
+    UFUNCTION(BlueprintCallable, Category="Status")
+    void SetWet(bool bInWet);
+
+    // --- Activities & Fishing (ACT-01, ACT-03) ---
+    UFUNCTION(BlueprintPure, Category="Activities")
+    UWyrmFishingComponent* GetFishing() const { return FishingComponent; }
+
+    // --- Consumables & Food Preparation Buffs (ACT-02, ACT-04) ---
+    UFUNCTION(BlueprintCallable, Category="Inventory")
+    bool ConsumeItem(const FGuid& ItemInstanceId);
+
+    UFUNCTION(BlueprintPure, Category="Buff")
+    bool HasActiveFoodBuff() const { return ActiveFoodBuff.IsActive(); }
+
+    UFUNCTION(BlueprintPure, Category="Buff")
+    const FWyrmActiveFoodBuff& GetActiveFoodBuff() const { return ActiveFoodBuff; }
+
+    UFUNCTION(BlueprintCallable, Category="Buff")
+    void ApplyFoodBuff(const FWyrmActiveFoodBuff& InBuff);
+
+    UFUNCTION(BlueprintCallable, Category="Buff")
+    void ClearFoodBuff();
+
+    UFUNCTION(BlueprintCallable, Category="Buff")
+    void SetActiveFoodBuffRemainingDuration(float InDuration) { ActiveFoodBuff.RemainingDuration = InDuration; }
+
 protected:
     virtual void PostInitializeComponents() override;
     virtual void BeginPlay() override;
@@ -123,6 +183,15 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
     TObjectPtr<UWyrmInventoryComponent> InventoryComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Activities")
+    TObjectPtr<UWyrmFishingComponent> FishingComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Buff")
+    FWyrmActiveFoodBuff ActiveFoodBuff;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Status")
+    bool bIsWet = false;
 
 private:
     void ApplyCamera();

@@ -1,5 +1,5 @@
 """
-Headless PIE Verification Suite for WP-04: First Real Combat Loop
+Editor-world commandlet verification for WP-04: First Real Combat Loop
 Tests acceptance criteria COM-01 through COM-05:
   COM-01: Canonical damage execution via authoritative GAS pipeline.
   COM-02: Bounds and drain limits: Shield absorption, invulnerability immunity, dead target rejection, overkill clamp.

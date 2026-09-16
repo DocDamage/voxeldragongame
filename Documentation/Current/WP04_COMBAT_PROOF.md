@@ -1,8 +1,8 @@
 # WP-04: First Real Combat Loop Proof
 
-**Date**: 2026-09-15  
-**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)  
-**Status**: PASS (All criteria COM-01 through COM-05 verified)  
+**Date**: 2026-09-15
+**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)
+**Status**: PARTIAL (native and editor-world commandlet cases pass; complete WP-04 PIE NOT_RUN)
 **Evidence Receipts**:
 - `Saved/Diagnostics/WP04_combat_proof.json`
 - `Saved/Automation/Scaffold/index.json` (14/14 native tests pass, including 4 combat foundation tests)
@@ -54,12 +54,13 @@ In accordance with [AGENTS.md](../../AGENTS.md), [Combat Rules](../DesignPack/do
 
 ## 3. Verification Evidence
 
-### 3.1 Headless PIE Suite (`tools/unreal/verify_wp04_combat_proof.py`)
+### 3.1 Editor-world Commandlet Suite (`tools/unreal/verify_wp04_combat_proof.py`)
 Executed via:
 ```powershell
 & "C:\Program Files\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "G:\assets\voxel project\WYRMFALL.uproject" -run=pythonscript -script="G:/assets/voxel project/tools/unreal/verify_wp04_combat_proof.py" -stdout -FullStdOutLogOutput -unattended -nopause -nosplash -nullrhi
 ```
-Result: **Exit Code 0, Overall Status PASS**.
+Result: **Exit Code 0, Overall Commandlet Status PASS**. This invocation runs a
+Python commandlet and obtains `get_editor_world()`; it does not start PIE.
 
 | Case ID | Acceptance Target | Metric / Rule Tested | Result | Observed Evidence |
 |:---|:---|:---|:---:|:---|
@@ -90,5 +91,7 @@ All 14 source-declared automation tests pass:
 
 ## 4. Conclusion & Next Task
 
-WP-04 is fully implemented, native-compiled, and verified via authoritative GAS automation tests and headless PIE proof.
-The next task in the backlog is **WP-05: Inventory, Equipment Attachment, and Save Ownership** (reconciling AGIS candidate capacity, overflow, rewards, and one project save owner).
+WP-04 source compiles and its native and editor-world cases pass. WP-06 adds
+supporting real-PIE evidence for a live ranged hit, melee range gating, evade and
+camera selection, but the complete COM-01 through COM-05 suite has not been
+repeated in PIE. Keep the package PARTIAL until that focused gameplay proof runs.

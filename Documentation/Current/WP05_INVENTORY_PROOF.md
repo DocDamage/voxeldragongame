@@ -1,10 +1,10 @@
 # WP-05: Loot, Equipment, Inventory, and Coherent Save Snapshot — Verification Proof
 
-**Date**: 2026-09-15 / 2026-09-16  
-**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)  
-**Target**: `WYRMFALLEditor Win64 Development`  
-**Host**: Windows 11 (DOCDAMAGE)  
-**Status**: **PASS** (18/18 Native Tests, Headless PIE Suite 3/3 Cases PASS)
+**Date**: 2026-09-15 / 2026-09-16
+**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)
+**Target**: `WYRMFALLEditor Win64 Development`
+**Host**: Windows 11 (DOCDAMAGE)
+**Status**: **PARTIAL** (22/22 current native tests; editor-world commandlet 3/3; combined bound-terrain snapshot NOT_RUN)
 
 ---
 
@@ -29,10 +29,10 @@ WP-05 delivers the authoritative inventory, equipment, and single-owner save arc
 | **Inventory Types** | `Source/WYRMFALL/Public/Inventory/WyrmInventoryTypes.h` | `EWyrmItemType`, `EWyrmEquipSlot`, `FWyrmItemRoll`, `FWyrmItemInstance` |
 | **Save Game Container** | `Source/WYRMFALL/Public/Save/WyrmSaveGame.h`, `Private/Save/WyrmSaveGame.cpp` | Authoritative single save record unifying stats, appearance, inventory, and terrain delta |
 | **Save Subsystem** | `Source/WYRMFALL/Public/Save/WyrmSaveSubsystem.h`, `Private/Save/WyrmSaveSubsystem.cpp` | GameInstanceSubsystem coordinating coherent snapshot save/load roundtrips |
-| **Native Automation Suite** | `Source/WYRMFALL/Private/Tests/WyrmScaffoldTests.cpp` | 18 native automation tests (4 new tests for WP-05) |
-| **Native Test Results** | `Saved/Automation/Scaffold/index.json` | 18/18 tests reporting `Success`, 0 warnings, 0 errors |
-| **Headless PIE Suite** | `tools/unreal/verify_wp05_inventory_proof.py` | Headless execution verifying `COM-06`, `COM-07`, and `SAVE-01` |
-| **PIE Diagnostic Report** | `Saved/Diagnostics/WP05_inventory_proof.json` | JSON verification proof of all 3 criteria |
+| **Native Automation Suite** | `Source/WYRMFALL/Private/Tests/WyrmScaffoldTests.cpp` | Current 22-test suite includes the WP-05 cases |
+| **Native Test Results** | `Saved/Automation/Scaffold/index.json` | 22/22 tests reporting `Success` |
+| **Editor-world Commandlet** | `tools/unreal/verify_wp05_inventory_proof.py` | Verifies scoped `COM-06`, `COM-07`, and character/inventory `SAVE-01` behavior without starting PIE |
+| **Diagnostic Report** | `Saved/Diagnostics/WP05_inventory_proof.json` | JSON commandlet result for the three scoped cases |
 
 ---
 
@@ -59,9 +59,9 @@ WP-05 delivers the authoritative inventory, equipment, and single-owner save arc
 - **Verdict**: **PASS**
 
 ### SAVE-01: Coherent Snapshot Save & Reload Roundtrip
-- **Target**: Coherent snapshot save captures Character attributes (Health, Power, Armor), camera perspective (TopDown), Mutable appearance, inventory (equipped weapon, bag consumables, stash resources), and GeoForge terrain delta. Reload restores all components with exact fidelity.
+- **Target**: Coherent snapshot save captures character, inventory/equipment and a bound GeoForge terrain payload in one generation, then restores them together.
 - **Observed Results**:
-  - Configured state: Health = 85.0, Power = 30.0 (base) + 20.5 (equipped weapon) = 50.5 total, Armor = 12.0, Camera = TopDown, 1 equipped weapon, 5 potions in Bag, 50 Mythril Ore in Stash, terrain processed action ID.
+  - Configured state: Health = 85.0, MaxFocus = 175.0, Focus = 140.0, Level = 7.0, Power = 30.0 (base) + 20.5 (equipped weapon) = 50.5 total, Camera = TopDown, 1 equipped weapon, 5 potions in Bag and 50 ore in Stash.
   - Saved snapshot to slot `"WP05_Proof_Slot"`.
   - Mutated character to blank state (HP = 15.0, Power = 5.0, Camera = ThirdPerson, empty inventory, cleared terrain action IDs).
   - Reloaded snapshot from slot `"WP05_Proof_Slot"`.
@@ -72,9 +72,13 @@ WP-05 delivers the authoritative inventory, equipment, and single-owner save arc
     - Restored Equipped: `True` (Relic Blade in MainHand)
     - Restored Bag: 1 item (5 Healing Flasks)
     - Restored Stash: 1 item (50 Mythril Ore)
-    - Restored Terrain: Processed action ID retained in adapter
+    - Restored legitimate world-origin transform
   - Slot deletion verified: slot cleanly deleted from disk.
-- **Verdict**: **PASS**
+- The commandlet deliberately passed `None` for terrain because an unbound
+  adapter is now rejected. WP-01 separately proves real GeoForge payload capture
+  and apply. A single combined bound-terrain plus character/inventory roundtrip
+  remains NOT_RUN.
+- **Verdict**: **PARTIAL** (character/inventory scope PASS; combined terrain transaction NOT_RUN)
 
 ---
 
@@ -106,7 +110,7 @@ All 18 tests passed:
 17. `WYRMFALL.Scaffold.EquipmentStatApplication` (Success)
 18. `WYRMFALL.Scaffold.SaveSubsystemRoundtrip` (Success)
 
-### 4.2 Headless PIE Output (`verify_wp05_inventory_proof.py`)
+### 4.2 Editor-world Commandlet Output (`verify_wp05_inventory_proof.py`)
 ```json
 {
   "COM-06": {
@@ -134,12 +138,15 @@ All 18 tests passed:
     "save_success": true,
     "load_success": true,
     "restored_health": 85.0,
+    "restored_max_focus": 175.0,
+    "restored_focus": 140.0,
+    "restored_character_level": 7.0,
     "restored_power": 50.5,
     "restored_camera_mode": "<WyrmCameraMode.TOP_DOWN: 1>",
     "weapon_remains_equipped": true,
     "bag_item_count": 1,
     "stash_item_count": 1,
-    "terrain_action_restored": true
+    "world_origin_restored": true
   }
 }
 ```

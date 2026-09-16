@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "Engine/OverlapResult.h"
 #include "CollisionQueryParams.h"
+#include "Water/WyrmWaterVolume.h"
 
 namespace
 {
@@ -46,6 +47,11 @@ void AWyrmGeoForgeAdapter::BeginPlay()
             TerrainActor = Cast<AGeoForgeInfiniteTerrainActor>(FoundActor);
         }
     }
+
+    for (TActorIterator<AWyrmWaterVolume> It(GetWorld()); It; ++It)
+    {
+        RegisterWaterVolume(*It);
+    }
 }
 
 void AWyrmGeoForgeAdapter::Tick(float DeltaSeconds)
@@ -71,6 +77,22 @@ void AWyrmGeoForgeAdapter::Tick(float DeltaSeconds)
 void AWyrmGeoForgeAdapter::BindTerrainActor(AGeoForgeInfiniteTerrainActor* InActor)
 {
     TerrainActor = InActor;
+}
+
+void AWyrmGeoForgeAdapter::RegisterWaterVolume(AWyrmWaterVolume* Volume)
+{
+    if (Volume)
+    {
+        RegisteredWaterVolumes.AddUnique(Volume);
+    }
+}
+
+void AWyrmGeoForgeAdapter::UnregisterWaterVolume(AWyrmWaterVolume* Volume)
+{
+    if (Volume)
+    {
+        RegisteredWaterVolumes.Remove(Volume);
+    }
 }
 
 FWyrmTerrainCapabilities AWyrmGeoForgeAdapter::GetTerrainCapabilities_Implementation() const
@@ -147,6 +169,21 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
     }
     else if (Request.Operation == EWyrmTerrainEditOperation::Remove)
     {
+        // Water basin boundary protection (WRLD-11):
+        for (const TWeakObjectPtr<AWyrmWaterVolume>& WaterVolPtr : RegisteredWaterVolumes)
+        {
+            if (AWyrmWaterVolume* WaterVol = WaterVolPtr.Get())
+            {
+                FString OutRejectionReason;
+                if (!WaterVol->ValidateTerrainEdit(Request, OutRejectionReason))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("[WyrmTerrain] Edit %s rejected by water volume: %s"),
+                        *Request.ActionId.ToString(), *OutRejectionReason);
+                    return EWyrmTerrainSubmitResult::Rejected;
+                }
+            }
+        }
+
         const int32 FilledBefore = CountFilledCellsInSphere(
             Request.WorldCenter, Request.RadiusCm, CellVolumeCm3);
         if (FilledBefore == INDEX_NONE)

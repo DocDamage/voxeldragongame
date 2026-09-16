@@ -1,112 +1,85 @@
 # Current implementation status
 
-**September 16, 2026 · starter v0.2 · C: native build/tests and focused PIE exercised**
+**September 16, 2026 · starter v0.2 · evidence reconciled through scoped WP-07 verification**
 
-This status supersedes only the old documentation pack's statement that no scaffold exists. It does not change approved design or grant broader Git/art permissions. The uploaded pack's 36 files remain byte-for-byte preserved under Documentation/DesignPack.
+This file records observed results. Source presence, editor-world commandlets,
+native automation, and Play-In-Editor (PIE) are kept as separate evidence.
+Historical documents under `Documentation/DesignPack` remain unchanged.
 
-| Area | Actual status | Evidence / next proof |
+## Verified state
+
+| Area | Current status | Evidence and boundary |
 |---|---|---|
-| Source project | AUTHORED | WYRMFALL.uproject, targets, runtime module, Config |
-| Portable tooling | Test results recorded in root VALIDATION.md | Standard-library tests; no engine emulation |
-| Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
-| Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
-| UHT / UBT compile | PASS | Actual headers; latest build with per-command `-NoUBA -NoPCH` succeeded in 14.52 seconds |
-| Native automation | 22/22 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, SharedControlFoundation, CombatCanonicalDamage, CombatBoundsAndDrain, CombatCostAndCooldown, CombatEnemyRolesAndStatus, ItemGenerationAndRolls, InventoryCapacityAndTransfer, EquipmentStatApplication, SaveSubsystemRoundtrip, ProgressionSaveRoundtrip, ProgressionXpAndLevelUp, RangedProjectileDamage, WeaponFamilyGatingAndKitSwitch |
-| Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
-| PIE, input, cameras, HUD | VERIFIED (AWyrmPlayerController & AWyrmCharacter); WP-03 PASS | Seamless third-person & top-down camera switching, direct movement cancelling click-move (WRLD-06), movement lock and pause gating (UI-02, UI-07), control state persistence (SAVE-05); 8/8 PIE checks pass; [evidence](WP03_CONTROL_PROOF.md) |
-| Mutable & Character | VERIFIED (CO_Knight & AWyrmCharacter); WP-02 PASS | Authoritative recipe authored/compiled; runtime binding, parameters (Helmet, ArmorTint), socket attachment (SM_Sword on Hand_Right), and persistence verified; [evidence](WP02_MUTABLE_RECIPE_PROOF.md) |
-| Terrain | GeoForge VERIFIED (AWyrmGeoForgeAdapter); WP-01 PASS | Authoritative adapter authored; 8/8 native tests pass; 7/7 PIE checks (WRLD-01..05, 08, SAVE-01..04) pass; [evidence](WP01_TERRAIN_PROVIDER_PROOF.md) |
-| GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
-| Real sample assets | Dirt/stone/knight/44-part Green Dragon plus wolf/sword imported and statically previewed | [Measured diagnostic scales and supplied palettes](WP00_REAL_ASSET_REVIEW.md); animation, collision, Mutable and production suitability unverified |
-| GAS & Combat | VERIFIED (AWyrmCharacter & AWyrmEnemyCharacter); WP-04 PASS | Authoritative GAS combat loop, canonical damage mitigation formulas (COM-01), shield absorption, invulnerability immunity, dead clamp (COM-02), two-camera combat (COM-03), 20 Focus cost & 5s cooldown gating (COM-04), slow combining & boss CC resistance (COM-05); 18/18 native tests pass; 5/5 PIE cases pass; [evidence](WP04_COMBAT_PROOF.md) |
-| Inventory, equipment & save | VERIFIED (UWyrmInventoryComponent & UWyrmSaveSubsystem); WP-05 PASS | Single inventory authority on character, capacity & stacking, overflow rejection (COM-07), rolled item affix generation & idempotent equipment stats with zero leaks (COM-06), single save coordinator unifying character attributes, camera, appearance, inventory, and GeoForge terrain delta (SAVE-01); 18/18 native tests pass; 3/3 PIE checks pass; [evidence](WP05_INVENTORY_PROOF.md) |
-| Second Build & Progression | VERIFIED (Ranged Skirmisher, AWyrmProjectile, Level/XP); WP-06 PASS | Real supplied ranger bow/arrow assets, physical projectile combat, weapon family gating & dynamic kit switching, GAS-authoritative Level/XP progression fixture, progression save roundtrip (COM-08); 22/22 native tests pass; 4/4 PIE checks pass; [evidence](WP06_PROGRESSION_PROOF.md) |
-| Dragon, Heartfold, Echoes | Requirements and integration locations preserved; NOT IMPLEMENTED | Original WP-09 onward |
-| Vehicles/colony | Future required deliverables; NOT IMPLEMENTED | Original WP-18/19 |
-| Git/remote/branch | Git initialized; origin configured; main | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame); existing remote history retained; generated data and supplied/imported vendor assets excluded |
+| Repository | `main`; pushed checkpoint `55172d0` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
+| Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, `-NoUBA -NoPCH`; fresh build completed in 36.73 seconds |
+| Native automation | **PASS: 27/27** | `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
+| Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
+| BOOT-01 | **Historical focused PASS** | Keyboard/mouse movement, jump, cameras, HUD, rebinding, pause/input guards, click rejection and relaunch passed before the current configuration |
+| Physical controller | **NOT_RUN** | No controller was detected; do not report controller acceptance as PASS |
+| WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
+| WP-01 GeoForge terrain | **PASS in real PIE** | Dig/refill collision, actual finite depletion, duplicate prevention, occupied-fill rejection, new/buried navigation projection, and direct terrain payload restoration passed; [report](WP01_TERRAIN_PROVIDER_PROOF.md) |
+| WP-02 Mutable recipe | **PARTIAL** | Recipe compile, source/native tests, and editor-world commandlet checks passed. A current real-PIE Mutable generation/visual proof was not run |
+| WP-03 shared controls | **PARTIAL** | Source/native and editor-world commandlet checks passed. BOOT-01 supplies narrower historical keyboard/mouse PIE evidence; the latest full WP-03 script did not start PIE |
+| WP-04 combat | **PARTIAL** | GAS source/native tests and five editor-world commandlet cases passed. WP-06 proves a live ranged hit and camera/evade access in PIE, but a complete WP-04 PIE pass remains open |
+| WP-05 inventory/save | **PARTIAL** | Native tests and three editor-world commandlet cases passed. Character/inventory disk roundtrip passed; terrain payload passed separately in WP-01. One combined bound-terrain plus character/inventory save roundtrip remains NOT_RUN |
+| WP-06 ranged progression fixture | **PASS in real PIE** | Imported bow/arrow meshes and textures loaded; projectile used `SM_Arrow`; progression, kit switching, 600 cm ranged hit, evade, both cameras, and progression snapshot restore passed; [report](WP06_PROGRESSION_PROOF.md) |
+| WP-07 scoped activities fixture | **PARTIAL; scoped real PIE PASS** | 8/8 scoped groups passed for real assets, water, fishing, crafting and food buffs. No repository task packet defines full WP-07 acceptance; [report](WP07_ACTIVITIES_PROOF.md) |
+| Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
-## v0.2 changes
+## Important implementation facts
 
-Added bounded onboarding/recovery reports and source/evidence freshness checks;
-made the native runner require the source-declared suite; added process-tree
-cleanup and unique hashed attempt logs; preserved asset roots during engine-path
-updates; strengthened metadata/map receipts. The existing C++ shell now guards
-input rebinding/paused movement and clamps GAS base health as well as current
-health. These native changes and the typed map checks have now been exercised
-on the C: UE 5.8.2 installation, as scoped in the recovery report.
+- Mutable remains the character creator and GAS remains combat authority.
+- `AWyrmGeoForgeAdapter` is the selected project terrain provider. It reports
+  `QUEUED` while GeoForge mesh/collision/navigation work remains and completes
+  only after the observed queues and navigation build settle.
+- Terrain resource yield is calculated from filled cells removed by the edit.
+  A different action ID over the exhausted proof volume returned zero yield.
+- `UWyrmInventoryComponent` remains the inventory/equipment owner.
+  Cross-inventory transfers now preflight target capacity and roll back on an
+  unexpected partial failure.
+- `UWyrmSaveSubsystem` remains the save coordinator. It rejects unknown schema,
+  wrong terrain owners, missing terrain payloads, and terrain apply failures
+  before mutating the character.
+- WP-06 adds a ranged weapon family, GAS abilities, a physical projectile,
+  evade, Level/XP scaling, and progression persistence. It is a functional
+  second combat kit on the shared humanoid; distinct ranger body/animation
+  presentation has not been accepted.
+- WP-07 scoped owners are `AWyrmWaterVolume`, `UWyrmFishingComponent`, and
+  `UWyrmCraftingSubsystem`; GAS and the existing inventory/save owners remain
+  authoritative.
 
-The first-run wrapper is offline by default; `--native` explicitly adds local
-engine steps. No new gameplay owner, terrain provider or speculative content
-system was introduced. See [changes](../../CHANGELOG.md).
+## Fresh verification commands
 
-## What Codex should do next
+```powershell
+& "C:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat" WYRMFALLEditor Win64 Development "-Project=G:/assets/voxel project/WYRMFALL.uproject" -WaitMutex -NoHotReloadFromIDE -NoEngineChanges -NoUBA -NoPCH
+py -3.12 tools/wyrm.py ue-test --engine-root "C:/Program Files/UE_5.8" --timeout 1800
+py -3.12 tools/run_pie_proof.py
+py -3.12 tools/run_wp06_pie_proof.py
+py -3.12 tools/run_wp07_pie_proof.py
+```
 
-Use the [current handoff](HANDOFF.md) for paths, evidence and the bounded next task.
+The WP-05 commandlet also passed, but it is editor-world evidence:
 
-Read [the current C: recovery report](BOOT-01_C_RECOVERY.md). Finish
-[WP-00](tasks/WP-00.md) at the inventory-source/remaining acceptance boundary;
-then one eligible [WP-01](tasks/WP-01.md) proof. Do not jump to the entire first
-region. GeoForge's stale D: registration and failing D: cache were recovered with
-user approval. Fab now uses `C:\EpicVaultCache\VaultCache`; GeoForge is installed
-in the C: engine and native loading passed. Finish the remaining WP-00 inspections.
+```powershell
+& "C:/Program Files/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "G:/assets/voxel project/WYRMFALL.uproject" -run=pythonscript "-script=G:/assets/voxel project/tools/unreal/verify_wp05_inventory_proof.py" -stdout -FullStdOutLogOutput -unattended -nopause -nosplash -nullrhi
+```
 
-## Unverified boundaries to keep visible
+## Remaining acceptance boundaries
 
-Input mappings are transient developer defaults rather than final remappable input assets. The top-down fixture has no roof/occlusion, menus, target selection or edit-aware nav invalidation. Camera preference is not saved. The humanoid is intentionally unmeshed. GAS state is owned by the humanoid while it exists; destruction/region transfer reconstruction is not implemented. The terrain seam intentionally omits speculative vendor completion/save APIs. The map builder never creates production materials, rigs, animations or UI.
+- Full WP-00 RDY-02/03/04 acceptance.
+- Current real-PIE proofs for the complete WP-02 through WP-05 scopes.
+- One coherent bound-terrain plus character/inventory save and reload.
+- Physical-controller validation.
+- Full WP-07 acceptance once a task packet defines production interaction,
+  presentation, final fishing-tool art and integration requirements.
+- Cook and packaged-game validation.
+- Production animation, collision, scale, materials, ranger presentation,
+  targeting, UI and production-map acceptance.
 
-Later sessions must replace these specific statuses with observed results, not delete the limitations wholesale. Use [the report template](SESSION_REPORT_TEMPLATE.md).
+## Next bounded task
 
-## Current Windows evidence and remaining boundary
-
-[Current C: recovery, commands and PIE evidence](BOOT-01_C_RECOVERY.md) ·
-[WP-00 scoped readiness](WP-00_SCOPED_READINESS.md) ·
-[Historical D: failure](BOOT-01_WINDOWS_SESSION.md).
-
-Use installed `py -3.12`; default `python` is 3.10. The final C: editor build,
-real bootstrap map, six native tests and focused keyboard/mouse PIE checks passed.
-The portable suite ran 124 tests with two platform/privilege skips. The old
-onboarding receipt correctly reports STALE_EVIDENCE after the engine/source
-changes; current individual execution evidence is listed in the recovery report.
-
-WP-00 native sample intake found real dirt/stone meshes and materials, a
-15-bone knight through the current FBX importer, and 44 Green Dragon skeletal
-parts sharing a 195-bone imported hierarchy plus 20 clips. Legacy knight import
-failed with multiple roots; the source FBX was preserved. Later native wolf/sword
-imports, supplied-palette previews and static dragon assembly are recorded in
-[the real-asset review](WP00_REAL_ASSET_REVIEW.md). Diagnostic scales are measured,
-not production approvals. Animation, collision, Mutable, full ownership/provenance
-acceptance and inventory source inspection remain incomplete.
-
-The C: engine now has GeoForgeRuntime 5.0.0 with native runtime/editor/dependency
-loading verified. Authoritative adapter AWyrmGeoForgeAdapter is implemented and compiled
-into the WYRMFALL runtime module. 8/8 native automation tests pass under Unreal Editor.
-The headless PIE verification suite (`verify_wp01_terrain_proof.py`) exercised synchronous
-digging/refilling with zero pending queues (`WRLD-01`, `WRLD-02`), finite yields and duplicate
-prevention (`WRLD-03`), new surface nav projection (`WRLD-04`), stale sub-surface nav
-cancellation (`WRLD-05`), active pawn envelope occupied-fill protection (`WRLD-08`), and
-binary save/load payload round-trip restoration (`SAVE-01..04`). See [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md).
-WP-01 is **PASS / VERIFIED**.
-
-[Native owner inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md) now covers eight
-EBS, five Waterline, and ten AGIS Blueprints with unchanged source hashes. EBS has its own
-resource balances and save-slot/actor-reconstruction flow; Waterline has physical
-side effects as well as visuals; AGIS (Advanced Grid Inventory System by Kaya Products,
-`G:\VaultCache\Advancedc03c38f197d4V1`) has full spatial grid math, container UIDs,
-author-confirmed controller decoupling (`PlayerController_AGIS` is empty), `Inventory_Player`
-component attachment, `_BP_ItemBase` physical pickup spawning, and `SG_AGIS_World` savegame
-coordination. None were integrated into WYRMFALL runtime descriptor. Architectural
-reconciliation across capacity, overflow, terrain rewards, EBS spends, and save
-coordination is documented in the owner inspection report.
-
-[Real-asset review](WP00_REAL_ASSET_REVIEW.md) now adds native wolf/sword imports,
-explicit diagnostic scales, supplied palette materials and two inspected renders
-of the 44-part assembled Green Dragon, knight, wolf, sword, dirt and stone.
-Static visual inspection does not clear animation, Mutable, collision or full
-RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
-
-**Next bounded task:** WP-01 (GeoForge terrain provider proof), WP-02 (Playable Mutable character recipe & runtime proof),
-WP-03 (Shared humanoid control, camera switching & input gating proof), WP-04 (First real combat loop proof),
-WP-05 (Loot, equipment, inventory, and coherent save snapshot), and WP-06 (Second build and progression fixture)
-are all complete and verified with native test automation and headless PIE evidence suites. The next bounded milestone is
-**WP-07: Vertical Slice Integration Map & Encounter Fixture** (combining editable terrain, combat encounters, loot drop triggers,
-progression reward loop, and coherent save state in a playable developer integration arena).
+Finish the remaining WP-00 readiness acceptance and reconcile the stale
+WP-00 documents with the now-proven WP-01 terrain result. Keep the verified
+WP-07 fixture bounded until a task packet defines the full acceptance surface.
+Use the [current handoff](HANDOFF.md) for the exact continuation state.

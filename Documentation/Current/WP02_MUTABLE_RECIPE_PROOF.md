@@ -1,8 +1,8 @@
 # WP-02: Playable Mutable Character Recipe & Runtime Proof
 
-**Date**: 2026-09-15  
-**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)  
-**Status**: PASS (All 6 criteria CHAR-01 through CHAR-06 verified)  
+**Date**: 2026-09-15
+**Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)
+**Status**: PARTIAL (recipe compile, native and editor-world commandlet checks pass; current real PIE NOT_RUN)
 **Evidence Receipts**:
 - `Saved/Diagnostics/WP02_mutable_recipe_build_report.json`
 - `Saved/Diagnostics/WP02_mutable_recipe_proof.json`
@@ -80,9 +80,12 @@ Mutable is the single authoritative character creator in WYRMFALL. In accordance
 1. **Native Automation Tests**:
    - Command: `py -3.12 tools/wyrm.py ue-test`
    - Result: 9/9 tests passed (including `WYRMFALL.Scaffold.CharacterMutableBinding`).
-2. **Headless Execution Verification**:
+2. **Editor-world Commandlet Verification**:
    - Script: `tools/unreal/verify_wp02_mutable_proof.py`
    - Result: All 7 checks (CHAR-01 to CHAR-06 + Cleanup) PASSED.
+   - Boundary: the script obtains the editor world under `UnrealEditor-Cmd` and
+     does not request a PIE session. Treat its runtime-looking checks as
+     editor-world evidence until a real PIE proof repeats them.
 3. **Repository Offline Verification**:
    - `py -3.12 tools/wyrm.py verify` -> PASS
    - `py -3.12 tools/wyrm.py test` -> 124/124 tests passed (0 failures, 2 skipped).

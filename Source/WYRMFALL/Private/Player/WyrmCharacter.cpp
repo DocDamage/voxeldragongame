@@ -5,6 +5,7 @@
 #include "Combat/Abilities/WyrmRangedAttackAbility.h"
 #include "Combat/Abilities/WyrmEvadeAbility.h"
 #include "Inventory/WyrmInventoryComponent.h"
+#include "Activities/WyrmFishingComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -37,6 +38,7 @@ AWyrmCharacter::AWyrmCharacter()
     CustomizableSkeletalComponent = CreateDefaultSubobject<UCustomizableSkeletalComponent>(TEXT("CustomizableSkeletalComponent"));
     CustomizableSkeletalComponent->SetupAttachment(GetMesh());
     InventoryComponent = CreateDefaultSubobject<UWyrmInventoryComponent>(TEXT("InventoryComponent"));
+    FishingComponent = CreateDefaultSubobject<UWyrmFishingComponent>(TEXT("FishingComponent"));
     ApplyCamera();
 }
 
@@ -128,6 +130,28 @@ void AWyrmCharacter::ApplyCamera()
 void AWyrmCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+
+    // Food buff expiration and regen (ACT-04)
+    if (ActiveFoodBuff.IsActive())
+    {
+        ActiveFoodBuff.RemainingDuration -= DeltaSeconds;
+
+        if (ActiveFoodBuff.HealthRegenPerSecond > 0.f && Attributes)
+        {
+            const float CurrentHP = Attributes->GetCurrentHealth();
+            const float MaxHP = Attributes->GetCurrentMaxHealth();
+            if (CurrentHP < MaxHP)
+            {
+                Attributes->SetCurrentHealth(FMath::Min(MaxHP, CurrentHP + (ActiveFoodBuff.HealthRegenPerSecond * DeltaSeconds)));
+            }
+        }
+
+        if (ActiveFoodBuff.RemainingDuration <= 0.f)
+        {
+            ClearFoodBuff();
+        }
+    }
+
 #if !UE_BUILD_SHIPPING
     // Wireframe diagnostic, not replacement character artwork.
     if (!GetMesh()->GetSkeletalMeshAsset())
@@ -481,3 +505,155 @@ void AWyrmCharacter::CheckLevelUp()
     }
 }
 
+void AWyrmCharacter::SetWet(bool bInWet)
+{
+    bIsWet = bInWet;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag WetTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Wet")), false);
+        if (WetTag.IsValid())
+        {
+            if (bIsWet)
+            {
+                if (!AbilitySystem->HasMatchingGameplayTag(WetTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(WetTag);
+                }
+            }
+            else
+            {
+                if (AbilitySystem->HasMatchingGameplayTag(WetTag))
+                {
+                    AbilitySystem->RemoveLooseGameplayTag(WetTag);
+                }
+            }
+        }
+    }
+}
+
+void AWyrmCharacter::ApplyFoodBuff(const FWyrmActiveFoodBuff& InBuff)
+{
+    if (InBuff.BuffId.IsNone() || (InBuff.RemainingDuration <= 0.f && InBuff.TotalDuration <= 0.f))
+    {
+        return;
+    }
+
+    // Case 1: Consuming identical preparation buff refreshes duration (ACT-04)
+    if (ActiveFoodBuff.IsActive() && ActiveFoodBuff.BuffId == InBuff.BuffId)
+    {
+        ActiveFoodBuff.RemainingDuration = InBuff.RemainingDuration > 0.f
+            ? InBuff.RemainingDuration
+            : InBuff.TotalDuration;
+        return;
+    }
+
+    // Case 2: Consuming different preparation buff replaces existing buff (ACT-04)
+    if (ActiveFoodBuff.IsActive())
+    {
+        ClearFoodBuff();
+    }
+
+    ActiveFoodBuff = InBuff;
+    if (ActiveFoodBuff.RemainingDuration <= 0.f)
+    {
+        ActiveFoodBuff.RemainingDuration = InBuff.TotalDuration;
+    }
+
+    // Apply MaxFocus percent bonus via GAS attributes (ACT-04)
+    if (Attributes && ActiveFoodBuff.MaxFocusPercentBonus > 0.f)
+    {
+        const float CurrentMaxFocus = Attributes->GetCurrentMaxFocus();
+        const float NewMaxFocus = CurrentMaxFocus * (1.f + ActiveFoodBuff.MaxFocusPercentBonus);
+        Attributes->SetCurrentMaxFocus(NewMaxFocus);
+        // Do NOT grant a free Focus refill; keep current focus unchanged (clamped to max)
+        Attributes->SetCurrentFocus(FMath::Min(Attributes->GetCurrentFocus(), NewMaxFocus));
+    }
+
+    if (Attributes && ActiveFoodBuff.PowerBonus != 0.f)
+    {
+        Attributes->SetCurrentPower(Attributes->GetCurrentPower() + ActiveFoodBuff.PowerBonus);
+    }
+}
+
+void AWyrmCharacter::ClearFoodBuff()
+{
+    // Expired buffs still own their modifiers until this method removes them.
+    if (ActiveFoodBuff.BuffId.IsNone())
+    {
+        return;
+    }
+
+    // Revert MaxFocus bonus
+    if (Attributes && ActiveFoodBuff.MaxFocusPercentBonus > 0.f)
+    {
+        const float ScaledMaxFocus = Attributes->GetCurrentMaxFocus();
+        const float BaseMaxFocus = ScaledMaxFocus / (1.f + ActiveFoodBuff.MaxFocusPercentBonus);
+        Attributes->SetCurrentMaxFocus(BaseMaxFocus);
+        Attributes->SetCurrentFocus(FMath::Min(Attributes->GetCurrentFocus(), BaseMaxFocus));
+    }
+
+
+    if (Attributes && ActiveFoodBuff.PowerBonus != 0.f)
+    {
+        Attributes->SetCurrentPower(FMath::Max(0.f, Attributes->GetCurrentPower() - ActiveFoodBuff.PowerBonus));
+    }
+
+    ActiveFoodBuff = FWyrmActiveFoodBuff();
+}
+
+bool AWyrmCharacter::ConsumeItem(const FGuid& ItemInstanceId)
+{
+    if (!InventoryComponent)
+    {
+        return false;
+    }
+
+    const TArray<FWyrmItemInstance>& Bag = InventoryComponent->GetBagItems();
+    const FWyrmItemInstance* FoundItem = nullptr;
+    for (const FWyrmItemInstance& Item : Bag)
+    {
+        if (Item.InstanceId == ItemInstanceId)
+        {
+            FoundItem = &Item;
+            break;
+        }
+    }
+
+    if (!FoundItem || FoundItem->ItemType != EWyrmItemType::Consumable)
+    {
+        return false;
+    }
+
+    // Check healing consumable waste rejection (ACTIVITIES_AND_BUILDING.md line 50)
+    const float HealthHeal = FoundItem->GetStatValue(TEXT("Buff.HealthRegen"));
+    const float MaxFocusBonus = FoundItem->GetStatValue(TEXT("Buff.MaxFocusPercentBonus"));
+    const float Duration = FoundItem->GetStatValue(TEXT("Buff.Duration"));
+
+    if (Attributes && HealthHeal > 0.f && MaxFocusBonus <= 0.f && Duration <= 1.f)
+    {
+        if (Attributes->GetCurrentHealth() >= Attributes->GetCurrentMaxHealth())
+        {
+            // Already at full health: reject waste
+            return false;
+        }
+
+        // Apply instant healing
+        Attributes->SetCurrentHealth(FMath::Min(Attributes->GetCurrentMaxHealth(), Attributes->GetCurrentHealth() + HealthHeal));
+        InventoryComponent->RemoveItem(ItemInstanceId, 1);
+        return true;
+    }
+
+    // Food preparation buff
+    FWyrmActiveFoodBuff NewBuff;
+    NewBuff.BuffId = FoundItem->ItemId;
+    NewBuff.BuffName = FoundItem->DisplayName;
+    NewBuff.TotalDuration = Duration > 0.f ? Duration : 300.f;
+    NewBuff.RemainingDuration = NewBuff.TotalDuration;
+    NewBuff.MaxFocusPercentBonus = MaxFocusBonus;
+    NewBuff.HealthRegenPerSecond = HealthHeal;
+    NewBuff.PowerBonus = FoundItem->GetStatValue(TEXT("Buff.Power"));
+
+    ApplyFoodBuff(NewBuff);
+    InventoryComponent->RemoveItem(ItemInstanceId, 1);
+    return true;
+}
