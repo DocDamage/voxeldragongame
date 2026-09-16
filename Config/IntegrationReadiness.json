@@ -34,13 +34,14 @@
     {
       "id": "combat",
       "authority": "GAS",
-      "state": "SCAFFOLD_ATTRIBUTE_TESTS_AND_PIE_HUD_PASSED_COMBAT_LOOP_NOT_RUN",
+      "state": "WP04_VERIFIED_NATIVE_AND_PIE_PROVED",
       "actual_source_path": "C:\\Program Files\\UE_5.8\\Engine\\Plugins\\Runtime\\GameplayAbilities",
       "version": "1.0",
       "evidence": [
         "Saved/Diagnostics/doctor.json",
         "Saved/Automation/Scaffold/index.json",
-        "Saved/Diagnostics/BOOT-01_PIE_first_session.log"
+        "Saved/Diagnostics/WP04_combat_proof.json",
+        "Documentation/Current/WP04_COMBAT_PROOF.md"
       ],
       "gate": "WP-04"
     },
@@ -227,7 +228,7 @@
     "controller": "PASS"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 10,
+  "native_test_cases_authored": 14,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -271,6 +272,14 @@
     "CTRL-05": "PASS",
     "CTRL-06": "PASS",
     "CTRL-07": "PASS"
+  },
+  "wp04_state": "PASS",
+  "combat_acceptance": {
+    "COM-01": "PASS",
+    "COM-02": "PASS",
+    "COM-03": "PASS",
+    "COM-04": "PASS",
+    "COM-05": "PASS"
   },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",

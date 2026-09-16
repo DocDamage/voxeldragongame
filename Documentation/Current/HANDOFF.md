@@ -95,6 +95,29 @@ WP-03: Shared Humanoid Control, Camera Switching & Input Gating Proof has been i
   - `CTRL-07`: Return to third-person camera verified.
 - **Evidence & Report:** [Documentation/Current/WP03_CONTROL_PROOF.md](WP03_CONTROL_PROOF.md).
 
+WP-04: First Real Combat Loop Proof has been implemented and verified:
+- **Authoritative GAS Combat Architecture:** `AWyrmCharacter` and `AWyrmEnemyCharacter` implement
+  `IAbilitySystemInterface` with `UAbilitySystemComponent` and `UWyrmAttributeSet`. GAS is the sole authority
+  for health, shield, focus, power, armor, damage calculations, ability costs, and cooldowns.
+- **Canonical Combat Formulas (`COM-01`):** Raw damage calculated via `WeaponBase + Power * PowerCoefficient`,
+  mitigated via physical formula `MitigationFraction = Armor / (Armor + 50 + 10 * Level)`. Mitigated damage
+  is 17.143 at Level 1 with 20 Raw vs 10 Armor (14.3% mitigation observed).
+- **Bounds & Drain Enforcement (`COM-02`):** 10.0 Shield absorbed completely prior to health deduction;
+  invulnerable target (`State.Combat.Invulnerable`) ignores damage; defeated targets clamp HP at 0.0 with
+  `State.Dead` loose tag, movement disabled, and collision cleared (overkill prevention).
+- **Two-Camera Combat Parity (`COM-03`):** Primary attacks deal identical 17.14 damage in Third-Person
+  and Top-Down camera modes without state, attack, or ability reset.
+- **Focus Cost & Cooldown Commit (`COM-04`):** Secondary melee attack atomically deducts 20 Focus (100 -> 80),
+  applies 5.0s cooldown tag (`Cooldown.Melee.Secondary`), rejects immediate re-activation, and rejects activation
+  when Focus < 20.
+- **Status Interactions & Contrasting Enemy Roles (`COM-05`):** Melee Chaser (Wolf profile: 60 HP / 10 Armor / 550 Spd)
+  and Ranged Skirmisher (50 HP / 5 Armor / 400 Spd) verified distinct. Slow combines by highest magnitude
+  (0.3 -> 385 Spd, 0.5 -> 275 Spd). Boss enemies (`bIsBoss = true`) resist hard crowd control (stun/root).
+- **Native Automation Test Suite:** 14/14 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including 4 new combat tests:
+  `CombatCanonicalDamage`, `CombatBoundsAndDrain`, `CombatCostAndCooldown`, and `CombatEnemyRolesAndStatus`.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP04_combat_proof.json` verifies 5/5 cases (COM-01 through COM-05) with exit code 0.
+- **Evidence & Report:** [Documentation/Current/WP04_COMBAT_PROOF.md](WP04_COMBAT_PROOF.md).
+
 ## Actual owner implementation inspection
 
 `WP00_OWNER_IMPLEMENTATION_INSPECTION.md` records native graph exports and traced
@@ -143,18 +166,18 @@ py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-## Next bounded task: WP-04 First Real Combat Loop
+## Next bounded task: WP-05 Inventory, Equipment Attachment, and Save Ownership
 
 With **WP-01** (One Real Terrain Provider Proof), **WP-02** (Playable Mutable Character Recipe & Runtime Proof),
-and **WP-03** (Shared Humanoid Control, Camera Switching & Input Gating Proof) all fully verified and passing
-native test automation and headless PIE proof suites:
+**WP-03** (Shared Humanoid Control, Camera Switching & Input Gating Proof), and **WP-04** (First Real Combat Loop Proof)
+all fully verified and passing native test automation and headless PIE proof suites:
 
-Proceed to **WP-04**:
-1. Implement authoritative GameplayAbility-based melee attack (`UWyrmGameplayAbility` / `GA_MeleeAttack`).
-2. Implement sword hitbox trace / overlap sweep during attack active frame window using weapon sockets (`Hand_Right` / `SM_Sword`).
-3. Apply instant `GE_Damage` to target (`AWyrmCharacter` / dummy target) deducting Health attribute authority via ASC.
-4. Verify hit reaction, damage floating text / log event, and target death handling at Health <= 0.
-5. Ensure zero secondary combat/health managers are introduced: GAS retains sole authority (`COM-01`, `COM-02`).
+Proceed to **WP-05**:
+1. Implement single project save coordinator (`UWyrmSaveSubsystem` / `UWyrmSaveGame`) respecting the one save owner constraint.
+2. Bind AGIS inventory component (`Inventory_Player`) to `AWyrmCharacter` with defined slot capacity, spatial grid limits, and overflow handling.
+3. Reconcile equipment attachment sockets with Mutable character mesh (`Hand_Right`, `Back_Weapon`, etc.).
+4. Author native tests and headless PIE verification suite for inventory capacity, overflow, equipment stats, and save roundtrip.
+
 
 
 

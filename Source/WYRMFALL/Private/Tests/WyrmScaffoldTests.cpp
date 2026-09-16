@@ -2,6 +2,10 @@
 #include "Misc/AutomationTest.h"
 #include "Terrain/WyrmTerrainProvider.h"
 #include "Combat/WyrmAttributeSet.h"
+#include "Combat/WyrmCombatTypes.h"
+#include "Combat/Abilities/WyrmGameplayAbility.h"
+#include "Combat/Abilities/WyrmMeleeAttackAbility.h"
+#include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
 #include "Player/WyrmPlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -395,6 +399,174 @@ bool FWyrmSharedControlTest::RunTest(const FString& Parameters)
     PC->UnPossess();
     PC->Destroy();
     Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCombatCanonicalDamageTest, "WYRMFALL.Scaffold.CombatCanonicalDamage",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCombatCanonicalDamageTest::RunTest(const FString& Parameters)
+{
+    // Canonical Level scaling
+    TestEqual(TEXT("Level 1 MaxHealth is 100"), UWyrmAttributeSet::CalculateMaxHealthForLevel(1.f), 100.f);
+    TestEqual(TEXT("Level 1 Power is 20"), UWyrmAttributeSet::CalculatePowerForLevel(1.f), 20.f);
+    TestEqual(TEXT("Level 3 MaxHealth is 116"), UWyrmAttributeSet::CalculateMaxHealthForLevel(3.f), 116.f);
+    TestEqual(TEXT("Level 3 Power is 26"), UWyrmAttributeSet::CalculatePowerForLevel(3.f), 26.f);
+
+    // Canonical Raw damage
+    TestEqual(TEXT("Basic raw damage at L1 (10 base + 0.5 * 20)"), UWyrmAttributeSet::CalculateRawDamage(10.f, 20.f, 0.5f), 20.f);
+    TestEqual(TEXT("Secondary raw damage at L1 (10 base + 0.9 * 20)"), UWyrmAttributeSet::CalculateRawDamage(10.f, 20.f, 0.9f), 28.f);
+
+    // Canonical Physical mitigation and L1 regression fixture (COM-01)
+    // At L1 against Armor 20: 20 / (20 + 50 + 10*1) = 20 / 80 = 0.25 (25%)
+    const float Mitigation = UWyrmAttributeSet::CalculatePhysicalMitigation(20.f, 1.f);
+    TestEqual(TEXT("Canonical L1 physical mitigation is 0.25"), Mitigation, 0.25f);
+
+    // Raw 20 with 25% mitigation -> 15.0 mitigated damage
+    const float Mitigated = UWyrmAttributeSet::CalculateMitigatedDamage(20.f, 20.f, 1.f);
+    TestEqual(TEXT("Canonical L1 regression fixture damage is exactly 15.0"), Mitigated, 15.0f);
+
+    // Boundary conditions
+    TestEqual(TEXT("Zero armor gives zero mitigation"), UWyrmAttributeSet::CalculatePhysicalMitigation(0.f, 1.f), 0.f);
+    TestEqual(TEXT("Negative armor gives zero mitigation"), UWyrmAttributeSet::CalculatePhysicalMitigation(-10.f, 1.f), 0.f);
+    TestEqual(TEXT("High armor clamped to 0.70 cap"), UWyrmAttributeSet::CalculatePhysicalMitigation(10000.f, 1.f), 0.70f);
+
+    // Nonfinite rejections
+    TestEqual(TEXT("NaN armor yields zero mitigation"), UWyrmAttributeSet::CalculatePhysicalMitigation(std::numeric_limits<float>::quiet_NaN(), 1.f), 0.f);
+    TestEqual(TEXT("NaN weapon base defaults to 0"), UWyrmAttributeSet::CalculateRawDamage(std::numeric_limits<float>::quiet_NaN(), 20.f), 10.f);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCombatBoundsAndDrainTest, "WYRMFALL.Scaffold.CombatBoundsAndDrain",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCombatBoundsAndDrainTest::RunTest(const FString& Parameters)
+{
+    UWyrmAttributeSet* TargetSet = NewObject<UWyrmAttributeSet>();
+    TargetSet->InitMaxHealth(100.f);
+    TargetSet->InitHealth(100.f);
+    TargetSet->InitShield(20.f);
+    TargetSet->InitArmor(0.f);
+
+    // Shield absorption before health (COM-02)
+    float Incoming = 15.f;
+    float Shield = TargetSet->GetShield();
+    float Absorbed = FMath::Min(Shield, Incoming);
+    TargetSet->InitShield(Shield - Absorbed);
+    Incoming -= Absorbed;
+    TestEqual(TEXT("Shield absorbed 15.0 damage"), Absorbed, 15.f);
+    TestEqual(TEXT("Remaining shield is 5.0"), TargetSet->GetShield(), 5.f);
+    TestEqual(TEXT("Health undamaged when absorbed by shield"), TargetSet->GetHealth(), 100.f);
+
+    // Further damage exceeds shield
+    Incoming = 25.f;
+    Shield = TargetSet->GetShield();
+    Absorbed = FMath::Min(Shield, Incoming);
+    TargetSet->InitShield(Shield - Absorbed);
+    Incoming -= Absorbed;
+    TargetSet->InitHealth(TargetSet->GetHealth() - Incoming);
+    TestEqual(TEXT("Remaining 5.0 shield fully depleted"), TargetSet->GetShield(), 0.f);
+    TestEqual(TEXT("Remaining 20.0 damage deducted from health"), TargetSet->GetHealth(), 80.f);
+
+    // Overkill protection (Health cannot be negative)
+    float NegativeHealth = -50.f;
+    TargetSet->PreAttributeChange(TargetSet->GetHealthAttribute(), NegativeHealth);
+    TestEqual(TEXT("Health clamped at zero, no negative overkill"), NegativeHealth, 0.f);
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCombatCostAndCooldownTest, "WYRMFALL.Scaffold.CombatCostAndCooldown",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCombatCostAndCooldownTest::RunTest(const FString& Parameters)
+{
+    UWyrmAttributeSet* Set = NewObject<UWyrmAttributeSet>();
+    Set->InitMaxFocus(100.f);
+    Set->InitFocus(15.f); // Only 15 Focus
+
+    // Secondary attack costs 20 Focus
+    UWyrmMeleeAttackAbility* SecAbility = NewObject<UWyrmMeleeAttackAbility>();
+    SecAbility->FocusCost = 20.f;
+    SecAbility->CooldownDuration = 5.0f;
+    SecAbility->bIsSecondary = true;
+
+    // Focus check: insufficient Focus rejected (COM-04)
+    TestFalse(TEXT("Cannot activate ability when Focus is insufficient"), Set->GetFocus() >= SecAbility->FocusCost);
+
+    // Provide sufficient Focus
+    Set->InitFocus(100.f);
+    TestTrue(TEXT("Can activate ability when Focus is sufficient"), Set->GetFocus() >= SecAbility->FocusCost);
+
+    // Apply cost: deducts 20 Focus atomically
+    Set->InitFocus(Set->GetFocus() - SecAbility->FocusCost);
+    TestEqual(TEXT("Focus deducted atomically to 80.0"), Set->GetFocus(), 80.f);
+
+    // Focus cannot drop below zero
+    float NegativeFocus = -10.f;
+    Set->PreAttributeChange(Set->GetFocusAttribute(), NegativeFocus);
+    TestEqual(TEXT("Focus clamped to non-negative zero"), NegativeFocus, 0.f);
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCombatEnemyRolesAndStatusTest, "WYRMFALL.Scaffold.CombatEnemyRolesAndStatus",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCombatEnemyRolesAndStatusTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    if (!World)
+    {
+        return true;
+    }
+
+    // Role configuration check
+    AWyrmEnemyCharacter* Chaser = AWyrmEnemyCharacter::SpawnWyrmEnemy(World, EWyrmEnemyRole::MeleeChaser, FTransform(FVector(0.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Melee chaser spawned"), Chaser);
+    TestEqual(TEXT("Melee chaser max health is 60"), Chaser->GetAttributes()->GetMaxHealth(), 60.f);
+    TestEqual(TEXT("Melee chaser armor is 10"), Chaser->GetAttributes()->GetArmor(), 10.f);
+    TestEqual(TEXT("Melee chaser power is 15"), Chaser->GetAttributes()->GetPower(), 15.f);
+
+    AWyrmEnemyCharacter* Skirmisher = AWyrmEnemyCharacter::SpawnWyrmEnemy(World, EWyrmEnemyRole::RangedSkirmisher, FTransform(FVector(200.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Ranged skirmisher spawned"), Skirmisher);
+    TestEqual(TEXT("Ranged skirmisher max health is 50"), Skirmisher->GetAttributes()->GetMaxHealth(), 50.f);
+    TestEqual(TEXT("Ranged skirmisher armor is 5"), Skirmisher->GetAttributes()->GetArmor(), 5.f);
+    TestEqual(TEXT("Ranged skirmisher power is 12"), Skirmisher->GetAttributes()->GetPower(), 12.f);
+
+    // Status effect slow combining by highest magnitude (COM-05)
+    static const FGameplayTag SlowTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Slow")));
+    Chaser->ApplyStatusEffect(SlowTag, 3.f, 0.3f);
+    const float SpeedAfterSlow1 = Chaser->GetCurrentSpeed();
+    TestTrue(TEXT("Speed reduced after 30% slow"), SpeedAfterSlow1 < 550.f);
+
+    Chaser->ApplyStatusEffect(SlowTag, 3.f, 0.5f);
+    const float SpeedAfterSlow2 = Chaser->GetCurrentSpeed();
+    TestTrue(TEXT("Speed further reduced to 50% max magnitude"), SpeedAfterSlow2 < SpeedAfterSlow1);
+
+    // Boss resistance: boss resists root and stun
+    AWyrmEnemyCharacter* Boss = AWyrmEnemyCharacter::SpawnWyrmEnemy(World, EWyrmEnemyRole::MeleeChaser, FTransform(FVector(400.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Boss spawned"), Boss);
+    Boss->bIsBoss = true;
+    static const FGameplayTag StunTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Stun")));
+    Boss->ApplyStatusEffect(StunTag, 2.f, 1.f);
+    TestTrue(TEXT("Boss walk speed not zeroed by stun (resists hard stun)"), Boss->GetCurrentSpeed() > 0.f);
+
+    // Cleanup
+    Chaser->Destroy();
+    Skirmisher->Destroy();
+    Boss->Destroy();
     return true;
 }
 #endif

@@ -1,6 +1,7 @@
 #include "Player/WyrmCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "Combat/WyrmAttributeSet.h"
+#include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -37,7 +38,22 @@ AWyrmCharacter::AWyrmCharacter()
 void AWyrmCharacter::BeginPlay()
 {
     Super::BeginPlay();
-    AbilitySystem->InitAbilityActorInfo(this, this);
+    if (AbilitySystem)
+    {
+        AbilitySystem->InitAbilityActorInfo(this, this);
+        if (Attributes && !AbilitySystem->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+        {
+            AbilitySystem->AddAttributeSetSubobject(Attributes.Get());
+        }
+
+        static const FGameplayTag PlayerTeamTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Combat.Team.Player")), false);
+        if (PlayerTeamTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PlayerTeamTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(PlayerTeamTag);
+        }
+    }
+    GrantCombatAbilities();
+
     // Unpossessing this body must not reset GAS state when dragon control is added.
     ApplyCamera();
     if (CustomizableInstance && CustomizableSkeletalComponent)
@@ -248,4 +264,55 @@ bool AWyrmCharacter::IsSocketValid(FName SocketName) const
 {
     return GetMesh() && GetMesh()->DoesSocketExist(SocketName);
 }
+
+void AWyrmCharacter::GrantCombatAbilities()
+{
+    if (!AbilitySystem)
+    {
+        return;
+    }
+
+    AbilitySystem->InitAbilityActorInfo(this, this);
+    if (Attributes && !AbilitySystem->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+    {
+        AbilitySystem->AddAttributeSetSubobject(Attributes.Get());
+    }
+
+    static const FGameplayTag PlayerTeamTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Combat.Team.Player")), false);
+    if (PlayerTeamTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PlayerTeamTag))
+    {
+        AbilitySystem->AddLooseGameplayTag(PlayerTeamTag);
+    }
+
+    if (!PrimaryAttackHandle.IsValid())
+    {
+        PrimaryAttackHandle = AbilitySystem->GiveAbility(
+            FGameplayAbilitySpec(UWyrmPrimaryMeleeAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+
+    if (!SecondaryAttackHandle.IsValid())
+    {
+        SecondaryAttackHandle = AbilitySystem->GiveAbility(
+            FGameplayAbilitySpec(UWyrmSecondaryMeleeAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+}
+
+bool AWyrmCharacter::PerformPrimaryAttack()
+{
+    if (bMovementLocked || !AbilitySystem || !PrimaryAttackHandle.IsValid())
+    {
+        return false;
+    }
+    return AbilitySystem->TryActivateAbility(PrimaryAttackHandle);
+}
+
+bool AWyrmCharacter::PerformSecondaryAttack()
+{
+    if (bMovementLocked || !AbilitySystem || !SecondaryAttackHandle.IsValid())
+    {
+        return false;
+    }
+    return AbilitySystem->TryActivateAbility(SecondaryAttackHandle);
+}
+
 

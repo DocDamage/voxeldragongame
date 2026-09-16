@@ -44,6 +44,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Control")
     bool RequestClickMoveToDestination(const FVector& DestinationLocation);
 
+    UFUNCTION(BlueprintCallable, Category="Combat")
+    void PrimaryAttack();
+
+    UFUNCTION(BlueprintCallable, Category="Combat")
+    void SecondaryAttack();
+
 #if WITH_EDITOR
     // BOOT-01 instrumentation: exercise repeated setup on the live PIE controller.
     UFUNCTION(Exec) void WyrmDevRebindInput();

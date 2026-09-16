@@ -293,3 +293,24 @@ void AWyrmPlayerController::JumpPressed()
 }
 void AWyrmPlayerController::JumpReleased() { if (auto* Body = Cast<AWyrmCharacter>(GetPawn())) { Body->StopJumping(); } }
 
+void AWyrmPlayerController::PrimaryAttack()
+{
+    auto* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked())
+    {
+        return;
+    }
+    Body->PerformPrimaryAttack();
+}
+
+void AWyrmPlayerController::SecondaryAttack()
+{
+    auto* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked())
+    {
+        return;
+    }
+    Body->PerformSecondaryAttack();
+}
+
+

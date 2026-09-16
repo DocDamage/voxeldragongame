@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "Player/WyrmControlTypes.h"
 #include "WyrmCharacter.generated.h"
 class UAbilitySystemComponent;
@@ -20,6 +21,7 @@ class WYRMFALL_API AWyrmCharacter : public ACharacter, public IAbilitySystemInte
 public:
     AWyrmCharacter();
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+    UFUNCTION(BlueprintPure, Category="Combat") UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
     virtual void Tick(float DeltaSeconds) override;
     UFUNCTION(BlueprintCallable, Category="Camera") void SetCameraMode(EWyrmCameraMode NewMode);
     UFUNCTION(BlueprintCallable, Category="Camera") void ToggleCamera();
@@ -33,7 +35,11 @@ public:
     UFUNCTION(BlueprintCallable, Category="Control") void CaptureControlState(FWyrmControlState& OutState) const;
     UFUNCTION(BlueprintCallable, Category="Control") void RestoreControlState(const FWyrmControlState& InState);
 
+    // --- Combat and Abilities (WP-04) ---
     UFUNCTION(BlueprintPure, Category="Combat") UWyrmAttributeSet* GetAttributes() const { return Attributes; }
+    UFUNCTION(BlueprintCallable, Category="Combat") bool PerformPrimaryAttack();
+    UFUNCTION(BlueprintCallable, Category="Combat") bool PerformSecondaryAttack();
+    UFUNCTION(BlueprintCallable, Category="Combat") void GrantCombatAbilities();
 
     // --- Mutable Appearance Authority (WP-02) ---
     UFUNCTION(BlueprintPure, Category="Appearance")
@@ -99,5 +105,7 @@ private:
     void ApplyCamera();
     UPROPERTY(VisibleAnywhere, Category="Camera") EWyrmCameraMode CameraMode = EWyrmCameraMode::ThirdPerson;
     UPROPERTY(VisibleAnywhere, Category="Control") bool bMovementLocked = false;
+    FGameplayAbilitySpecHandle PrimaryAttackHandle;
+    FGameplayAbilitySpecHandle SecondaryAttackHandle;
 };
 
