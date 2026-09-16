@@ -1,3 +1,4 @@
+using System.IO;
 using UnrealBuildTool;
 public class WYRMFALL : ModuleRules
 {
@@ -9,9 +10,23 @@ public class WYRMFALL : ModuleRules
             "GameplayAbilities", "GameplayTags", "GameplayTasks"
         });
         PrivateDependencyModuleNames.AddRange(new string[] {
-            "NavigationSystem", "AIModule", "ProceduralMeshComponent", "GeoForgeRuntime"
+            "NavigationSystem", "AIModule", "ProceduralMeshComponent", "GeoForgeRuntime", "CustomizableObject"
         });
-        // Mutable is enabled in the project; add CustomizableObject only when
-        // WP-02 consumes its verified headers.
+
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new string[] {
+                "UnrealEd", "CustomizableObjectEditor", "MutableRuntime", "MutableTools"
+            });
+            PrivateIncludePaths.AddRange(new string[] {
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "CustomizableObject", "Internal"),
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "MutableRuntime", "Internal"),
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "MutableTools", "Internal"),
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "CustomizableObjectEditor", "Private"),
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "CustomizableObjectEditor", "Private", "MuCOE"),
+                Path.Combine(EngineDirectory, "Plugins", "Mutable", "Source", "CustomizableObjectEditor", "Private", "MuCOE", "Nodes")
+            });
+        }
+
     }
 }

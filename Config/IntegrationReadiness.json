@@ -20,11 +20,14 @@
     {
       "id": "mutable",
       "authority": "Mutable",
-      "state": "REQUIRED_DESCRIPTOR_INSPECTED_RUNTIME_NOT_RUN",
+      "state": "WP02_VERIFIED_RECIPE_COMPILED_AND_RUNTIME_PROVED",
       "actual_source_path": "C:\\Program Files\\UE_5.8\\Engine\\Plugins\\Mutable",
       "version": "1.8.0",
       "evidence": [
-        "Saved/Diagnostics/doctor.json"
+        "Saved/Diagnostics/doctor.json",
+        "Saved/Diagnostics/WP02_mutable_recipe_build_report.json",
+        "Saved/Diagnostics/WP02_mutable_recipe_proof.json",
+        "Documentation/Current/WP02_MUTABLE_RECIPE_PROOF.md"
       ],
       "gate": "WP-02"
     },
@@ -224,7 +227,7 @@
     "controller": "NOT_RUN"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 8,
+  "native_test_cases_authored": 9,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -249,6 +252,15 @@
   },
   "wp00_state": "PARTIAL_NATIVE_ASSET_PREVIEW_OWNER_INSPECTIONS_COMPLETE_CANDIDATES_UNSELECTED",
   "wp01_state": "PASS",
+  "wp02_state": "PASS",
+  "character_acceptance": {
+    "CHAR-01": "PASS",
+    "CHAR-02": "PASS",
+    "CHAR-03": "PASS",
+    "CHAR-04": "PASS",
+    "CHAR-05": "PASS",
+    "CHAR-06": "PASS"
+  },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
     "Saved/Diagnostics/WP00_native_samples.json",

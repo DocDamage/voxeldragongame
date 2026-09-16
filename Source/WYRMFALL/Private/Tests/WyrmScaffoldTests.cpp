@@ -2,6 +2,9 @@
 #include "Misc/AutomationTest.h"
 #include "Terrain/WyrmTerrainProvider.h"
 #include "Combat/WyrmAttributeSet.h"
+#include "Player/WyrmCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "MuCO/CustomizableSkeletalComponent.h"
 #include "GameplayTagsManager.h"
 #include <limits>
 
@@ -229,4 +232,52 @@ bool FWyrmAdapterYieldTest::RunTest(const FString& Parameters)
     Adapter->Destroy();
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCharacterMutableTest, "WYRMFALL.Scaffold.CharacterMutableBinding",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCharacterMutableTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World())
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    TestNotNull(TEXT("World exists for character mutable test"), World);
+    if (!World)
+    {
+        return false;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), SpawnParams);
+    TestNotNull(TEXT("WyrmCharacter spawned successfully"), Character);
+    if (Character)
+    {
+        UCustomizableSkeletalComponent* Comp = Character->GetCustomizableComponent();
+        TestNotNull(TEXT("CustomizableSkeletalComponent exists on character"), Comp);
+        if (Comp)
+        {
+            TestTrue(TEXT("CustomizableSkeletalComponent attached to GetMesh()"), Comp->GetAttachParent() == Character->GetMesh());
+        }
+
+        TestEqual(TEXT("Default Color parameter returns White"), Character->GetColorParameter(TEXT("NonExistent")), FLinearColor::White);
+        TestEqual(TEXT("Default Option parameter returns empty string"), Character->GetOptionParameter(TEXT("NonExistent")), FString());
+        TestEqual(TEXT("Default Float parameter returns zero"), Character->GetFloatParameter(TEXT("NonExistent")), 0.f);
+
+        TestFalse(TEXT("Capture descriptor without instance returns empty"), Character->CaptureAppearanceDescriptor().Len() > 0);
+        TestFalse(TEXT("Restore empty descriptor returns false"), Character->RestoreAppearanceDescriptor(TEXT("")));
+
+        Character->Destroy();
+    }
+    return true;
+}
 #endif
+

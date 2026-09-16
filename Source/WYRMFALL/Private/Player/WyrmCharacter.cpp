@@ -6,6 +6,12 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "MuCO/CustomizableSkeletalComponent.h"
+#include "MuCO/CustomizableObject.h"
+#include "MuCO/CustomizableObjectInstance.h"
+#include "Serialization/MemoryWriter.h"
+#include "Serialization/MemoryReader.h"
+#include "Misc/Base64.h"
 #include "DrawDebugHelpers.h"
 
 AWyrmCharacter::AWyrmCharacter()
@@ -24,6 +30,8 @@ AWyrmCharacter::AWyrmCharacter()
     CameraBoom->bDoCollisionTest = true;
     Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
     Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+    CustomizableSkeletalComponent = CreateDefaultSubobject<UCustomizableSkeletalComponent>(TEXT("CustomizableSkeletalComponent"));
+    CustomizableSkeletalComponent->SetupAttachment(GetMesh());
     ApplyCamera();
 }
 void AWyrmCharacter::BeginPlay()
@@ -32,6 +40,11 @@ void AWyrmCharacter::BeginPlay()
     AbilitySystem->InitAbilityActorInfo(this, this);
     // Unpossessing this body must not reset GAS state when dragon control is added.
     ApplyCamera();
+    if (CustomizableInstance && CustomizableSkeletalComponent)
+    {
+        CustomizableSkeletalComponent->SetCustomizableObjectInstance(CustomizableInstance);
+        ApplyAppearance(true);
+    }
 }
 UAbilitySystemComponent* AWyrmCharacter::GetAbilitySystemComponent() const { return AbilitySystem; }
 void AWyrmCharacter::ToggleCamera()
@@ -59,3 +72,149 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
     }
 #endif
 }
+
+bool AWyrmCharacter::SetCustomizableObject(UCustomizableObject* InCustomizableObject)
+{
+    if (!InCustomizableObject)
+    {
+        return false;
+    }
+    UCustomizableObjectInstance* NewInstance = InCustomizableObject->CreateInstance();
+    if (!NewInstance)
+    {
+        return false;
+    }
+    SetCustomizableInstance(NewInstance);
+
+    if (GetMesh() && InCustomizableObject->GetComponentCount() > 0)
+    {
+        FName CompName = InCustomizableObject->GetComponentName(0);
+        if (USkeletalMesh* RefMesh = InCustomizableObject->GetSkeletalMeshComponentReferenceSkeletalMesh(CompName))
+        {
+            GetMesh()->SetSkeletalMeshAsset(RefMesh);
+        }
+    }
+    return true;
+}
+
+void AWyrmCharacter::SetCustomizableInstance(UCustomizableObjectInstance* InInstance)
+{
+    CustomizableInstance = InInstance;
+    if (CustomizableSkeletalComponent)
+    {
+        CustomizableSkeletalComponent->SetCustomizableObjectInstance(InInstance);
+    }
+}
+
+void AWyrmCharacter::SetColorParameter(FName ParamName, FLinearColor Color)
+{
+    if (CustomizableInstance)
+    {
+        CustomizableInstance->SetColorParameterSelectedOption(ParamName.ToString(), Color);
+    }
+}
+
+FLinearColor AWyrmCharacter::GetColorParameter(FName ParamName) const
+{
+    if (CustomizableInstance)
+    {
+        return CustomizableInstance->GetColorParameterSelectedOption(ParamName.ToString());
+    }
+    return FLinearColor::White;
+}
+
+void AWyrmCharacter::SetOptionParameter(FName ParamName, const FString& OptionName)
+{
+    if (CustomizableInstance)
+    {
+        CustomizableInstance->SetIntParameterSelectedOption(ParamName.ToString(), OptionName);
+    }
+}
+
+FString AWyrmCharacter::GetOptionParameter(FName ParamName) const
+{
+    if (CustomizableInstance)
+    {
+        return CustomizableInstance->GetIntParameterSelectedOption(ParamName.ToString());
+    }
+    return FString();
+}
+
+void AWyrmCharacter::SetFloatParameter(FName ParamName, float Value)
+{
+    if (CustomizableInstance)
+    {
+        CustomizableInstance->SetFloatParameterSelectedOption(ParamName.ToString(), Value);
+    }
+}
+
+float AWyrmCharacter::GetFloatParameter(FName ParamName) const
+{
+    if (CustomizableInstance)
+    {
+        return CustomizableInstance->GetFloatParameterSelectedOption(ParamName.ToString());
+    }
+    return 0.f;
+}
+
+void AWyrmCharacter::ApplyAppearance(bool bAsync)
+{
+    if (CustomizableSkeletalComponent)
+    {
+        CustomizableSkeletalComponent->UpdateSkeletalMeshAsync(true);
+    }
+    else if (CustomizableInstance)
+    {
+        CustomizableInstance->UpdateSkeletalMeshAsync(true);
+    }
+}
+
+FString AWyrmCharacter::CaptureAppearanceDescriptor() const
+{
+    if (!CustomizableInstance)
+    {
+        return FString();
+    }
+    TArray<uint8> Bytes;
+    FMemoryWriter Writer(Bytes, true);
+    CustomizableInstance->SaveDescriptor(Writer, false);
+    return FBase64::Encode(Bytes);
+}
+
+bool AWyrmCharacter::RestoreAppearanceDescriptor(const FString& InDescriptor)
+{
+    if (!CustomizableInstance || InDescriptor.IsEmpty())
+    {
+        return false;
+    }
+    TArray<uint8> Bytes;
+    if (!FBase64::Decode(InDescriptor, Bytes) || Bytes.Num() == 0)
+    {
+        return false;
+    }
+    FMemoryReader Reader(Bytes, true);
+    CustomizableInstance->LoadDescriptor(Reader);
+    ApplyAppearance(true);
+    return true;
+}
+
+bool AWyrmCharacter::AttachEquipmentMesh(USceneComponent* ItemMesh, FName SocketName)
+{
+    if (!ItemMesh || !GetMesh())
+    {
+        return false;
+    }
+    if (!GetMesh()->DoesSocketExist(SocketName))
+    {
+        return false;
+    }
+    ItemMesh->SetMobility(EComponentMobility::Movable);
+    ItemMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+    return true;
+}
+
+bool AWyrmCharacter::IsSocketValid(FName SocketName) const
+{
+    return GetMesh() && GetMesh()->DoesSocketExist(SocketName);
+}
+

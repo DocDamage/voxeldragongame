@@ -53,6 +53,25 @@ WP-01: One Real Terrain Provider Proof (GeoForge) has been implemented and verif
   - `SAVE-01..04`: Terrain delta persistence serialized 57,286-byte binary payload, reset geometry, and successfully restored floor elevation upon reload.
 - **Evidence & Report:** [Documentation/Current/WP01_TERRAIN_PROVIDER_PROOF.md](WP01_TERRAIN_PROVIDER_PROOF.md).
 
+WP-02: Playable Mutable Character Recipe & Runtime Proof has been implemented and verified:
+- **Authoritative Recipe Authored & Compiled:** `CO_Knight` (`/Game/WYRMFALL/Characters/Player/CO_Knight.uasset`)
+  authored using `FWyrmMutableRecipeBuilder` and compiled cleanly via `CustomizableObject` plugin compiler in UE 5.8.2.
+  Recipe includes Base Mesh (`SK_Knight`), Mesh Switch (`Helmet` with `SK_KnightHelmDown` / None), and Vector Parameter (`ArmorTint`).
+- **C++ Runtime Component Integration:** `AWyrmCharacter` binds `UCustomizableSkeletalComponent` directly to `GetMesh()`.
+  Implemented dynamic parameter manipulation (`SetColorParameter`, `SetIntParameter`), appearance snapshot persistence
+  (`CaptureAppearanceDescriptor`, `RestoreAppearanceDescriptor` via Base64 serialization), and socket-based equipment attachment
+  (`AttachEquipmentMesh` with automatic `Movable` mobility enforcement).
+- **Native Automation Test Suite:** 9/9 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including new test
+  `Scaffold.Wyrm.CharacterMutableBinding` verifying component binding, parameter reflection, and appearance persistence.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP02_mutable_recipe_proof.json` verifies 7/7 cases:
+  - `CHAR-01`: Authoritative Mutable recipe asset `CO_Knight` loaded and compiled.
+  - `CHAR-02`: Runtime character spawned with `UCustomizableSkeletalComponent` generating dynamic skeletal instance.
+  - `CHAR-03`: Mesh switch mutation (`Helmet` parameter index 0 <-> 1) successfully swapped helmet geometry.
+  - `CHAR-04`: Material color parameter mutation (`ArmorTint`) modified runtime instance without invalidating skeletal hierarchy.
+  - `CHAR-05`: Equipment mesh attachment (`SM_Sword`) cleanly attached to `Hand_Right` socket of dynamic Mutable mesh.
+  - `CHAR-06`: Base64 appearance descriptor captured, cleared, and restored with exact parameter state fidelity.
+- **Evidence & Report:** [Documentation/Current/WP02_MUTABLE_RECIPE_PROOF.md](WP02_MUTABLE_RECIPE_PROOF.md).
+
 ## Actual owner implementation inspection
 
 `WP00_OWNER_IMPLEMENTATION_INSPECTION.md` records native graph exports and traced
@@ -101,15 +120,16 @@ py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-## Next bounded task: WP-02 Playable Mutable Character Recipe & Runtime Proof
+## Next bounded task: WP-03 Shared Humanoid Control & Movement
 
-With **WP-01** (One Real Terrain Provider Proof) fully verified and passing all 8 native tests and 7 PIE cases,
-and **WP-00** owner inspections and architectural reconciliation documented:
+With **WP-01** (One Real Terrain Provider Proof) and **WP-02** (Playable Mutable Character Recipe & Runtime Proof)
+both fully verified and passing native test automation and headless PIE proof suites:
 
-Proceed to **WP-02**:
-1. Author the real Mutable character recipe asset using the inspected Knight / Dragon sample assets.
-2. Compile and link with the installed engine plugin **Mutable 1.8.0** (`CustomizableObject`).
-3. Verify runtime instantiation, dynamic parameter variation (e.g. materials, textures, body parts),
-   and packaging/cooking compatibility.
-4. Keep Mutable as character creator authority; no fallback mock mesh creators or parallel character pipelines.
+Proceed to **WP-03**:
+1. Implement shared humanoid control supporting both third-person direct WASD/gamepad movement and
+   top-down click-to-move navigation on the same humanoid actor.
+2. Implement seamless camera perspective switching with persistent mode preferences (`SAVE-05` / `UI-01..03`).
+3. Enforce movement gating under interaction / pause / hit-stun states without duplicating pawn progression.
+4. Maintain single GAS authority on humanoid.
+
 
