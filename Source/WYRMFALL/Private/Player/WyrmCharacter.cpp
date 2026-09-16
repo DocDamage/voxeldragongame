@@ -2,6 +2,7 @@
 #include "AbilitySystemComponent.h"
 #include "Combat/WyrmAttributeSet.h"
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
+#include "Inventory/WyrmInventoryComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -33,6 +34,7 @@ AWyrmCharacter::AWyrmCharacter()
     Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     CustomizableSkeletalComponent = CreateDefaultSubobject<UCustomizableSkeletalComponent>(TEXT("CustomizableSkeletalComponent"));
     CustomizableSkeletalComponent->SetupAttachment(GetMesh());
+    InventoryComponent = CreateDefaultSubobject<UWyrmInventoryComponent>(TEXT("InventoryComponent"));
     ApplyCamera();
 }
 void AWyrmCharacter::BeginPlay()
@@ -251,12 +253,13 @@ bool AWyrmCharacter::AttachEquipmentMesh(USceneComponent* ItemMesh, FName Socket
     {
         return false;
     }
-    if (!GetMesh()->DoesSocketExist(SocketName))
-    {
-        return false;
-    }
     ItemMesh->SetMobility(EComponentMobility::Movable);
-    ItemMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+    if (!SocketName.IsNone() && GetMesh()->DoesSocketExist(SocketName))
+    {
+        ItemMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+        return true;
+    }
+    ItemMesh->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale);
     return true;
 }
 

@@ -114,15 +114,17 @@
     },
     {
       "id": "inventory",
-      "authority": "Inspect Advanced Grid Inventory System (AGIS) candidate",
-      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_AUTHORITY_UNSELECTED",
-      "actual_source_path": null,
-      "version": null,
+      "authority": "UWyrmInventoryComponent",
+      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "Source/WYRMFALL/Public/Inventory/WyrmInventoryComponent.h",
+      "version": "1.0",
       "evidence": [
         "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md",
         "Saved/Diagnostics/WP00_inventory_source_search.json",
         "Saved/Diagnostics/AGISOwnerInspection/report.json",
-        "Saved/Diagnostics/AGISOwnerInspection/save_load_report.json"
+        "Saved/Diagnostics/AGISOwnerInspection/save_load_report.json",
+        "Saved/Diagnostics/WP05_inventory_proof.json",
+        "Documentation/Current/WP05_INVENTORY_PROOF.md"
       ],
       "gate": "WP-05",
       "candidate": "Advanced Grid Inventory System (AGIS)",
@@ -131,11 +133,14 @@
     },
     {
       "id": "equipment",
-      "authority": null,
-      "state": "UNSELECTED",
-      "actual_source_path": null,
-      "version": null,
-      "evidence": [],
+      "authority": "UWyrmInventoryComponent (GAS attributes & socket attachment)",
+      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "Source/WYRMFALL/Public/Inventory/WyrmInventoryComponent.h",
+      "version": "1.0",
+      "evidence": [
+        "Saved/Diagnostics/WP05_inventory_proof.json",
+        "Documentation/Current/WP05_INVENTORY_PROOF.md"
+      ],
       "gate": "WP-05"
     },
     {
@@ -173,12 +178,14 @@
     },
     {
       "id": "save",
-      "authority": "One project coordinator, not implemented",
-      "state": "NOT_IMPLEMENTED",
-      "actual_source_path": null,
-      "version": null,
+      "authority": "UWyrmSaveSubsystem & UWyrmSaveGame",
+      "state": "WP05_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "Source/WYRMFALL/Public/Save/WyrmSaveSubsystem.h",
+      "version": "1.0",
       "evidence": [
-        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md",
+        "Saved/Diagnostics/WP05_inventory_proof.json",
+        "Documentation/Current/WP05_INVENTORY_PROOF.md"
       ],
       "gate": "WP-05"
     },
@@ -228,7 +235,7 @@
     "controller": "PASS"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 14,
+  "native_test_cases_authored": 18,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -280,6 +287,12 @@
     "COM-03": "PASS",
     "COM-04": "PASS",
     "COM-05": "PASS"
+  },
+  "wp05_state": "PASS",
+  "inventory_acceptance": {
+    "COM-06": "PASS",
+    "COM-07": "PASS",
+    "SAVE-01": "PASS"
   },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",

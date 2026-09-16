@@ -11,15 +11,15 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
 | Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
 | UHT / UBT compile | PASS | Actual headers; latest build with per-command `-NoUBA -NoPCH` succeeded in 14.52 seconds |
-| Native automation | 14/14 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, SharedControlFoundation, CombatCanonicalDamage, CombatBoundsAndDrain, CombatCostAndCooldown, CombatEnemyRolesAndStatus |
+| Native automation | 18/18 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, SharedControlFoundation, CombatCanonicalDamage, CombatBoundsAndDrain, CombatCostAndCooldown, CombatEnemyRolesAndStatus, ItemGenerationAndRolls, InventoryCapacityAndTransfer, EquipmentStatApplication, SaveSubsystemRoundtrip |
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
 | PIE, input, cameras, HUD | VERIFIED (AWyrmPlayerController & AWyrmCharacter); WP-03 PASS | Seamless third-person & top-down camera switching, direct movement cancelling click-move (WRLD-06), movement lock and pause gating (UI-02, UI-07), control state persistence (SAVE-05); 8/8 PIE checks pass; [evidence](WP03_CONTROL_PROOF.md) |
 | Mutable & Character | VERIFIED (CO_Knight & AWyrmCharacter); WP-02 PASS | Authoritative recipe authored/compiled; runtime binding, parameters (Helmet, ArmorTint), socket attachment (SM_Sword on Hand_Right), and persistence verified; [evidence](WP02_MUTABLE_RECIPE_PROOF.md) |
 | Terrain | GeoForge VERIFIED (AWyrmGeoForgeAdapter); WP-01 PASS | Authoritative adapter authored; 8/8 native tests pass; 7/7 PIE checks (WRLD-01..05, 08, SAVE-01..04) pass; [evidence](WP01_TERRAIN_PROVIDER_PROOF.md) |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
 | Real sample assets | Dirt/stone/knight/44-part Green Dragon plus wolf/sword imported and statically previewed | [Measured diagnostic scales and supplied palettes](WP00_REAL_ASSET_REVIEW.md); animation, collision, Mutable and production suitability unverified |
-| GAS & Combat | VERIFIED (AWyrmCharacter & AWyrmEnemyCharacter); WP-04 PASS | Authoritative GAS combat loop, canonical damage mitigation formulas (COM-01), shield absorption, invulnerability immunity, dead clamp (COM-02), two-camera combat (COM-03), 20 Focus cost & 5s cooldown gating (COM-04), slow combining & boss CC resistance (COM-05); 14/14 native tests pass; 5/5 PIE cases pass; [evidence](WP04_COMBAT_PROOF.md) |
-| Saves/inventory/equipment | CANDIDATES INSPECTED; owners unresolved; architectural reconciliation documented | Preserve one-owner requirements; AGIS natively inspected in UE 5.8 (10 Blueprints exported); D: unreadable (error 433) retained as history |
+| GAS & Combat | VERIFIED (AWyrmCharacter & AWyrmEnemyCharacter); WP-04 PASS | Authoritative GAS combat loop, canonical damage mitigation formulas (COM-01), shield absorption, invulnerability immunity, dead clamp (COM-02), two-camera combat (COM-03), 20 Focus cost & 5s cooldown gating (COM-04), slow combining & boss CC resistance (COM-05); 18/18 native tests pass; 5/5 PIE cases pass; [evidence](WP04_COMBAT_PROOF.md) |
+| Inventory, equipment & save | VERIFIED (UWyrmInventoryComponent & UWyrmSaveSubsystem); WP-05 PASS | Single inventory authority on character, capacity & stacking, overflow rejection (COM-07), rolled item affix generation & idempotent equipment stats with zero leaks (COM-06), single save coordinator unifying character attributes, camera, appearance, inventory, and GeoForge terrain delta (SAVE-01); 18/18 native tests pass; 3/3 PIE checks pass; [evidence](WP05_INVENTORY_PROOF.md) |
 | Dragon, Heartfold, Echoes | Requirements and integration locations preserved; NOT IMPLEMENTED | Original WP-09 onward |
 | Vehicles/colony | Future required deliverables; NOT IMPLEMENTED | Original WP-18/19 |
 | Git/remote/branch | Git initialized; origin configured; main | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame); existing remote history retained; generated data and supplied/imported vendor assets excluded |
@@ -104,9 +104,9 @@ Static visual inspection does not clear animation, Mutable, collision or full
 RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
 
 **Next bounded task:** WP-01 (GeoForge terrain provider proof), WP-02 (Playable Mutable character recipe & runtime proof),
-and WP-03 (Shared humanoid control, camera switching & input gating proof) are all complete and verified with native test
-automation and headless PIE evidence suites. The next bounded milestone is **WP-04: First Real Combat Loop** (GAS-authoritative
-attack ability, melee hitbox sweep trace, attribute modification via GameplayEffect, hit reaction, and target death handling
-without bypassing GAS or introducing secondary combat managers).
-
-
+WP-03 (Shared humanoid control, camera switching & input gating proof), WP-04 (First real combat loop proof), and
+WP-05 (Loot, equipment, inventory, and coherent save snapshot) are all complete and verified with native test
+automation and headless PIE evidence suites. The next bounded milestone is **WP-06: Second Build and Progression Fixture**
+(materially different real ranged/skirmisher build kit contrasting with the base melee knight kit, level/XP progression
+fixture modifying base attributes via GAS, distinct item affix archetypes, and demonstrable gear/build decisions without
+introducing secondary combat or progression managers).

@@ -118,6 +118,22 @@ WP-04: First Real Combat Loop Proof has been implemented and verified:
 - **Headless PIE Proof Suite:** `Saved/Diagnostics/WP04_combat_proof.json` verifies 5/5 cases (COM-01 through COM-05) with exit code 0.
 - **Evidence & Report:** [Documentation/Current/WP04_COMBAT_PROOF.md](WP04_COMBAT_PROOF.md).
 
+WP-05: Loot, Equipment, Inventory, and Coherent Save Snapshot has been implemented and verified:
+- **Single Save Coordinator:** `UWyrmSaveSubsystem` (GameInstanceSubsystem) and `UWyrmSaveGame` (SaveGame)
+  unifying character attributes, camera mode, appearance descriptor, inventory/equipment, and GeoForge terrain delta.
+  Respects the single save owner constraint without secondary managers (`SAVE-01`).
+- **Authoritative Inventory Authority:** `UWyrmInventoryComponent` on `AWyrmCharacter` with bag/stash capacity,
+  atomic transfers, and overflow protection (`COM-07`).
+- **Stable Rolled Item Instances:** `FWyrmItemInstance` with persistent GUID, rolls, and stack counts (`COM-06`).
+- **Idempotent Equipment Stat Bonuses:** Power, Armor, MaxHealth, and socket mesh attachments (`Hand_Right`,
+  `spine_02Socket`, `Back_Weapon`) with **0.0 stat leak** upon equip/unequip cycles (`COM-06`).
+- **Coherent Snapshot Roundtrip Across Restart (`SAVE-01`):** Player HP (85.0), Power (50.5), Camera Mode (TopDown),
+  equipped weapon, 1 bag item, 1 stash item, and GeoForge terrain action preserved across save and reload.
+- **Native Automation Test Suite:** 18/18 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including 4 new tests:
+  `ItemGenerationAndRolls`, `InventoryCapacityAndTransfer`, `EquipmentStatApplication`, and `SaveSubsystemRoundtrip`.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP05_inventory_proof.json` verifies 3/3 cases (`COM-06`, `COM-07`, `SAVE-01`) with exit code 0.
+- **Evidence & Report:** [Documentation/Current/WP05_INVENTORY_PROOF.md](WP05_INVENTORY_PROOF.md).
+
 ## Actual owner implementation inspection
 
 `WP00_OWNER_IMPLEMENTATION_INSPECTION.md` records native graph exports and traced
@@ -166,18 +182,19 @@ py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-## Next bounded task: WP-05 Inventory, Equipment Attachment, and Save Ownership
+## Next bounded task: WP-06 Second Build and Progression Fixture
 
-With **WP-01** (One Real Terrain Provider Proof), **WP-02** (Playable Mutable Character Recipe & Runtime Proof),
-**WP-03** (Shared Humanoid Control, Camera Switching & Input Gating Proof), and **WP-04** (First Real Combat Loop Proof)
-all fully verified and passing native test automation and headless PIE proof suites:
+With **WP-01** (Terrain Provider Proof), **WP-02** (Mutable Character Recipe), **WP-03** (Shared Control),
+**WP-04** (First Real Combat Loop), and **WP-05** (Loot, Equipment, Inventory & Coherent Save Snapshot)
+all fully verified and passing native test automation (18/18) and headless PIE proof suites:
 
-Proceed to **WP-05**:
-1. Implement single project save coordinator (`UWyrmSaveSubsystem` / `UWyrmSaveGame`) respecting the one save owner constraint.
-2. Bind AGIS inventory component (`Inventory_Player`) to `AWyrmCharacter` with defined slot capacity, spatial grid limits, and overflow handling.
-3. Reconcile equipment attachment sockets with Mutable character mesh (`Hand_Right`, `Back_Weapon`, etc.).
-4. Author native tests and headless PIE verification suite for inventory capacity, overflow, equipment stats, and save roundtrip.
-
-
-
-
+Proceed to **WP-06**:
+1. Implement a materially different real ranged/skirmisher build kit contrasting with the base melee knight kit:
+   - Primary ranged projectile / hitscan ability with distinct projectile trajectory, range limit, and damage mitigation.
+   - Secondary mobility/utility skill (e.g., Tactical Evade / Dash / Disengage) with separate focus cost and cooldown tags.
+2. Progression & level fixture:
+   - Experience gain and level-up scaling modifying Base Stats via GAS (Power, Armor, MaxHealth, MaxFocus) and scaling canonical damage formulas.
+   - Distinct item affix archetypes (e.g., Melee Berserker vs. Ranged Swiftness) demonstrating meaningful build choices.
+3. Validate gear/build decision:
+   - Side-by-side combat loop comparison verifying DPS, mitigation, and playstyle trade-offs between Build A (Heavy Melee Knight) and Build B (Agile Ranged Skirmisher).
+4. Author native test automation cases and headless PIE verification suite for WP-06.

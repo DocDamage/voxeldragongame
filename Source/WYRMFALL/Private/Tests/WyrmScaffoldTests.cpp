@@ -13,6 +13,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "MuCO/CustomizableSkeletalComponent.h"
 #include "GameplayTagsManager.h"
+#include "Inventory/WyrmInventoryTypes.h"
+#include "Inventory/WyrmInventoryComponent.h"
+#include "Save/WyrmSaveGame.h"
+#include "Save/WyrmSaveSubsystem.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -567,6 +571,285 @@ bool FWyrmCombatEnemyRolesAndStatusTest::RunTest(const FString& Parameters)
     Chaser->Destroy();
     Skirmisher->Destroy();
     Boss->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmItemGenerationTest, "WYRMFALL.Scaffold.ItemGenerationAndRolls",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmItemGenerationTest::RunTest(const FString& Parameters)
+{
+    // 1. Weapon generation (COM-06)
+    FWyrmItemInstance Weapon = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("TestBlade")), EWyrmItemType::Weapon, 2);
+    TestTrue(TEXT("Weapon instance ID is valid"), Weapon.InstanceId.IsValid());
+    TestEqual(TEXT("Weapon type is Weapon"), Weapon.ItemType, EWyrmItemType::Weapon);
+    TestEqual(TEXT("Weapon default slot is MainHand"), Weapon.DefaultSlot, EWyrmEquipSlot::MainHand);
+    TestEqual(TEXT("Weapon max stack is 1"), Weapon.MaxStack, 1);
+    TestEqual(TEXT("Weapon level 2 power roll is 17.0"), Weapon.GetStatValue(FName(TEXT("Power"))), 17.f); // 10 + 2*3.5 = 17
+
+    // 2. Armor generation
+    FWyrmItemInstance Armor = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("TestCuirass")), EWyrmItemType::Armor, 3);
+    TestTrue(TEXT("Armor instance ID is valid"), Armor.InstanceId.IsValid());
+    TestEqual(TEXT("Armor type is Armor"), Armor.ItemType, EWyrmItemType::Armor);
+    TestEqual(TEXT("Armor default slot is Chest"), Armor.DefaultSlot, EWyrmEquipSlot::Chest);
+    TestEqual(TEXT("Armor level 3 armor roll is 11.0"), Armor.GetStatValue(FName(TEXT("Armor"))), 11.f); // 5 + 3*2 = 11
+    TestEqual(TEXT("Armor level 3 max health roll is 50.0"), Armor.GetStatValue(FName(TEXT("MaxHealth"))), 50.f); // 20 + 3*10 = 50
+
+    // 3. Stacking items: consumable and resource
+    FWyrmItemInstance Elixir = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("WyrmElixir")), EWyrmItemType::Consumable, 1);
+    TestEqual(TEXT("Consumable max stack is 20"), Elixir.MaxStack, 20);
+
+    FWyrmItemInstance Ore = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("ObsidianOre")), EWyrmItemType::Resource, 1);
+    TestEqual(TEXT("Resource max stack is 99"), Ore.MaxStack, 99);
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmInventoryCapacityTest, "WYRMFALL.Scaffold.InventoryCapacityAndTransfer",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmInventoryCapacityTest::RunTest(const FString& Parameters)
+{
+    UWyrmInventoryComponent* Inv = NewObject<UWyrmInventoryComponent>();
+    Inv->MaxBagSlots = 3;
+    Inv->MaxStashSlots = 5;
+
+    // 1. Fill bag to max capacity (3 slots)
+    FWyrmItemInstance Item1 = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("Blade1")), EWyrmItemType::Weapon, 1);
+    FWyrmItemInstance Item2 = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("Blade2")), EWyrmItemType::Weapon, 1);
+    FWyrmItemInstance Item3 = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("Blade3")), EWyrmItemType::Weapon, 1);
+
+    FWyrmItemInstance Excess;
+    TestTrue(TEXT("Added item 1"), Inv->AddItem(Item1, Excess) && Excess.StackCount == 0);
+    TestTrue(TEXT("Added item 2"), Inv->AddItem(Item2, Excess) && Excess.StackCount == 0);
+    TestTrue(TEXT("Added item 3"), Inv->AddItem(Item3, Excess) && Excess.StackCount == 0);
+    TestEqual(TEXT("Bag slots at maximum 3"), Inv->GetBagItems().Num(), 3);
+
+    // 2. Overflow protection (COM-07): adding 4th item fails and returns excess without modifying bag
+    FWyrmItemInstance Item4 = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("Blade4")), EWyrmItemType::Weapon, 1);
+    TestFalse(TEXT("Cannot add 4th item when bag is full"), Inv->AddItem(Item4, Excess));
+    TestEqual(TEXT("Excess stack count retained in OutRemaining"), Excess.StackCount, 1);
+    TestEqual(TEXT("Bag count still 3 (no leak or overwrite)"), Inv->GetBagItems().Num(), 3);
+
+    // 3. Transfer from Bag to Stash atomically
+    TestTrue(TEXT("Transfer item 1 from Bag to Stash"), Inv->TransferToStash(Item1.InstanceId, 1));
+    TestEqual(TEXT("Bag count reduced to 2"), Inv->GetBagItems().Num(), 2);
+    TestEqual(TEXT("Stash count is now 1"), Inv->GetStashItems().Num(), 1);
+
+    // 4. Transfer back from Stash to Bag atomically
+    TestTrue(TEXT("Transfer item 1 from Stash back to Bag"), Inv->TransferFromStash(Item1.InstanceId, 1));
+    TestEqual(TEXT("Bag count restored to 3"), Inv->GetBagItems().Num(), 3);
+    TestEqual(TEXT("Stash count is now 0"), Inv->GetStashItems().Num(), 0);
+
+    // 5. Stack combining with resources
+    Inv->ClearAll();
+    FWyrmItemInstance OreBatch1 = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("Ore")), EWyrmItemType::Resource, 1);
+    OreBatch1.StackCount = 50;
+    Inv->AddItem(OreBatch1, Excess);
+
+    FWyrmItemInstance OreBatch2 = OreBatch1;
+    OreBatch2.StackCount = 30;
+    Inv->AddItem(OreBatch2, Excess);
+
+    TestEqual(TEXT("Bag count is 1 after stacking"), Inv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Combined stack count is 80"), Inv->GetBagItems()[0].StackCount, 80);
+
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmEquipmentStatTest, "WYRMFALL.Scaffold.EquipmentStatApplication",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmEquipmentStatTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    if (!World)
+    {
+        return true;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FTransform::Identity, SpawnParams);
+    TestNotNull(TEXT("WyrmCharacter spawned for equipment test"), Character);
+    if (!Character)
+    {
+        return true;
+    }
+
+    UWyrmAttributeSet* Attrs = Character->GetAttributes();
+    UWyrmInventoryComponent* Inv = Character->GetInventory();
+    TestNotNull(TEXT("AttributeSet present on character"), Attrs);
+    TestNotNull(TEXT("InventoryComponent present on character"), Inv);
+    if (!Attrs || !Inv)
+    {
+        Character->Destroy();
+        return true;
+    }
+
+    const float BasePower = Attrs->GetCurrentPower();
+    const float BaseArmor = Attrs->GetCurrentArmor();
+    const float BaseMaxHealth = Attrs->GetCurrentMaxHealth();
+
+    // 1. Generate rolled weapon (+17 Power) and add to bag
+    FWyrmItemInstance Weapon = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("IronSword")), EWyrmItemType::Weapon, 2);
+    FWyrmItemInstance Excess;
+    Inv->AddItem(Weapon, Excess);
+
+    // 2. Equip weapon and verify stats (COM-06)
+    TestTrue(TEXT("Weapon equipped successfully"), Inv->EquipItem(Weapon.InstanceId, EWyrmEquipSlot::MainHand));
+    TestTrue(TEXT("MainHand is equipped"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
+    TestEqual(TEXT("Power increased by weapon bonus (+17)"), Attrs->GetCurrentPower(), BasePower + 17.f);
+    TestEqual(TEXT("Bag items count is 0 after equip"), Inv->GetBagItems().Num(), 0);
+
+    // 3. Generate rolled armor (+11 Armor, +50 MaxHealth) and equip
+    FWyrmItemInstance Armor = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("SteelPlate")), EWyrmItemType::Armor, 3);
+    Inv->AddItem(Armor, Excess);
+    TestTrue(TEXT("Armor equipped successfully"), Inv->EquipItem(Armor.InstanceId, EWyrmEquipSlot::Chest));
+    TestEqual(TEXT("Armor increased by armor bonus (+11)"), Attrs->GetCurrentArmor(), BaseArmor + 11.f);
+    TestEqual(TEXT("MaxHealth increased by armor bonus (+50)"), Attrs->GetCurrentMaxHealth(), BaseMaxHealth + 50.f);
+
+    // 4. Unequip weapon and verify clean return to base power (zero leaks)
+    TestTrue(TEXT("Weapon unequipped successfully"), Inv->UnequipItem(EWyrmEquipSlot::MainHand));
+    TestFalse(TEXT("MainHand no longer equipped"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
+    TestEqual(TEXT("Power returned exactly to base value"), Attrs->GetCurrentPower(), BasePower);
+    TestEqual(TEXT("Bag items count is 1 after unequip"), Inv->GetBagItems().Num(), 1);
+
+    // 5. Unequip armor and verify clean return to base armor and health
+    TestTrue(TEXT("Armor unequipped successfully"), Inv->UnequipItem(EWyrmEquipSlot::Chest));
+    TestEqual(TEXT("Armor returned exactly to base value"), Attrs->GetCurrentArmor(), BaseArmor);
+    TestEqual(TEXT("MaxHealth returned exactly to base value"), Attrs->GetCurrentMaxHealth(), BaseMaxHealth);
+
+    // 6. Test overflow guard on unequip: fill bag completely, then verify unequip is rejected
+    Inv->EquipItem(Weapon.InstanceId, EWyrmEquipSlot::MainHand);
+    Inv->MaxBagSlots = 1;
+    Inv->AddItem(Armor, Excess); // Bag is now 1/1 full
+    TestFalse(TEXT("Cannot unequip weapon when bag is full (overflow protection)"), Inv->UnequipItem(EWyrmEquipSlot::MainHand));
+    TestTrue(TEXT("Weapon remains equipped"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
+
+    Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmSaveSubsystemTest, "WYRMFALL.Scaffold.SaveSubsystemRoundtrip",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmSaveSubsystemTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    if (!World)
+    {
+        return true;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FTransform::Identity, SpawnParams);
+    TestNotNull(TEXT("WyrmCharacter spawned for save test"), Character);
+    if (!Character)
+    {
+        return true;
+    }
+
+    UWyrmAttributeSet* Attrs = Character->GetAttributes();
+    UWyrmInventoryComponent* Inv = Character->GetInventory();
+
+    // Setup custom character state
+    Attrs->SetCurrentHealth(75.f);
+    Attrs->SetCurrentPower(25.f);
+    Attrs->SetCurrentArmor(15.f);
+    Character->SetCameraMode(EWyrmCameraMode::TopDown);
+
+    // Setup inventory with rolled weapon equipped and potion in bag
+    FWyrmItemInstance Weapon = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("RelicSword")), EWyrmItemType::Weapon, 2);
+    FWyrmItemInstance Potion = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("HealPotion")), EWyrmItemType::Consumable, 1);
+    Potion.StackCount = 5;
+
+    FWyrmItemInstance Excess;
+    Inv->AddItem(Weapon, Excess);
+    Inv->AddItem(Potion, Excess);
+    Inv->EquipItem(Weapon.InstanceId, EWyrmEquipSlot::MainHand);
+
+    // Create mock terrain provider with delta payload
+    AWyrmGeoForgeAdapter* Adapter = World->SpawnActor<AWyrmGeoForgeAdapter>(AWyrmGeoForgeAdapter::StaticClass(), SpawnParams);
+    FGuid MockActionId = FGuid::NewGuid();
+    Adapter->ProcessedActionIds.Add(MockActionId);
+
+    // Capture unified snapshot
+    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("TestSlot_WP05"), Character, Adapter);
+    TestNotNull(TEXT("Snapshot created successfully"), Snapshot);
+    TestEqual(TEXT("Snapshot camera mode is TopDown"), Snapshot->CharacterRecord.CameraMode, EWyrmCameraMode::TopDown);
+    TestEqual(TEXT("Snapshot contains 1 equipped item"), Snapshot->InventoryRecord.EquippedItems.Num(), 1);
+    TestEqual(TEXT("Snapshot contains 1 bag item (potion)"), Snapshot->InventoryRecord.BagItems.Num(), 1);
+    TestEqual(TEXT("Snapshot contains terrain action ID"), Snapshot->TerrainRecord.ProcessedActionIds.Num(), 1);
+
+    // Mutate character to different state
+    Attrs->SetCurrentHealth(10.f);
+    Attrs->SetCurrentPower(5.f);
+    Character->SetCameraMode(EWyrmCameraMode::ThirdPerson);
+    Inv->ClearAll();
+    Adapter->ProcessedActionIds.Empty();
+
+    // Restore snapshot
+    TestTrue(TEXT("Snapshot applied successfully"), UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Character, Adapter));
+
+    // Verify complete restoration fidelity
+    TestEqual(TEXT("Restored health matches snapshot"), Attrs->GetCurrentHealth(), 75.f);
+    TestEqual(TEXT("Restored power matches (base + equipped bonus)"), Attrs->GetCurrentPower(), 42.f);
+    TestEqual(TEXT("Restored camera mode is TopDown"), Character->GetCameraMode(), EWyrmCameraMode::TopDown);
+    TestTrue(TEXT("Restored main hand is equipped"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
+    TestEqual(TEXT("Restored bag item count is 1"), Inv->GetBagItems().Num(), 1);
+    TestEqual(TEXT("Restored bag item is potion with 5 stacks"), Inv->GetBagItems()[0].StackCount, 5);
+    TestTrue(TEXT("Restored terrain action ID"), Adapter->ProcessedActionIds.Contains(MockActionId));
+
+    // Test slot disk I/O save/load roundtrip (SAVE-01)
+    const FString SlotName = TEXT("WyrmSlot_UnitTest");
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI)
+    {
+        GI = NewObject<UGameInstance>(World);
+    }
+    UWyrmSaveSubsystem* SaveSys = NewObject<UWyrmSaveSubsystem>(GI);
+    TestTrue(TEXT("SaveGameSnapshot to slot succeeds"), SaveSys->SaveGameSnapshot(SlotName, Character, Adapter));
+    TestTrue(TEXT("DoesSaveExist returns true for slot"), SaveSys->DoesSaveExist(SlotName));
+
+    // Clear and reload from disk slot
+    Inv->ClearAll();
+    TestTrue(TEXT("LoadGameSnapshot from slot succeeds"), SaveSys->LoadGameSnapshot(SlotName, Character, Adapter));
+    TestTrue(TEXT("Slot load restored equipped item"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
+
+    // Delete slot cleanup
+    TestTrue(TEXT("DeleteSaveSlot cleans up slot"), SaveSys->DeleteSaveSlot(SlotName));
+    TestFalse(TEXT("DoesSaveExist returns false after deletion"), SaveSys->DoesSaveExist(SlotName));
+
+    Character->Destroy();
+    Adapter->Destroy();
     return true;
 }
 #endif

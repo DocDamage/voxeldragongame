@@ -12,6 +12,7 @@ class UCameraComponent;
 class UCustomizableSkeletalComponent;
 class UCustomizableObject;
 class UCustomizableObjectInstance;
+class UWyrmInventoryComponent;
 
 // Humanoid host with Mutable visual authority.
 UCLASS()
@@ -88,6 +89,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Equipment")
     bool IsSocketValid(FName SocketName) const;
 
+    // --- Inventory & Equipment (WP-05) ---
+    UFUNCTION(BlueprintPure, Category="Inventory")
+    UWyrmInventoryComponent* GetInventory() const { return InventoryComponent; }
+
 protected:
     virtual void BeginPlay() override;
     UPROPERTY(VisibleAnywhere, Category="Combat") TObjectPtr<UAbilitySystemComponent> AbilitySystem;
@@ -100,6 +105,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance")
     TObjectPtr<UCustomizableObjectInstance> CustomizableInstance;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
+    TObjectPtr<UWyrmInventoryComponent> InventoryComponent;
 
 private:
     void ApplyCamera();
