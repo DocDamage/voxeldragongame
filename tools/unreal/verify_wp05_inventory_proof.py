@@ -187,9 +187,13 @@ def main():
 
     # Configure custom character state
     attrs.set_current_health(85.0)
+    attrs.set_current_max_focus(175.0)
+    attrs.set_current_focus(140.0)
+    attrs.set_current_character_level(7.0)
     attrs.set_current_power(30.0)
     attrs.set_current_armor(12.0)
     player.set_camera_mode(unreal.WyrmCameraMode.TOP_DOWN)
+    player.set_actor_location_and_rotation(unreal.Vector(0.0, 0.0, 0.0), unreal.Rotator(0.0, 37.0, 0.0), False, False)
 
     # Add items: 1 weapon equipped (+20.5 Power), 1 consumable in bag (5 potions), 1 resource in stash (50 ore)
     relic_wep = unreal.WyrmInventoryComponent.roll_random_item("RelicBlade", unreal.WyrmItemType.WEAPON, 3, unreal.WyrmEquipSlot.MAIN_HAND)
@@ -205,50 +209,58 @@ def main():
     inv.equip_item(relic_wep.instance_id, unreal.WyrmEquipSlot.MAIN_HAND)
     inv.transfer_to_stash(ore.instance_id, 50)
 
-    # Spawn mock terrain provider with action ID
-    adapter_loc = unreal.Vector(500.0, 0.0, 0.0)
-    adapter = unreal.EditorLevelLibrary.spawn_actor_from_class(unreal.WyrmGeoForgeAdapter, adapter_loc)
-    mock_action_id = unreal.WyrmInventoryComponent.roll_random_item("ActionGuid", unreal.WyrmItemType.RESOURCE, 1).instance_id
-    if adapter:
-        adapter.processed_action_ids.add(mock_action_id)
-
-    # Save to slot using authoritative static helper
+    # Save the character/inventory portion using the authoritative static helper.
+    # WP-01 separately exercises a bound GeoForge binary payload; an unbound
+    # terrain adapter is no longer accepted as terrain evidence.
     slot_name = "WP05_Proof_Slot"
-    save_ok = unreal.WyrmSaveSubsystem.save_snapshot_to_slot(slot_name, player, adapter)
+    save_ok = unreal.WyrmSaveSubsystem.save_snapshot_to_slot(slot_name, player, None)
     log(f"SAVE-01 Snapshot Saved to Slot '{slot_name}': Success={save_ok}")
 
     # Mutate player & inventory to blank/different state
     attrs.set_current_health(15.0)
+    attrs.set_current_max_focus(20.0)
+    attrs.set_current_focus(5.0)
+    attrs.set_current_character_level(1.0)
     attrs.set_current_power(5.0)
     player.set_camera_mode(unreal.WyrmCameraMode.THIRD_PERSON)
+    player.set_actor_location(unreal.Vector(1000.0, 1000.0, 1000.0), False, False)
     inv.clear_all()
-    if adapter:
-        adapter.processed_action_ids.clear()
 
     # Reload snapshot from slot
-    load_ok = unreal.WyrmSaveSubsystem.load_snapshot_from_slot(slot_name, player, adapter)
+    load_ok = unreal.WyrmSaveSubsystem.load_snapshot_from_slot(slot_name, player, None)
     log(f"SAVE-01 Snapshot Reloaded from Slot '{slot_name}': Success={load_ok}")
 
     # Inspect restored state
     restored_hp = attrs.get_current_health()
+    restored_max_focus = attrs.get_current_max_focus()
+    restored_focus = attrs.get_current_focus()
+    restored_level = attrs.get_current_character_level()
     restored_power = attrs.get_current_power()
     restored_camera = player.get_camera_mode()
     restored_wep_equipped = inv.is_slot_equipped(unreal.WyrmEquipSlot.MAIN_HAND)
     restored_bag_items = inv.get_bag_items()
     restored_stash_items = inv.get_stash_items()
-    restored_terrain_action = (mock_action_id in adapter.processed_action_ids) if adapter else True
+    restored_location = player.get_actor_location()
+    world_origin_restored = (
+        abs(restored_location.x) < 0.01 and
+        abs(restored_location.y) < 0.01 and
+        abs(restored_location.z) < 0.01
+    )
 
     log(f"Restored: HP={restored_hp} (Expected=85.0), Power={restored_power} (Expected={30.0 + relic_power}), Camera={restored_camera} (Expected=TopDown), WeaponEquipped={restored_wep_equipped}, BagNum={len(restored_bag_items)}, StashNum={len(restored_stash_items)}")
 
     save01_pass = (
         save_ok and load_ok and
         abs(restored_hp - 85.0) < 0.01 and
+        abs(restored_max_focus - 175.0) < 0.01 and
+        abs(restored_focus - 140.0) < 0.01 and
+        abs(restored_level - 7.0) < 0.01 and
         abs(restored_power - (30.0 + relic_power)) < 0.01 and
         restored_camera == unreal.WyrmCameraMode.TOP_DOWN and
         restored_wep_equipped and
         len(restored_bag_items) == 1 and restored_bag_items[0].stack_count == 5 and
         len(restored_stash_items) == 1 and restored_stash_items[0].stack_count == 50 and
-        restored_terrain_action
+        world_origin_restored
     )
 
     results["SAVE-01"] = {
@@ -256,19 +268,20 @@ def main():
         "save_success": save_ok,
         "load_success": load_ok,
         "restored_health": restored_hp,
+        "restored_max_focus": restored_max_focus,
+        "restored_focus": restored_focus,
+        "restored_character_level": restored_level,
         "restored_power": restored_power,
         "restored_camera_mode": str(restored_camera),
         "weapon_remains_equipped": restored_wep_equipped,
         "bag_item_count": len(restored_bag_items),
         "stash_item_count": len(restored_stash_items),
-        "terrain_action_restored": restored_terrain_action
+        "world_origin_restored": world_origin_restored
     }
     if not save01_pass:
         passed = False
 
     # Cleanup actors
-    if adapter:
-        adapter.destroy_actor()
     player.destroy_actor()
 
     # Clean up save slot if created

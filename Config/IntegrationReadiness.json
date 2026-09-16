@@ -294,6 +294,10 @@
     "COM-07": "PASS",
     "SAVE-01": "PASS"
   },
+  "wp06_state": "PASS",
+  "progression_acceptance": {
+    "COM-08": "PASS"
+  },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
     "Saved/Diagnostics/WP00_native_samples.json",

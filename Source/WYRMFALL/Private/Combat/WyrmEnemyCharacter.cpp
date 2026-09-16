@@ -42,8 +42,10 @@ void AWyrmEnemyCharacter::BeginPlay()
 
         if (Attributes)
         {
-            AbilitySystem->GetGameplayAttributeValueChangeDelegate(Attributes->GetHealthAttribute())
-                .AddUObject(this, &AWyrmEnemyCharacter::HandleHealthChanged);
+            FOnGameplayAttributeValueChange& HealthChanged =
+                AbilitySystem->GetGameplayAttributeValueChangeDelegate(Attributes->GetHealthAttribute());
+            HealthChanged.RemoveAll(this);
+            HealthChanged.AddUObject(this, &AWyrmEnemyCharacter::HandleHealthChanged);
         }
     }
 
@@ -355,8 +357,10 @@ AWyrmEnemyCharacter* AWyrmEnemyCharacter::SpawnWyrmEnemy(UObject* WorldContextOb
 
             if (NewEnemy->Attributes)
             {
-                NewEnemy->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(NewEnemy->Attributes->GetHealthAttribute())
-                    .AddUObject(NewEnemy, &AWyrmEnemyCharacter::HandleHealthChanged);
+                FOnGameplayAttributeValueChange& HealthChanged =
+                    NewEnemy->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(NewEnemy->Attributes->GetHealthAttribute());
+                HealthChanged.RemoveAll(NewEnemy);
+                HealthChanged.AddUObject(NewEnemy, &AWyrmEnemyCharacter::HandleHealthChanged);
             }
         }
         NewEnemy->ConfigureForRole(InRole);

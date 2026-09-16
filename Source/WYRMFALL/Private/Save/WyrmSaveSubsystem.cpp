@@ -124,7 +124,8 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
             SaveObj->CharacterRecord.Health = FMath::Min(Attrs->GetCurrentHealth(), SaveObj->CharacterRecord.MaxHealth);
             SaveObj->CharacterRecord.Focus = Attrs->GetCurrentFocus();
             SaveObj->CharacterRecord.MaxFocus = Attrs->GetCurrentMaxFocus();
-            SaveObj->CharacterRecord.CharacterLevel = Attrs->GetCharacterLevel();
+            SaveObj->CharacterRecord.CharacterLevel = Character->GetCharacterLevel();
+            SaveObj->CharacterRecord.CurrentXP = Character->GetCurrentXP();
             SaveObj->CharacterRecord.Power = FMath::Max(0.f, Attrs->GetCurrentPower() - PowerBonus);
             SaveObj->CharacterRecord.Armor = FMath::Max(0.f, Attrs->GetCurrentArmor() - ArmorBonus);
             SaveObj->CharacterRecord.Shield = Attrs->GetCurrentShield();
@@ -148,11 +149,12 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
 
     if (TerrainProviderActor)
     {
-        if (AWyrmGeoForgeAdapter* Adapter = Cast<AWyrmGeoForgeAdapter>(TerrainProviderActor))
+        AWyrmGeoForgeAdapter* Adapter = Cast<AWyrmGeoForgeAdapter>(TerrainProviderActor);
+        if (!Adapter || !Adapter->BuildSavePayload(SaveObj->TerrainRecord.TerrainDeltaPayload))
         {
-            Adapter->BuildSavePayload(SaveObj->TerrainRecord.TerrainDeltaPayload);
-            SaveObj->TerrainRecord.ProcessedActionIds = Adapter->ProcessedActionIds.Array();
+            return nullptr;
         }
+        SaveObj->TerrainRecord.ProcessedActionIds = Adapter->ProcessedActionIds.Array();
     }
 
     return SaveObj;
@@ -160,17 +162,33 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
 
 bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor)
 {
-    if (!SaveObj)
+    if (!SaveObj || SaveObj->SchemaVersion != UWyrmSaveGame::CurrentSchemaVersion)
     {
         return false;
+    }
+
+    // Validate and restore the terrain owner first so a failed terrain payload
+    // cannot leave the remaining owners partially restored.
+    if (TerrainProviderActor)
+    {
+        AWyrmGeoForgeAdapter* Adapter = Cast<AWyrmGeoForgeAdapter>(TerrainProviderActor);
+        if (!Adapter || SaveObj->TerrainRecord.TerrainDeltaPayload.IsEmpty() ||
+            !Adapter->ApplySavePayload(SaveObj->TerrainRecord.TerrainDeltaPayload))
+        {
+            return false;
+        }
+        Adapter->ProcessedActionIds = TSet<FGuid>(SaveObj->TerrainRecord.ProcessedActionIds);
     }
 
     if (Character)
     {
         if (UWyrmAttributeSet* Attrs = Character->GetAttributes())
         {
+            Character->SetCharacterLevel(SaveObj->CharacterRecord.CharacterLevel);
+            Character->SetCurrentXP(SaveObj->CharacterRecord.CurrentXP);
             Attrs->SetCurrentMaxHealth(SaveObj->CharacterRecord.MaxHealth);
             Attrs->SetCurrentHealth(SaveObj->CharacterRecord.Health);
+            Attrs->SetCurrentMaxFocus(SaveObj->CharacterRecord.MaxFocus);
             Attrs->SetCurrentFocus(SaveObj->CharacterRecord.Focus);
             Attrs->SetCurrentPower(SaveObj->CharacterRecord.Power);
             Attrs->SetCurrentArmor(SaveObj->CharacterRecord.Armor);
@@ -179,10 +197,7 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
 
         Character->SetCameraMode(SaveObj->CharacterRecord.CameraMode);
         Character->SetMovementLocked(SaveObj->CharacterRecord.bMovementLocked);
-        if (!SaveObj->CharacterRecord.WorldLocation.IsZero())
-        {
-            Character->SetActorLocationAndRotation(SaveObj->CharacterRecord.WorldLocation, SaveObj->CharacterRecord.WorldRotation);
-        }
+        Character->SetActorLocationAndRotation(SaveObj->CharacterRecord.WorldLocation, SaveObj->CharacterRecord.WorldRotation);
         if (!SaveObj->CharacterRecord.AppearanceDescriptor.IsEmpty())
         {
             Character->RestoreAppearanceDescriptor(SaveObj->CharacterRecord.AppearanceDescriptor);
@@ -193,18 +208,6 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             Inv->MaxBagSlots = SaveObj->InventoryRecord.MaxBagSlots;
             Inv->MaxStashSlots = SaveObj->InventoryRecord.MaxStashSlots;
             Inv->RestoreInventoryState(SaveObj->InventoryRecord.BagItems, SaveObj->InventoryRecord.StashItems, SaveObj->InventoryRecord.EquippedItems);
-        }
-    }
-
-    if (TerrainProviderActor)
-    {
-        if (AWyrmGeoForgeAdapter* Adapter = Cast<AWyrmGeoForgeAdapter>(TerrainProviderActor))
-        {
-            if (SaveObj->TerrainRecord.TerrainDeltaPayload.Num() > 0)
-            {
-                Adapter->ApplySavePayload(SaveObj->TerrainRecord.TerrainDeltaPayload);
-            }
-            Adapter->ProcessedActionIds = TSet<FGuid>(SaveObj->TerrainRecord.ProcessedActionIds);
         }
     }
 

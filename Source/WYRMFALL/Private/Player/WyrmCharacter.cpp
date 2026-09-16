@@ -2,6 +2,8 @@
 #include "AbilitySystemComponent.h"
 #include "Combat/WyrmAttributeSet.h"
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
+#include "Combat/Abilities/WyrmRangedAttackAbility.h"
+#include "Combat/Abilities/WyrmEvadeAbility.h"
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -37,6 +39,20 @@ AWyrmCharacter::AWyrmCharacter()
     InventoryComponent = CreateDefaultSubobject<UWyrmInventoryComponent>(TEXT("InventoryComponent"));
     ApplyCamera();
 }
+
+void AWyrmCharacter::PostInitializeComponents()
+{
+    Super::PostInitializeComponents();
+    if (AbilitySystem)
+    {
+        AbilitySystem->InitAbilityActorInfo(this, this);
+        if (Attributes && !AbilitySystem->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+        {
+            AbilitySystem->AddAttributeSetSubobject(Attributes.Get());
+        }
+    }
+}
+
 void AWyrmCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -287,35 +303,181 @@ void AWyrmCharacter::GrantCombatAbilities()
         AbilitySystem->AddLooseGameplayTag(PlayerTeamTag);
     }
 
-    if (!PrimaryAttackHandle.IsValid())
+    if (!PrimaryMeleeHandle.IsValid())
     {
-        PrimaryAttackHandle = AbilitySystem->GiveAbility(
+        PrimaryMeleeHandle = AbilitySystem->GiveAbility(
             FGameplayAbilitySpec(UWyrmPrimaryMeleeAbility::StaticClass(), 1, INDEX_NONE, this));
     }
 
-    if (!SecondaryAttackHandle.IsValid())
+    if (!SecondaryMeleeHandle.IsValid())
     {
-        SecondaryAttackHandle = AbilitySystem->GiveAbility(
+        SecondaryMeleeHandle = AbilitySystem->GiveAbility(
             FGameplayAbilitySpec(UWyrmSecondaryMeleeAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+
+    if (!PrimaryRangedHandle.IsValid())
+    {
+        PrimaryRangedHandle = AbilitySystem->GiveAbility(
+            FGameplayAbilitySpec(UWyrmPrimaryRangedAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+
+    if (!SecondaryRangedHandle.IsValid())
+    {
+        SecondaryRangedHandle = AbilitySystem->GiveAbility(
+            FGameplayAbilitySpec(UWyrmSecondaryRangedAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+
+    if (!EvadeHandle.IsValid())
+    {
+        EvadeHandle = AbilitySystem->GiveAbility(
+            FGameplayAbilitySpec(UWyrmEvadeAbility::StaticClass(), 1, INDEX_NONE, this));
+    }
+
+    UpdateActiveWeaponKit();
+}
+
+void AWyrmCharacter::UpdateActiveWeaponKit()
+{
+    if (!InventoryComponent)
+    {
+        ActiveWeaponFamily = EWyrmWeaponFamily::Unarmed;
+        return;
+    }
+
+    FWyrmItemInstance MainHandItem;
+    if (InventoryComponent->GetEquippedItem(EWyrmEquipSlot::MainHand, MainHandItem) && MainHandItem.ItemType == EWyrmItemType::Weapon)
+    {
+        ActiveWeaponFamily = MainHandItem.WeaponFamily;
+        if (ActiveWeaponFamily == EWyrmWeaponFamily::Unarmed)
+        {
+            if (MainHandItem.ItemId.ToString().Contains(TEXT("Bow")) || MainHandItem.ItemId.ToString().Contains(TEXT("Ranger")))
+            {
+                ActiveWeaponFamily = EWyrmWeaponFamily::RangedBow;
+            }
+            else
+            {
+                ActiveWeaponFamily = EWyrmWeaponFamily::Melee1H;
+            }
+        }
+    }
+    else
+    {
+        ActiveWeaponFamily = EWyrmWeaponFamily::Unarmed;
     }
 }
 
 bool AWyrmCharacter::PerformPrimaryAttack()
 {
-    if (bMovementLocked || !AbilitySystem || !PrimaryAttackHandle.IsValid())
+    if (bMovementLocked || !AbilitySystem)
     {
         return false;
     }
-    return AbilitySystem->TryActivateAbility(PrimaryAttackHandle);
+
+    if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
+    {
+        return PrimaryRangedHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryRangedHandle);
+    }
+
+    return PrimaryMeleeHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryMeleeHandle);
 }
 
 bool AWyrmCharacter::PerformSecondaryAttack()
 {
-    if (bMovementLocked || !AbilitySystem || !SecondaryAttackHandle.IsValid())
+    if (bMovementLocked || !AbilitySystem)
     {
         return false;
     }
-    return AbilitySystem->TryActivateAbility(SecondaryAttackHandle);
+
+    if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
+    {
+        return SecondaryRangedHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryRangedHandle);
+    }
+
+    return SecondaryMeleeHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryMeleeHandle);
 }
 
+bool AWyrmCharacter::PerformEvade()
+{
+    if (bMovementLocked || !AbilitySystem || !EvadeHandle.IsValid())
+    {
+        return false;
+    }
+    return AbilitySystem->TryActivateAbility(EvadeHandle);
+}
+
+float AWyrmCharacter::CalculateXPForNextLevel(float InLevel)
+{
+    // XPNeeded(L) = 100 + 50*(L - 1) per GAME_DESIGN.md line 28
+    return 100.f + 50.f * FMath::Max(0.f, InLevel - 1.f);
+}
+
+float AWyrmCharacter::GetCharacterLevel() const
+{
+    return Attributes ? Attributes->GetCurrentCharacterLevel() : 1.f;
+}
+
+float AWyrmCharacter::GetXPToNextLevel() const
+{
+    return FMath::Max(0.f, GetXPForNextLevel() - CurrentXP);
+}
+
+float AWyrmCharacter::GetXPForNextLevel() const
+{
+    return CalculateXPForNextLevel(GetCharacterLevel());
+}
+
+void AWyrmCharacter::SetCurrentXP(float InXP)
+{
+    CurrentXP = FMath::Max(0.f, InXP);
+}
+
+void AWyrmCharacter::SetCharacterLevel(float NewLevel)
+{
+    const float ClampedLevel = FMath::Max(1.f, NewLevel);
+    if (Attributes)
+    {
+        Attributes->SetCurrentCharacterLevel(ClampedLevel);
+
+        // Scale base attributes per COMBAT_AND_NIGHTMARE_ECHOES.md Section 2
+        const float NewMaxHealth = UWyrmAttributeSet::CalculateMaxHealthForLevel(ClampedLevel);
+        const float NewPower = UWyrmAttributeSet::CalculatePowerForLevel(ClampedLevel);
+
+        // Account for any active equipment bonuses
+        float EquipHealthBonus = 0.f;
+        float EquipPowerBonus = 0.f;
+        if (InventoryComponent)
+        {
+            EquipHealthBonus = InventoryComponent->GetEquippedStatBonus(FName(TEXT("MaxHealth")));
+            EquipPowerBonus = InventoryComponent->GetEquippedStatBonus(FName(TEXT("Power")));
+        }
+
+        Attributes->SetCurrentMaxHealth(NewMaxHealth + EquipHealthBonus);
+        Attributes->SetCurrentPower(NewPower + EquipPowerBonus);
+        Attributes->SetCurrentHealth(Attributes->GetCurrentMaxHealth());
+    }
+}
+
+bool AWyrmCharacter::AddExperience(float Amount)
+{
+    if (Amount <= 0.f)
+    {
+        return false;
+    }
+
+    const float StartingLevel = GetCharacterLevel();
+    CurrentXP += Amount;
+    CheckLevelUp();
+    return GetCharacterLevel() > StartingLevel;
+}
+
+void AWyrmCharacter::CheckLevelUp()
+{
+    float RequiredXP = GetXPForNextLevel();
+    while (RequiredXP > 0.f && CurrentXP >= RequiredXP)
+    {
+        CurrentXP -= RequiredXP;
+        SetCharacterLevel(GetCharacterLevel() + 1.f);
+        RequiredXP = GetXPForNextLevel();
+    }
+}
 

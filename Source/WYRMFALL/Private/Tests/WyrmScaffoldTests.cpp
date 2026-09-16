@@ -17,6 +17,7 @@
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Save/WyrmSaveGame.h"
 #include "Save/WyrmSaveSubsystem.h"
+#include "Combat/Projectiles/WyrmProjectile.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -652,6 +653,30 @@ bool FWyrmInventoryCapacityTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Bag count is 1 after stacking"), Inv->GetBagItems().Num(), 1);
     TestEqual(TEXT("Combined stack count is 80"), Inv->GetBagItems()[0].StackCount, 80);
 
+    // 6. A cross-component transfer must not partially fill the target when the
+    // complete requested count will not fit.
+    UWyrmInventoryComponent* SourceInv = NewObject<UWyrmInventoryComponent>();
+    UWyrmInventoryComponent* TargetInv = NewObject<UWyrmInventoryComponent>();
+    SourceInv->MaxBagSlots = 1;
+    TargetInv->MaxBagSlots = 1;
+
+    FWyrmItemInstance SourceOre = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("SharedOre")), EWyrmItemType::Resource, 1);
+    SourceOre.StackCount = 10;
+    FWyrmItemInstance TargetOre = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("SharedOre")), EWyrmItemType::Resource, 1);
+    TargetOre.StackCount = 98;
+    TestTrue(TEXT("Source ore added"), SourceInv->AddItem(SourceOre, Excess));
+    TestTrue(TEXT("Target ore added"), TargetInv->AddItem(TargetOre, Excess));
+
+    TestFalse(TEXT("Two-item transfer rejects partial target capacity"),
+        SourceInv->TransferItem(TargetInv, SourceOre.InstanceId, 2));
+    TestEqual(TEXT("Rejected transfer preserves source count"), SourceInv->GetBagItems()[0].StackCount, 10);
+    TestEqual(TEXT("Rejected transfer preserves target count"), TargetInv->GetBagItems()[0].StackCount, 98);
+
+    TestTrue(TEXT("One-item transfer succeeds into remaining stack space"),
+        SourceInv->TransferItem(TargetInv, SourceOre.InstanceId, 1));
+    TestEqual(TEXT("Successful transfer decrements source"), SourceInv->GetBagItems()[0].StackCount, 9);
+    TestEqual(TEXT("Successful transfer fills target stack"), TargetInv->GetBagItems()[0].StackCount, 99);
+
     return true;
 }
 
@@ -782,9 +807,13 @@ bool FWyrmSaveSubsystemTest::RunTest(const FString& Parameters)
 
     // Setup custom character state
     Attrs->SetCurrentHealth(75.f);
+    Attrs->SetCurrentMaxFocus(175.f);
+    Attrs->SetCurrentFocus(140.f);
+    Attrs->SetCurrentCharacterLevel(7.f);
     Attrs->SetCurrentPower(25.f);
     Attrs->SetCurrentArmor(15.f);
     Character->SetCameraMode(EWyrmCameraMode::TopDown);
+    Character->SetActorLocationAndRotation(FVector::ZeroVector, FRotator(0.f, 37.f, 0.f));
 
     // Setup inventory with rolled weapon equipped and potion in bag
     FWyrmItemInstance Weapon = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("RelicSword")), EWyrmItemType::Weapon, 2);
@@ -796,37 +825,66 @@ bool FWyrmSaveSubsystemTest::RunTest(const FString& Parameters)
     Inv->AddItem(Potion, Excess);
     Inv->EquipItem(Weapon.InstanceId, EWyrmEquipSlot::MainHand);
 
-    // Create mock terrain provider with delta payload
+    // A supplied terrain owner must produce a real payload. An unbound adapter
+    // is rejected instead of silently creating a partial snapshot.
     AWyrmGeoForgeAdapter* Adapter = World->SpawnActor<AWyrmGeoForgeAdapter>(AWyrmGeoForgeAdapter::StaticClass(), SpawnParams);
-    FGuid MockActionId = FGuid::NewGuid();
-    Adapter->ProcessedActionIds.Add(MockActionId);
+    TestNull(TEXT("Snapshot rejects an unbound terrain adapter"),
+        UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("InvalidTerrain_WP05"), Character, Adapter));
 
-    // Capture unified snapshot
-    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("TestSlot_WP05"), Character, Adapter);
+    // Capture the character/inventory portion. WP-01 exercises the real bound
+    // GeoForge binary payload path.
+    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("TestSlot_WP05"), Character, nullptr);
     TestNotNull(TEXT("Snapshot created successfully"), Snapshot);
+    if (!Snapshot)
+    {
+        return false;
+    }
     TestEqual(TEXT("Snapshot camera mode is TopDown"), Snapshot->CharacterRecord.CameraMode, EWyrmCameraMode::TopDown);
     TestEqual(TEXT("Snapshot contains 1 equipped item"), Snapshot->InventoryRecord.EquippedItems.Num(), 1);
     TestEqual(TEXT("Snapshot contains 1 bag item (potion)"), Snapshot->InventoryRecord.BagItems.Num(), 1);
-    TestEqual(TEXT("Snapshot contains terrain action ID"), Snapshot->TerrainRecord.ProcessedActionIds.Num(), 1);
+    TestEqual(TEXT("Snapshot preserves max focus"), Snapshot->CharacterRecord.MaxFocus, 175.f);
+    TestEqual(TEXT("Snapshot preserves character level"), Snapshot->CharacterRecord.CharacterLevel, 7.f);
+    TestTrue(TEXT("Snapshot preserves a legitimate world-origin location"), Snapshot->CharacterRecord.WorldLocation.IsZero());
 
     // Mutate character to different state
     Attrs->SetCurrentHealth(10.f);
+    Attrs->SetCurrentMaxFocus(20.f);
+    Attrs->SetCurrentFocus(5.f);
+    Attrs->SetCurrentCharacterLevel(1.f);
     Attrs->SetCurrentPower(5.f);
     Character->SetCameraMode(EWyrmCameraMode::ThirdPerson);
+    Character->SetActorLocationAndRotation(FVector(1000.f, 1000.f, 1000.f), FRotator::ZeroRotator);
     Inv->ClearAll();
-    Adapter->ProcessedActionIds.Empty();
 
     // Restore snapshot
-    TestTrue(TEXT("Snapshot applied successfully"), UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Character, Adapter));
+    TestTrue(TEXT("Snapshot applied successfully"), UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Character, nullptr));
 
     // Verify complete restoration fidelity
     TestEqual(TEXT("Restored health matches snapshot"), Attrs->GetCurrentHealth(), 75.f);
+    TestEqual(TEXT("Restored max focus matches snapshot"), Attrs->GetCurrentMaxFocus(), 175.f);
+    TestEqual(TEXT("Restored focus matches snapshot"), Attrs->GetCurrentFocus(), 140.f);
+    TestEqual(TEXT("Restored character level matches snapshot"), Attrs->GetCurrentCharacterLevel(), 7.f);
     TestEqual(TEXT("Restored power matches (base + equipped bonus)"), Attrs->GetCurrentPower(), 42.f);
     TestEqual(TEXT("Restored camera mode is TopDown"), Character->GetCameraMode(), EWyrmCameraMode::TopDown);
     TestTrue(TEXT("Restored main hand is equipped"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
     TestEqual(TEXT("Restored bag item count is 1"), Inv->GetBagItems().Num(), 1);
     TestEqual(TEXT("Restored bag item is potion with 5 stacks"), Inv->GetBagItems()[0].StackCount, 5);
-    TestTrue(TEXT("Restored terrain action ID"), Adapter->ProcessedActionIds.Contains(MockActionId));
+    TestTrue(TEXT("Restored location remains at world origin"), Character->GetActorLocation().IsNearlyZero());
+    TestTrue(TEXT("Restored world-origin rotation matches snapshot"), FMath::IsNearlyEqual(Character->GetActorRotation().Yaw, 37.f));
+
+    UWyrmSaveGame* BadSchemaSnapshot = DuplicateObject<UWyrmSaveGame>(Snapshot, GetTransientPackage());
+    BadSchemaSnapshot->SchemaVersion = UWyrmSaveGame::CurrentSchemaVersion + 1;
+    Attrs->SetCurrentHealth(63.f);
+    TestFalse(TEXT("Unknown save schema is rejected"),
+        UWyrmSaveSubsystem::ApplySnapshotObject(BadSchemaSnapshot, Character, nullptr));
+    TestEqual(TEXT("Rejected schema leaves character untouched"), Attrs->GetCurrentHealth(), 63.f);
+    Attrs->SetCurrentHealth(75.f);
+
+    Attrs->SetCurrentHealth(61.f);
+    TestFalse(TEXT("Wrong terrain owner is rejected before character mutation"),
+        UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Character, Character));
+    TestEqual(TEXT("Rejected terrain owner leaves character untouched"), Attrs->GetCurrentHealth(), 61.f);
+    Attrs->SetCurrentHealth(75.f);
 
     // Test slot disk I/O save/load roundtrip (SAVE-01)
     const FString SlotName = TEXT("WyrmSlot_UnitTest");
@@ -836,12 +894,12 @@ bool FWyrmSaveSubsystemTest::RunTest(const FString& Parameters)
         GI = NewObject<UGameInstance>(World);
     }
     UWyrmSaveSubsystem* SaveSys = NewObject<UWyrmSaveSubsystem>(GI);
-    TestTrue(TEXT("SaveGameSnapshot to slot succeeds"), SaveSys->SaveGameSnapshot(SlotName, Character, Adapter));
+    TestTrue(TEXT("SaveGameSnapshot to slot succeeds"), SaveSys->SaveGameSnapshot(SlotName, Character, nullptr));
     TestTrue(TEXT("DoesSaveExist returns true for slot"), SaveSys->DoesSaveExist(SlotName));
 
     // Clear and reload from disk slot
     Inv->ClearAll();
-    TestTrue(TEXT("LoadGameSnapshot from slot succeeds"), SaveSys->LoadGameSnapshot(SlotName, Character, Adapter));
+    TestTrue(TEXT("LoadGameSnapshot from slot succeeds"), SaveSys->LoadGameSnapshot(SlotName, Character, nullptr));
     TestTrue(TEXT("Slot load restored equipped item"), Inv->IsSlotEquipped(EWyrmEquipSlot::MainHand));
 
     // Delete slot cleanup
@@ -852,5 +910,229 @@ bool FWyrmSaveSubsystemTest::RunTest(const FString& Parameters)
     Adapter->Destroy();
     return true;
 }
-#endif
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmProgressionXpTest, "WYRMFALL.Scaffold.ProgressionXpAndLevelUp",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmProgressionXpTest::RunTest(const FString& Parameters)
+{
+    // Test canonical XP needed formula from GAME_DESIGN.md line 28
+    TestEqual(TEXT("XP needed for Lv.1->2 is 100"), AWyrmCharacter::CalculateXPForNextLevel(1.f), 100.f);
+    TestEqual(TEXT("XP needed for Lv.2->3 is 150"), AWyrmCharacter::CalculateXPForNextLevel(2.f), 150.f);
+    TestEqual(TEXT("XP needed for Lv.3->4 is 200"), AWyrmCharacter::CalculateXPForNextLevel(3.f), 200.f);
+
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+    Character->GrantCombatAbilities();
+
+    TestEqual(TEXT("Initial level is 1.0"), Character->GetCharacterLevel(), 1.f);
+    TestEqual(TEXT("Initial XP is 0.0"), Character->GetCurrentXP(), 0.f);
+    TestEqual(TEXT("Initial XP remaining is 100.0"), Character->GetXPToNextLevel(), 100.f);
+    TestEqual(TEXT("Initial base MaxHealth is 100.0"), Character->GetAttributes()->GetCurrentMaxHealth(), 100.f);
+    TestEqual(TEXT("Initial base Power is 20.0"), Character->GetAttributes()->GetCurrentPower(), 20.f);
+
+    // Partial XP accumulation without level-up
+    TestFalse(TEXT("Partial XP does not level up"), Character->AddExperience(50.f));
+    TestEqual(TEXT("Level remains 1.0 after 50 XP"), Character->GetCharacterLevel(), 1.f);
+    TestEqual(TEXT("Current XP is 50.0"), Character->GetCurrentXP(), 50.f);
+    TestEqual(TEXT("XP remaining is 50.0"), Character->GetXPToNextLevel(), 50.f);
+
+    // Exact threshold level-up
+    TestTrue(TEXT("Threshold XP levels up"), Character->AddExperience(50.f));
+    TestEqual(TEXT("Level increased to 2.0 after 100 XP total"), Character->GetCharacterLevel(), 2.f);
+    TestEqual(TEXT("Current XP reset to 0.0"), Character->GetCurrentXP(), 0.f);
+    TestEqual(TEXT("Base MaxHealth scaled to 108.0 (100 + 8*1)"), Character->GetAttributes()->GetCurrentMaxHealth(), 108.f);
+    TestEqual(TEXT("Base Power scaled to 23.0 (20 + 3*1)"), Character->GetAttributes()->GetCurrentPower(), 23.f);
+
+    // Overflow XP accumulation across level threshold
+    Character->AddExperience(200.f); // 150 needed for Lv.2->3, 50 overflow
+    TestEqual(TEXT("Level increased to 3.0"), Character->GetCharacterLevel(), 3.f);
+    TestEqual(TEXT("Overflow XP retained at 50.0"), Character->GetCurrentXP(), 50.f);
+    TestEqual(TEXT("Base MaxHealth scaled to 116.0 (100 + 8*2)"), Character->GetAttributes()->GetCurrentMaxHealth(), 116.f);
+    TestEqual(TEXT("Base Power scaled to 26.0 (20 + 3*2)"), Character->GetAttributes()->GetCurrentPower(), 26.f);
+
+    Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmWeaponFamilyGatingTest, "WYRMFALL.Scaffold.WeaponFamilyGatingAndKitSwitch",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmWeaponFamilyGatingTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+    Character->GrantCombatAbilities();
+
+    UWyrmInventoryComponent* Inv = Character->GetInventory();
+    TestNotNull(TEXT("Inventory component present"), Inv);
+
+    // Initial state without equipped weapon: Unarmed
+    TestEqual(TEXT("Initial active weapon family is Unarmed"), Character->GetActiveWeaponFamily(), EWyrmWeaponFamily::Unarmed);
+
+    // Equip Sword -> Melee1H
+    FWyrmItemInstance Sword = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("ForgedBlade")), EWyrmItemType::Weapon, 1);
+    TestEqual(TEXT("Rolled sword family is Melee1H"), Sword.WeaponFamily, EWyrmWeaponFamily::Melee1H);
+    FWyrmItemInstance Excess;
+    Inv->AddItem(Sword, Excess);
+    Inv->EquipItem(Sword.InstanceId, EWyrmEquipSlot::MainHand);
+    TestEqual(TEXT("Equipping sword sets active family to Melee1H"), Character->GetActiveWeaponFamily(), EWyrmWeaponFamily::Melee1H);
+
+    // Equip Bow -> RangedBow
+    FWyrmItemInstance Bow = UWyrmInventoryComponent::RollRandomItem(FName(TEXT("RangerBow")), EWyrmItemType::Weapon, 1);
+    TestEqual(TEXT("Rolled bow family is RangedBow"), Bow.WeaponFamily, EWyrmWeaponFamily::RangedBow);
+    Inv->AddItem(Bow, Excess);
+    Inv->EquipItem(Bow.InstanceId, EWyrmEquipSlot::MainHand);
+    TestEqual(TEXT("Equipping bow sets active family to RangedBow"), Character->GetActiveWeaponFamily(), EWyrmWeaponFamily::RangedBow);
+
+    // Unequip weapon -> Unarmed
+    Inv->UnequipItem(EWyrmEquipSlot::MainHand);
+    TestEqual(TEXT("Unequipping weapon resets family to Unarmed"), Character->GetActiveWeaponFamily(), EWyrmWeaponFamily::Unarmed);
+
+    Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmRangedProjectileTest, "WYRMFALL.Scaffold.RangedProjectileDamage",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmRangedProjectileTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Player spawned"), Player);
+    Player->GrantCombatAbilities();
+
+    AWyrmEnemyCharacter* Enemy = AWyrmEnemyCharacter::SpawnWyrmEnemy(World, EWyrmEnemyRole::MeleeChaser, FTransform(FVector(300.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Enemy spawned"), Enemy);
+
+    const float InitialEnemyHealth = Enemy->GetAttributes()->GetCurrentHealth();
+    TestEqual(TEXT("Enemy initial health is 60.0"), InitialEnemyHealth, 60.f);
+
+    // Spawn and initialize projectile targeting hostile enemy
+    AWyrmProjectile* Proj = World->SpawnActor<AWyrmProjectile>(AWyrmProjectile::StaticClass(), FVector(50.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Projectile spawned"), Proj);
+
+    const float RawDamage = 30.f;
+    Proj->InitializeProjectile(Player, Player->GetAbilitySystem(), RawDamage, FVector(1.f, 0.f, 0.f));
+
+    // Simulate projectile impact on enemy
+    Proj->OnProjectileHit(nullptr, Enemy, nullptr, FVector::ZeroVector, FHitResult());
+
+    // Enemy Level 1, Armor 10 -> mitigation is 10 / (10 + 50 + 10) = 14.286%
+    // Expected mitigated damage: 30 * (1 - 0.142857) = 25.714
+    const float ExpectedHealth = 60.f - 25.714f;
+    TestNearlyEqual(TEXT("Enemy took mitigated projectile damage"), Enemy->GetAttributes()->GetCurrentHealth(), ExpectedHealth, 0.05f);
+
+    Player->Destroy();
+    Enemy->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmProgressionSaveTest, "WYRMFALL.Scaffold.ProgressionSaveRoundtrip",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmProgressionSaveTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Character spawned"), Character);
+    Character->GrantCombatAbilities();
+
+    // Set progression state
+    Character->SetCharacterLevel(3.f);
+    Character->AddExperience(45.f);
+
+    TestEqual(TEXT("Setup level is 3.0"), Character->GetCharacterLevel(), 3.f);
+    TestEqual(TEXT("Setup XP is 45.0"), Character->GetCurrentXP(), 45.f);
+    TestEqual(TEXT("Setup MaxHealth is 116.0"), Character->GetAttributes()->GetCurrentMaxHealth(), 116.f);
+
+    // Save snapshot
+    const FString SlotName = TEXT("WyrmSlot_Progression_UnitTest");
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmSaveSubsystem* SaveSys = NewObject<UWyrmSaveSubsystem>(GI);
+
+    TestTrue(TEXT("SaveGameSnapshot succeeds"), SaveSys->SaveGameSnapshot(SlotName, Character, nullptr));
+
+    // Reset character progression to Level 1
+    Character->SetCharacterLevel(1.f);
+    Character->SetCurrentXP(0.f);
+    TestEqual(TEXT("Reset level is 1.0"), Character->GetCharacterLevel(), 1.f);
+
+    // Reload from slot
+    TestTrue(TEXT("LoadGameSnapshot succeeds"), SaveSys->LoadGameSnapshot(SlotName, Character, nullptr));
+
+    // Verify restored progression state
+    TestEqual(TEXT("Restored level is 3.0"), Character->GetCharacterLevel(), 3.f);
+    TestEqual(TEXT("Restored XP is 45.0"), Character->GetCurrentXP(), 45.f);
+    TestEqual(TEXT("Restored MaxHealth is 116.0"), Character->GetAttributes()->GetCurrentMaxHealth(), 116.f);
+    TestEqual(TEXT("Restored Power is 26.0"), Character->GetAttributes()->GetCurrentPower(), 26.f);
+
+    SaveSys->DeleteSaveSlot(SlotName);
+    Character->Destroy();
+    return true;
+}
+#endif

@@ -26,6 +26,9 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
     float CharacterLevel = 1.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float CurrentXP = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float Power = 10.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")

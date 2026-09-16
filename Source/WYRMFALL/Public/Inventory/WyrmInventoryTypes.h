@@ -24,6 +24,15 @@ enum class EWyrmEquipSlot : uint8
     Back        UMETA(DisplayName="Back (Cloak/Weapon)")
 };
 
+UENUM(BlueprintType)
+enum class EWyrmWeaponFamily : uint8
+{
+    Unarmed     UMETA(DisplayName="Unarmed"),
+    Melee1H     UMETA(DisplayName="One-Handed Melee"),
+    Melee2H     UMETA(DisplayName="Two-Handed Melee"),
+    RangedBow   UMETA(DisplayName="Ranged Bow")
+};
+
 USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmItemRoll
 {
@@ -57,6 +66,9 @@ struct WYRMFALL_API FWyrmItemInstance
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
     EWyrmItemType ItemType = EWyrmItemType::None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
+    EWyrmWeaponFamily WeaponFamily = EWyrmWeaponFamily::Unarmed;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Inventory")
     EWyrmEquipSlot DefaultSlot = EWyrmEquipSlot::None;
@@ -98,6 +110,7 @@ struct WYRMFALL_API FWyrmItemInstance
         return InstanceId == Other.InstanceId &&
                ItemId == Other.ItemId &&
                ItemType == Other.ItemType &&
+               WeaponFamily == Other.WeaponFamily &&
                DefaultSlot == Other.DefaultSlot &&
                StackCount == Other.StackCount &&
                RolledStats == Other.RolledStats;

@@ -4,6 +4,7 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "Player/WyrmControlTypes.h"
+#include "Inventory/WyrmInventoryTypes.h"
 #include "WyrmCharacter.generated.h"
 class UAbilitySystemComponent;
 class UWyrmAttributeSet;
@@ -36,11 +37,24 @@ public:
     UFUNCTION(BlueprintCallable, Category="Control") void CaptureControlState(FWyrmControlState& OutState) const;
     UFUNCTION(BlueprintCallable, Category="Control") void RestoreControlState(const FWyrmControlState& InState);
 
-    // --- Combat and Abilities (WP-04) ---
+    // --- Combat and Abilities (WP-04, WP-06) ---
     UFUNCTION(BlueprintPure, Category="Combat") UWyrmAttributeSet* GetAttributes() const { return Attributes; }
     UFUNCTION(BlueprintCallable, Category="Combat") bool PerformPrimaryAttack();
     UFUNCTION(BlueprintCallable, Category="Combat") bool PerformSecondaryAttack();
+    UFUNCTION(BlueprintCallable, Category="Combat") bool PerformEvade();
     UFUNCTION(BlueprintCallable, Category="Combat") void GrantCombatAbilities();
+    UFUNCTION(BlueprintPure, Category="Combat") EWyrmWeaponFamily GetActiveWeaponFamily() const { return ActiveWeaponFamily; }
+    UFUNCTION(BlueprintCallable, Category="Combat") void UpdateActiveWeaponKit();
+
+    // --- Progression & XP (WP-06) ---
+    UFUNCTION(BlueprintCallable, Category="Progression") bool AddExperience(float Amount);
+    UFUNCTION(BlueprintPure, Category="Progression") float GetCurrentXP() const { return CurrentXP; }
+    UFUNCTION(BlueprintCallable, Category="Progression") void SetCurrentXP(float InXP);
+    UFUNCTION(BlueprintPure, Category="Progression") float GetCharacterLevel() const;
+    UFUNCTION(BlueprintCallable, Category="Progression") void SetCharacterLevel(float NewLevel);
+    UFUNCTION(BlueprintPure, Category="Progression") static float CalculateXPForNextLevel(float InLevel);
+    UFUNCTION(BlueprintPure, Category="Progression") float GetXPForNextLevel() const;
+    UFUNCTION(BlueprintPure, Category="Progression") float GetXPToNextLevel() const;
 
     // --- Mutable Appearance Authority (WP-02) ---
     UFUNCTION(BlueprintPure, Category="Appearance")
@@ -94,6 +108,7 @@ public:
     UWyrmInventoryComponent* GetInventory() const { return InventoryComponent; }
 
 protected:
+    virtual void PostInitializeComponents() override;
     virtual void BeginPlay() override;
     UPROPERTY(VisibleAnywhere, Category="Combat") TObjectPtr<UAbilitySystemComponent> AbilitySystem;
     UPROPERTY(VisibleAnywhere, Category="Combat") TObjectPtr<UWyrmAttributeSet> Attributes;
@@ -111,9 +126,16 @@ protected:
 
 private:
     void ApplyCamera();
+    void CheckLevelUp();
+
     UPROPERTY(VisibleAnywhere, Category="Camera") EWyrmCameraMode CameraMode = EWyrmCameraMode::ThirdPerson;
     UPROPERTY(VisibleAnywhere, Category="Control") bool bMovementLocked = false;
-    FGameplayAbilitySpecHandle PrimaryAttackHandle;
-    FGameplayAbilitySpecHandle SecondaryAttackHandle;
-};
+    UPROPERTY(VisibleAnywhere, Category="Combat") EWyrmWeaponFamily ActiveWeaponFamily = EWyrmWeaponFamily::Unarmed;
+    UPROPERTY(VisibleAnywhere, Category="Progression") float CurrentXP = 0.f;
 
+    FGameplayAbilitySpecHandle PrimaryMeleeHandle;
+    FGameplayAbilitySpecHandle SecondaryMeleeHandle;
+    FGameplayAbilitySpecHandle PrimaryRangedHandle;
+    FGameplayAbilitySpecHandle SecondaryRangedHandle;
+    FGameplayAbilitySpecHandle EvadeHandle;
+};

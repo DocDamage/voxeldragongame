@@ -250,20 +250,41 @@ bool UWyrmInventoryComponent::TransferItem(UWyrmInventoryComponent* TargetInvent
     FWyrmItemInstance TransferInstance = SourceItem;
     TransferInstance.StackCount = ActualCount;
 
-    FWyrmItemInstance Excess;
-    // Check if target can accommodate full transfer
-    if (!TargetInventory->AddItem(TransferInstance, Excess) || Excess.StackCount > 0)
+    // Preflight the complete destination capacity. AddItem mutates existing stacks before
+    // reporting overflow, so calling it without this check would make a failed transfer
+    // non-atomic when the target has only partial stacking room.
+    int64 AvailableSpace = 0;
+    if (TransferInstance.MaxStack > 1)
     {
-        // Revert any partial addition if target could not accept all
-        if (Excess.StackCount < ActualCount)
+        for (const FWyrmItemInstance& TargetItem : TargetInventory->BagItems)
         {
-            int32 AddedToTarget = ActualCount - Excess.StackCount;
-            TargetInventory->RemoveItem(TransferInstance.InstanceId, AddedToTarget);
+            if (TargetItem.ItemId == TransferInstance.ItemId && TargetItem.StackCount < TargetItem.MaxStack)
+            {
+                AvailableSpace += static_cast<int64>(TargetItem.MaxStack - TargetItem.StackCount);
+            }
         }
+    }
+
+    const int32 EmptyTargetSlots = FMath::Max(0, TargetInventory->MaxBagSlots - TargetInventory->BagItems.Num());
+    AvailableSpace += static_cast<int64>(EmptyTargetSlots) * FMath::Max(1, TransferInstance.MaxStack);
+    if (AvailableSpace < ActualCount)
+    {
         return false;
     }
 
-    RemoveItem(ItemInstanceId, ActualCount);
+    FWyrmItemInstance Excess;
+    const TArray<FWyrmItemInstance> TargetSnapshot = TargetInventory->BagItems;
+    if (!TargetInventory->AddItem(TransferInstance, Excess) || Excess.StackCount > 0)
+    {
+        TargetInventory->BagItems = TargetSnapshot;
+        return false;
+    }
+
+    if (!RemoveItem(ItemInstanceId, ActualCount))
+    {
+        TargetInventory->BagItems = TargetSnapshot;
+        return false;
+    }
     return true;
 }
 
@@ -303,6 +324,15 @@ bool UWyrmInventoryComponent::EquipItem(const FGuid& ItemInstanceId, EWyrmEquipS
     ApplyItemStats(ItemToEquip, true);
     UpdateMeshAttachment(TargetSlot, ItemToEquip, true);
     OnItemEquipped.Broadcast(TargetSlot, ItemToEquip);
+
+    if (TargetSlot == EWyrmEquipSlot::MainHand)
+    {
+        if (AWyrmCharacter* Char = Cast<AWyrmCharacter>(GetOwner()))
+        {
+            Char->UpdateActiveWeaponKit();
+        }
+    }
+
     return true;
 }
 
@@ -326,6 +356,15 @@ bool UWyrmInventoryComponent::UnequipItem(EWyrmEquipSlot Slot)
 
     BagItems.Add(Item);
     OnItemUnequipped.Broadcast(Slot);
+
+    if (Slot == EWyrmEquipSlot::MainHand)
+    {
+        if (AWyrmCharacter* Char = Cast<AWyrmCharacter>(GetOwner()))
+        {
+            Char->UpdateActiveWeaponKit();
+        }
+    }
+
     return true;
 }
 
@@ -370,6 +409,11 @@ void UWyrmInventoryComponent::ClearAll()
     EquippedItems.Empty();
     BagItems.Empty();
     StashItems.Empty();
+
+    if (AWyrmCharacter* Character = Cast<AWyrmCharacter>(GetOwner()))
+    {
+        Character->UpdateActiveWeaponKit();
+    }
 }
 
 void UWyrmInventoryComponent::RestoreInventoryState(
@@ -385,6 +429,11 @@ void UWyrmInventoryComponent::RestoreInventoryState(
         EquippedItems.Add(Kvp.Key, Kvp.Value);
         ApplyItemStats(Kvp.Value, true);
         UpdateMeshAttachment(Kvp.Key, Kvp.Value, true);
+    }
+
+    if (AWyrmCharacter* Character = Cast<AWyrmCharacter>(GetOwner()))
+    {
+        Character->UpdateActiveWeaponKit();
     }
 }
 
@@ -500,9 +549,23 @@ FWyrmItemInstance UWyrmInventoryComponent::RollRandomItem(FName ItemId, EWyrmIte
     {
     case EWyrmItemType::Weapon:
         Item.DefaultSlot = (Slot != EWyrmEquipSlot::None) ? Slot : EWyrmEquipSlot::MainHand;
-        Item.DisplayName = FText::FromString(FString::Printf(TEXT("Forged Blade Lv.%d"), Level));
         Item.AttachedSocketName = FName(TEXT("Hand_Right"));
+
+        if (ItemId.ToString().Contains(TEXT("Bow")) || ItemId.ToString().Contains(TEXT("Ranger")))
         {
+            Item.WeaponFamily = EWyrmWeaponFamily::RangedBow;
+            Item.DisplayName = FText::FromString(FString::Printf(TEXT("Ranger Bow Lv.%d"), Level));
+            Item.WorldMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/WYRMFALL/Items/Weapons/SM_Bow.SM_Bow")));
+            FWyrmItemRoll PowerRoll;
+            PowerRoll.StatName = FName(TEXT("Power"));
+            PowerRoll.Value = 12.f + (Level * 4.0f);
+            Item.RolledStats.Add(PowerRoll);
+        }
+        else
+        {
+            Item.WeaponFamily = EWyrmWeaponFamily::Melee1H;
+            Item.DisplayName = FText::FromString(FString::Printf(TEXT("Forged Blade Lv.%d"), Level));
+            Item.WorldMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/WYRMFALL/Items/Weapons/SM_Sword.SM_Sword")));
             FWyrmItemRoll PowerRoll;
             PowerRoll.StatName = FName(TEXT("Power"));
             PowerRoll.Value = 10.f + (Level * 3.5f);

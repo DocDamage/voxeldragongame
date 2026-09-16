@@ -63,6 +63,10 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentFocus(float NewVal);
 
     UFUNCTION(BlueprintPure, Category="Combat") float GetCurrentMaxFocus() const { return GetMaxFocus(); }
+    UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentMaxFocus(float NewVal);
+
+    UFUNCTION(BlueprintPure, Category="Combat") float GetCurrentCharacterLevel() const { return GetCharacterLevel(); }
+    UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentCharacterLevel(float NewVal);
 
     UFUNCTION(BlueprintPure, Category="Combat") float GetCurrentPower() const { return GetPower(); }
     UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentPower(float NewVal);

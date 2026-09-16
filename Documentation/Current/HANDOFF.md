@@ -182,19 +182,34 @@ py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-## Next bounded task: WP-06 Second Build and Progression Fixture
+WP-06: Second Build and Progression Fixture has been implemented and verified:
+- **Supplied Real Art Intake:** Imported real supplied static meshes and textures from `assets and old docs/voxel/characters/rangers.zip` into `/Game/WYRMFALL/Items/Weapons/` (`SM_Bow`, `SM_Arrow`, `T_Bow`, `T_Arrow`).
+- **Authoritative Projectile Combat:** Authored `AWyrmProjectile` with `USphereComponent`, `UProjectileMovementComponent`, team filtering (`Combat.Team.Player`), `ApplyDamageEffect`, and self-destruction.
+- **Ranged Gameplay Abilities:** `UWyrmPrimaryRangedAbility` (rapid fire, 0 cost, 0.50 Power coef) and `UWyrmSecondaryRangedAbility` (charged heavy shot, 20 Focus cost, 5s cooldown, 0.90 Power coef).
+- **Tactical Mobility:** `UWyrmEvadeAbility` giving the character a directional launch impulse with a 1.25s cooldown.
+- **Weapon Family Gating & Dynamic Kit Switching:** Added `EWyrmWeaponFamily` (`Unarmed`, `Melee1H`, `Melee2H`, `RangedBow`) to `FWyrmItemInstance`. `AWyrmCharacter::UpdateActiveWeaponKit` dynamically binds combat abilities according to the active main-hand weapon family, restoring the unarmed kit on unequip.
+- **GAS-Authoritative Progression & Attribute Scaling:**
+  - Level formula: $\text{XPNeeded}(L) = 100 + 50 \times (L - 1)$.
+  - Health scaling: $\text{MaxHealth}(L) = 100 + 8 \times (L - 1)$.
+  - Power scaling: $\text{Power}(L) = 20 + 3 \times (L - 1)$.
+  - Overflow XP retention across multi-level jumps and additive integration with active equipment bonuses.
+- **Progression Persistence:** `FWyrmCharacterSaveRecord` in `UWyrmSaveGame` preserves `CharacterLevel` and `CurrentXP` across game restarts, restored faithfully by `UWyrmSaveSubsystem`.
+- **Native Automation Test Suite:** 22/22 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including 4 new tests:
+  `ProgressionSaveRoundtrip`, `ProgressionXpAndLevelUp`, `RangedProjectileDamage`, and `WeaponFamilyGatingAndKitSwitch`.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP06_progression_proof.json` verifies 4/4 cases (`COM-08_Progression`, `COM-08_KitSwitching`, `COM-08_CombatArchetypes`, `COM-08_CameraParity`) with exit code 0.
+- **Evidence & Report:** [Documentation/Current/WP06_PROGRESSION_PROOF.md](WP06_PROGRESSION_PROOF.md).
+
+## Next bounded task: WP-07 Vertical Slice Integration Map & Encounter Fixture
 
 With **WP-01** (Terrain Provider Proof), **WP-02** (Mutable Character Recipe), **WP-03** (Shared Control),
-**WP-04** (First Real Combat Loop), and **WP-05** (Loot, Equipment, Inventory & Coherent Save Snapshot)
-all fully verified and passing native test automation (18/18) and headless PIE proof suites:
+**WP-04** (First Real Combat Loop), **WP-05** (Loot, Equipment, Inventory & Coherent Save Snapshot), and
+**WP-06** (Second Build and Progression Fixture) all fully verified and passing native test automation (22/22)
+and headless PIE proof suites:
 
-Proceed to **WP-06**:
-1. Implement a materially different real ranged/skirmisher build kit contrasting with the base melee knight kit:
-   - Primary ranged projectile / hitscan ability with distinct projectile trajectory, range limit, and damage mitigation.
-   - Secondary mobility/utility skill (e.g., Tactical Evade / Dash / Disengage) with separate focus cost and cooldown tags.
-2. Progression & level fixture:
-   - Experience gain and level-up scaling modifying Base Stats via GAS (Power, Armor, MaxHealth, MaxFocus) and scaling canonical damage formulas.
-   - Distinct item affix archetypes (e.g., Melee Berserker vs. Ranged Swiftness) demonstrating meaningful build choices.
-3. Validate gear/build decision:
-   - Side-by-side combat loop comparison verifying DPS, mitigation, and playstyle trade-offs between Build A (Heavy Melee Knight) and Build B (Agile Ranged Skirmisher).
-4. Author native test automation cases and headless PIE verification suite for WP-06.
+Proceed to **WP-07**:
+1. Author a dedicated vertical slice developer encounter arena map (`L_DEV_VerticalSlice.umap`).
+2. Integrate GeoForge editable terrain fixture, procedural resource extraction, and occupied-fill protection in the arena.
+3. Spawn real combat encounters featuring both Melee Chaser and Ranged Skirmisher enemy roles with GAS attribute sets.
+4. Wire complete gameplay encounter loop: combat victory -> loot generation -> inventory acquisition -> XP progression & stat scaling.
+5. Demonstrate single-owner save/load roundtrip preserving character progression, equipment, and terrain modifications in the integrated level.
+6. Author native test automation cases and headless PIE verification suite for WP-07.

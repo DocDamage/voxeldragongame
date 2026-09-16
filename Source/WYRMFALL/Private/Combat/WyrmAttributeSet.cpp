@@ -56,6 +56,32 @@ void UWyrmAttributeSet::SetCurrentFocus(float NewVal)
     }
 }
 
+void UWyrmAttributeSet::SetCurrentMaxFocus(float NewVal)
+{
+    UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponent();
+    if (AbilityComp && AbilityComp->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+    {
+        SetMaxFocus(NewVal);
+    }
+    else
+    {
+        InitMaxFocus(NewVal);
+    }
+}
+
+void UWyrmAttributeSet::SetCurrentCharacterLevel(float NewVal)
+{
+    UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponent();
+    if (AbilityComp && AbilityComp->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+    {
+        SetCharacterLevel(NewVal);
+    }
+    else
+    {
+        InitCharacterLevel(NewVal);
+    }
+}
+
 void UWyrmAttributeSet::SetCurrentPower(float NewVal)
 {
     UAbilitySystemComponent* AbilityComp = GetOwningAbilitySystemComponent();

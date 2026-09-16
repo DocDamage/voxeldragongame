@@ -9,7 +9,7 @@ class AGeoForgeInfiniteTerrainActor;
 
 /**
  * Authoritative project adapter for GeoForgeRuntime terrain.
- * Implements IWyrmTerrainProvider with synchronous collision & navigation completion,
+ * Implements IWyrmTerrainProvider with verified collision & navigation completion,
  * occupied-fill protection, finite resource yield transactions, and save serialization.
  */
 UCLASS(BlueprintType, Blueprintable, Category="WYRMFALL|Terrain")
@@ -21,6 +21,7 @@ public:
     AWyrmGeoForgeAdapter();
 
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
 
     /** Bound GeoForge terrain actor */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
@@ -61,6 +62,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Terrain")
     bool QueryLastYield(const FGuid& ActionId, FWyrmVoxelYield& OutYield) const { return GetLastYield_Implementation(ActionId, OutYield); }
 
+    UFUNCTION(BlueprintPure, Category="Terrain")
+    bool HasPendingTerrainEdits() const { return PendingCompletionRequests.Num() > 0; }
+
     // --- Persistence ---
     /** Captures current terrain state and yield tracking into a binary payload */
     UFUNCTION(BlueprintCallable, Category="Terrain|Persistence")
@@ -77,4 +81,15 @@ public:
     /** Recorded yields keyed by action ID */
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Terrain|State")
     TMap<FGuid, FWyrmVoxelYield> ActionYields;
+
+private:
+    bool IsTerrainGeometryReady() const;
+    bool TryFinalizePendingTerrainEdits();
+    int32 CountFilledCellsInSphere(const FVector& Center, float RadiusCm, float& OutCellVolumeCm3) const;
+    void FailPendingTerrainEdits();
+
+    TArray<FWyrmTerrainEditRequest> PendingCompletionRequests;
+    bool bNavigationRefreshSubmitted = false;
+    float PendingCompletionAgeSeconds = 0.f;
+    static constexpr float CompletionTimeoutSeconds = 30.f;
 };

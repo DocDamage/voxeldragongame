@@ -218,19 +218,32 @@ def pie_tick(delta):
 
         # Stage: execute_wrld01_wrld03 (Dig & Finite Yield)
         if pie_stage == "execute_wrld01_wrld03":
-            log("Executing WRLD-01 (Dig) and WRLD-03 (Yield)...")
-            dig_guid = make_guid()
-            pie_context["dig_guid"] = dig_guid
+            if "dig_submit_result" not in pie_context:
+                log("Executing WRLD-01 (Dig) and WRLD-03 (Yield)...")
+                dig_guid = make_guid()
+                req = unreal.WyrmTerrainEditRequest()
+                req.action_id = dig_guid
+                req.world_center = center
+                req.radius_cm = 250.0
+                req.operation = unreal.WyrmTerrainEditOperation.REMOVE
 
-            req = unreal.WyrmTerrainEditRequest()
-            req.action_id = dig_guid
-            req.world_center = center
-            req.radius_cm = 250.0
-            req.operation = unreal.WyrmTerrainEditOperation.REMOVE
+                res = a.execute_terrain_edit(req)
+                if res not in (unreal.WyrmTerrainSubmitResult.COMPLETED,
+                                unreal.WyrmTerrainSubmitResult.QUEUED):
+                    raise RuntimeError(f"SubmitTerrainEdit rejected proof edit: {res}")
+                pie_context["dig_guid"] = dig_guid
+                pie_context["dig_request"] = req
+                pie_context["dig_submit_result"] = res
+                stage_timer = time.monotonic()
 
-            res = a.execute_terrain_edit(req)
-            if res != unreal.WyrmTerrainSubmitResult.COMPLETED:
-                raise RuntimeError(f"SubmitTerrainEdit expected COMPLETED, got {res}")
+            if a.has_pending_terrain_edits() or unreal.WyrmTerrainDiagnostics.is_navigation_build_pending(t):
+                if time.monotonic() - stage_timer > 30:
+                    raise RuntimeError("Timed out waiting for dig collision/navigation completion")
+                return
+
+            dig_guid = pie_context["dig_guid"]
+            req = pie_context["dig_request"]
+            res = pie_context["dig_submit_result"]
 
             # Check queues are zero (synchronous refresh)
             queues = get_render_queue_counts(t)
@@ -252,7 +265,9 @@ def pie_tick(delta):
                 "baseline_z": base_z,
                 "dug_z": dug_z,
                 "drop_cm": drop_cm,
-                "queues": queues
+                "queues": queues,
+                "submit_result": str(res),
+                "completion_confirmed": True
             }
 
             # WRLD-03: Yield query
@@ -274,6 +289,27 @@ def pie_tick(delta):
                 raise RuntimeError("Duplicate yield record check failed")
 
             log("Duplicate edit rejected and yield duplicate_prevented confirmed.")
+
+            # A different transaction ID over the already-depleted volume must
+            # complete with zero yield. This proves depletion is based on actual
+            # removed cells rather than the requested sphere volume.
+            exhausted_guid = make_guid()
+            exhausted_req = unreal.WyrmTerrainEditRequest()
+            exhausted_req.action_id = exhausted_guid
+            exhausted_req.world_center = center
+            exhausted_req.radius_cm = 250.0
+            exhausted_req.operation = unreal.WyrmTerrainEditOperation.REMOVE
+            exhausted_res = a.execute_terrain_edit(exhausted_req)
+            if exhausted_res != unreal.WyrmTerrainSubmitResult.COMPLETED:
+                raise RuntimeError(f"Exhausted-volume edit expected COMPLETED, got {exhausted_res}")
+            exhausted_out = a.query_last_yield(exhausted_guid)
+            exhausted_success, exhausted_yield = exhausted_out if isinstance(exhausted_out, tuple) else (True, exhausted_out)
+            if not exhausted_success or exhausted_yield.extracted_count != 0 or exhausted_yield.volume_extracted_cm3 != 0:
+                raise RuntimeError(
+                    f"Exhausted volume granted yield: count={exhausted_yield.extracted_count}, "
+                    f"volume={exhausted_yield.volume_extracted_cm3}")
+            log("Distinct action over exhausted volume completed with zero yield.")
+
             report["tests"]["WRLD-03"]["status"] = "PASS"
             report["details"]["WRLD-03"] = {
                 "initial_count": voxel_yield.extracted_count,
@@ -281,7 +317,10 @@ def pie_tick(delta):
                 "resource_id": str(voxel_yield.resource_id),
                 "duplicate_rejected": str(dup_res),
                 "duplicate_prevented_flag": dup_yield.duplicate_prevented,
-                "duplicate_extracted_count": dup_yield.extracted_count
+                "duplicate_extracted_count": dup_yield.extracted_count,
+                "exhausted_new_action_result": str(exhausted_res),
+                "exhausted_new_action_count": exhausted_yield.extracted_count,
+                "exhausted_new_action_volume_cm3": exhausted_yield.volume_extracted_cm3
             }
 
             pie_context["dug_trace"] = dug_trace
@@ -379,16 +418,29 @@ def pie_tick(delta):
 
         # Stage: execute_wrld02_wrld05_refill (Refill & Stale Route Blockage)
         if pie_stage == "execute_wrld02_wrld05_refill":
-            log("Executing WRLD-02 (Refill) and WRLD-05 (Stale Route Cancellation)...")
-            refill_req = unreal.WyrmTerrainEditRequest()
-            refill_req.action_id = make_guid()
-            refill_req.world_center = center
-            refill_req.radius_cm = 250.0
-            refill_req.operation = unreal.WyrmTerrainEditOperation.ADD
+            if "refill_submit_result" not in pie_context:
+                log("Executing WRLD-02 (Refill) and WRLD-05 (Stale Route Cancellation)...")
+                refill_req = unreal.WyrmTerrainEditRequest()
+                refill_req.action_id = make_guid()
+                refill_req.world_center = center
+                refill_req.radius_cm = 250.0
+                refill_req.operation = unreal.WyrmTerrainEditOperation.ADD
 
-            refill_res = a.execute_terrain_edit(refill_req)
-            if refill_res != unreal.WyrmTerrainSubmitResult.COMPLETED:
-                raise RuntimeError(f"Refill edit expected COMPLETED, got {refill_res}")
+                refill_res = a.execute_terrain_edit(refill_req)
+                if refill_res not in (unreal.WyrmTerrainSubmitResult.COMPLETED,
+                                      unreal.WyrmTerrainSubmitResult.QUEUED):
+                    raise RuntimeError(f"Refill edit rejected: {refill_res}")
+                pie_context["refill_request"] = refill_req
+                pie_context["refill_submit_result"] = refill_res
+                stage_timer = time.monotonic()
+
+            if a.has_pending_terrain_edits() or unreal.WyrmTerrainDiagnostics.is_navigation_build_pending(t):
+                if time.monotonic() - stage_timer > 30:
+                    raise RuntimeError("Timed out waiting for refill collision/navigation completion")
+                return
+
+            refill_req = pie_context["refill_request"]
+            refill_res = pie_context["refill_submit_result"]
 
             refill_trace = vertical_trace(t, 1550, 850)
             base_z = pie_context["base_trace"]["impact_cm"][2]
@@ -402,7 +454,9 @@ def pie_tick(delta):
             report["details"]["WRLD-02"] = {
                 "baseline_z": base_z,
                 "dug_z": dug_z,
-                "refilled_z": refill_z
+                "refilled_z": refill_z,
+                "submit_result": str(refill_res),
+                "completion_confirmed": True
             }
 
             pie_context["refill_trace"] = refill_trace
@@ -436,21 +490,35 @@ def pie_tick(delta):
 
         # Stage: execute_save_persistence (SAVE-01..04)
         if pie_stage == "execute_save_persistence":
-            log("Executing SAVE-01..04 (Save Payload & Restoration)...")
-            # 1. Capture save payload of refilled state
-            save_out = a.build_save_payload()
-            save_bytes = save_out[1] if isinstance(save_out, tuple) else save_out
-            if not save_bytes or len(save_bytes) == 0:
-                raise RuntimeError(f"build_save_payload returned empty payload: {save_out}")
-            log(f"Captured terrain save payload: {len(save_bytes)} bytes")
+            if "save_payload" not in pie_context:
+                log("Executing SAVE-01..04 (Save Payload & Restoration)...")
+                # 1. Capture save payload of refilled state
+                save_out = a.build_save_payload()
+                save_bytes = save_out[1] if isinstance(save_out, tuple) else save_out
+                if not save_bytes or len(save_bytes) == 0:
+                    raise RuntimeError(f"build_save_payload returned empty payload: {save_out}")
+                log(f"Captured terrain save payload: {len(save_bytes)} bytes")
 
-            # 2. Modify terrain state (dig a new crater)
-            new_dig = unreal.WyrmTerrainEditRequest()
-            new_dig.action_id = make_guid()
-            new_dig.world_center = center
-            new_dig.radius_cm = 250.0
-            new_dig.operation = unreal.WyrmTerrainEditOperation.REMOVE
-            a.execute_terrain_edit(new_dig)
+                # 2. Modify terrain state (dig a new crater)
+                new_dig = unreal.WyrmTerrainEditRequest()
+                new_dig.action_id = make_guid()
+                new_dig.world_center = center
+                new_dig.radius_cm = 250.0
+                new_dig.operation = unreal.WyrmTerrainEditOperation.REMOVE
+                modify_result = a.execute_terrain_edit(new_dig)
+                if modify_result not in (unreal.WyrmTerrainSubmitResult.COMPLETED,
+                                         unreal.WyrmTerrainSubmitResult.QUEUED):
+                    raise RuntimeError(f"Persistence modification edit rejected: {modify_result}")
+                pie_context["save_payload"] = save_bytes
+                pie_context["save_modify_result"] = modify_result
+                stage_timer = time.monotonic()
+
+            if a.has_pending_terrain_edits() or unreal.WyrmTerrainDiagnostics.is_navigation_build_pending(t):
+                if time.monotonic() - stage_timer > 30:
+                    raise RuntimeError("Timed out waiting for persistence modification completion")
+                return
+
+            save_bytes = pie_context["save_payload"]
             modified_trace = vertical_trace(t, 1550, 850)
             log(f"Modified terrain for persistence check, new Z: {modified_trace['impact_cm'][2]:.1f} cm")
 
@@ -470,6 +538,7 @@ def pie_tick(delta):
             report["tests"]["SAVE-01..04"]["status"] = "PASS"
             report["details"]["SAVE-01..04"] = {
                 "payload_bytes": len(save_bytes),
+                "modify_submit_result": str(pie_context["save_modify_result"]),
                 "modified_z": modified_trace["impact_cm"][2],
                 "restored_z": restored_z,
                 "saved_expected_z": saved_z

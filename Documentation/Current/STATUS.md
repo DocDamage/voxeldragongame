@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 15, 2026 · starter v0.2 · C: native build/tests and focused PIE exercised**
+**September 16, 2026 · starter v0.2 · C: native build/tests and focused PIE exercised**
 
 This status supersedes only the old documentation pack's statement that no scaffold exists. It does not change approved design or grant broader Git/art permissions. The uploaded pack's 36 files remain byte-for-byte preserved under Documentation/DesignPack.
 
@@ -11,7 +11,7 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
 | Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
 | UHT / UBT compile | PASS | Actual headers; latest build with per-command `-NoUBA -NoPCH` succeeded in 14.52 seconds |
-| Native automation | 18/18 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, SharedControlFoundation, CombatCanonicalDamage, CombatBoundsAndDrain, CombatCostAndCooldown, CombatEnemyRolesAndStatus, ItemGenerationAndRolls, InventoryCapacityAndTransfer, EquipmentStatApplication, SaveSubsystemRoundtrip |
+| Native automation | 22/22 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, SharedControlFoundation, CombatCanonicalDamage, CombatBoundsAndDrain, CombatCostAndCooldown, CombatEnemyRolesAndStatus, ItemGenerationAndRolls, InventoryCapacityAndTransfer, EquipmentStatApplication, SaveSubsystemRoundtrip, ProgressionSaveRoundtrip, ProgressionXpAndLevelUp, RangedProjectileDamage, WeaponFamilyGatingAndKitSwitch |
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
 | PIE, input, cameras, HUD | VERIFIED (AWyrmPlayerController & AWyrmCharacter); WP-03 PASS | Seamless third-person & top-down camera switching, direct movement cancelling click-move (WRLD-06), movement lock and pause gating (UI-02, UI-07), control state persistence (SAVE-05); 8/8 PIE checks pass; [evidence](WP03_CONTROL_PROOF.md) |
 | Mutable & Character | VERIFIED (CO_Knight & AWyrmCharacter); WP-02 PASS | Authoritative recipe authored/compiled; runtime binding, parameters (Helmet, ArmorTint), socket attachment (SM_Sword on Hand_Right), and persistence verified; [evidence](WP02_MUTABLE_RECIPE_PROOF.md) |
@@ -20,6 +20,7 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Real sample assets | Dirt/stone/knight/44-part Green Dragon plus wolf/sword imported and statically previewed | [Measured diagnostic scales and supplied palettes](WP00_REAL_ASSET_REVIEW.md); animation, collision, Mutable and production suitability unverified |
 | GAS & Combat | VERIFIED (AWyrmCharacter & AWyrmEnemyCharacter); WP-04 PASS | Authoritative GAS combat loop, canonical damage mitigation formulas (COM-01), shield absorption, invulnerability immunity, dead clamp (COM-02), two-camera combat (COM-03), 20 Focus cost & 5s cooldown gating (COM-04), slow combining & boss CC resistance (COM-05); 18/18 native tests pass; 5/5 PIE cases pass; [evidence](WP04_COMBAT_PROOF.md) |
 | Inventory, equipment & save | VERIFIED (UWyrmInventoryComponent & UWyrmSaveSubsystem); WP-05 PASS | Single inventory authority on character, capacity & stacking, overflow rejection (COM-07), rolled item affix generation & idempotent equipment stats with zero leaks (COM-06), single save coordinator unifying character attributes, camera, appearance, inventory, and GeoForge terrain delta (SAVE-01); 18/18 native tests pass; 3/3 PIE checks pass; [evidence](WP05_INVENTORY_PROOF.md) |
+| Second Build & Progression | VERIFIED (Ranged Skirmisher, AWyrmProjectile, Level/XP); WP-06 PASS | Real supplied ranger bow/arrow assets, physical projectile combat, weapon family gating & dynamic kit switching, GAS-authoritative Level/XP progression fixture, progression save roundtrip (COM-08); 22/22 native tests pass; 4/4 PIE checks pass; [evidence](WP06_PROGRESSION_PROOF.md) |
 | Dragon, Heartfold, Echoes | Requirements and integration locations preserved; NOT IMPLEMENTED | Original WP-09 onward |
 | Vehicles/colony | Future required deliverables; NOT IMPLEMENTED | Original WP-18/19 |
 | Git/remote/branch | Git initialized; origin configured; main | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame); existing remote history retained; generated data and supplied/imported vendor assets excluded |
@@ -104,9 +105,8 @@ Static visual inspection does not clear animation, Mutable, collision or full
 RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
 
 **Next bounded task:** WP-01 (GeoForge terrain provider proof), WP-02 (Playable Mutable character recipe & runtime proof),
-WP-03 (Shared humanoid control, camera switching & input gating proof), WP-04 (First real combat loop proof), and
-WP-05 (Loot, equipment, inventory, and coherent save snapshot) are all complete and verified with native test
-automation and headless PIE evidence suites. The next bounded milestone is **WP-06: Second Build and Progression Fixture**
-(materially different real ranged/skirmisher build kit contrasting with the base melee knight kit, level/XP progression
-fixture modifying base attributes via GAS, distinct item affix archetypes, and demonstrable gear/build decisions without
-introducing secondary combat or progression managers).
+WP-03 (Shared humanoid control, camera switching & input gating proof), WP-04 (First real combat loop proof),
+WP-05 (Loot, equipment, inventory, and coherent save snapshot), and WP-06 (Second build and progression fixture)
+are all complete and verified with native test automation and headless PIE evidence suites. The next bounded milestone is
+**WP-07: Vertical Slice Integration Map & Encounter Fixture** (combining editable terrain, combat encounters, loot drop triggers,
+progression reward loop, and coherent save state in a playable developer integration arena).

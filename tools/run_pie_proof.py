@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -27,4 +28,14 @@ proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, t
 for line in proc.stdout:
     sys.stdout.write(line)
 proc.wait()
-sys.exit(proc.returncode)
+report_path = ROOT / "Saved/Diagnostics/WP01_terrain_provider_proof.json"
+try:
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    print(f"PIE proof report missing or unreadable: {exc}", file=sys.stderr)
+    sys.exit(1)
+
+if proc.returncode != 0 or report.get("status") != "PASS":
+    print(f"PIE proof failed: process={proc.returncode}, report={report.get('status')}", file=sys.stderr)
+    sys.exit(1)
+sys.exit(0)

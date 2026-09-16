@@ -1,5 +1,6 @@
 #include "Terrain/WyrmGeoForgeAdapter.h"
 #include "GeoForgeInfiniteTerrainActor.h"
+#include "GeoForgeTerrainTypes.h"
 #include "GeoForgeTerrainBlueprintLibrary.h"
 #include "GeoForgeTerrainSaveGame.h"
 #include "Terrain/WyrmTerrainDiagnostics.h"
@@ -8,9 +9,29 @@
 #include "Engine/OverlapResult.h"
 #include "CollisionQueryParams.h"
 
+namespace
+{
+struct FWyrmGeoForgeCellKey
+{
+    FIntVector ChunkCoord = FIntVector::ZeroValue;
+    FIntVector LocalCell = FIntVector::ZeroValue;
+
+    bool operator==(const FWyrmGeoForgeCellKey& Other) const
+    {
+        return ChunkCoord == Other.ChunkCoord && LocalCell == Other.LocalCell;
+    }
+
+    friend uint32 GetTypeHash(const FWyrmGeoForgeCellKey& Key)
+    {
+        return HashCombine(GetTypeHash(Key.ChunkCoord), GetTypeHash(Key.LocalCell));
+    }
+};
+}
+
 AWyrmGeoForgeAdapter::AWyrmGeoForgeAdapter()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bStartWithTickEnabled = false;
 }
 
 void AWyrmGeoForgeAdapter::BeginPlay()
@@ -25,6 +46,26 @@ void AWyrmGeoForgeAdapter::BeginPlay()
             TerrainActor = Cast<AGeoForgeInfiniteTerrainActor>(FoundActor);
         }
     }
+}
+
+void AWyrmGeoForgeAdapter::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    if (PendingCompletionRequests.IsEmpty())
+    {
+        SetActorTickEnabled(false);
+        return;
+    }
+
+    PendingCompletionAgeSeconds += FMath::Max(0.f, DeltaSeconds);
+    if (PendingCompletionAgeSeconds >= CompletionTimeoutSeconds)
+    {
+        FailPendingTerrainEdits();
+        return;
+    }
+
+    TryFinalizePendingTerrainEdits();
 }
 
 void AWyrmGeoForgeAdapter::BindTerrainActor(AGeoForgeInfiniteTerrainActor* InActor)
@@ -89,6 +130,9 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
         return EWyrmTerrainSubmitResult::Unsupported;
     }
 
+    int32 AppliedEditCount = 0;
+    float CellVolumeCm3 = 0.f;
+
     if (Request.Operation == EWyrmTerrainEditOperation::Add)
     {
         // Occupied fill protection: do not bury or clip characters
@@ -97,37 +141,202 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
             return EWyrmTerrainSubmitResult::Rejected;
         }
 
-        TerrainActor->AddSphere(Request.WorldCenter, Request.RadiusCm);
+        FGeoForgeBlockSpecification BlockSpecification;
+        AppliedEditCount = TerrainActor->AddSphereWithBlock(
+            Request.WorldCenter, Request.RadiusCm, BlockSpecification);
     }
     else if (Request.Operation == EWyrmTerrainEditOperation::Remove)
     {
-        const float VolumeCm3 = (4.0f / 3.0f) * PI * FMath::Pow(Request.RadiusCm, 3.0f);
-        const int32 Count = FMath::Max(1, FMath::RoundToInt(VolumeCm3 / 500000.0f));
+        const int32 FilledBefore = CountFilledCellsInSphere(
+            Request.WorldCenter, Request.RadiusCm, CellVolumeCm3);
+        if (FilledBefore == INDEX_NONE)
+        {
+            return EWyrmTerrainSubmitResult::Rejected;
+        }
+
+        TerrainActor->DigSphere(Request.WorldCenter, Request.RadiusCm);
+
+        float IgnoredCellVolume = 0.f;
+        const int32 FilledAfter = CountFilledCellsInSphere(
+            Request.WorldCenter, Request.RadiusCm, IgnoredCellVolume);
+        if (FilledAfter == INDEX_NONE)
+        {
+            return EWyrmTerrainSubmitResult::Rejected;
+        }
+        AppliedEditCount = FMath::Max(0, FilledBefore - FilledAfter);
 
         FWyrmVoxelYield Yield;
         Yield.ActionId = Request.ActionId;
         Yield.ResourceId = FName(TEXT("Resource.Dirt"));
-        Yield.ExtractedCount = Count;
-        Yield.VolumeExtractedCm3 = VolumeCm3;
+        Yield.ExtractedCount = AppliedEditCount;
+        Yield.VolumeExtractedCm3 = AppliedEditCount * CellVolumeCm3;
         Yield.bDuplicatePrevented = false;
         ActionYields.Add(Request.ActionId, Yield);
-
-        TerrainActor->DigSphere(Request.WorldCenter, Request.RadiusCm);
     }
-
-    // Authoritative synchronous visual refresh
-    TerrainActor->RefreshLoadedChunkVisuals();
-
-    // Authoritative navigation submission
-    UWyrmTerrainDiagnostics::RefreshNavigationDataForActor(TerrainActor.Get());
 
     ProcessedActionIds.Add(Request.ActionId);
 
-    OnTerrainEditCompleted.Broadcast(Request, true);
-    OnTerrainCollisionReady.Broadcast(Request.ActionId);
-    OnTerrainNavReady.Broadcast(Request.ActionId);
+    // A no-op edit is a completed transaction with zero yield and no geometry or
+    // navigation work to wait for.
+    if (AppliedEditCount == 0)
+    {
+        OnTerrainEditCompleted.Broadcast(Request, true);
+        OnTerrainCollisionReady.Broadcast(Request.ActionId);
+        OnTerrainNavReady.Broadcast(Request.ActionId);
+        return EWyrmTerrainSubmitResult::Completed;
+    }
 
-    return EWyrmTerrainSubmitResult::Completed;
+    // Advance the configured synchronous budget, then inspect GeoForge's real
+    // queues. Any remaining work is completed from Tick instead of being falsely
+    // reported as ready.
+    TerrainActor->RefreshLoadedChunkVisuals();
+    PendingCompletionRequests.Add(Request);
+    bNavigationRefreshSubmitted = false;
+    PendingCompletionAgeSeconds = 0.f;
+    SetActorTickEnabled(true);
+
+    return TryFinalizePendingTerrainEdits()
+        ? EWyrmTerrainSubmitResult::Completed
+        : EWyrmTerrainSubmitResult::Queued;
+}
+
+bool AWyrmGeoForgeAdapter::IsTerrainGeometryReady() const
+{
+    if (!TerrainActor.IsValid())
+    {
+        return false;
+    }
+
+    const FGeoForgeTerrainRuntimeRenderStats Stats = TerrainActor->GetRuntimeRenderStats();
+    const bool bQueuesIdle = Stats.QueuedChunkGenerationCount == 0
+        && Stats.QueuedChunkRebuildCount == 0
+        && Stats.ChunkGenerationJobsInFlight == 0
+        && Stats.ChunkMeshJobsInFlight == 0
+        && Stats.PendingChunkApplyCount == 0;
+
+    if (Stats.WorldShape == EGeoForgeWorldShape::CubeSpherePlanet)
+    {
+        return bQueuesIdle && Stats.bPlanetReadyForGameplay
+            && !Stats.bPlanetMeshBuildInFlight
+            && !Stats.bPlanetMeshApplyInProgress
+            && !Stats.bPlanetApplyQueued;
+    }
+    return bQueuesIdle;
+}
+
+bool AWyrmGeoForgeAdapter::TryFinalizePendingTerrainEdits()
+{
+    if (PendingCompletionRequests.IsEmpty())
+    {
+        SetActorTickEnabled(false);
+        return true;
+    }
+
+    if (!IsTerrainGeometryReady())
+    {
+        return false;
+    }
+
+    if (!bNavigationRefreshSubmitted)
+    {
+        UWyrmTerrainDiagnostics::RefreshNavigationDataForActor(TerrainActor.Get());
+        bNavigationRefreshSubmitted = true;
+    }
+
+    if (UWyrmTerrainDiagnostics::IsNavigationBuildPending(TerrainActor.Get()))
+    {
+        return false;
+    }
+
+    TArray<FWyrmTerrainEditRequest> CompletedRequests = MoveTemp(PendingCompletionRequests);
+    PendingCompletionRequests.Reset();
+    bNavigationRefreshSubmitted = false;
+    PendingCompletionAgeSeconds = 0.f;
+    SetActorTickEnabled(false);
+
+    for (const FWyrmTerrainEditRequest& CompletedRequest : CompletedRequests)
+    {
+        OnTerrainEditCompleted.Broadcast(CompletedRequest, true);
+        OnTerrainCollisionReady.Broadcast(CompletedRequest.ActionId);
+        OnTerrainNavReady.Broadcast(CompletedRequest.ActionId);
+    }
+    return true;
+}
+
+int32 AWyrmGeoForgeAdapter::CountFilledCellsInSphere(
+    const FVector& Center, float RadiusCm, float& OutCellVolumeCm3) const
+{
+    OutCellVolumeCm3 = 0.f;
+    if (!TerrainActor.IsValid() || !FMath::IsFinite(RadiusCm) || RadiusCm <= 0.f)
+    {
+        return INDEX_NONE;
+    }
+
+    const float CellSize = TerrainActor->GetResolvedTerrainCellSizeInWorldUnits();
+    if (!FMath::IsFinite(CellSize) || CellSize <= KINDA_SMALL_NUMBER)
+    {
+        return INDEX_NONE;
+    }
+
+    OutCellVolumeCm3 = CellSize * CellSize * CellSize;
+    const float SampleStep = FMath::Max(1.f, CellSize * 0.5f);
+    const int32 HalfSteps = FMath::CeilToInt(RadiusCm / SampleStep) + 2;
+    if (HalfSteps > 64)
+    {
+        return INDEX_NONE;
+    }
+
+    TSet<FWyrmGeoForgeCellKey> VisitedCells;
+    int32 FilledCount = 0;
+    const float QueryRadius = RadiusCm + CellSize;
+    for (int32 X = -HalfSteps; X <= HalfSteps; ++X)
+    {
+        for (int32 Y = -HalfSteps; Y <= HalfSteps; ++Y)
+        {
+            for (int32 Z = -HalfSteps; Z <= HalfSteps; ++Z)
+            {
+                const FVector SampleOffset(X * SampleStep, Y * SampleStep, Z * SampleStep);
+                if (SampleOffset.SizeSquared() > FMath::Square(QueryRadius))
+                {
+                    continue;
+                }
+
+                FGeoForgeTerrainCellHitInfo CellInfo;
+                if (!TerrainActor->QueryExactTerrainCellAtWorldLocation(
+                        Center + SampleOffset, CellInfo, true)
+                    || !CellInfo.bIsValid
+                    || FVector::DistSquared(CellInfo.CellCenterWorld, Center) > FMath::Square(RadiusCm + KINDA_SMALL_NUMBER))
+                {
+                    continue;
+                }
+
+                const FWyrmGeoForgeCellKey CellKey{CellInfo.ChunkCoord, CellInfo.LocalCell};
+                if (!VisitedCells.Contains(CellKey))
+                {
+                    VisitedCells.Add(CellKey);
+                    if (CellInfo.bFilled)
+                    {
+                        ++FilledCount;
+                    }
+                }
+            }
+        }
+    }
+    return FilledCount;
+}
+
+void AWyrmGeoForgeAdapter::FailPendingTerrainEdits()
+{
+    TArray<FWyrmTerrainEditRequest> FailedRequests = MoveTemp(PendingCompletionRequests);
+    PendingCompletionRequests.Reset();
+    bNavigationRefreshSubmitted = false;
+    PendingCompletionAgeSeconds = 0.f;
+    SetActorTickEnabled(false);
+
+    for (const FWyrmTerrainEditRequest& FailedRequest : FailedRequests)
+    {
+        OnTerrainEditCompleted.Broadcast(FailedRequest, false);
+    }
 }
 
 bool AWyrmGeoForgeAdapter::GetLastYield_Implementation(const FGuid& ActionId, FWyrmVoxelYield& OutYield) const
@@ -143,7 +352,8 @@ bool AWyrmGeoForgeAdapter::GetLastYield_Implementation(const FGuid& ActionId, FW
 
 bool AWyrmGeoForgeAdapter::BuildSavePayload(TArray<uint8>& OutBytes)
 {
-    if (!TerrainActor.IsValid())
+    OutBytes.Reset();
+    if (!TerrainActor.IsValid() || HasPendingTerrainEdits())
     {
         return false;
     }
@@ -161,7 +371,7 @@ bool AWyrmGeoForgeAdapter::BuildSavePayload(TArray<uint8>& OutBytes)
 
 bool AWyrmGeoForgeAdapter::ApplySavePayload(const TArray<uint8>& InBytes)
 {
-    if (!TerrainActor.IsValid() || InBytes.Num() == 0)
+    if (!TerrainActor.IsValid() || InBytes.Num() == 0 || HasPendingTerrainEdits())
     {
         return false;
     }
