@@ -24,6 +24,10 @@
       "Enabled": true
     },
     {
+      "Name": "GeoForgeRuntime",
+      "Enabled": true
+    },
+    {
       "Name": "Mutable",
       "Enabled": true
     },

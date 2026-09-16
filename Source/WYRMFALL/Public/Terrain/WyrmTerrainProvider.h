@@ -19,7 +19,22 @@ struct WYRMFALL_API FWyrmTerrainCapabilities
 UENUM(BlueprintType)
 enum class EWyrmTerrainEditOperation : uint8 { Remove, Add };
 UENUM(BlueprintType)
-enum class EWyrmTerrainSubmitResult : uint8 { Unsupported, Rejected, Queued };
+enum class EWyrmTerrainSubmitResult : uint8 { Unsupported, Rejected, Queued, Completed };
+USTRUCT(BlueprintType)
+struct WYRMFALL_API FWyrmVoxelYield
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
+    FGuid ActionId;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
+    FName ResourceId = NAME_None;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
+    int32 ExtractedCount = 0;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
+    float VolumeExtractedCm3 = 0.f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Terrain")
+    bool bDuplicatePrevented = false;
+};
 USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmTerrainEditRequest
 {
@@ -34,6 +49,11 @@ struct WYRMFALL_API FWyrmTerrainEditRequest
             && (Operation == EWyrmTerrainEditOperation::Remove || Operation == EWyrmTerrainEditOperation::Add);
     }
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWyrmOnTerrainEditCompleted, const FWyrmTerrainEditRequest&, Request, bool, bSuccess);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWyrmOnTerrainCollisionReady, const FGuid&, ActionId);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWyrmOnTerrainNavReady, const FGuid&, ActionId);
+
 UINTERFACE(BlueprintType, Blueprintable)
 class WYRMFALL_API UWyrmTerrainProvider : public UInterface { GENERATED_BODY() };
 class WYRMFALL_API IWyrmTerrainProvider
@@ -46,4 +66,10 @@ public:
     UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Terrain")
     EWyrmTerrainSubmitResult SubmitTerrainEdit(const FWyrmTerrainEditRequest& Request);
     virtual EWyrmTerrainSubmitResult SubmitTerrainEdit_Implementation(const FWyrmTerrainEditRequest& Request);
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Terrain")
+    bool IsVolumeOccupied(const FVector& Center, float RadiusCm) const;
+    virtual bool IsVolumeOccupied_Implementation(const FVector& Center, float RadiusCm) const;
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Terrain")
+    bool GetLastYield(const FGuid& ActionId, FWyrmVoxelYield& OutYield) const;
+    virtual bool GetLastYield_Implementation(const FGuid& ActionId, FWyrmVoxelYield& OutYield) const;
 };

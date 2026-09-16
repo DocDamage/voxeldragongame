@@ -9,9 +9,9 @@ public class WYRMFALL : ModuleRules
             "GameplayAbilities", "GameplayTags", "GameplayTasks"
         });
         PrivateDependencyModuleNames.AddRange(new string[] {
-            "NavigationSystem", "AIModule"
+            "NavigationSystem", "AIModule", "ProceduralMeshComponent", "GeoForgeRuntime"
         });
         // Mutable is enabled in the project; add CustomizableObject only when
-        // WP-02 consumes its verified headers. No invented terrain dependency.
+        // WP-02 consumes its verified headers.
     }
 }

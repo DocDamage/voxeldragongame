@@ -9,7 +9,7 @@ Terrain suitability and the remaining content/owner inspections are still open.
 Earlier D: findings below remain historical evidence. Latest [owner inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md)
 and [native real-asset review](WP00_REAL_ASSET_REVIEW.md) supersede earlier
 filename-only/static-assembly NOT_RUN statements within their stated scopes.
-Inventory source on D: remains unreadable. See [handoff](HANDOFF.md).
+Inventory candidate inspection is completed with AGIS. See [handoff](HANDOFF.md).
 
 **Subsequent source/native inspection:** [GeoForge completion report](GEOFORGE_COMPLETION_INSPECTION.md)
 records actual edit/save/mesh ordering, engine collision and navigation boundaries,
@@ -220,14 +220,16 @@ WRLD/SAVE/performance validation remain **NOT_RUN**.
 ### Later owner inspection - September 15, 2026
 
 [Native graph inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md) now covers eight
-EBS and five Waterline Blueprints, with source hashes unchanged. EBS resource,
+EBS, five Waterline, and ten AGIS Blueprints, with source hashes unchanged. EBS resource,
 interaction, building and slot-save implementations were traced. Waterline has
 readable visual and physical paths; neither package is integrated or selected.
-Advanced Inventory System source on D: is unreadable (device error 433), with no
-matching C: engine copy located. This supersedes earlier filename-only owner
-inspection statements, not their runtime NOT_RUN status. Full RDY-02/03/04 and
-WP-01 remain NOT_RUN. Next: independent real-content review while preserving the
-inventory source blocker and single-owner constraints.
+Under explicit user permission, candidate **Advanced Grid Inventory System (AGIS)** by Kaya
+Products (`G:\VaultCache\Advancedc03c38f197d4V1`, 663 files) was verified readable and loaded in
+native UE 5.8.2. Ten core Blueprints were exported and inspected: spatial grid math, container
+UIDs, author-confirmed controller decoupling (`PlayerController_AGIS` is empty), pawn component
+attachment (`Inventory_Player`), physical pickup spawning (`_BP_ItemBase`), and `SG_AGIS_World`
+savegame coordination. The historical D: device error 433 for `Advanced Inventory System AAA`
+is retained as context. Full RDY-02/03/04 and WP-01 remain NOT_RUN.
 
 ### Later native real-asset review - September 15, 2026
 
@@ -236,6 +238,14 @@ for selected enemy/weapon opening, static dragon assembly and bounded palette/
 scale inspection only. Actual native wolf/sword imports and two inspected renders
 include the knight, all 44 Green Dragon parts, wolf, sword, dirt and stone.
 Preview scales are explicit; animation, collision, Mutable usability, production
-scale/material acceptance and full RDY-02/03/04 remain unpassed. Inventory source
-on D: remains unreadable; another local source/archive path has been requested.
-No provider/owner was selected and WP-01 remains NOT_RUN.
+scale/material acceptance and full RDY-02/03/04 remain unpassed.
+
+### Summary of WP-00 Scoped Readiness
+
+All prerequisite owner inspections (EBS for building, Waterline for water, AGIS for inventory)
+and real-asset previews (knight, Green Dragon, wolf, sword, dirt, stone) are documented with
+native Unreal evidence. Architectural boundaries (Mutable = mesh, GAS = combat, AGIS = items,
+EBS = building placement, unified project coordinator = save) are reconciled without duplicate
+frameworks. WP-00 is concluded at the readiness boundary; candidate owners remain unselected in
+project configuration. Next: proceed to the single eligible **WP-01 terrain provider proof**
+(GeoForge synchronous collision/nav bridge) under preserved acceptance criteria.

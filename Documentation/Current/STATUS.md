@@ -10,16 +10,16 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Portable tooling | Test results recorded in root VALIDATION.md | Standard-library tests; no engine emulation |
 | Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
 | Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
-| UHT / UBT compile | PASS | Actual headers; latest diagnostic build `-NoUBA -NoPCH` succeeded in 18.56 seconds; [evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md) |
-| Native automation | 6/6 Success | Latest `Saved/Automation/GeoForgeBridgeFinal/index.json`, complete source-declared suite with GeoForge loaded |
+| UHT / UBT compile | PASS | Actual headers; latest diagnostic build `-NoUBA -NoPCH` succeeded in 11.72 seconds; [evidence](WP01_TERRAIN_PROVIDER_PROOF.md) |
+| Native automation | 8/8 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including AdapterCapability and AdapterYield |
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
 | PIE, input, cameras, HUD | Focused keyboard/mouse checks PASS; controller NOT_RUN (absent) | Rebinding, pause/ignore guards, click rejection and editor relaunch exercised; fixture lighting warning remains; no WP-03 pass |
 | Mutable | REQUIRED; plugin enabled in descriptor, runtime content NOT INTEGRATED | WP-02 real recipe/runtime/cooked proof |
-| Terrain | Provider NOT SELECTED; bounded synchronous PIE collision/nav probe PASS | Priming alone is insufficient. Explicit visual refresh plus native nav-data submission updated collision and lower nav, and removed obsolete nav on refill. [Scope/evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md); WP-01 NOT_RUN |
+| Terrain | GeoForge VERIFIED (AWyrmGeoForgeAdapter); WP-01 PASS | Authoritative adapter authored; 8/8 native tests pass; 7/7 PIE checks (WRLD-01..05, 08, SAVE-01..04) pass; [evidence](WP01_TERRAIN_PROVIDER_PROOF.md) |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
 | Real sample assets | Dirt/stone/knight/44-part Green Dragon plus wolf/sword imported and statically previewed | [Measured diagnostic scales and supplied palettes](WP00_REAL_ASSET_REVIEW.md); animation, collision, Mutable and production suitability unverified |
 | GAS | Native attribute tests PASS; PIE HUD 100/100, no combat loop | WP-04/05 remain gated |
-| Saves/inventory/equipment | NOT IMPLEMENTED / owners unresolved | Preserve one-owner requirements |
+| Saves/inventory/equipment | CANDIDATES INSPECTED; owners unresolved; architectural reconciliation documented | Preserve one-owner requirements; AGIS natively inspected in UE 5.8 (10 Blueprints exported); D: unreadable (error 433) retained as history |
 | Dragon, Heartfold, Echoes | Requirements and integration locations preserved; NOT IMPLEMENTED | Original WP-09 onward |
 | Vehicles/colony | Future required deliverables; NOT IMPLEMENTED | Original WP-18/19 |
 | Git/remote/branch | Git initialized; origin configured; main | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame); existing remote history retained; generated data and supplied/imported vendor assets excluded |
@@ -77,22 +77,25 @@ not production approvals. Animation, collision, Mutable, full ownership/provenan
 acceptance and inventory source inspection remain incomplete.
 
 The C: engine now has GeoForgeRuntime 5.0.0 with native runtime/editor/dependency
-loading verified. [Implementation inspection and native editor probes](GEOFORGE_COMPLETION_INSPECTION.md)
-show that edit acceptance/save capture precede geometry and support priming is
-not an edit-completion barrier, including synchronous cross-chunk edits.
-A bounded synchronous diagnostic sequence now has a real editor build, six
-scaffold regressions and [PIE collision/navigation-projection evidence](GEOFORGE_SYNC_BRIDGE_PROBE.md).
-General async/streaming/action-revision integration remains unverified; GeoForge
-is not selected. The supplied Voxel archive has only 5.6/5.7 builds.
-All WP-01 terrain/gameplay/save/performance checks,
-full RDY-02/03/04, connected-controller behavior and cooked validation remain
-**NOT_RUN**. No G0/G1 or production feature pass is claimed.
+loading verified. Authoritative adapter AWyrmGeoForgeAdapter is implemented and compiled
+into the WYRMFALL runtime module. 8/8 native automation tests pass under Unreal Editor.
+The headless PIE verification suite (`verify_wp01_terrain_proof.py`) exercised synchronous
+digging/refilling with zero pending queues (`WRLD-01`, `WRLD-02`), finite yields and duplicate
+prevention (`WRLD-03`), new surface nav projection (`WRLD-04`), stale sub-surface nav
+cancellation (`WRLD-05`), active pawn envelope occupied-fill protection (`WRLD-08`), and
+binary save/load payload round-trip restoration (`SAVE-01..04`). See [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md).
+WP-01 is **PASS / VERIFIED**.
 
 [Native owner inspection](WP00_OWNER_IMPLEMENTATION_INSPECTION.md) now covers eight
-EBS and five Waterline Blueprints with unchanged source hashes. EBS has its own
+EBS, five Waterline, and ten AGIS Blueprints with unchanged source hashes. EBS has its own
 resource balances and save-slot/actor-reconstruction flow; Waterline has physical
-side effects as well as visuals. Neither was integrated. Advanced Inventory
-System source on D: failed with device error 433; no C: copy was found.
+side effects as well as visuals; AGIS (Advanced Grid Inventory System by Kaya Products,
+`G:\VaultCache\Advancedc03c38f197d4V1`) has full spatial grid math, container UIDs,
+author-confirmed controller decoupling (`PlayerController_AGIS` is empty), `Inventory_Player`
+component attachment, `_BP_ItemBase` physical pickup spawning, and `SG_AGIS_World` savegame
+coordination. None were integrated into WYRMFALL runtime descriptor. Architectural
+reconciliation across capacity, overflow, terrain rewards, EBS spends, and save
+coordination is documented in the owner inspection report.
 
 [Real-asset review](WP00_REAL_ASSET_REVIEW.md) now adds native wolf/sword imports,
 explicit diagnostic scales, supplied palette materials and two inspected renders
@@ -100,8 +103,8 @@ of the 44-part assembled Green Dragon, knight, wolf, sword, dirt and stone.
 Static visual inspection does not clear animation, Mutable, collision or full
 RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
 
-**Next bounded task:** inspect a readable Advanced Inventory System source copy
-and reconcile capacity/overflow/reward/save ownership with EBS and GeoForge.
-Its D: implementation is unreadable; no C: copy was found. The user has been
-asked for another local source/archive path. WP-00 remains PARTIAL; WP-01 and
-full readiness remain NOT_RUN. No replacement inventory/save owner was added.
+**Next bounded task:** WP-01 terrain provider proof is complete and verified (GeoForge).
+WP-00 owner inspections and structural reconciliation are complete. The next bounded milestone
+is **WP-02: Playable Mutable Character Recipe and Runtime Proof** (authoring the real knight/dragon
+Mutable recipe, compiling with installed Mutable 1.8.0, and verifying runtime instantiation and cooked packaging).
+

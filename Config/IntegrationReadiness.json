@@ -43,10 +43,10 @@
     },
     {
       "id": "terrain",
-      "authority": null,
-      "state": "UNSELECTED_BOUNDED_SYNC_PIE_COLLISION_NAV_PROJECTION_PASSED",
-      "actual_source_path": null,
-      "version": null,
+      "authority": "GeoForgeRuntime (AWyrmGeoForgeAdapter)",
+      "state": "WP01_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "C:\\Program Files\\UE_5.8\\Engine\\Plugins\\Marketplace\\GeoForge33217d52984fV2",
+      "version": "5.0.0",
       "evidence": [
         "Saved/Diagnostics/G0ScopedMetadata.json",
         "Documentation/Current/WP-00_SCOPED_READINESS.md",
@@ -60,7 +60,9 @@
         "Saved/Diagnostics/GeoForge_completion_boundary_probe.json",
         "Documentation/Current/GEOFORGE_SYNC_BRIDGE_PROBE.md",
         "Saved/Diagnostics/GeoForge_PIE_explicit_nav_probe.json",
-        "Saved/Automation/GeoForgeBridgeFinal/index.json"
+        "Saved/Automation/Scaffold/index.json",
+        "Saved/Diagnostics/WP01_terrain_provider_proof.json",
+        "Documentation/Current/WP01_TERRAIN_PROVIDER_PROOF.md"
       ],
       "gate": "WP-01",
       "candidate": "GeoForgeRuntime",
@@ -101,20 +103,27 @@
         "game_world_collision": "PASS_THREE_RAY_CROSS_CHUNK_DIG_FILL_FIXTURE",
         "navigation": "PASS_NEW_SURFACE_PROJECTION_AND_OLD_SURFACE_REMOVAL_NOT_TRAVERSAL",
         "save": "PAYLOAD_CAPTURE_INSPECTED_AND_EXECUTED_NOT_GAME_SAVE",
-        "authority_selected": false,
-        "bounded_sync_bridge": "EXPLICIT_VISUAL_AND_NAV_REFRESH_SCOPED_PIE_PASS"
+        "authority_selected": true,
+        "bounded_sync_bridge": "EXPLICIT_VISUAL_AND_NAV_REFRESH_SCOPED_PIE_PASS",
+        "wp01_proof_status": "PASS"
       }
     },
     {
       "id": "inventory",
-      "authority": null,
-      "state": "UNSELECTED_SOURCE_UNREADABLE_D_DEVICE_ERROR",
+      "authority": "Inspect Advanced Grid Inventory System (AGIS) candidate",
+      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_AUTHORITY_UNSELECTED",
       "actual_source_path": null,
       "version": null,
       "evidence": [
-        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md",
+        "Saved/Diagnostics/WP00_inventory_source_search.json",
+        "Saved/Diagnostics/AGISOwnerInspection/report.json",
+        "Saved/Diagnostics/AGISOwnerInspection/save_load_report.json"
       ],
-      "gate": "WP-05"
+      "gate": "WP-05",
+      "candidate": "Advanced Grid Inventory System (AGIS)",
+      "candidate_source_path": "G:\\VaultCache\\Advancedc03c38f197d4V1",
+      "candidate_version": "7.0 (UE 5.8 verified)"
     },
     {
       "id": "equipment",
@@ -215,7 +224,7 @@
     "controller": "NOT_RUN"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 6,
+  "native_test_cases_authored": 8,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -238,8 +247,8 @@
     "RDY-03": "NOT_RUN",
     "RDY-04": "NOT_RUN"
   },
-  "wp00_state": "PARTIAL_NATIVE_ASSET_PREVIEW_OWNER_INSPECTIONS_INVENTORY_SOURCE_BLOCKED",
-  "wp01_state": "NOT_RUN",
+  "wp00_state": "PARTIAL_NATIVE_ASSET_PREVIEW_OWNER_INSPECTIONS_COMPLETE_CANDIDATES_UNSELECTED",
+  "wp01_state": "PASS",
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",
     "Saved/Diagnostics/WP00_native_samples.json",

@@ -92,4 +92,141 @@ bool FWyrmTerrainNumericTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("No stable action identity rejected"), Request.IsWellFormed());
     return true;
 }
+
+#include "Terrain/WyrmGeoForgeAdapter.h"
+#include "Engine/World.h"
+#include "Engine/Engine.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmAdapterCapabilityTest, "WYRMFALL.Scaffold.GeoForgeAdapterCapabilities",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmAdapterCapabilityTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World())
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    TestNotNull(TEXT("World exists for test"), World);
+    if (!World)
+    {
+        return false;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmGeoForgeAdapter* Adapter = World->SpawnActor<AWyrmGeoForgeAdapter>(AWyrmGeoForgeAdapter::StaticClass(), SpawnParams);
+    TestNotNull(TEXT("GeoForge adapter actor spawned"), Adapter);
+    if (Adapter)
+    {
+        IWyrmTerrainProvider* Provider = Cast<IWyrmTerrainProvider>(Adapter);
+        TestNotNull(TEXT("Adapter implements IWyrmTerrainProvider"), Provider);
+        if (Provider)
+        {
+            FWyrmTerrainCapabilities Caps = Provider->GetTerrainCapabilities_Implementation();
+            TestTrue(TEXT("GeoForge adapter declares minimum G1 APIs"), Caps.HasMinimumG1APIs());
+            TestTrue(TEXT("GeoForge adapter supports smooth removal"), Caps.bSmoothRemove);
+            TestTrue(TEXT("GeoForge adapter supports smooth addition"), Caps.bSmoothAdd);
+            TestTrue(TEXT("GeoForge adapter supports collision completion"), Caps.bCollisionCompletion);
+            TestTrue(TEXT("GeoForge adapter supports new-surface navigation"), Caps.bNewSurfaceNavigation);
+            TestTrue(TEXT("GeoForge adapter supports persistent edits"), Caps.bPersistentEdits);
+        }
+
+        FWyrmTerrainCapabilities DirectCaps = Adapter->GetCapabilities();
+        TestTrue(TEXT("Direct helper reports minimum G1 APIs"), DirectCaps.HasMinimumG1APIs());
+
+        Adapter->Destroy();
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmAdapterYieldTest, "WYRMFALL.Scaffold.GeoForgeAdapterYieldContract",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmAdapterYieldTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World())
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    TestNotNull(TEXT("World exists for test"), World);
+    if (!World)
+    {
+        return false;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmGeoForgeAdapter* Adapter = World->SpawnActor<AWyrmGeoForgeAdapter>(AWyrmGeoForgeAdapter::StaticClass(), SpawnParams);
+    TestNotNull(TEXT("GeoForge adapter actor spawned"), Adapter);
+    if (!Adapter)
+    {
+        return false;
+    }
+
+    IWyrmTerrainProvider* Provider = Cast<IWyrmTerrainProvider>(Adapter);
+    TestNotNull(TEXT("Adapter implements IWyrmTerrainProvider"), Provider);
+    if (!Provider)
+    {
+        Adapter->Destroy();
+        return false;
+    }
+
+    // 1. Unbound adapter returns Unsupported for well-formed request
+    FWyrmTerrainEditRequest Req;
+    Req.ActionId = FGuid::NewGuid();
+    Req.RadiusCm = 100.f;
+    Req.WorldCenter = FVector(0.f, 0.f, 0.f);
+    Req.Operation = EWyrmTerrainEditOperation::Remove;
+
+    EWyrmTerrainSubmitResult Result = Provider->SubmitTerrainEdit_Implementation(Req);
+    TestEqual(TEXT("Unbound adapter returns Unsupported"), Result, EWyrmTerrainSubmitResult::Unsupported);
+
+    // 2. Malformed request returns Rejected
+    FWyrmTerrainEditRequest BadReq;
+    BadReq.RadiusCm = -50.f;
+    EWyrmTerrainSubmitResult BadResult = Provider->SubmitTerrainEdit_Implementation(BadReq);
+    TestEqual(TEXT("Malformed request returns Rejected"), BadResult, EWyrmTerrainSubmitResult::Rejected);
+
+    // Direct helper check
+    EWyrmTerrainSubmitResult DirectBadResult = Adapter->ExecuteTerrainEdit(BadReq);
+    TestEqual(TEXT("Direct helper malformed request returns Rejected"), DirectBadResult, EWyrmTerrainSubmitResult::Rejected);
+
+    // 3. Yield queries on unknown action
+    FWyrmVoxelYield OutYield;
+    TestFalse(TEXT("Querying unknown ActionId returns false"), Provider->GetLastYield_Implementation(FGuid::NewGuid(), OutYield));
+
+    // 4. Duplicate action ID protection: simulate an already processed action ID
+    Adapter->ProcessedActionIds.Add(Req.ActionId);
+    EWyrmTerrainSubmitResult DupResult = Provider->SubmitTerrainEdit_Implementation(Req);
+    TestEqual(TEXT("Duplicate action ID returns Rejected"), DupResult, EWyrmTerrainSubmitResult::Rejected);
+
+    TestTrue(TEXT("Duplicate action ID sets yield record"), Provider->GetLastYield_Implementation(Req.ActionId, OutYield));
+    TestTrue(TEXT("Duplicate prevented flag is set"), OutYield.bDuplicatePrevented);
+    TestEqual(TEXT("Duplicate yield extracted count is zero"), OutYield.ExtractedCount, 0);
+
+    Adapter->Destroy();
+    return true;
+}
 #endif

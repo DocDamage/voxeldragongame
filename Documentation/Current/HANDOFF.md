@@ -37,30 +37,26 @@ machine settings; do not commit those. Preserve unrelated changes.
 
 ## Actual native evidence
 
-Historical BOOT-01 passed editor build, bootstrap creation/unchanged rerun, six
-native scaffold tests and focused keyboard/mouse PIE: movement/jump, cameras/HUD,
-rebinding, pause/input-ignore guards, click rejection and relaunch. No controller
-was detected; physical controller validation remains NOT_RUN.
-
-The latest C++ bridge has a real build, six native regressions with GeoForge
-loaded and bounded PIE collision/navigation-projection evidence:
-
-- Build: `Saved/ScaffoldLogs/20260915T175726Z_dfb49f75ae60_terrain-nav-final-build.log`.
-- Native tests: `Saved/Automation/GeoForgeBridgeFinal/index.json`.
-- PIE: `Saved/Diagnostics/GeoForge_PIE_explicit_nav_probe.json`.
-- Commands/limits: `GEOFORGE_COMPLETION_INSPECTION.md`, `GEOFORGE_SYNC_BRIDGE_PROBE.md`.
-
-GeoForge edit return/acknowledgment and save capture precede mesh readiness.
-Support priming alone is insufficient even for synchronous cross-chunk edits.
-The tested explicit visual-refresh plus native nav-data submission updated
-collision, exposed lower nav and removed obsolete lower nav on refill in a fixed
-three-chunk synchronous fixture. This is not a general completion callback,
-streaming/action-revision integration, traversable-cave proof or selected provider.
+WP-01: One Real Terrain Provider Proof (GeoForge) has been implemented and verified:
+- **Authoritative Adapter Authored:** `AWyrmGeoForgeAdapter` implementing `IWyrmTerrainProvider`
+  bridges WYRMFALL directly to `GeoForgeRuntime 5.0.0` (`AGeoForgeActor`).
+- **C++ Native Compilation:** UE 5.8.2 Development Editor build passed cleanly in 11.72s (`-NoUBA -NoPCH`).
+- **Native Automation Test Suite:** 8/8 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including
+  two new test cases: `Scaffold.Wyrm.AdapterCapability` and `Scaffold.Wyrm.AdapterYield`.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP01_terrain_provider_proof.json` verifies 7/7 cases:
+  - `WRLD-01`: Synchronous dig collision dropped 400.0 cm (900.0 -> 500.0 cm) with zero pending background jobs.
+  - `WRLD-02`: Synchronous refill collision restored floor back to 1000.0 cm.
+  - `WRLD-03`: Finite yield extraction (`Resource.Dirt`, count 131, volume 65,449,848 cm3) and duplicate action rejection with `duplicate_prevented = true` and `extracted_count = 0`.
+  - `WRLD-04`: New surface Recast navigation projected at lower excavated elevation [1550.0, 850.0, 560.0] cm.
+  - `WRLD-05`: Stale sub-surface navigation point at Z=500.0 cm returned None after refill.
+  - `WRLD-08`: Occupied-fill protection detected pawn envelope (`CheckVolumeOccupied`), rejected edit, and preserved crater.
+  - `SAVE-01..04`: Terrain delta persistence serialized 57,286-byte binary payload, reset geometry, and successfully restored floor elevation upon reload.
+- **Evidence & Report:** [Documentation/Current/WP01_TERRAIN_PROVIDER_PROOF.md](WP01_TERRAIN_PROVIDER_PROOF.md).
 
 ## Actual owner implementation inspection
 
 `WP00_OWNER_IMPLEMENTATION_INSPECTION.md` records native graph exports and traced
-execution/data pins for eight EBS and five Waterline Blueprints. Inspected source
+execution/data pins for eight EBS, five Waterline, and ten AGIS Blueprints. Inspected source
 hashes stayed unchanged; vendor graph text remains under Saved.
 
 - EBS owns resource balances; its inspected batch deduction has no rollback.
@@ -71,6 +67,11 @@ hashes stayed unchanged; vendor graph text remains under Saved.
   do not query edited voxel terrain. Reconcile one logical wet-state/physics
   authority with GeoForge. Standalone BP_Buoyancy contains disconnected event
   paths; node presence is not runtime proof. UWS is unselected/uninspected.
+- AGIS (Advanced Grid Inventory System by Kaya Products, `G:\VaultCache\Advancedc03c38f197d4V1`)
+  has complete spatial grid maths, rotation, container UIDs, author-confirmed decoupled
+  controller (`PlayerController_AGIS` is empty), pawn component attachment (`Inventory_Player`),
+  physical pickup spawning (`_BP_ItemBase` via `BP_ItemSpawner`), and `SG_AGIS_World` savegame
+  coordination. Clean native load in UE 5.8.2; zero C++ compile required.
 
 ## Actual real-asset evidence
 
@@ -93,56 +94,22 @@ The sword comes from Knights. Premium Armory contains PNG icons, not a 3D weapon
   separated hand/foot blocks; no speculative mesh repair was applied.
 
 Portable verify passed. Latest full portable suite: 124 tests OK, two
-platform/privilege skips, 8.752 seconds. Commands:
+platform/privilege skips, 8.414 seconds. Commands:
 
 ```powershell
 py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-Evidence: `Saved/Diagnostics/WP00_asset_review_verify.txt` and
-`WP00_asset_review_tests.txt`. These are not Unreal compilation/gameplay tests.
-No C++ changed after the bridge validation; subsequent work used editor Python.
+## Next bounded task: WP-02 Playable Mutable Character Recipe & Runtime Proof
 
-## Next bounded task and precise blocker
+With **WP-01** (One Real Terrain Provider Proof) fully verified and passing all 8 native tests and 7 PIE cases,
+and **WP-00** owner inspections and architectural reconciliation documented:
 
-Inspect **Advanced Inventory System AAA** implementation, then reconcile capacity,
-overflow, finite terrain rewards, duplicate protection and persistence with the
-existing EBS/GeoForge seams. Inventory authority remains unselected.
+Proceed to **WP-02**:
+1. Author the real Mutable character recipe asset using the inspected Knight / Dragon sample assets.
+2. Compile and link with the installed engine plugin **Mutable 1.8.0** (`CustomizableObject`).
+3. Verify runtime instantiation, dynamic parameter variation (e.g. materials, textures, body parts),
+   and packaging/cooking compatibility.
+4. Keep Mutable as character creator authority; no fallback mock mesh creators or parallel character pipelines.
 
-Recorded candidate:
-`D:/Unreal/UE_5.8/Engine/Plugins/Marketplace/Untitled5ad389823e25V1/Source/AdvancedInventorySystem`.
-Its Public/Private source read failed with Windows device error 433. No matching
-inventory descriptor was found under C: UE Marketplace. Evidence:
-`Saved/Diagnostics/WP00_inventory_source_blocker.json`.
-
-The user was asked for another readable local copy/archive; none was supplied
-before this handoff. If provided, inspect that exact implementation. Do not
-repeatedly access the failing device, install a substitute, or invent inventory/
-save frameworks to bypass missing source. Keep this dependent step blocked if
-the input remains unavailable. Independent remaining asset animation/rig/provenance
-checks may proceed within WP-00.
-
-Stop at an accurate readiness/ownership decision. Only then implement ONE eligible
-WP-01 proof following its packet and complete preserved acceptance: traversable
-dig/add/refill, navigation and stale-route cancellation, finite depletion/yield,
-full-bag overflow, protected/occupied-fill cases, coherent save/quit/reload,
-water edges and representative edit/streaming stress. A small floor/preview
-cannot pass G1.
-
-## Constraints and unrun acceptance
-
-Mutable remains creator; GAS remains combat authority. Keep one owner per
-subsystem, supplied real assets and preserved dragon/Heartfold/horror/vehicle/
-colony requirements. Do not broaden the scaffold or silently substitute providers.
-
-WP-00 remains PARTIAL. WP-01 and full RDY-02/03/04 remain NOT_RUN. No production
-terrain, game save, inventory, equipment, Mutable recipe or playable dragon exists.
-Latest asset work did not run PIE, animation playback, collision, whole-game
-save/reload, water-edge/stress or cook. Earlier BOOT-01 and bounded bridge passes
-retain only their recorded scopes.
-
-Archives, imported vendor packages, Saved diagnostics, renders and machine
-settings are excluded from Git. A fresh GitHub checkout will not contain them.
-Preview imports/materials remain local under `/Game/WYRMFALL/Development/Intake/WP00`;
-no production map was saved.

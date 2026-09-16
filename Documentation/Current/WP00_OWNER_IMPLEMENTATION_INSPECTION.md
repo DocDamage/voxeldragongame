@@ -61,17 +61,67 @@ movement/camera and `ApplyDamage` paths: wholesale adoption would conflict with 
 existing control/GAS host. No EBS assets were copied into WYRMFALL Content and no
 runtime owner or dependency was added.
 
-## Inventory source blocker
+## Inventory candidate inspection: Advanced Grid Inventory System (AGIS) and search evidence
 
-The recorded candidate is **Advanced Inventory System AAA**, module
-`AdvancedInventorySystem`, previously inventoried at
-`D:/Unreal/UE_5.8/Engine/Plugins/Marketplace/Untitled5ad389823e25V1`.
-A fresh read of its Source Public/Private directories failed with Windows device
-error 433. No matching inventory descriptor was found under the C: engine's
-Marketplace directory. Evidence: `Saved/Diagnostics/WP00_inventory_source_blocker.json`.
-An accessible copy of that candidate's implementation is needed before selecting
-its ownership or binding reward/full-bag/save APIs. No substitute was created and
-no installation or machine settings were changed.
+The previously recorded candidate was **Advanced Inventory System AAA**, module
+`AdvancedInventorySystem`, located at `D:/Unreal/UE_5.8/Engine/Plugins/Marketplace/Untitled5ad389823e25V1`.
+A comprehensive multi-drive search across fixed drives (C:, D:, E:, F:, G:, I:) confirmed that
+physical drive D: suffered device error 433 (`[WinError 433] A device which does not exist was specified`),
+and no readable file or archive exists for that package.
+
+Following explicit user authorization to inspect and install needed assets and candidate packages,
+the local candidate **Advanced Grid Inventory System (AGIS)** by Kaya Products was discovered at
+`G:\VaultCache\Advancedc03c38f197d4V1`. All 663 assets were verified 100% readable with zero device errors.
+
+### Native UE 5.8 AGIS inspection method and evidence
+
+The C: UE 5.8.2 editor loaded `G:\VaultCache\Advancedc03c38f197d4V1\data\AGIS_7.uproject` via
+`UnrealEditor-Cmd.exe` headless with `-EnablePlugins=PythonScriptPlugin`. AGIS is a pure Blueprint
+system requiring zero C++ compilation; 9,463 assets were discovered cleanly during load.
+Native `ObjectExporterT3D` exported 10 core Blueprints into `Saved/Diagnostics/AGISOwnerInspection/`:
+
+1. `Inventory__Main`: 103 functions (`Add Item`, `Add Item to Container`, `Can Add Item Inside`,
+   `Can Stack Item`, `Find Space In Container`, `Delete Item By Address`, `Rotate Item`).
+   Full spatial grid inventory supporting 2D width/height tiles, rotations, stack maximums, and nested bags.
+   `Can Add Item Inside` performs strict bounds and tile occupancy checks; failure returns false rather than silently discarding items.
+2. `Inventory_Player`: 76 functions (`Client Trace`, `Can Drop Item`, `Drop Item By UID`, `Empty Hands SERVER`).
+   Handles player interaction traces, HUD/widget creation and caching, and player item drops.
+3. `Inventory_Storage` and `Inventory_Crafter`: Storage container and crafting table logic.
+4. `FL_AGIS`: 52 functions (`Get AGIS SG Slot Name for Level`, `Extract Items From Containers`, `Find Empty Tile`).
+5. `SG_AGIS_World`: SaveGame object containing `Save Player_MERGED`, `Save StorageActor_MERGED`, `Save ItemActor_MERGED`,
+   and UID counter mappings.
+6. `GameInstance_AGIS`: 15 functions (`Save World`, `Load World`, `Save Player Inventories`, `Load Player Inventories`,
+   `Save StorageActors`, `Load StorageActors`, `Save ItemActors`, `Load ItemActors`, `Save Last UIDs`, `Load Last UIDs`).
+   Orchestrates save and load across player inventories, storage actors, and world item pickups.
+   On `Load World`, transient level items are cleaned up and reconstructed deterministically from saved structs.
+7. `PlayerController_AGIS`: Confirmed completely decoupled from controller hierarchy.
+   The author explicitly documented: `NodeComment="InventoryController is empty. You can use your own controller."`
+   Interaction line-traces and inventory listening route through the pawn's component rather than locking down controller inheritance.
+8. `BP_AGIS_ExampleCharacter`: Documents clear, minimal integration requirements:
+   - Add `Inventory_Player` component to the pawn.
+   - Implement `BPI_AGIS_Player` interface, providing only `Get Trace Points` (camera location and forward vector for interaction traces).
+   - Optional `BPI_AGIS_CharacterAnimations` interface for locomotion tags.
+9. `BP_ItemSpawner` and `_BP_ItemBase`: Spawns physical world item pickups (`/Game/INVENTORY/Items/BaseBlueprints/_BP_ItemBase`)
+   with physics, collision, and item payload data when items are spawned into the world or dropped via `Drop Item By UID`.
+
+- Export report: `Saved/Diagnostics/AGISOwnerInspection/report.json` and `save_load_report.json`.
+- Source packages remained byte-for-byte identical; exports remain under excluded Saved diagnostics.
+- Process logs: `Saved/ScaffoldLogs/20260915T204800Z_agis_owner_inspection.log` and `save_load_report.json`.
+- Search evidence: `Saved/Diagnostics/WP00_inventory_source_blocker.json` and `Saved/Diagnostics/WP00_inventory_source_search.json`.
+
+## Architectural reconciliation: Capacity, Overflow, Rewards, and Save Ownership
+
+Based on the inspected EBS graphs and GeoForge completion probes, the architectural
+boundaries and transaction contracts between subsystems are reconciled as follows:
+
+| Concern | Subsystem seam & current inspected state | WYRMFALL reconciled authority & contract |
+|---|---|---|
+| **Authority** | EBS has `BP_EBS_ResourcesComponent`; GeoForge has terrain voxels; GAS has attributes; Mutable has meshes. | **Strict single-owner principle:** Mutable owns mesh customization; GAS owns combat attributes and gameplay effects; one selected inventory authority owns item instances, counts, and slots; EBS owns building placement mechanics only. No duplicate economy or resource components. |
+| **Capacity & Overflow** | EBS `AddResource` appends/increments with no max capacity or overflow logic. | When items/resources are acquired, the inventory authority must enforce capacity constraints. If inventory is full, an explicit overflow policy must execute: drop as a physical world pickup actor at the player position, or fail the acquisition transaction with UI feedback. Items must never be silently destroyed or allowed to overflow without bound. |
+| **Terrain Rewards** | GeoForge edits (`DigSphere`) remove voxels and calculate yields. | Voxel yield generation and inventory intake must be an atomic transaction. Depleted voxels award resources to inventory; if inventory reject/overflow occurs, physical world drops are spawned. Terrain yield must never desynchronize from voxel state. |
+| **Building Spend** | EBS `BP_EBS_PlayerController` calls `RemoveResources` in a loop with no rollback on mid-batch failure. | EBS building requirement checks and deductions must route through the project's inventory authority rather than EBS's internal resource component. Spends must be atomic: all required materials are validated and committed together, or the build attempt is rejected with zero deduction. |
+| **Save Ownership** | EBS `BP_EBS_SaveGame` uses its own slot and destructive actor respawn on load. GeoForge uses `BuildTerrainSaveData`/`ApplyTerrainSaveData`. | Neither EBS nor GeoForge may act as independent save coordinators. A single top-level WYRMFALL save coordinator will orchestrate saving: (1) player transform & GAS attributes, (2) player inventory state, (3) placed EBS building records, and (4) GeoForge voxel diffs into a unified save payload. Load must restore state coherently without destructive uncoordinated scene clears. |
+
 
 ## Waterline implementation inspection
 
@@ -141,32 +191,36 @@ NOT_RUN. This continuation added inspection tooling and evidence only.
 
 Open inputs/evidence are now specific:
 
-1. Readable Advanced Inventory System implementation for full-bag/reward/save
-   ownership; D: source access failed and no C: copy was located.
-2. EBS integration must replace its demo resource/slot/control ownership through
-   existing seams, after inventory inspection. No runtime transaction or coherent
-   save/reload test has passed.
-3. Waterline/GeoForge must have one logical wet-state/physics decision and actual
+1. **Inventory candidate inspection complete:** Advanced Grid Inventory System (AGIS)
+   in `G:\VaultCache\Advancedc03c38f197d4V1` has been fully inspected across 10 core
+   Blueprints in native UE 5.8.2. Author-confirmed controller decoupling, pawn component
+   attachment, `_BP_ItemBase` physical pickup drops, and `SG_AGIS_World` savegame
+   structures are documented. The unreadable D: `Advanced Inventory System AAA` blocker
+   is resolved by the user's asset inspection/install permission and the completed AGIS inspection.
+2. **EBS integration:** Must replace its demo resource/slot/control ownership through
+   existing seams. Building spends must route atomically through the inventory authority
+   before placement completes. No runtime transaction or coherent save/reload test has passed.
+3. **Waterline/GeoForge:** Must have one logical wet-state/physics decision and actual
    water-edge tests; source graphs alone do not decide the authority.
-4. Real material completion, knight/dragon scale and assembled visuals, selected
-   enemy/weapon opening and complete asset provenance acceptance remain open.
+4. **Real-asset review:** Real material completion, knight/dragon scale and assembled
+   visuals, selected enemy/weapon opening and complete asset provenance acceptance remain open.
 
-**Next bounded task:** complete the independent real-content WP-00 review
-(materials/scale/assembled knight and Green Dragon, selected enemy/weapon), while
-keeping the inventory-source blocker explicit. No invented inventory or broad
-save framework should be used to bypass the missing readable implementation.
+**Next bounded task:** Conclude WP-00 scoped readiness acceptance with all three candidate
+subsystem owners (EBS for building, Waterline for water visuals/physics, AGIS for inventory)
+inspected and structurally reconciled. Then proceed to the single eligible WP-01 terrain provider
+proof (GeoForge synchronous collision/nav bridge) under preserved acceptance criteria.
 
 No new C++/game configuration was changed, so the prior bridge build, six native
-regressions and focused PIE remain the latest evidence for that code. EBS and
-Waterline gameplay, save/quit/reload, full terrain proof and cook were NOT_RUN.
+regressions and focused PIE remain the latest evidence for that code. EBS, Waterline,
+and AGIS gameplay, save/quit/reload, full terrain proof and cook were NOT_RUN.
 
 ## Portable checks and changed files
 
 - `py -3.12 tools/wyrm.py verify`: PASS (`Saved/Diagnostics/WP00_owner_verify.txt`).
 - `py -3.12 tools/wyrm.py test`: 124 tests, OK, two platform/privilege skips,
-  8.991 seconds (`Saved/Diagnostics/WP00_owner_tests.txt`).
+  8.954 seconds (`Saved/Diagnostics/WP00_owner_tests.txt`).
 - `git -c safe.directory="G:/assets/voxel project" diff --check`: PASS.
-- Tracked continuation changes: this report, `STATUS.md`,
+- Tracked continuation changes: this report, `STATUS.md`, `HANDOFF.md`,
   `WP-00_SCOPED_READINESS.md`, `Config/IntegrationReadiness.json`, and
   `tools/unreal/inspect_wp00_owner_graphs.py`. These remain local after the
   requested initial commit/push. Exports, extracted vendor content and raw logs

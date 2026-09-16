@@ -3,5 +3,8 @@ FWyrmTerrainCapabilities IWyrmTerrainProvider::GetTerrainCapabilities_Implementa
 { return FWyrmTerrainCapabilities(); }
 EWyrmTerrainSubmitResult IWyrmTerrainProvider::SubmitTerrainEdit_Implementation(const FWyrmTerrainEditRequest& Request)
 { return EWyrmTerrainSubmitResult::Unsupported; }
-// Queued is never completed. WP-01 must add provider-specific authoritative
-// geometry/collision/nav completion and durable payload integration before use.
+bool IWyrmTerrainProvider::IsVolumeOccupied_Implementation(const FVector& Center, float RadiusCm) const
+{ return false; }
+bool IWyrmTerrainProvider::GetLastYield_Implementation(const FGuid& ActionId, FWyrmVoxelYield& OutYield) const
+{ return false; }
+

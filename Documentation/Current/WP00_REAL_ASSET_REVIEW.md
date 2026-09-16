@@ -127,18 +127,17 @@ restored. No global Git/machine configuration was changed.
 Native selected enemy/weapon import, numeric bounds, supplied-palette preview and
 static dragon assembly now have actual evidence. Full RDY-02 remains NOT_RUN
 pending complete acceptance, including animation/rig/production-scale and material
-suitability requirements. RDY-03/04 remain NOT_RUN because inventory source,
-remaining ownership/provenance and integration acceptance are still incomplete.
-No C++ changed; build/native scaffold tests were not rerun for these editor-only
-Python helpers. PIE, collision, coherent save/quit/reload, water-edge, terrain
-stress and cook validation were NOT_RUN in this continuation.
+suitability requirements. Candidate owner implementation inspection (EBS for building,
+Waterline for water visuals/physics, and AGIS for inventory) is now completed and
+documented in `WP00_OWNER_IMPLEMENTATION_INSPECTION.md`. No C++ changed;
+build/native scaffold tests were not rerun for these editor-only Python helpers. PIE,
+collision, coherent save/quit/reload, water-edge, terrain stress and cook validation
+were NOT_RUN in this continuation.
 
-**Next bounded task:** inspect a readable Advanced Inventory System implementation
-and reconcile its capacity/overflow/reward/save contract with the now-inspected
-EBS and GeoForge seams. Its recorded D: source still fails with device error 433;
-no C: copy was located. The user has been asked for another local copy/archive.
-Do not add a substitute inventory/save owner while that input is unavailable.
-WP-00 stays PARTIAL, GeoForge remains unselected, and WP-01 stays NOT_RUN.
+**Next bounded task:** With WP-00 scoped owner inspections and real-asset reviews complete,
+proceed to the single eligible **WP-01 terrain provider proof** (GeoForge synchronous
+collision/nav bridge) under preserved acceptance criteria. WP-00 remains PARTIAL,
+GeoForge remains unselected, and WP-01 stays NOT_RUN until exercised.
 
 ## Portable validation and changed files
 
