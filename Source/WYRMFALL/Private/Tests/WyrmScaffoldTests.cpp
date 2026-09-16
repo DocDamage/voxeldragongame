@@ -3,6 +3,9 @@
 #include "Terrain/WyrmTerrainProvider.h"
 #include "Combat/WyrmAttributeSet.h"
 #include "Player/WyrmCharacter.h"
+#include "Player/WyrmPlayerController.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "MuCO/CustomizableSkeletalComponent.h"
 #include "GameplayTagsManager.h"
@@ -277,6 +280,121 @@ bool FWyrmCharacterMutableTest::RunTest(const FString& Parameters)
 
         Character->Destroy();
     }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmSharedControlTest, "WYRMFALL.Scaffold.SharedControlFoundation",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmSharedControlTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.World())
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World)
+    {
+        World = GWorld;
+    }
+    TestNotNull(TEXT("World exists for shared control test"), World);
+    if (!World)
+    {
+        return false;
+    }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), SpawnParams);
+    TestNotNull(TEXT("WyrmCharacter spawned"), Character);
+    if (!Character)
+    {
+        return false;
+    }
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(AWyrmPlayerController::StaticClass(), SpawnParams);
+    TestNotNull(TEXT("WyrmPlayerController spawned"), PC);
+    if (!PC)
+    {
+        Character->Destroy();
+        return false;
+    }
+
+    PC->Possess(Character);
+    TestTrue(TEXT("Possessed pawn matches character"), PC->GetPawn() == Character);
+
+    // 1. Initial ThirdPerson camera defaults
+    TestEqual(TEXT("Initial camera mode is ThirdPerson"), Character->GetCameraMode(), EWyrmCameraMode::ThirdPerson);
+    TestEqual(TEXT("Active camera mode on controller is ThirdPerson"), PC->GetActiveCameraMode(), EWyrmCameraMode::ThirdPerson);
+    TestEqual(TEXT("ThirdPerson target arm length is 450"), Character->GetCameraBoom()->TargetArmLength, 450.f);
+    TestEqual(TEXT("ThirdPerson FOV is 80"), Character->GetFollowCamera()->FieldOfView, 80.f);
+    TestTrue(TEXT("ThirdPerson uses pawn control rotation"), Character->GetCameraBoom()->bUsePawnControlRotation);
+    TestFalse(TEXT("ThirdPerson cursor is hidden"), PC->bShowMouseCursor);
+
+    // 2. Camera Mode Toggle to TopDown
+    Character->ToggleCamera();
+    TestEqual(TEXT("Toggled camera mode is TopDown"), Character->GetCameraMode(), EWyrmCameraMode::TopDown);
+    TestEqual(TEXT("TopDown target arm length is 1100"), Character->GetCameraBoom()->TargetArmLength, 1100.f);
+    TestEqual(TEXT("TopDown FOV is 55"), Character->GetFollowCamera()->FieldOfView, 55.f);
+    TestFalse(TEXT("TopDown does not use pawn control rotation"), Character->GetCameraBoom()->bUsePawnControlRotation);
+
+    // Refresh cursor test on controller
+    PC->SetActiveCameraMode(EWyrmCameraMode::TopDown);
+    TestTrue(TEXT("TopDown cursor is visible on controller"), PC->bShowMouseCursor);
+
+    // 3. Set camera mode explicitly
+    Character->SetCameraMode(EWyrmCameraMode::ThirdPerson);
+    TestEqual(TEXT("Explicit camera mode is ThirdPerson"), Character->GetCameraMode(), EWyrmCameraMode::ThirdPerson);
+    PC->SetActiveCameraMode(EWyrmCameraMode::ThirdPerson);
+    TestFalse(TEXT("ThirdPerson cursor is hidden again"), PC->bShowMouseCursor);
+
+    // 4. Movement Lock state gating
+    TestFalse(TEXT("Initial movement lock is false"), Character->IsMovementLocked());
+    TestFalse(TEXT("Controller initial movement lock is false"), PC->IsMovementLocked());
+
+    PC->SetMovementLocked(true);
+    TestTrue(TEXT("Controller movement is locked"), PC->IsMovementLocked());
+    TestTrue(TEXT("Character movement is locked via controller"), Character->IsMovementLocked());
+
+    PC->SetMovementLocked(false);
+    TestFalse(TEXT("Controller movement is unlocked"), PC->IsMovementLocked());
+    TestFalse(TEXT("Character movement is unlocked"), Character->IsMovementLocked());
+
+    // 5. Control State persistence capture and restore
+    FWyrmControlState State;
+    PC->CaptureControlState(State);
+    TestEqual(TEXT("Captured state camera mode matches"), State.CameraMode, EWyrmCameraMode::ThirdPerson);
+    TestTrue(TEXT("Captured click-move enabled"), State.bClickMoveEnabled);
+    TestFalse(TEXT("Captured movement locked is false"), State.bMovementLocked);
+
+    // Mutate and serialize
+    State.CameraMode = EWyrmCameraMode::TopDown;
+    State.bClickMoveEnabled = false;
+    State.bMovementLocked = true;
+    FString JsonStr = State.ToJsonString();
+    TestTrue(TEXT("State JSON serialized"), JsonStr.Contains(TEXT("\"camera_mode\":\"TopDown\"")));
+
+    FWyrmControlState RestoredState;
+    TestTrue(TEXT("State JSON deserialized"), FWyrmControlState::FromJsonString(JsonStr, RestoredState));
+    TestEqual(TEXT("Restored camera mode is TopDown"), RestoredState.CameraMode, EWyrmCameraMode::TopDown);
+    TestFalse(TEXT("Restored click-move is false"), RestoredState.bClickMoveEnabled);
+    TestTrue(TEXT("Restored movement locked is true"), RestoredState.bMovementLocked);
+
+    PC->RestoreControlState(RestoredState);
+    TestEqual(TEXT("Controller restored camera mode is TopDown"), PC->GetActiveCameraMode(), EWyrmCameraMode::TopDown);
+    TestFalse(TEXT("Controller restored click move is false"), PC->IsClickMoveEnabled());
+    TestTrue(TEXT("Controller restored movement locked is true"), PC->IsMovementLocked());
+
+    // Cleanup
+    PC->UnPossess();
+    PC->Destroy();
+    Character->Destroy();
     return true;
 }
 #endif

@@ -224,10 +224,10 @@
     "bootstrap": "PASS",
     "pie": "PASS",
     "cook": "NOT_RUN",
-    "controller": "NOT_RUN"
+    "controller": "PASS"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 9,
+  "native_test_cases_authored": 10,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -260,6 +260,17 @@
     "CHAR-04": "PASS",
     "CHAR-05": "PASS",
     "CHAR-06": "PASS"
+  },
+  "wp03_state": "PASS",
+  "control_acceptance": {
+    "CTRL-00": "PASS",
+    "CTRL-01": "PASS",
+    "CTRL-02": "PASS",
+    "CTRL-03": "PASS",
+    "CTRL-04": "PASS",
+    "CTRL-05": "PASS",
+    "CTRL-06": "PASS",
+    "CTRL-07": "PASS"
   },
   "asset_sample_evidence": [
     "Saved/AssetIntake/WP00/selection.json",

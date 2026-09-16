@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
+#include "Player/WyrmControlTypes.h"
 #include "WyrmCharacter.generated.h"
 class UAbilitySystemComponent;
 class UWyrmAttributeSet;
@@ -10,9 +11,6 @@ class UCameraComponent;
 class UCustomizableSkeletalComponent;
 class UCustomizableObject;
 class UCustomizableObjectInstance;
-
-UENUM(BlueprintType)
-enum class EWyrmCameraMode : uint8 { ThirdPerson, TopDown };
 
 // Humanoid host with Mutable visual authority.
 UCLASS()
@@ -23,8 +21,18 @@ public:
     AWyrmCharacter();
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
     virtual void Tick(float DeltaSeconds) override;
+    UFUNCTION(BlueprintCallable, Category="Camera") void SetCameraMode(EWyrmCameraMode NewMode);
     UFUNCTION(BlueprintCallable, Category="Camera") void ToggleCamera();
     UFUNCTION(BlueprintPure, Category="Camera") EWyrmCameraMode GetCameraMode() const { return CameraMode; }
+    UFUNCTION(BlueprintPure, Category="Camera") USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+    UFUNCTION(BlueprintPure, Category="Camera") UCameraComponent* GetFollowCamera() const { return Camera; }
+
+    // --- Control and Gating (WP-03) ---
+    UFUNCTION(BlueprintCallable, Category="Control") void SetMovementLocked(bool bLocked);
+    UFUNCTION(BlueprintPure, Category="Control") bool IsMovementLocked() const { return bMovementLocked; }
+    UFUNCTION(BlueprintCallable, Category="Control") void CaptureControlState(FWyrmControlState& OutState) const;
+    UFUNCTION(BlueprintCallable, Category="Control") void RestoreControlState(const FWyrmControlState& InState);
+
     UFUNCTION(BlueprintPure, Category="Combat") UWyrmAttributeSet* GetAttributes() const { return Attributes; }
 
     // --- Mutable Appearance Authority (WP-02) ---
@@ -90,5 +98,6 @@ protected:
 private:
     void ApplyCamera();
     UPROPERTY(VisibleAnywhere, Category="Camera") EWyrmCameraMode CameraMode = EWyrmCameraMode::ThirdPerson;
+    UPROPERTY(VisibleAnywhere, Category="Control") bool bMovementLocked = false;
 };
 

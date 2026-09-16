@@ -11,9 +11,9 @@ This status supersedes only the old documentation pack's statement that no scaff
 | Engine on this Windows host | UE 5.8.2 VERIFIED on C: | `C:\Program Files\UE_5.8`, CL 56702186; old D: failure retained as history |
 | Windows UE installation | Five required descriptors INSPECTED | Mutable 1.8.0, EnhancedInput, GAS, Python and EditorScriptingUtilities; doctor is metadata evidence |
 | UHT / UBT compile | PASS | Actual headers; latest build with per-command `-NoUBA -NoPCH` succeeded in 14.52 seconds |
-| Native automation | 9/9 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, and AdapterYield |
+| Native automation | 10/10 Success | Latest `Saved/Automation/Scaffold/index.json`, complete source-declared suite including CharacterMutableBinding, AdapterCapability, AdapterYield, and SharedControlFoundation |
 | Diagnostic map | SAVED and unchanged on bootstrap rerun | Real 17,817-byte `.umap` and validated receipt |
-| PIE, input, cameras, HUD | Focused keyboard/mouse checks PASS; controller NOT_RUN (absent) | Rebinding, pause/ignore guards, click rejection and editor relaunch exercised; fixture lighting warning remains; no WP-03 pass |
+| PIE, input, cameras, HUD | VERIFIED (AWyrmPlayerController & AWyrmCharacter); WP-03 PASS | Seamless third-person & top-down camera switching, direct movement cancelling click-move (WRLD-06), movement lock and pause gating (UI-02, UI-07), control state persistence (SAVE-05); 8/8 PIE checks pass; [evidence](WP03_CONTROL_PROOF.md) |
 | Mutable & Character | VERIFIED (CO_Knight & AWyrmCharacter); WP-02 PASS | Authoritative recipe authored/compiled; runtime binding, parameters (Helmet, ArmorTint), socket attachment (SM_Sword on Hand_Right), and persistence verified; [evidence](WP02_MUTABLE_RECIPE_PROOF.md) |
 | Terrain | GeoForge VERIFIED (AWyrmGeoForgeAdapter); WP-01 PASS | Authoritative adapter authored; 8/8 native tests pass; 7/7 PIE checks (WRLD-01..05, 08, SAVE-01..04) pass; [evidence](WP01_TERRAIN_PROVIDER_PROOF.md) |
 | GeoForge prerequisite | ProceduralMeshComponent bundled and native load PASS | Explicitly enabled in the project and loaded successfully alongside GeoForge; [dependency evidence](PROCEDURAL_MESH_DEPENDENCY.md) |
@@ -103,9 +103,10 @@ of the 44-part assembled Green Dragon, knight, wolf, sword, dirt and stone.
 Static visual inspection does not clear animation, Mutable, collision or full
 RDY acceptance. The Armory ZIP is PNG icons; the real sword came from Knights.
 
-**Next bounded task:** WP-01 (GeoForge terrain provider proof) and WP-02 (Playable Mutable character recipe & runtime proof)
-are both complete and verified with native test automation and headless PIE evidence suites. The next bounded milestone
-is **WP-03: Shared Humanoid Control & Movement** (supporting both third-person direct WASD/gamepad movement and top-down
-click-to-move navigation on the same humanoid actor, camera mode persistence, and input gating without duplicating pawn progression).
+**Next bounded task:** WP-01 (GeoForge terrain provider proof), WP-02 (Playable Mutable character recipe & runtime proof),
+and WP-03 (Shared humanoid control, camera switching & input gating proof) are all complete and verified with native test
+automation and headless PIE evidence suites. The next bounded milestone is **WP-04: First Real Combat Loop** (GAS-authoritative
+attack ability, melee hitbox sweep trace, attribute modification via GameplayEffect, hit reaction, and target death handling
+without bypassing GAS or introducing secondary combat managers).
 
 

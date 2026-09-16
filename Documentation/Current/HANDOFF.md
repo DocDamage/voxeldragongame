@@ -72,6 +72,29 @@ WP-02: Playable Mutable Character Recipe & Runtime Proof has been implemented an
   - `CHAR-06`: Base64 appearance descriptor captured, cleared, and restored with exact parameter state fidelity.
 - **Evidence & Report:** [Documentation/Current/WP02_MUTABLE_RECIPE_PROOF.md](WP02_MUTABLE_RECIPE_PROOF.md).
 
+WP-03: Shared Humanoid Control, Camera Switching & Input Gating Proof has been implemented and verified:
+- **Shared Controller & Character Architecture:** `AWyrmPlayerController` and `AWyrmCharacter`
+  support both third-person follow camera (ArmLength=450, FOV=80, PawnRotation=true, Cursor=hidden)
+  and top-down isometric camera (ArmLength=1100, Pitch=-55, FOV=55, PawnRotation=false, Cursor=visible).
+- **Direct Movement Cancels Path Navigation (`WRLD-06`):** Calling `Move()` on controller immediately
+  triggers `StopMovement()` before applying pawn input, interrupting active click-to-move pathfinding.
+- **Strict Input Gating (`UI-02`, `UI-07`):** Movement, look, and jump inputs are strictly suppressed when
+  `bMovementLocked` is set on either controller or character, when input is ignored, or when game is paused.
+- **Control State Persistence (`SAVE-05`):** `FWyrmControlState` serializes camera mode, click-to-move toggle,
+  and movement lock state to/from JSON with exact roundtrip fidelity.
+- **Native Automation Test Suite:** 10/10 SUCCEEDED (`Saved/Automation/Scaffold/index.json`), including new test
+  `Scaffold.Wyrm.SharedControlFoundation` verifying camera mode toggling, boom adjustments, and state serialization.
+- **Headless PIE Proof Suite:** `Saved/Diagnostics/WP03_control_proof.json` verifies 8/8 cases:
+  - `CTRL-00`: Character and controller spawn, possession, and binding verified.
+  - `CTRL-01`: Third-person camera defaults (ArmLength=450, FOV=80, PawnRotation=true, Cursor=hidden) verified.
+  - `CTRL-02`: Top-down mode switch (ArmLength=1100, FOV=55, PawnRotation=false, Cursor=visible) verified.
+  - `CTRL-03`: Click-to-move pathfinding with reachability check and unreachable point rejection verified.
+  - `CTRL-04`: Direct movement interruption and path cancellation via `StopMovement()` verified.
+  - `CTRL-05`: Input lock gating verified on both controller and character.
+  - `CTRL-06`: Control state capture and restore roundtrip verified with JSON fidelity.
+  - `CTRL-07`: Return to third-person camera verified.
+- **Evidence & Report:** [Documentation/Current/WP03_CONTROL_PROOF.md](WP03_CONTROL_PROOF.md).
+
 ## Actual owner implementation inspection
 
 `WP00_OWNER_IMPLEMENTATION_INSPECTION.md` records native graph exports and traced
@@ -120,16 +143,18 @@ py -3.12 tools/wyrm.py verify
 py -3.12 tools/wyrm.py test
 ```
 
-## Next bounded task: WP-03 Shared Humanoid Control & Movement
+## Next bounded task: WP-04 First Real Combat Loop
 
-With **WP-01** (One Real Terrain Provider Proof) and **WP-02** (Playable Mutable Character Recipe & Runtime Proof)
-both fully verified and passing native test automation and headless PIE proof suites:
+With **WP-01** (One Real Terrain Provider Proof), **WP-02** (Playable Mutable Character Recipe & Runtime Proof),
+and **WP-03** (Shared Humanoid Control, Camera Switching & Input Gating Proof) all fully verified and passing
+native test automation and headless PIE proof suites:
 
-Proceed to **WP-03**:
-1. Implement shared humanoid control supporting both third-person direct WASD/gamepad movement and
-   top-down click-to-move navigation on the same humanoid actor.
-2. Implement seamless camera perspective switching with persistent mode preferences (`SAVE-05` / `UI-01..03`).
-3. Enforce movement gating under interaction / pause / hit-stun states without duplicating pawn progression.
-4. Maintain single GAS authority on humanoid.
+Proceed to **WP-04**:
+1. Implement authoritative GameplayAbility-based melee attack (`UWyrmGameplayAbility` / `GA_MeleeAttack`).
+2. Implement sword hitbox trace / overlap sweep during attack active frame window using weapon sockets (`Hand_Right` / `SM_Sword`).
+3. Apply instant `GE_Damage` to target (`AWyrmCharacter` / dummy target) deducting Health attribute authority via ASC.
+4. Verify hit reaction, damage floating text / log event, and target death handling at Health <= 0.
+5. Ensure zero secondary combat/health managers are introduced: GAS retains sole authority (`COM-01`, `COM-02`).
+
 
 

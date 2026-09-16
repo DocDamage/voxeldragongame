@@ -47,11 +47,42 @@ void AWyrmCharacter::BeginPlay()
     }
 }
 UAbilitySystemComponent* AWyrmCharacter::GetAbilitySystemComponent() const { return AbilitySystem; }
-void AWyrmCharacter::ToggleCamera()
+void AWyrmCharacter::SetCameraMode(EWyrmCameraMode NewMode)
 {
-    CameraMode = CameraMode == EWyrmCameraMode::ThirdPerson ? EWyrmCameraMode::TopDown : EWyrmCameraMode::ThirdPerson;
+    CameraMode = NewMode;
     ApplyCamera();
 }
+
+void AWyrmCharacter::ToggleCamera()
+{
+    SetCameraMode(CameraMode == EWyrmCameraMode::ThirdPerson ? EWyrmCameraMode::TopDown : EWyrmCameraMode::ThirdPerson);
+}
+
+void AWyrmCharacter::SetMovementLocked(bool bLocked)
+{
+    bMovementLocked = bLocked;
+    if (bMovementLocked)
+    {
+        StopJumping();
+        if (AController* C = GetController())
+        {
+            C->StopMovement();
+        }
+    }
+}
+
+void AWyrmCharacter::CaptureControlState(FWyrmControlState& OutState) const
+{
+    OutState.CameraMode = CameraMode;
+    OutState.bMovementLocked = bMovementLocked;
+}
+
+void AWyrmCharacter::RestoreControlState(const FWyrmControlState& InState)
+{
+    SetCameraMode(InState.CameraMode);
+    SetMovementLocked(InState.bMovementLocked);
+}
+
 void AWyrmCharacter::ApplyCamera()
 {
     const bool bTop = CameraMode == EWyrmCameraMode::TopDown;

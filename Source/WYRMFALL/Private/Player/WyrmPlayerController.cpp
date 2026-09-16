@@ -9,12 +9,119 @@
 #include "InputCoreTypes.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "Kismet/GameplayStatics.h"
 
-AWyrmPlayerController::AWyrmPlayerController() { bShowMouseCursor = false; }
+AWyrmPlayerController::AWyrmPlayerController()
+{
+    bShowMouseCursor = false;
+    bClickMoveEnabled = true;
+    bMovementLocked = false;
+}
+
+AWyrmPlayerController* AWyrmPlayerController::SpawnWyrmPlayerController(UObject* WorldContextObject, const FTransform& SpawnTransform)
+{
+    if (!WorldContextObject) { return nullptr; }
+    UWorld* World = WorldContextObject->GetWorld();
+    if (!World && GEngine)
+    {
+        World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
+    }
+    if (!World) { return nullptr; }
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    return World->SpawnActor<AWyrmPlayerController>(AWyrmPlayerController::StaticClass(), SpawnTransform, SpawnParams);
+}
+
+void AWyrmPlayerController::SetClickMoveEnabled(bool bEnabled)
+{
+    bClickMoveEnabled = bEnabled;
+    if (!bClickMoveEnabled)
+    {
+        StopMovement();
+    }
+}
+
+void AWyrmPlayerController::SetMovementLocked(bool bLocked)
+{
+    bMovementLocked = bLocked;
+    if (bMovementLocked)
+    {
+        StopMovement();
+        JumpReleased();
+    }
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        Body->SetMovementLocked(bLocked);
+    }
+}
+
+EWyrmCameraMode AWyrmPlayerController::GetActiveCameraMode() const
+{
+    if (const auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        return Body->GetCameraMode();
+    }
+    return EWyrmCameraMode::ThirdPerson;
+}
+
+void AWyrmPlayerController::SetActiveCameraMode(EWyrmCameraMode NewMode)
+{
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        StopMovement();
+        Body->SetCameraMode(NewMode);
+        RefreshCursor();
+    }
+}
+
+void AWyrmPlayerController::CaptureControlState(FWyrmControlState& OutState) const
+{
+    OutState.CameraMode = GetActiveCameraMode();
+    OutState.bClickMoveEnabled = bClickMoveEnabled;
+    OutState.bMovementLocked = bMovementLocked;
+}
+
+void AWyrmPlayerController::RestoreControlState(const FWyrmControlState& InState)
+{
+    SetClickMoveEnabled(InState.bClickMoveEnabled);
+    SetMovementLocked(InState.bMovementLocked);
+    SetActiveCameraMode(InState.CameraMode);
+}
+
+bool AWyrmPlayerController::RequestClickMoveToDestination(const FVector& DestinationLocation)
+{
+    const auto* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || (Body && Body->IsMovementLocked()))
+    {
+        StopMovement();
+        return false;
+    }
+    if (!Body || !bClickMoveEnabled || Body->GetCameraMode() != EWyrmCameraMode::TopDown)
+    {
+        return false;
+    }
+    StopMovement();
+    UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(GetWorld());
+    if (!Nav) { return false; }
+    FNavLocation ProjectedNav;
+    if (!Nav->ProjectPointToNavigation(DestinationLocation, ProjectedNav, FVector(100.f, 100.f, 250.f)))
+    {
+        UE_LOG(LogWyrmfall, Warning, TEXT("Click blocked: no usable navigation at destination."));
+        return false;
+    }
+    UNavigationPath* Path = Nav->FindPathToLocationSynchronously(GetWorld(), Body->GetActorLocation(), ProjectedNav.Location, const_cast<AWyrmCharacter*>(Body));
+    if (!Path || !Path->IsValid() || Path->IsPartial())
+    {
+        UE_LOG(LogWyrmfall, Warning, TEXT("Click blocked: no complete path."));
+        return false;
+    }
+    UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, ProjectedNav.Location);
+    return true;
+}
 void AWyrmPlayerController::BuildInputContext()
 {
     if (Context) { return; }
@@ -136,7 +243,7 @@ void AWyrmPlayerController::RefreshCursor()
 void AWyrmPlayerController::Move(const FInputActionValue& Value)
 {
     auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this)) { return; } // do not route humanoid inputs to future dragon/car pawns
+    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; } // do not route humanoid inputs to future dragon/car pawns
     const FVector2D Axis = Value.Get<FVector2D>().GetClampedToMaxSize(1.f);
     if (Axis.IsNearlyZero()) { return; }
     StopMovement();
@@ -148,7 +255,7 @@ void AWyrmPlayerController::Move(const FInputActionValue& Value)
 void AWyrmPlayerController::Look(const FInputActionValue& Value)
 {
     const auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || Body->GetCameraMode() == EWyrmCameraMode::TopDown) { return; }
+    if (!Body || Body->GetCameraMode() == EWyrmCameraMode::TopDown || IsLookInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; }
     const FVector2D Axis = Value.Get<FVector2D>();
     AddYawInput(Axis.X); AddPitchInput(-Axis.Y);
 }
@@ -161,29 +268,28 @@ void AWyrmPlayerController::SwitchCamera()
     if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
     { StopMovement(); Body->ToggleCamera(); RefreshCursor(); }
 }
-void AWyrmPlayerController::ToggleClickMove() { bClickMoveEnabled = !bClickMoveEnabled; StopMovement(); }
+void AWyrmPlayerController::ToggleClickMove() { SetClickMoveEnabled(!bClickMoveEnabled); }
 void AWyrmPlayerController::ClickMove()
 {
     const auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this)) { StopMovement(); return; }
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || (Body && Body->IsMovementLocked()))
+    {
+        StopMovement();
+        return;
+    }
     if (!Body || !bClickMoveEnabled || Body->GetCameraMode() != EWyrmCameraMode::TopDown) { return; }
     // Cancel the old destination even when the replacement click hits nothing.
     StopMovement();
     FHitResult Hit;
     if (!GetHitResultUnderCursor(ECC_Visibility, false, Hit) || !Hit.bBlockingHit) { return; }
-    UNavigationSystemV1* Nav = UNavigationSystemV1::GetCurrent(GetWorld());
-    FNavLocation Destination;
-    if (!Nav || !Nav->ProjectPointToNavigation(Hit.ImpactPoint, Destination, FVector(50.f,50.f,100.f)))
-    { UE_LOG(LogWyrmfall, Warning, TEXT("Click blocked: no usable navigation at destination.")); return; }
-    UNavigationPath* Path = Nav->FindPathToLocationSynchronously(GetWorld(), Body->GetActorLocation(), Destination.Location, const_cast<AWyrmCharacter*>(Body));
-    if (!Path || !Path->IsValid() || Path->IsPartial())
-    { UE_LOG(LogWyrmfall, Warning, TEXT("Click blocked: no complete path.")); return; }
-    UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, Destination.Location);
-    // G1 must wire edit-pending invalidation; this is NOT dynamic terrain/nav proof.
+    RequestClickMoveToDestination(Hit.ImpactPoint);
 }
 void AWyrmPlayerController::JumpPressed()
 {
-    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this)) { return; }
-    if (auto* Body = Cast<AWyrmCharacter>(GetPawn())) { StopMovement(); Body->Jump(); }
+    auto* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; }
+    StopMovement();
+    Body->Jump();
 }
 void AWyrmPlayerController::JumpReleased() { if (auto* Body = Cast<AWyrmCharacter>(GetPawn())) { Body->StopJumping(); } }
+
