@@ -33,6 +33,11 @@ ExternalAssets/*
 /assets and old docs/
 /Content/WYRMFALL/Development/Intake/
 /Content/Developers/
+# Locally installed vendor content for audited Region 01 placement. Keep these
+# packs at their original Unreal mount paths; never place proprietary binaries
+# in source control.
+/Content/BanditCamp/
+/Content/DarkHalls/
 # Retain source-side VS Code tasks; do not add machine-specific settings.
 .vscode/*
 !.vscode/tasks.json

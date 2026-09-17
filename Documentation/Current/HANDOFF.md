@@ -35,7 +35,7 @@ settings out of commits.
 - WP-10 real PIE passed 5/5 green dragon riding, flight locomotion, obstacle collision & mounted persistence groups (`DRG-05..07`, `DRG-14`, `SAVE-09`):
   authentic humanoid attachment to mount socket (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery to anchor beneath, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery.
 - WP-11 real PIE passed 7/7 Green Dragon/Verdance Heartfold groups (`DRG-08..13`, `SAVE-08`): compact capsule doorway fit, compact combat/direct control, one-second timed form changes with four-second recovery cooldown, state conservation, blocked growth, damage interruption, town combat suppression, and compact save roundtrip. `DRG-15` passed as a native/source policy check: unvalidated rigs cannot inherit Verdance mesh, collision, mount, flight, or Heartfold values.
-- WP-12 is **PARTIAL**: the Region 01 fact ledger passed its 13-landmark logical graph, native 1/1, and diagnostic PIE 8/8 proof (including a real Green Dragon bond/direct-control handoff and unified save restore). This is not production map placement; the PIE fixture explicitly used a blank diagnostic map and modeled a future relief fact only to validate the completion predicate.
+- WP-12 is **PARTIAL**: the Region 01 fact ledger passed its 13-landmark logical graph, native 1/1, and diagnostic PIE 8/8 proof (including a real Green Dragon bond/direct-control handoff and unified save restore). UE 5.8.2 also discovered and loaded locally installed real Tidecross/cart and underworks packages (724 Modular Medieval Village files and 269 Modular Dungeon files). The six selected supplied NPC roles initially imported as 15-bone meshes; source inspection found their matching 25-bone, three-root skeletons. An ignored Blender-derived one-root intake then imported six correct 26-bone mesh/idle/walk skeleton pairs with original timing. The direct fixture captures real palette colours but rejects its non-zero walk pose as visibly deformed. The normalized visual capture did not run because the editor console split its first mode argument; a dedicated wrapper is present for the next focused run. This is not production map placement; the PIE fixture explicitly used a blank diagnostic map and modeled a future relief fact only to validate the completion predicate.
 
 Evidence:
 
@@ -48,6 +48,14 @@ Evidence:
 - `Saved/Diagnostics/WP10_flight_proof.json`
 - `Saved/Diagnostics/WP11_heartfold_proof.json`
 - `Saved/Diagnostics/WP12_region01_proof.json`
+- `Saved/Diagnostics/WP12_region01_asset_intake.json`
+- `Saved/Diagnostics/WP12_region01_npc_intake.json`
+- `Saved/Diagnostics/WP12_region01_source_material_probe.json`
+- `Saved/Diagnostics/WP12_region01_fbx_palette_layout.json`
+- `Saved/Diagnostics/WP12_region01_fbx_animation_compat.json`
+- `Saved/Diagnostics/WP12_region01_normalized_npc_sources.json`
+- `Saved/Diagnostics/WP12_region01_normalized_npc_intake.json`
+- `Saved/Diagnostics/WP12Region01NpcPreview/report.json`
 - `Saved/Automation/Region01/index.json`
 - [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md)
 - [WP-06 report](WP06_PROGRESSION_PROOF.md)
@@ -85,12 +93,15 @@ Evidence:
 - WP-02 through WP-05 full proof scripts remain editor-world evidence.
 - Physical controller, cook and packaged-game validation remain NOT_RUN.
 - Jadefang has source metadata only; it is not an imported, playable, or Heartfold-proven rig.
-- WP-12 production placement is blocked: the audited import set lacks real quarry, Tidecross/settlement, underworks/cave, broken cart/claim apparatus, and distinct Tamsin, Mara, Pell, Iven, Sella, and Rusk content. Preserve `REG-01`–`05` and `REG-09`–`11` as NOT_RUN until those real interactions exist.
+- WP-12 production placement remains NOT_RUN: real Tidecross/cart and underworks packages are installed and natively loadable, and the six supplied NPC roles have a native 26-bone normalized mesh/clip compatibility path. The direct 15-bone route visibly fails its non-zero walk pose. The project still lacks normalized visual playback acceptance, a selected production material/scale path, a production map, quarry/claim composition, NPC world staging, and real interactions. Preserve `REG-01`–`05` and `REG-09`–`11` as NOT_RUN until those real interactions exist.
 - `py -3.12 tools/wyrm.py report` is stale because its old onboarding receipt predates the current source and `Saved/Diagnostics/doctor.json` is absent. Do not use it as current WP-12 proof.
 
 ## Next bounded task
 
-Provide or import approved existing real Region 01 quarry, settlement, cave,
-cart/claim, and named-NPC content; then place and validate the actual landmarks
-and production `REG` cases. Do not expand into WP-13 before that blocker is resolved.
+Run `py -3.12 tools/run_wp12_npc_preview.py --normalized` to use the dedicated
+normalized wrapper, then inspect all six candidates at a non-zero walk frame
+and validate the final material/scale path. Only then compose the verified
+town/cart and underworks packages with actual terrain into the Region 01 map,
+place and validate the landmarks, and run production `REG` cases. Do not expand
+into WP-13 before that boundary is resolved.
 Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.

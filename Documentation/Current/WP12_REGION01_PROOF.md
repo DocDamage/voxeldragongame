@@ -2,7 +2,11 @@
 
 **Date**: 2026-09-17  
 **Engine**: Unreal Engine 5.8.2 (`C:\Program Files\UE_5.8`)  
-**Status**: **PARTIAL — fact ledger and diagnostic PIE proof PASS; production landmark placement BLOCKED**
+**Status**: **PARTIAL — fact ledger and diagnostic PIE proof PASS; real
+environment-package, supplied NPC intake, and normalized 26-bone
+mesh/animation compatibility PASS; direct walk playback is rejected and
+normalized visual playback, production materials, landmark placement, and NPC
+staging remain NOT_RUN**
 
 ## Scope and authority
 
@@ -34,6 +38,10 @@ count alone cannot fabricate a homecoming.
 | Focused native Region 01 automation | PASS: 1/1 | `WYRMFALL.Region01.LandmarksFactsAndPersistence`; [report](../../Saved/Automation/Region01/index.json) |
 | Selected scaffold native automation | PASS: 46/46 | 42 Success plus 4 SuccessWithWarnings; [receipt](../../Saved/ScaffoldLogs/20260917T171757Z_d640a0f01c93_ue-test.json) |
 | Focused PIE fact-ledger probe | PASS: 8/8 | [diagnostic receipt](../../Saved/Diagnostics/WP12_region01_proof.json); blank diagnostic fixture with real humanoid and Green Dragon runtime actors, not a production Region 01 map |
+| Direct supplied NPC intake | PASS: 6/6 metadata pairs | [native receipt](../../Saved/Diagnostics/WP12_region01_npc_intake.json); each direct mesh is 15 bones with one material slot and matching 60-key / 2.458 s idle plus 41-key / 1.667 s walk metadata; no visual acceptance is implied |
+| Supplied source inspection | PASS: source-only | [palette layout](../../Saved/Diagnostics/WP12_region01_fbx_palette_layout.json) and [mesh/clip compatibility](../../Saved/Diagnostics/WP12_region01_fbx_animation_compat.json); the source uses a 25-bone, three-root armature and an authored 256-by-1 palette UV mapping |
+| Normalized supplied NPC intake | PASS: 6/6 skeleton-compatible pairs | [native receipt](../../Saved/Diagnostics/WP12_region01_normalized_npc_intake.json); each normalized derivative imports as a 26-bone mesh plus its matching, correctly timed idle/walk skeleton pair in the ignored development mount |
+| Direct developer fixture | PARTIAL: idle colour/bounds captured; walk rejected | [fixture receipt](../../Saved/Diagnostics/WP12Region01NpcPreview/report.json); source palettes are visible using a diagnostic emissive material, while the direct 15-bone non-zero walk visibly deforms. No normalized pose capture exists yet |
 | Portable source/config check | PASS | `py -3.12 tools/wyrm.py verify`; this is not an Unreal build or PIE result |
 | Portable tooling tests | PASS: 124, 2 expected skips | `py -3.12 tools/wyrm.py test` under normal local Windows permissions |
 
@@ -48,11 +56,40 @@ encounter, which remains in WP-14.
 
 ## Asset and acceptance boundary
 
-The audited imported content contains the existing humanoid, Green Dragon,
-wolf, dirt, and stone assets. It does **not** contain the supplied real
-environment/NPC inputs needed to place this work package's locations and
-interactions: quarry, Tidecross/settlement, underworks/cave, broken cart or
-claim apparatus, or distinct Tamsin, Mara, Pell, Iven, Sella, and Rusk assets.
+The audited local install now has two user-owned, real environment packs at
+their original Unreal mount paths: `Content/BanditCamp` (Modular Medieval
+Village, 724 files) and `Content/DarkHalls` (Modular Dungeon, 269 files).
+They are intentionally ignored by Git because they are proprietary vendor
+packages. UE 5.8.2 discovered and loaded the real cart, cooking-pot, corridor,
+and corridor-wall samples; see [asset-intake report](../../Saved/Diagnostics/WP12_region01_asset_intake.json)
+and [intake record](WP12_REGION01_ASSET_INTAKE.md). This establishes real
+Tidecross/cart and underworks geometry availability, not a placed map.
+
+The supplied `ART-HUM-01` archives provide distinct mesh/texture candidates
+for Tamsin, Mara, Sella, Pell, Iven, and Rusk. UE 5.8.2 natively imported and
+measured each direct candidate in the ignored development intake mount. The
+initial Interchange animation test classified an idle sample as a StaticMesh;
+the later legacy route made matching `AnimSequence` metadata but retained only
+15 mesh bones. The direct fixture's explicit non-zero walk sample visibly
+deformed, so this route is not accepted for animation playback.
+
+Read-only Blender inspection shows the supplied mesh and walk armatures have
+the same 25 named bones and that the source has three roots. A local Blender
+normalization retains the source FBXs untouched, adds one identity root, and
+writes only ignored intake derivatives. UE 5.8.2 then imported six complete
+26-bone mesh/idle/walk pairs with matching skeletons and original clip timing:
+60 keys / 2.458 s idle and 41 keys / 1.667 s walk. This resolves native asset
+compatibility, not visual presentation.
+
+The authored source palette is a one-row 256-by-1 texture. Its raw imported
+material has no texture parameter, so the direct fixture factory-imports that
+real palette and connects it to a diagnostic emissive material only for visual
+inspection. It showed real supplied idle colours and recorded fixture bounds,
+but it is not a production shader, lighting choice, scale acceptance, or world
+actor. The first normalized pose-capture command was split by the editor
+console before Python ran; its wrapper is ready for a later focused attempt,
+but no normalized visual playback receipt exists in this checkpoint. Dialogue,
+interaction, collision, navigation, and relief gameplay therefore remain open.
 
 Consequently, the preserved production acceptance cases `REG-01` through
 `REG-05` and `REG-09` through `REG-11` remain **NOT_RUN**. The named checks in
@@ -66,7 +103,9 @@ used as current WP-12 proof.
 
 ## Next bounded task
 
-Provide or import approved existing real quarry, settlement, cave, cart/claim,
-and distinct worker/NPC content; then place and validate the actual Region 01
-landmarks and run the production `REG` cases. Do not begin WP-13 before that
-blocked placement work is resolved.
+Run the dedicated normalized NPC developer fixture, inspect all six at a
+non-zero walk frame, and validate the final material/scale path. Then compose
+the existing town/cart and underworks packages with the actual terrain provider
+into a production Region 01 map, wire the landmarks and interactions to the
+existing fact ledger, and run the production `REG` cases. Do not begin WP-13
+before that placement work is resolved.

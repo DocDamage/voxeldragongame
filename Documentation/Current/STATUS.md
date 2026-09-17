@@ -1,6 +1,7 @@
 # Current implementation status
 
-**September 17, 2026 · starter v0.2 · evidence reconciled through WP-12 fact-ledger verification**
+**September 17, 2026 · starter v0.2 · evidence reconciled through WP-12
+normalized NPC compatibility intake**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -29,7 +30,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-09 green dragon locomotion, combat & direct control | **PASS in real PIE** | 5/5 test groups passed for genuine modular dragon assets, living defeat (1800 HP -> 0 HP DefeatedAlive), one-way bond (420 Max HP, 210 initial HP), companion orders & GAS combat (24 primary, 18 area 6s cooldown), direct control possession with humanoid body anchoring, 150m tether return, waiting body damage return, and unified save roundtrip; [report](WP09_DRAGON_PROOF.md) |
 | WP-10 green dragon riding, flight locomotion, obstacle collision & mounted persistence | **PASS in real PIE** | 5/5 test groups passed for original humanoid mount socket attachment (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery; [report](WP10_FLIGHT_PROOF.md) |
 | WP-11 Green Dragon Heartfold & compact behavior | **PASS in real PIE (Verdance only)** | 7/7 live groups passed: compact fit, compact combat/direct control, timed state-conserving transitions, blocked growth, interruption, town behavior, and compact save roundtrip. DRG-15 is a separate native/source policy check: unvalidated rigs are blocked from inheriting Green Dragon values; [report](WP11_HEARTFOLD_PROOF.md) |
-| WP-12 Region 01 landmarks & quest facts | **PARTIAL; fact ledger + diagnostic PIE PASS** | 13 logical landmarks plus fact/receipt/save scenarios passed through a real game instance and Green Dragon runtime actor. Production landmark placement and full `REG-01`–`05`, `09`–`11` remain BLOCKED/NOT_RUN because the required approved environment and named-NPC content is not imported; [report](WP12_REGION01_PROOF.md) |
+| WP-12 Region 01 landmarks & quest facts | **PARTIAL; fact ledger + diagnostic PIE + native environment load + normalized NPC asset compatibility PASS** | 13 logical landmarks plus fact/receipt/save scenarios passed through a real game instance and Green Dragon runtime actor. Real Tidecross/cart and underworks packages load; six supplied source pairs now import as 26-bone normalized meshes with matching, correctly timed clips. The direct 15-bone route visibly fails a non-zero walk pose; the normalized visual fixture and production material/scale/map staging remain NOT_RUN. Full `REG-01`–`05`, `09`–`11` remain NOT_RUN; [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -78,6 +79,10 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   It has no save-slot ownership: `UWyrmSaveSubsystem` snapshots/restores the
   record. Full homecoming is an actual Tidecross event after every local
   closure fact, not an all-workers counter or a tutorial/activity gate.
+- WP-12's six supplied NPC source skeletons contain 25 bones across three
+  roots. The ignored intake-only normalizer adds one identity root and has a
+  native 26-bone mesh/clip compatibility pass; it does not make a production
+  material, visual animation, NPC actor, or map placement claim.
 
 ## Fresh verification commands
 
@@ -114,12 +119,16 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Imported Jadefang validation and its own rig-profile/Heartfold proof. It is intentionally
   blocked from inheriting the Verdance values until that work is performed.
 - Production Region 01 placement and full `REG-01`–`05`, `REG-09`–`11` acceptance.
-  The fact ledger is verified, but no audited quarry, settlement, cave, cart/claim,
-  or distinct named-NPC content exists to place and exercise it.
+  The fact ledger, town/cart/underworks package intake, and six supplied NPC
+  mesh/texture candidates plus normalized skeleton-compatible clips are verified,
+  but no normalized visual playback, production map, quarry composition, claim
+  interaction, production material/scale validation, or NPC world staging exists.
 
 ## Next bounded task
 
-Provide or import approved existing real Region 01 quarry, settlement, cave,
-cart/claim, and named-NPC content; then place the actual landmarks and run the
-production `REG` cases. Do not begin WP-13 before that blocker is resolved.
+Run the dedicated normalized Region 01 NPC developer fixture, inspect all six
+candidates at a non-zero walk frame, and validate the final material/scale
+path. Then compose the verified town/cart and underworks packages with actual
+terrain into the production map, place the landmarks, and run the production
+`REG` cases. Do not begin WP-13 before that boundary is resolved.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.
