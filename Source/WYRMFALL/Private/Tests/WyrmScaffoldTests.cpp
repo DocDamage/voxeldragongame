@@ -32,6 +32,8 @@
 #include "Terrain/WyrmGeoForgeAdapter.h"
 #include "Dragon/WyrmDragonTypes.h"
 #include "Dragon/WyrmDragonCharacter.h"
+#include "Components/BoxComponent.h"
+#include "Engine/DamageEvents.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -2252,6 +2254,7 @@ bool FWyrmDragonCompanionCombatTest::RunTest(const FString& Parameters)
     AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
         AWyrmDragonCharacter::StaticClass(), FVector(100.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
     Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
 
     // Test companion orders (DRG-02)
     Dragon->IssueOrder(EWyrmCompanionOrder::Hold);
@@ -2474,6 +2477,624 @@ bool FWyrmDragonSaveRoundtripTest::RunTest(const FString& Parameters)
     Dragon->Destroy();
     Player->Destroy();
     PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonMountDismountTest, "WYRMFALL.Scaffold.DragonMountAndDismount",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonMountDismountTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    PC->Possess(Player);
+
+    // 1. Compact mount rejected (DRG-05)
+    Dragon->SetDragonForm(EWyrmDragonForm::CompanionForm);
+    FString RejectionReason;
+    TestFalse(TEXT("Compact mount rejected (DRG-05)"), Dragon->CanMount(Player, RejectionReason));
+    TestTrue(TEXT("Rejection explains True Form required"), RejectionReason.Contains(TEXT("True Form")));
+
+    // 2. True Form mount succeeds (DRG-05)
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+    TestTrue(TEXT("CanMount in TrueForm succeeds"), Dragon->CanMount(Player, RejectionReason));
+    TestTrue(TEXT("MountHumanoid succeeds"), Dragon->MountHumanoid(Player));
+    TestTrue(TEXT("IsRiderMounted is true"), Dragon->IsRiderMounted());
+    TestEqual(TEXT("Mounted rider is original humanoid"), Dragon->GetMountedRider(), Player);
+    TestTrue(TEXT("Humanoid movement locked"), Player->IsMovementLocked());
+    TestTrue(TEXT("PC possesses Dragon"), PC->GetPawn() == Dragon);
+
+    // 3. Dismount rejected in flight (DRG-06)
+    Dragon->TakeOff();
+    TestEqual(TEXT("Dragon flight state is Flying"), Dragon->GetFlightState(), EWyrmDragonFlightState::Flying);
+    FVector OutDismountLoc;
+    FString DismountReason;
+    TestFalse(TEXT("In-flight dismount rejected (DRG-06)"), Dragon->CanDismount(OutDismountLoc, DismountReason));
+    TestTrue(TEXT("Dismount rejection explains in flight"), DismountReason.Contains(TEXT("flight")));
+
+    // 4. Dismount on ground succeeds (DRG-05)
+    Dragon->Land();
+    TestEqual(TEXT("Dragon flight state is Grounded"), Dragon->GetFlightState(), EWyrmDragonFlightState::Grounded);
+    TestTrue(TEXT("CanDismount on ground succeeds"), Dragon->CanDismount(OutDismountLoc, DismountReason));
+    TestTrue(TEXT("DismountHumanoid succeeds"), Dragon->DismountHumanoid(OutDismountLoc));
+    TestFalse(TEXT("IsRiderMounted is false"), Dragon->IsRiderMounted());
+    TestFalse(TEXT("Humanoid movement unlocked"), Player->IsMovementLocked());
+    TestTrue(TEXT("PC possesses Humanoid again"), PC->GetPawn() == Player);
+
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonFlightTakeoffLandingTest, "WYRMFALL.Scaffold.DragonFlightTakeoffAndLanding",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonFlightTakeoffLandingTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    Dragon->SetDragonRole(EWyrmDragonRole::AlliedCompanion);
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+
+    // Initial state is Grounded
+    TestEqual(TEXT("Initial flight state is Grounded"), Dragon->GetFlightState(), EWyrmDragonFlightState::Grounded);
+    TestFalse(TEXT("IsInFlight is false initially"), Dragon->IsInFlight());
+
+    // Takeoff (DRG-06)
+    FString TakeoffReason;
+    TestTrue(TEXT("CanTakeOff succeeds with clear overhead"), Dragon->CanTakeOff(TakeoffReason));
+    TestTrue(TEXT("TakeOff succeeds"), Dragon->TakeOff());
+    TestEqual(TEXT("FlightState is Flying"), Dragon->GetFlightState(), EWyrmDragonFlightState::Flying);
+    TestTrue(TEXT("IsInFlight is true"), Dragon->IsInFlight());
+    TestEqual(TEXT("CharacterMovement is MOVE_Flying"), Dragon->GetCharacterMovement()->MovementMode, EMovementMode::MOVE_Flying);
+    TestEqual(TEXT("MaxFlySpeed is 1600.0"), Dragon->GetCharacterMovement()->MaxFlySpeed, 1600.f);
+
+    // Landing (DRG-06)
+    Dragon->SetActorLocation(FVector(0.f, 0.f, 400.f));
+    FVector LandingLoc;
+    FString LandReason;
+    TestTrue(TEXT("CanLand succeeds within search distance"), Dragon->CanLand(LandingLoc, LandReason));
+    TestTrue(TEXT("Land succeeds"), Dragon->Land());
+    TestEqual(TEXT("FlightState returned to Grounded"), Dragon->GetFlightState(), EWyrmDragonFlightState::Grounded);
+    TestFalse(TEXT("IsInFlight is false after landing"), Dragon->IsInFlight());
+    TestEqual(TEXT("MovementMode is MOVE_Walking"), Dragon->GetCharacterMovement()->MovementMode, EMovementMode::MOVE_Walking);
+
+    Dragon->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonMountedDefeatRecoveryTest, "WYRMFALL.Scaffold.DragonMountedDefeatAndHubRecovery",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonMountedDefeatRecoveryTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(100.f, 100.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(200.f, 200.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+    PC->Possess(Player);
+    Dragon->MountHumanoid(Player);
+    Dragon->TakeOff();
+
+    TestTrue(TEXT("Rider is mounted in flight"), Dragon->IsRiderMounted());
+    TestTrue(TEXT("Dragon is in flight"), Dragon->IsInFlight());
+
+    // 1. Mounted dragon defeat invokes emergency ground recovery (DRG-07)
+    Dragon->HandleMountedDefeat();
+
+    TestFalse(TEXT("Rider is no longer mounted after defeat"), Dragon->IsRiderMounted());
+    TestTrue(TEXT("PC possesses Humanoid again"), PC->GetPawn() == Player);
+    TestFalse(TEXT("Humanoid movement is unlocked"), Player->IsMovementLocked());
+    TestEqual(TEXT("Dragon role is Recovering"), Dragon->GetDragonRole(), EWyrmDragonRole::Recovering);
+    TestEqual(TEXT("Dragon flight state forced to Grounded"), Dragon->GetFlightState(), EWyrmDragonFlightState::Grounded);
+
+    // Mounting while recovering must be rejected
+    FString MountReason;
+    TestFalse(TEXT("Mounting recovering dragon rejected"), Dragon->CanMount(Player, MountReason));
+
+    // 2. Hub Recovery restores companion (DRG-14)
+    TestTrue(TEXT("RecoverCompanion succeeds"), Dragon->RecoverCompanion());
+    TestEqual(TEXT("Dragon role restored to AlliedCompanion"), Dragon->GetDragonRole(), EWyrmDragonRole::AlliedCompanion);
+    TestEqual(TEXT("Dragon health restored to 420.0"), Dragon->GetAttributes()->GetCurrentHealth(), 420.f);
+    TestEqual(TEXT("Dragon focus restored to 100.0"), Dragon->GetAttributes()->GetCurrentFocus(), 100.f);
+
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonMountedFlightSaveTest, "WYRMFALL.Scaffold.DragonMountedFlightSaveAndObstructedRecovery",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonMountedFlightSaveTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(100.f, 100.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(400.f, 500.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+    PC->Possess(Player);
+    Dragon->MountHumanoid(Player);
+    Dragon->TakeOff();
+    Dragon->SetActorLocation(FVector(400.f, 500.f, 800.f));
+
+    // Save snapshot while airborne mounted (SAVE-09)
+    const FString SlotName = TEXT("WyrmSlot_DragonFlight_Test");
+    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(SlotName, Player, nullptr, World);
+    TestNotNull(TEXT("Snapshot created"), Snapshot);
+    TestTrue(TEXT("Dragon record notes rider is mounted"), Snapshot->DragonRecord.bIsRiderMounted);
+    TestEqual(TEXT("Dragon record notes FlightState is Flying"), Snapshot->DragonRecord.FlightState, EWyrmDragonFlightState::Flying);
+    TestEqual(TEXT("Dragon record saved location Z=800"), Snapshot->DragonRecord.WorldLocation.Z, 800.0);
+
+    // Reset dragon state to grounded at origin
+    Dragon->DismountHumanoid(Snapshot->DragonRecord.SafeGroundAnchor);
+    Dragon->SetActorLocation(FVector::ZeroVector);
+
+    // Apply snapshot restore in valid space (SAVE-09)
+    const bool bApplySuccess = UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Player, nullptr, World);
+    TestTrue(TEXT("ApplySnapshotObject succeeded"), bApplySuccess);
+    TestEqual(TEXT("Dragon restored to Z=800"), Dragon->GetActorLocation().Z, 800.0);
+    TestEqual(TEXT("Flight state restored to Flying"), Dragon->GetFlightState(), EWyrmDragonFlightState::Flying);
+    TestTrue(TEXT("Rider re-mounted on dragon"), Dragon->IsRiderMounted());
+    TestTrue(TEXT("PC possesses dragon"), PC->GetPawn() == Dragon);
+
+    // Clean up
+    FVector DismountLoc;
+    Dragon->DismountHumanoid(DismountLoc);
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonHeartfoldCollisionTest, "WYRMFALL.Scaffold.DragonHeartfoldCollisionAndDoorfit",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonHeartfoldCollisionTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Dragon spawned"), Dragon);
+
+    Dragon->SetDragonRole(EWyrmDragonRole::AlliedCompanion);
+    TestEqual(TEXT("Initial companion role is AlliedCompanion"), Dragon->GetDragonRole(), EWyrmDragonRole::AlliedCompanion);
+    TestEqual(TEXT("Initial form is CompanionForm (DRG-08)"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+
+    // Verify CompanionForm dimensions (Radius=30, HalfHeight=35, scale=0.009)
+    UCapsuleComponent* Capsule = Dragon->GetCapsuleComponent();
+    TestNotNull(TEXT("Capsule exists"), Capsule);
+    TestEqual(TEXT("Companion capsule radius is 30.0 (DRG-08)"), Capsule->GetUnscaledCapsuleRadius(), 30.f);
+    TestEqual(TEXT("Companion capsule half height is 35.0 (DRG-08)"), Capsule->GetUnscaledCapsuleHalfHeight(), 35.f);
+    if (Dragon->GetMesh())
+    {
+        TestEqual(TEXT("Companion mesh scale is 0.009 (DRG-08)"), Dragon->GetMesh()->GetRelativeScale3D().X, 0.009);
+    }
+
+    // Doorframe fitting test (SM_Stylized_Wood_Doorframe has opening width 100cm, height 210cm)
+    const float DoorOpeningWidth = 100.f;
+    const float DoorOpeningHeight = 210.f;
+    const float CompanionDiameter = Capsule->GetUnscaledCapsuleRadius() * 2.f; // 60cm
+    const float CompanionHeight = Capsule->GetUnscaledCapsuleHalfHeight() * 2.f; // 70cm
+    TestTrue(TEXT("Companion diameter (60cm) fits within 100cm door opening (DRG-08)"), CompanionDiameter < DoorOpeningWidth);
+    TestTrue(TEXT("Companion height (70cm) fits within 210cm door height (DRG-08)"), CompanionHeight < DoorOpeningHeight);
+
+    // Switch to TrueForm
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+    TestEqual(TEXT("Form set to TrueForm"), Dragon->GetDragonForm(), EWyrmDragonForm::TrueForm);
+    TestEqual(TEXT("TrueForm capsule radius is 120.0 (DRG-08)"), Capsule->GetUnscaledCapsuleRadius(), 120.f);
+    TestEqual(TEXT("TrueForm capsule half height is 160.0 (DRG-08)"), Capsule->GetUnscaledCapsuleHalfHeight(), 160.f);
+    if (Dragon->GetMesh())
+    {
+        TestEqual(TEXT("TrueForm mesh scale is 0.035 (DRG-08)"), Dragon->GetMesh()->GetRelativeScale3D().X, 0.035);
+    }
+
+    // TrueForm blocked by standard doorframe
+    const float TrueFormDiameter = Capsule->GetUnscaledCapsuleRadius() * 2.f; // 240cm
+    const float TrueFormHeight = Capsule->GetUnscaledCapsuleHalfHeight() * 2.f; // 320cm
+    TestTrue(TEXT("TrueForm diameter (240cm) blocked by 100cm door opening (DRG-08)"), TrueFormDiameter > DoorOpeningWidth);
+    TestTrue(TEXT("TrueForm height (320cm) blocked by 210cm door height (DRG-08)"), TrueFormHeight > DoorOpeningHeight);
+
+    // Verify speed parameters
+    TestEqual(TEXT("Companion ground speed is 450"), Dragon->GetCompanionGroundSpeed(), 450.f);
+    TestEqual(TEXT("Companion catch-up speed is 600"), Dragon->GetCompanionCatchUpSpeed(), 600.f);
+    TestEqual(TEXT("TrueForm ground speed is 550"), Dragon->GetTrueFormGroundSpeed(), 550.f);
+
+    Dragon->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonHeartfoldCombatAndParityTest, "WYRMFALL.Scaffold.DragonHeartfoldCombatAndParity",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonHeartfoldCombatAndParityTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 3000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(200.f, 3000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmEnemyCharacter* DummyTarget = AWyrmEnemyCharacter::SpawnWyrmEnemy(
+        World, EWyrmEnemyRole::MeleeChaser, FTransform(FVector(400.f, 3000.f, 100.f)));
+    TestNotNull(TEXT("Dummy target spawned"), DummyTarget);
+    DummyTarget->GetAbilitySystemComponent()->InitAbilityActorInfo(DummyTarget, DummyTarget);
+    DummyTarget->GetAttributes()->InitMaxHealth(100.f);
+    DummyTarget->GetAttributes()->SetCurrentMaxHealth(100.f);
+    DummyTarget->GetAttributes()->InitHealth(100.f);
+    DummyTarget->GetAttributes()->SetCurrentHealth(100.f);
+    DummyTarget->GetAttributes()->InitArmor(0.f);
+    DummyTarget->GetAttributes()->SetCurrentArmor(0.f);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+
+    // 1. Injure dragon and reduce focus
+    Dragon->GetAttributes()->InitHealth(175.f);
+    Dragon->GetAttributes()->InitFocus(80.f);
+    TestEqual(TEXT("Injured dragon health is 175.0"), Dragon->GetAttributes()->GetCurrentHealth(), 175.f);
+    TestEqual(TEXT("Dragon focus is 80.0"), Dragon->GetAttributes()->GetCurrentFocus(), 80.f);
+
+    // 2. Trigger secondary area attack in TrueForm
+    TestTrue(TEXT("Secondary area attack executes in TrueForm"), Dragon->PerformSecondaryAttack(DummyTarget));
+    TestTrue(TEXT("Area attack cooldown committed (DRG-09)"), Dragon->GetAreaAttackCooldownRemaining() > 0.f);
+
+    // 3. Fold into CompanionForm (DRG-10 Form State Conservation)
+    TestTrue(TEXT("Fold into CompanionForm begins"), Dragon->RequestFormChange(EWyrmDragonForm::CompanionForm));
+    TestTrue(TEXT("Fold transition is active before its timed commit"), Dragon->IsTransitioningForm());
+    Dragon->Tick(1.1f);
+    TestEqual(TEXT("Current form is CompanionForm"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+
+    // Strict parity check: health, focus, and active cooldowns must not reset or heal
+    TestEqual(TEXT("Health strictly conserved across fold at 175.0 (DRG-10)"), Dragon->GetAttributes()->GetCurrentHealth(), 175.f);
+    TestEqual(TEXT("Max health strictly conserved at 420.0 (DRG-10)"), Dragon->GetAttributes()->GetMaxHealth(), 420.f);
+    TestEqual(TEXT("Focus strictly conserved at 80.0 (DRG-10)"), Dragon->GetAttributes()->GetCurrentFocus(), 80.f);
+    TestTrue(TEXT("Area attack cooldown conserved across fold (DRG-10)"), Dragon->GetAreaAttackCooldownRemaining() > 0.f);
+
+    // 4. Test Compact Primary Attack (DRG-09: 9 raw damage)
+    DummyTarget->GetAttributes()->SetCurrentHealth(100.f);
+    TestTrue(TEXT("PerformPrimaryAttack executes in CompanionForm"), Dragon->PerformPrimaryAttack(DummyTarget));
+    TestEqual(TEXT("Companion primary attack deals 9 damage (100 -> 91) (DRG-09)"), DummyTarget->GetAttributes()->GetCurrentHealth(), 91.f);
+
+    // 5. Test Compact Secondary Attack (DRG-09: 6 raw damage, 250cm radius, shared 6s cooldown)
+    DummyTarget->GetAttributes()->SetCurrentHealth(100.f);
+    FWyrmDragonSaveRecord CooldownResetRecord;
+    Dragon->BuildSaveRecord(CooldownResetRecord);
+    CooldownResetRecord.AreaAttackCooldownRemaining = 0.f;
+    Dragon->RestoreFromSaveRecord(CooldownResetRecord, Player);
+
+    TestTrue(TEXT("PerformSecondaryAttack executes in CompanionForm"), Dragon->PerformSecondaryAttack(DummyTarget));
+    TestEqual(TEXT("Companion secondary attack deals 6 damage (100 -> 94) (DRG-09)"), DummyTarget->GetAttributes()->GetCurrentHealth(), 94.f);
+    TestEqual(TEXT("Shared cooldown committed to 6s (DRG-09)"), Dragon->GetAreaAttackCooldownRemaining(), 6.0f);
+
+    // 6. Unfold to TrueForm: check parity preserved and TrueForm damage
+    // Let the shared form cooldown expire through the real tick path before
+    // requesting the reverse transition.
+    Dragon->Tick(4.1f);
+    FString UnfoldReason;
+    TestTrue(FString::Printf(TEXT("Unfold to TrueForm is valid after cooldown (Reason: %s)"), *UnfoldReason), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, UnfoldReason));
+    TestTrue(TEXT("Unfold to TrueForm begins"), Dragon->RequestFormChange(EWyrmDragonForm::TrueForm));
+    Dragon->Tick(1.1f);
+    TestEqual(TEXT("Health still strictly conserved at 175.0 after unfolding (DRG-10)"), Dragon->GetAttributes()->GetCurrentHealth(), 175.f);
+
+    DummyTarget->GetAttributes()->SetCurrentHealth(100.f);
+    TestTrue(TEXT("PerformPrimaryAttack executes in TrueForm"), Dragon->PerformPrimaryAttack(DummyTarget));
+    TestEqual(TEXT("TrueForm primary attack deals 24 damage (100 -> 76) (DRG-09)"), DummyTarget->GetAttributes()->GetCurrentHealth(), 76.f);
+
+    Dragon->Destroy();
+    DummyTarget->Destroy();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonHeartfoldBlockedGrowthTest, "WYRMFALL.Scaffold.DragonHeartfoldBlockedGrowth",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonHeartfoldBlockedGrowthTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(1000.f, 1000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::CompanionForm);
+
+    FString Reason;
+    // 1. In open clearance, growth is permitted
+    TestTrue(TEXT("CanChangeForm to TrueForm succeeds in open space (DRG-11)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+
+    // 2. Spawn a low ceiling obstacle directly overhead (Z=220cm, below 320cm TrueForm height requirement)
+    AActor* CeilingActor = World->SpawnActor<AActor>(AActor::StaticClass(), FVector(1000.f, 1000.f, 220.f), FRotator::ZeroRotator, SpawnParams);
+    UBoxComponent* BoxComp = NewObject<UBoxComponent>(CeilingActor, TEXT("CeilingCollision"));
+    CeilingActor->SetRootComponent(BoxComp);
+    BoxComp->SetBoxExtent(FVector(200.f, 200.f, 40.f));
+    BoxComp->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+    BoxComp->SetCollisionObjectType(ECC_WorldStatic);
+    BoxComp->SetCollisionResponseToAllChannels(ECR_Block);
+    BoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    BoxComp->SetWorldLocation(FVector(1000.f, 1000.f, 220.f));
+    BoxComp->RegisterComponentWithWorld(World);
+
+    // 3. Blocked growth test (DRG-11)
+    TestFalse(TEXT("CanChangeForm rejected under low ceiling (DRG-11)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+    TestTrue(TEXT("Rejection reason is 'Not enough room for True Form' (DRG-11)"), Reason.Contains(TEXT("Not enough room for True Form")));
+
+    // RequestFormChange must also fail
+    TestFalse(TEXT("RequestFormChange rejected under low ceiling (DRG-11)"), Dragon->RequestFormChange(EWyrmDragonForm::TrueForm));
+    TestEqual(TEXT("Dragon remains in valid CompanionForm (DRG-11)"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+
+    // 4. Remove ceiling: growth succeeds again
+    CeilingActor->Destroy();
+    TestTrue(TEXT("CanChangeForm succeeds after clearing overhead obstacle (DRG-11)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+
+    // Revalidate immediately before commit: a ceiling added while the compact
+    // dragon is transitioning must cancel safely rather than grow into it.
+    TestTrue(TEXT("Growth transition begins in clear space (DRG-12)"), Dragon->RequestFormChange(EWyrmDragonForm::TrueForm));
+    AActor* LateCeilingActor = World->SpawnActor<AActor>(AActor::StaticClass(), FVector(1000.f, 1000.f, 220.f), FRotator::ZeroRotator, SpawnParams);
+    UBoxComponent* LateBoxComp = NewObject<UBoxComponent>(LateCeilingActor, TEXT("LateCeilingCollision"));
+    LateCeilingActor->SetRootComponent(LateBoxComp);
+    LateBoxComp->SetBoxExtent(FVector(200.f, 200.f, 40.f));
+    LateBoxComp->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+    LateBoxComp->SetCollisionObjectType(ECC_WorldStatic);
+    LateBoxComp->SetCollisionResponseToAllChannels(ECR_Block);
+    LateBoxComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    LateBoxComp->SetWorldLocation(FVector(1000.f, 1000.f, 220.f));
+    LateBoxComp->RegisterComponentWithWorld(World);
+    Dragon->Tick(1.1f);
+    TestFalse(TEXT("Late obstruction cancels transition before commit (DRG-12)"), Dragon->IsTransitioningForm());
+    TestEqual(TEXT("Late obstruction leaves dragon compact (DRG-12)"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+    TestTrue(TEXT("Late obstruction commits recovery cooldown (DRG-12)"), Dragon->GetFormTransitionCooldownRemaining() > 0.f);
+    LateCeilingActor->Destroy();
+
+    Dragon->Destroy();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonHeartfoldInterruptionTest, "WYRMFALL.Scaffold.DragonHeartfoldInterruptionRollback",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonHeartfoldInterruptionTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 500.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->SetDragonForm(EWyrmDragonForm::CompanionForm);
+    Dragon->GetAttributes()->InitHealth(420.f);
+    Dragon->GetAttributes()->InitMaxHealth(420.f);
+
+    // 1. Request form transition to TrueForm
+    TestTrue(TEXT("RequestFormChange begins transition (DRG-12)"), Dragon->RequestFormChange(EWyrmDragonForm::TrueForm));
+    TestTrue(TEXT("IsTransitioningForm is true during transition (DRG-12)"), Dragon->IsTransitioningForm());
+    TestEqual(TEXT("Dragon remains in CompanionForm until commit (DRG-12)"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+    TestFalse(TEXT("Primary attack is suppressed during transition (DRG-12)"), Dragon->PerformPrimaryAttack(Player));
+    TestFalse(TEXT("Secondary attack is suppressed during transition (DRG-12)"), Dragon->PerformSecondaryAttack(Player));
+
+    // 2. Incoming damage interrupts transition (DRG-12)
+    const float InitialHealth = Dragon->GetAttributes()->GetCurrentHealth();
+    Dragon->TakeDamage(30.f, FDamageEvent(), nullptr, nullptr);
+
+    // 3. Verify rollback and cooldown commit
+    TestFalse(TEXT("IsTransitioningForm cancelled upon damage (DRG-12)"), Dragon->IsTransitioningForm());
+    TestEqual(TEXT("Dragon rolled back to CompanionForm (DRG-12)"), Dragon->GetDragonForm(), EWyrmDragonForm::CompanionForm);
+    TestTrue(TEXT("Recovery cooldown committed (4.0s) (DRG-12)"), Dragon->GetFormTransitionCooldownRemaining() > 0.f);
+    TestEqual(TEXT("Damage conserved without duplication (420 - 30 = 390) (DRG-12)"), Dragon->GetAttributes()->GetCurrentHealth(), InitialHealth - 30.f);
+
+    // 4. Subsequent transition request rejected while on cooldown
+    FString CooldownReason;
+    TestFalse(TEXT("Form change rejected during transition cooldown (DRG-12)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, CooldownReason));
+    TestTrue(TEXT("Reason mentions cooldown"), CooldownReason.Contains(TEXT("cooldown")));
+
+    // 5. Town Mode Behavior check (DRG-13)
+    Dragon->SetTownModeEnabled(true);
+    TestTrue(TEXT("Town mode enabled (DRG-13)"), Dragon->IsTownModeEnabled());
+    Dragon->IssueOrder(EWyrmCompanionOrder::AttackTarget, Player);
+    // In town mode, attack targeting is suppressed to Follow
+    Dragon->Tick(0.1f);
+    TestEqual(TEXT("Attack order suppressed to Follow in town mode (DRG-13)"), Dragon->GetCompanionOrder(), EWyrmCompanionOrder::Follow);
+    TestNull(TEXT("Combat target cleared in town mode (DRG-13)"), Dragon->GetCombatTarget());
+
+    Dragon->Destroy();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonRigProfilePolicyTest, "WYRMFALL.Scaffold.DragonRigProfilePolicy",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 5000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 5000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    Dragon->DragonId = FName(TEXT("Jadefang"));
+    TestFalse(TEXT("Jadefang cannot inherit Verdance's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
+
+    FString Reason;
+    TestFalse(TEXT("Jadefang Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+    TestTrue(TEXT("Heartfold rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated Heartfold profile")));
+
+    Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+    TestFalse(TEXT("Jadefang cannot inherit Verdance's mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Mount rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated mount profile")));
+    TestFalse(TEXT("Jadefang cannot inherit Verdance's flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
+    TestTrue(TEXT("Flight rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated flight profile")));
+
+    Dragon->Destroy();
+    Player->Destroy();
     return true;
 }
 #endif

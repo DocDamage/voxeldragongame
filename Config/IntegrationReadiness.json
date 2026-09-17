@@ -388,14 +388,17 @@
   "latest_verification": {
     "date": "2026-09-17",
     "pushed_checkpoint": "e90145e",
-    "editor_build": "PASS_NOUBA_NOPCH_FINAL_SOURCE",
-    "native_automation": "PASS_37_OF_37",
+    "editor_build": "PASS_UE58_EDITOR_TARGET_20260917T161434Z",
+    "native_automation": "PASS_46_OF_46_42_SUCCESS_4_SUCCESS_WITH_WARNINGS",
     "wp01_real_pie": "PASS_7_OF_7_GROUPS",
     "wp05_editor_world_commandlet": "PASS_3_OF_3_SCOPED_GROUPS",
     "wp06_real_pie": "PASS_6_OF_6_GROUPS",
     "wp07_real_pie": "PASS_8_OF_8_SCOPED_GROUPS",
     "wp08_real_pie": "PASS_7_OF_7_GROUPS",
     "wp09_real_pie": "PASS_5_OF_5_GROUPS",
+    "wp10_real_pie": "PASS_5_OF_5_GROUPS",
+    "wp11_real_pie": "PASS_7_OF_7_GROUPS_VERDANCE_ONLY",
+    "wp11_drg15_rig_policy": "PASS_NATIVE_AND_SOURCE_INSPECTION_OTHER_RIGS_FAIL_CLOSED",
     "portable": "PASS_124_TESTS_2_EXPECTED_SKIPS",
     "controller": "NOT_RUN",
     "cook": "NOT_RUN"
@@ -426,6 +429,25 @@
     "DRG-02": "PASS_NATIVE_AND_REAL_PIE",
     "DRG-03": "PASS_NATIVE_AND_REAL_PIE",
     "DRG-04": "PASS_NATIVE_AND_REAL_PIE",
+    "SAVE-08": "PASS_NATIVE_AND_REAL_PIE"
+  },
+  "wp10_state": "PASS_NATIVE_AND_REAL_PIE",
+  "dragon_flight_acceptance": {
+    "DRG-05": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-06": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-07": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-14": "PASS_NATIVE_AND_REAL_PIE",
+    "SAVE-09": "PASS_NATIVE_AND_REAL_PIE"
+  },
+  "wp11_state": "PASS_VERDANCE_NATIVE_AND_REAL_PIE_OTHER_RIGS_BLOCKED_PENDING_PROFILE",
+  "dragon_heartfold_acceptance": {
+    "DRG-08": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-09": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-10": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-11": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-12": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-13": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-15": "PASS_NATIVE_POLICY_AND_SOURCE_INSPECTION",
     "SAVE-08": "PASS_NATIVE_AND_REAL_PIE"
   }
 }

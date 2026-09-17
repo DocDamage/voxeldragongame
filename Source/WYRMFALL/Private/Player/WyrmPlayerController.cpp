@@ -258,6 +258,7 @@ void AWyrmPlayerController::Move(const FInputActionValue& Value)
     }
     else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
     {
+        if (Dragon->IsTransitioningForm()) { return; }
         StopMovement();
         const float Yaw = GetControlRotation().Yaw;
         const FRotationMatrix Basis(FRotator(0.f, Yaw, 0.f));
@@ -284,6 +285,14 @@ void AWyrmPlayerController::SwitchCamera()
 {
     if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
     { StopMovement(); Body->ToggleCamera(); RefreshCursor(); }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        if (Dragon->IsTransitioningForm()) { return; }
+        StopMovement();
+        static bool bDragonTopDown = false;
+        bDragonTopDown = !bDragonTopDown;
+        Dragon->SetFlightCameraMode(bDragonTopDown);
+    }
 }
 void AWyrmPlayerController::ToggleClickMove() { SetClickMoveEnabled(!bClickMoveEnabled); }
 void AWyrmPlayerController::ClickMove()
@@ -312,8 +321,29 @@ void AWyrmPlayerController::JumpPressed()
     }
     else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
     {
+        if (Dragon->IsTransitioningForm()) { return; }
         StopMovement();
-        Dragon->Jump();
+        if (Dragon->GetFlightState() == EWyrmDragonFlightState::Grounded)
+        {
+            Dragon->TakeOff();
+        }
+        else if (Dragon->IsInFlight())
+        {
+            FVector LandingLoc;
+            FString Reason;
+            if (Dragon->CanLand(LandingLoc, Reason))
+            {
+                Dragon->Land();
+            }
+            else
+            {
+                Dragon->AddMovementInput(FVector::UpVector, 1.0f);
+            }
+        }
+        else
+        {
+            Dragon->Jump();
+        }
     }
 }
 void AWyrmPlayerController::JumpReleased()
@@ -341,6 +371,7 @@ void AWyrmPlayerController::PrimaryAttack()
     }
     else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
     {
+        if (Dragon->IsTransitioningForm()) { return; }
         Dragon->PerformPrimaryAttack();
     }
 }
@@ -358,6 +389,7 @@ void AWyrmPlayerController::SecondaryAttack()
     }
     else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
     {
+        if (Dragon->IsTransitioningForm()) { return; }
         Dragon->PerformSecondaryAttack();
     }
 }
@@ -385,4 +417,43 @@ bool AWyrmPlayerController::ReturnControlToHumanoid()
     return false;
 }
 
+bool AWyrmPlayerController::MountDragon(AWyrmDragonCharacter* Dragon)
+{
+    if (!Dragon)
+    {
+        return false;
+    }
+    if (AWyrmCharacter* Humanoid = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        return Dragon->MountHumanoid(Humanoid);
+    }
+    return false;
+}
 
+bool AWyrmPlayerController::DismountDragon()
+{
+    if (AWyrmDragonCharacter* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        FVector DismountLoc;
+        return Dragon->DismountHumanoid(DismountLoc);
+    }
+    return false;
+}
+
+bool AWyrmPlayerController::TakeOffDragon()
+{
+    if (AWyrmDragonCharacter* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        return Dragon->TakeOff();
+    }
+    return false;
+}
+
+bool AWyrmPlayerController::LandDragon()
+{
+    if (AWyrmDragonCharacter* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        return Dragon->Land();
+    }
+    return false;
+}

@@ -2,7 +2,6 @@
 # Do not insert account model names, API keys, provider settings or global paths.
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
-model_reasoning_effort = "medium"
 
 [sandbox_workspace_write]
 network_access = false

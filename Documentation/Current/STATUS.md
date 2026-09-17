@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 17, 2026 · starter v0.2 · evidence reconciled through WP-09 verification**
+**September 17, 2026 · starter v0.2 · evidence reconciled through WP-11 verification**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -13,7 +13,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | Repository | `main`; pushed checkpoint `e90145e` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 37/37** | `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
+| Native automation | **PASS: 46/46** | 42 Success + 4 SuccessWithWarnings, 0 failed in `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | BOOT-01 | **Historical focused PASS** | Keyboard/mouse movement, jump, cameras, HUD, rebinding, pause/input guards, click rejection and relaunch passed before the current configuration |
 | Physical controller | **NOT_RUN** | No controller was detected; do not report controller acceptance as PASS |
@@ -27,6 +27,8 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-07 scoped activities fixture | **PARTIAL; scoped real PIE PASS** | 8/8 scoped groups passed for real assets, water, fishing, crafting and food buffs. No repository task packet defines full WP-07 acceptance; [report](WP07_ACTIVITIES_PROOF.md) |
 | WP-08 supported camp & storage | **PASS in real PIE** | 7/7 test groups passed for genuine camp assets, atomic placement, zero-side-effect rejection, single-owner storage identity, demolition recovery bundle overflow, camp persistence & companion growth clearance, and ground support terrain excavation locking; [report](WP08_CAMP_PROOF.md) |
 | WP-09 green dragon locomotion, combat & direct control | **PASS in real PIE** | 5/5 test groups passed for genuine modular dragon assets, living defeat (1800 HP -> 0 HP DefeatedAlive), one-way bond (420 Max HP, 210 initial HP), companion orders & GAS combat (24 primary, 18 area 6s cooldown), direct control possession with humanoid body anchoring, 150m tether return, waiting body damage return, and unified save roundtrip; [report](WP09_DRAGON_PROOF.md) |
+| WP-10 green dragon riding, flight locomotion, obstacle collision & mounted persistence | **PASS in real PIE** | 5/5 test groups passed for original humanoid mount socket attachment (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery; [report](WP10_FLIGHT_PROOF.md) |
+| WP-11 Green Dragon Heartfold & compact behavior | **PASS in real PIE (Verdance only)** | 7/7 live groups passed: compact fit, compact combat/direct control, timed state-conserving transitions, blocked growth, interruption, town behavior, and compact save roundtrip. DRG-15 is a separate native/source policy check: unvalidated rigs are blocked from inheriting Green Dragon values; [report](WP11_HEARTFOLD_PROOF.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -58,6 +60,18 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   `AWyrmPlayerController` (direct control possession & tethering authority),
   `UAbilitySystemComponent` (combat authority for dragon claw/sweep attacks), and
   `UWyrmSaveSubsystem` (dragon save record in unified schema version 5).
+- WP-10 owners are `AWyrmDragonCharacter` (rider mounting socket attachment, 3D flight
+  locomotion, takeoff wing clearance, obstacle collision, landing slope validation,
+  emergency ground recovery, and hub companion recovery), `AWyrmPlayerController`
+  (mounted controls, jump takeoff/landing routing, and dual third-person/top-down
+  flight cameras), and `UWyrmSaveSubsystem` (airborne mounted save roundtrip and
+  obstructed ground fallback in schema version 5).
+- WP-11 keeps Heartfold state in `AWyrmDragonCharacter`: normal requests use a one-second
+  transition, revalidate clearance at commit, retain a four-second shared cooldown, and
+  preserve the existing GAS attributes and save owner. `AWyrmPlayerController` suppresses
+  movement, jump, and attacks during that transition. Only the verified `Verdance`/Green
+  Dragon rig profile is enabled; unvalidated rigs cannot silently use its mesh, collision,
+  mount, flight, or Heartfold values.
 
 ## Fresh verification commands
 
@@ -69,6 +83,8 @@ py -3.12 tools/run_wp06_pie_proof.py
 py -3.12 tools/run_wp07_pie_proof.py
 py -3.12 tools/run_wp08_pie_proof.py
 py -3.12 tools/run_wp09_pie_proof.py
+py -3.12 tools/run_wp10_pie_proof.py
+py -3.12 tools/run_wp11_pie_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -88,8 +104,11 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Cook and packaged-game validation.
 - Production animation, collision, scale, materials, ranger presentation,
   targeting, UI and production-map acceptance.
+- Imported Jadefang validation and its own rig-profile/Heartfold proof. It is intentionally
+  blocked from inheriting the Verdance values until that work is performed.
 
 ## Next bounded task
 
-Reconcile integration readiness records and review next backlog task (e.g. WP-10 Dragon flight/riding/Heartfold mechanics or WP-18 Hovercar / vehicle locomotion).
+Review the WP-12 packet for Region 01 generated landmarks and quest facts; do not begin it
+until its bounded inputs and acceptance evidence are identified.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.

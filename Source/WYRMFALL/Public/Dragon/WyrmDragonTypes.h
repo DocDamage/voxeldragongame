@@ -36,6 +36,15 @@ enum class EWyrmTetherStatus : uint8
     LimitReached UMETA(DisplayName="Tether Limit Reached (>= 150m)")
 };
 
+UENUM(BlueprintType)
+enum class EWyrmDragonFlightState : uint8
+{
+    Grounded UMETA(DisplayName="Grounded"),
+    TakingOff UMETA(DisplayName="Taking Off"),
+    Flying UMETA(DisplayName="Flying"),
+    Landing UMETA(DisplayName="Landing")
+};
+
 USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmDragonSaveRecord
 {
@@ -85,4 +94,19 @@ struct WYRMFALL_API FWyrmDragonSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FRotator HumanoidWaitingRotation = FRotator::ZeroRotator;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bIsRiderMounted = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    EWyrmDragonFlightState FlightState = EWyrmDragonFlightState::Grounded;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FVector SafeGroundAnchor = FVector::ZeroVector;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float FormTransitionCooldownRemaining = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bTownModeEnabled = false;
 };

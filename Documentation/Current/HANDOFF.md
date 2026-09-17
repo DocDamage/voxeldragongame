@@ -25,14 +25,16 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Native automation passed 37/37 source-declared tests (including 5 dragon locomotion, combat, direct control, and save tests).
+- Native automation completed 46/46 source-declared tests: 42 Success, 4 SuccessWithWarnings, and 0 failures. This includes the Heartfold and rig-profile policy coverage.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
 - WP-07 scoped real PIE passed 8/8 activities groups.
 - WP-08 real PIE passed 7/7 supported camp & storage groups (`ACT-06..10`, `WRLD-08..09`).
-- WP-09 real PIE passed 5/5 green dragon locomotion, combat & direct control groups (`DRG-01..04`, `SAVE-08`):
-  authentic modular skeletal assets verified, living defeat (1800 HP -> 0 HP DefeatedAlive) & one-way bond (420 Max HP, 210 initial HP), autonomous companion orders & GAS combat (24 raw primary, 18 area with 6s cooldown), direct control possession with humanoid body anchoring, 150m tether limit & waiting humanoid damage interrupts, and unified save schema roundtrip.
+- WP-09 real PIE passed 5/5 green dragon locomotion, combat & direct control groups (`DRG-01..04`, `SAVE-08`).
+- WP-10 real PIE passed 5/5 green dragon riding, flight locomotion, obstacle collision & mounted persistence groups (`DRG-05..07`, `DRG-14`, `SAVE-09`):
+  authentic humanoid attachment to mount socket (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery to anchor beneath, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery.
+- WP-11 real PIE passed 7/7 Green Dragon/Verdance Heartfold groups (`DRG-08..13`, `SAVE-08`): compact capsule doorway fit, compact combat/direct control, one-second timed form changes with four-second recovery cooldown, state conservation, blocked growth, damage interruption, town combat suppression, and compact save roundtrip. `DRG-15` passed as a native/source policy check: unvalidated rigs cannot inherit Verdance mesh, collision, mount, flight, or Heartfold values.
 
 Evidence:
 
@@ -42,11 +44,15 @@ Evidence:
 - `Saved/Diagnostics/WP07_activities_proof.json`
 - `Saved/Diagnostics/WP08_camp_proof.json`
 - `Saved/Diagnostics/WP09_dragon_proof.json`
+- `Saved/Diagnostics/WP10_flight_proof.json`
+- `Saved/Diagnostics/WP11_heartfold_proof.json`
 - [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md)
 - [WP-06 report](WP06_PROGRESSION_PROOF.md)
 - [WP-07 scoped report](WP07_ACTIVITIES_PROOF.md)
 - [WP-08 report](WP08_CAMP_PROOF.md)
 - [WP-09 report](WP09_DRAGON_PROOF.md)
+- [WP-10 report](WP10_FLIGHT_PROOF.md)
+- [WP-11 report](WP11_HEARTFOLD_PROOF.md)
 
 ## Verification corrections
 
@@ -60,14 +66,21 @@ Evidence:
 - All combat damage routes strictly through `UWyrmMeleeAttackAbility::ApplyDamageEffect` rather than standard engine `TakeDamage` to ensure GAS attribute authority.
 - `CheckTetherStatus()` is exposed as a `UFUNCTION(BlueprintCallable)` allowing reliable script inspection without calling unexposed `AActor::Tick`.
 - `AWyrmDragonCharacter::EndDirectControl` evaluates humanoid distance rather than unconditionally resetting tether status, correctly preserving `LimitReached` upon max tether boundary return.
+- `CanLand`, `CanDismount`, and `GetSafeGroundAnchor` trace across both `ECC_WorldStatic` and `ECC_Visibility` channels with fallback ground checks for minimal test environments.
+- `HandleMountedDefeat` immediately teleports the rider to the nearest valid ground anchor beneath, resets dragon flight state, and transfers controller possession back to the humanoid, preventing fallen/dropped riders in midair.
+- In Unreal Engine Python test probes, C++ methods with out-parameters evaluate cleanly via return value inspection.
+- Normal Heartfold requests cannot bypass cooldowns. They stop movement, suppress attacks and controller actions while transitioning, and revalidate clearance immediately before commit.
+- `Verdance` is the only enabled dragon rig profile. A different `DragonId` is fail-closed until its own profile and proof exist, rather than silently reusing Green Dragon values.
+- The generated Android File Server settings were removed from tracked configuration and archived locally at `Saved/ConfigArchive/AndroidFileServerSettings-2026-09-17.ini`. The archive is ignored and deliberately omits the prior credential; generate a new token if this feature is restored.
 
 ## Boundaries
 
 - WP-00 remains PARTIAL; RDY-02/03/04 are open.
 - WP-02 through WP-05 full proof scripts remain editor-world evidence.
 - Physical controller, cook and packaged-game validation remain NOT_RUN.
+- Jadefang has source metadata only; it is not an imported, playable, or Heartfold-proven rig.
 
 ## Next bounded task
 
-Reconcile WP-00 readiness or begin next scheduled feature workpackage (e.g. WP-10 Dragon flight / riding / Heartfold or WP-18 Hovercar / vehicle locomotion).
+Review the bounded WP-12 Region 01 landmarks and quest-facts packet. Do not expand into WP-13 until WP-12 has its own evidence.
 Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.

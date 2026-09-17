@@ -35,6 +35,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon")
     FName DragonId = FName(TEXT("Verdance"));
 
+    // Only the imported Green Dragon/Verdance rig has a validated profile in this
+    // work package. Future dragon rigs must register and prove their own profile.
+    UFUNCTION(BlueprintPure, Category="Dragon|Rig")
+    bool HasSupportedRigProfile() const { return DragonId == FName(TEXT("Verdance")); }
+
     UFUNCTION(BlueprintPure, Category="Dragon")
     EWyrmDragonRole GetDragonRole() const { return CurrentRole; }
 
@@ -50,12 +55,47 @@ public:
     UFUNCTION(BlueprintCallable, Category="Dragon")
     bool BondWithHumanoid(AWyrmCharacter* Humanoid);
 
-    // --- Form & Scale (DRG-01, DRG-03) ---
-    UFUNCTION(BlueprintPure, Category="Dragon")
+    // --- Form & Scale (DRG-01, DRG-03, DRG-08..13) ---
+    UFUNCTION(BlueprintPure, Category="Dragon|Form")
     EWyrmDragonForm GetDragonForm() const { return CurrentForm; }
 
-    UFUNCTION(BlueprintCallable, Category="Dragon")
+    // Fixture/save restoration helper. Normal gameplay must use RequestFormChange.
+    UFUNCTION(BlueprintCallable, Category="Dragon|Form")
     void SetDragonForm(EWyrmDragonForm NewForm);
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Form")
+    bool CanChangeForm(EWyrmDragonForm TargetForm, FString& OutReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Form")
+    bool RequestFormChange(EWyrmDragonForm TargetForm);
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Form")
+    void InterruptFormTransition();
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Form")
+    bool IsTransitioningForm() const { return bIsTransitioningForm; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Form")
+    float GetFormTransitionProgress() const;
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Form")
+    float GetFormTransitionCooldownRemaining() const { return FormTransitionCooldownRemaining; }
+
+    // --- Town / Safe Zone Behavior (DRG-13) ---
+    UFUNCTION(BlueprintCallable, Category="Dragon|Town")
+    void SetTownModeEnabled(bool bEnabled);
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Town")
+    bool IsTownModeEnabled() const { return bTownModeEnabled; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Locomotion")
+    float GetCompanionGroundSpeed() const { return CompanionGroundSpeed; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Locomotion")
+    float GetCompanionCatchUpSpeed() const { return CompanionCatchUpSpeed; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Locomotion")
+    float GetTrueFormGroundSpeed() const { return TrueFormGroundSpeed; }
 
     // --- Companion Orders & AI (DRG-02) ---
     UFUNCTION(BlueprintPure, Category="Dragon|Companion")
@@ -102,6 +142,58 @@ public:
     UFUNCTION(BlueprintCallable, Category="Dragon|Control")
     void HandleWaitingBodyDamaged(float DamageAmount);
 
+    // --- Riding & Mounting (DRG-05) ---
+    UFUNCTION(BlueprintPure, Category="Dragon|Mount")
+    bool CanMount(AWyrmCharacter* Humanoid, FString& OutReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Mount")
+    bool MountHumanoid(AWyrmCharacter* Humanoid);
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Mount")
+    bool CanDismount(FVector& OutGroundLocation, FString& OutReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Mount")
+    bool DismountHumanoid(FVector& OutDismountLocation);
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Mount")
+    bool IsRiderMounted() const { return MountedRider.IsValid(); }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Mount")
+    AWyrmCharacter* GetMountedRider() const { return MountedRider.Get(); }
+
+    // --- Flight Locomotion (DRG-06) ---
+    UFUNCTION(BlueprintPure, Category="Dragon|Flight")
+    EWyrmDragonFlightState GetFlightState() const { return CurrentFlightState; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Flight")
+    bool IsInFlight() const { return CurrentFlightState == EWyrmDragonFlightState::Flying || CurrentFlightState == EWyrmDragonFlightState::TakingOff; }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Flight")
+    bool CanTakeOff(FString& OutReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Flight")
+    bool TakeOff();
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Flight")
+    bool CanLand(FVector& OutLandingLocation, FString& OutReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Flight")
+    bool Land();
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Flight")
+    FVector GetSafeGroundAnchor() const;
+
+    // --- Mounted Defeat & Hub Recovery (DRG-07, DRG-14) ---
+    UFUNCTION(BlueprintCallable, Category="Dragon|Recovery")
+    void HandleMountedDefeat();
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Recovery")
+    bool RecoverCompanion();
+
+    // --- Camera Preferences ---
+    UFUNCTION(BlueprintCallable, Category="Dragon|Camera")
+    void SetFlightCameraMode(bool bTopDown);
+
     // --- Mesh & Visuals ---
     UFUNCTION(BlueprintCallable, Category="Dragon|Visuals")
     void SetupModularMeshes();
@@ -123,6 +215,8 @@ public:
 
     UPROPERTY(BlueprintAssignable, Category="Dragon|Events")
     FWyrmTetherWarningDelegate OnTetherWarningChanged;
+
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
     virtual void PostInitializeComponents() override;
@@ -153,6 +247,37 @@ private:
     void HandleHealthChanged(const struct FOnAttributeChangeData& Data);
     void UpdateCompanionAI(float DeltaSeconds);
     void ApplyFormDimensions();
+    void CompleteFormTransition();
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Form")
+    bool bIsTransitioningForm = false;
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Form")
+    EWyrmDragonForm PendingForm = EWyrmDragonForm::CompanionForm;
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Form")
+    float FormTransitionTimeRemaining = 0.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Form")
+    float FormTransitionDuration = 1.0f;
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Form")
+    float FormTransitionCooldownRemaining = 0.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Form")
+    float FormTransitionCooldownDuration = 4.0f;
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Town")
+    bool bTownModeEnabled = false;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Locomotion")
+    float CompanionGroundSpeed = 450.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Locomotion")
+    float CompanionCatchUpSpeed = 600.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Locomotion")
+    float TrueFormGroundSpeed = 550.f;
 
     UPROPERTY(VisibleAnywhere, Category="Dragon|State")
     EWyrmDragonRole CurrentRole = EWyrmDragonRole::HostileBoss;
@@ -192,4 +317,30 @@ private:
 
     TWeakObjectPtr<AWyrmCharacter> WaitingHumanoid;
     TWeakObjectPtr<AActor> CurrentCombatTarget;
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|State")
+    EWyrmDragonFlightState CurrentFlightState = EWyrmDragonFlightState::Grounded;
+
+    TWeakObjectPtr<AWyrmCharacter> MountedRider;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Mount")
+    FVector MountSocketOffset = FVector(0.f, 0.f, 160.f);
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float FlightSpeed = 1600.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float GroundSpeed = 600.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float TakeoffClearanceHeight = 500.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float WingSpanSweepRadius = 350.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float LandingSearchDistance = 1200.f;
+
+    UPROPERTY(EditDefaultsOnly, Category="Dragon|Flight")
+    float MaxLandingSlopeAngle = 45.f;
 };

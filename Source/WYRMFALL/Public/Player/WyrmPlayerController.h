@@ -56,6 +56,18 @@ public:
     UFUNCTION(BlueprintCallable, Category="Dragon|Control")
     bool ReturnControlToHumanoid();
 
+    UFUNCTION(BlueprintCallable, Category="Dragon|Mount")
+    bool MountDragon(class AWyrmDragonCharacter* Dragon);
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Mount")
+    bool DismountDragon();
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Flight")
+    bool TakeOffDragon();
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Flight")
+    bool LandDragon();
+
 #if WITH_EDITOR
     // BOOT-01 instrumentation: exercise repeated setup on the live PIE controller.
     UFUNCTION(Exec) void WyrmDevRebindInput();
