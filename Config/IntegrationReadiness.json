@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "kind": "human_maintained_integration_readiness_not_runtime_state",
-  "updated": "2026-09-16",
+  "updated": "2026-09-17",
   "engine_target": {
     "family": "5.8",
     "preferred_patch": "5.8.2",
@@ -190,13 +190,14 @@
     },
     {
       "id": "building",
-      "authority": "Inspect Easy Building System candidate",
-      "state": "CANDIDATE_NATIVE_GRAPHS_INSPECTED_RUNTIME_NOT_RUN",
-      "actual_source_path": null,
-      "version": null,
+      "authority": "UWyrmBuildingSubsystem",
+      "state": "WP08_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "Source/WYRMFALL/Public/Building/WyrmBuildingSubsystem.h",
+      "version": "1.0",
       "evidence": [
-        "Saved/Diagnostics/G0ScopedMetadata.json",
-        "Documentation/Current/WP00_OWNER_IMPLEMENTATION_INSPECTION.md"
+        "Saved/Automation/Scaffold/index.json",
+        "Saved/Diagnostics/WP08_camp_proof.json",
+        "Documentation/Current/WP08_CAMP_PROOF.md"
       ],
       "gate": "WP-08",
       "candidate_source_path": "G:\\assets\\voxel project\\assets and old docs\\EasyBuildingSystemV10"
@@ -212,7 +213,9 @@
         "Saved/Diagnostics/WP05_inventory_proof.json",
         "Documentation/Current/WP05_INVENTORY_PROOF.md",
         "Saved/Diagnostics/WP07_activities_proof.json",
-        "Documentation/Current/WP07_ACTIVITIES_PROOF.md"
+        "Documentation/Current/WP07_ACTIVITIES_PROOF.md",
+        "Saved/Diagnostics/WP08_camp_proof.json",
+        "Documentation/Current/WP08_CAMP_PROOF.md"
       ],
       "gate": "WP-05"
     },
@@ -262,7 +265,7 @@
     "controller": "NOT_RUN"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 27,
+  "native_test_cases_authored": 32,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -367,17 +370,18 @@
     "wp01_full_acceptance": "PASS"
   },
   "latest_verification": {
-    "date": "2026-09-16",
-    "pushed_checkpoint": "68a7c963876eaaa7f1eeac18e0114254c2914352",
+    "date": "2026-09-17",
+    "pushed_checkpoint": "6eb5696",
     "editor_build": "PASS_NOUBA_NOPCH_FINAL_SOURCE",
-    "native_automation": "PASS_27_OF_27",
+    "native_automation": "PASS_32_OF_32",
     "wp01_real_pie": "PASS_7_OF_7_GROUPS",
     "wp05_editor_world_commandlet": "PASS_3_OF_3_SCOPED_GROUPS",
     "wp06_real_pie": "PASS_6_OF_6_GROUPS",
+    "wp07_real_pie": "PASS_8_OF_8_SCOPED_GROUPS",
+    "wp08_real_pie": "PASS_7_OF_7_GROUPS",
     "portable": "PASS_124_TESTS_2_EXPECTED_SKIPS",
     "controller": "NOT_RUN",
-    "cook": "NOT_RUN",
-    "wp07_real_pie": "PASS_8_OF_8_SCOPED_GROUPS"
+    "cook": "NOT_RUN"
   },
   "wp07_state": "PARTIAL_SCOPED_NATIVE_AND_REAL_PIE_NO_TASK_PACKET_FULL_ACCEPTANCE_UNDEFINED",
   "activities_acceptance": {
@@ -388,5 +392,15 @@
     "ACT-03": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
     "ACT-04": "PASS_SCOPED_NATIVE_AND_REAL_PIE",
     "ACT-05": "PASS_NATIVE_FAILURES_AND_SCOPED_REAL_PIE_CAPACITY_TRANSACTION"
+  },
+  "wp08_state": "PASS_NATIVE_AND_REAL_PIE",
+  "building_acceptance": {
+    "WRLD-08": "PASS_NATIVE_AND_REAL_PIE",
+    "WRLD-09": "PASS_NATIVE_AND_REAL_PIE",
+    "ACT-06": "PASS_NATIVE_AND_REAL_PIE",
+    "ACT-07": "PASS_NATIVE_AND_REAL_PIE",
+    "ACT-08": "PASS_NATIVE_AND_REAL_PIE",
+    "ACT-09": "PASS_NATIVE_AND_REAL_PIE",
+    "ACT-10": "PASS_NATIVE_AND_REAL_PIE"
   }
 }
