@@ -6,6 +6,7 @@
 #include "Terrain/WyrmGeoForgeAdapter.h"
 #include "Building/WyrmBuildingSubsystem.h"
 #include "Dragon/WyrmDragonCharacter.h"
+#include "Region/WyrmRegion01Subsystem.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/UObjectIterator.h"
@@ -229,6 +230,13 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         BuildingSub->BuildSaveRecord(SaveObj->CampRecord);
     }
 
+    // Region 01 owns facts only; this unified subsystem remains the sole
+    // serializer and slot owner for those facts.
+    if (UWyrmRegion01Subsystem* Region01 = UWyrmRegion01Subsystem::GetRegion01Subsystem(WorldContext))
+    {
+        Region01->BuildSaveRecord(SaveObj->Region01Record);
+    }
+
     // Capture active Dragon Companion / Boss (DRG-01..04, SAVE-08)
     if (WorldContext)
     {
@@ -247,7 +255,8 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
 
 bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
-    if (!SaveObj || SaveObj->SchemaVersion != UWyrmSaveGame::CurrentSchemaVersion)
+    if (!SaveObj || SaveObj->SchemaVersion < UWyrmSaveGame::MinimumSupportedSchemaVersion ||
+        SaveObj->SchemaVersion > UWyrmSaveGame::CurrentSchemaVersion)
     {
         return false;
     }
@@ -400,6 +409,13 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             {
                 ActiveDragon->RestoreFromSaveRecord(SaveObj->DragonRecord, Character);
             }
+        }
+
+        // Restore the fact ledger only after the existing terrain, character,
+        // inventory, camp, and dragon owners have accepted the snapshot.
+        if (UWyrmRegion01Subsystem* Region01 = UWyrmRegion01Subsystem::GetRegion01Subsystem(WorldContext))
+        {
+            Region01->RestoreFromSaveRecord(SaveObj->Region01Record);
         }
     }
 

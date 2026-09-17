@@ -5,6 +5,7 @@
 #include "Building/WyrmBuildingTypes.h"
 #include "Player/WyrmControlTypes.h"
 #include "Dragon/WyrmDragonTypes.h"
+#include "Region/WyrmRegion01Types.h"
 #include "WyrmSaveGame.generated.h"
 
 USTRUCT(BlueprintType)
@@ -124,7 +125,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    static const int32 CurrentSchemaVersion = 1;
+    // Schema 2 adds Region 01's fact/receipt record. Version 1 is still
+    // accepted as an empty Region 01 state by UWyrmSaveSubsystem.
+    static const int32 MinimumSupportedSchemaVersion = 1;
+    static const int32 CurrentSchemaVersion = 2;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;
@@ -152,4 +156,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmDragonSaveRecord DragonRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmRegion01SaveRecord Region01Record;
 };

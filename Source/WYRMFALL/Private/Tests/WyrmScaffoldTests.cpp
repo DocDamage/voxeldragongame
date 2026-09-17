@@ -32,6 +32,7 @@
 #include "Terrain/WyrmGeoForgeAdapter.h"
 #include "Dragon/WyrmDragonTypes.h"
 #include "Dragon/WyrmDragonCharacter.h"
+#include "Region/WyrmRegion01Subsystem.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
 #include <limits>
@@ -3095,6 +3096,145 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
 
     Dragon->Destroy();
     Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmRegion01FactsAndPersistenceTest, "WYRMFALL.Region01.LandmarksFactsAndPersistence",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmRegion01FactsAndPersistenceTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    // Commandlet automation uses an editor world without a game instance.
+    // Create a test-local ledger here; the focused PIE proof exercises the
+    // actual game-instance subsystem and unified save hand-off.
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmRegion01Subsystem* Region01 = NewObject<UWyrmRegion01Subsystem>(TestGI);
+    TestNotNull(TEXT("Region 01 fact ledger can be constructed for automation"), Region01);
+    if (!Region01)
+    {
+        return false;
+    }
+
+    Region01->ResetRegion01State();
+    TestTrue(TEXT("Region 01 defines a valid 13-landmark graph (REG-01)"), Region01->HasValidLandmarkGraph());
+    TestTrue(TEXT("Heart exit can reach Tidecross without an ordered trigger (REG-01)"),
+        Region01->HasRouteBetweenLandmarks(FName(TEXT("LM-HEART")), FName(TEXT("LM-TIDECROSS"))));
+    TestTrue(TEXT("Tidecross can reach the quarry arena through valid alternatives (REG-05)"),
+        Region01->HasRouteBetweenLandmarks(FName(TEXT("LM-TIDECROSS")), FName(TEXT("LM-ARENA"))));
+    TestTrue(TEXT("Silent Landing has a separate optional route rather than an opening choke"),
+        Region01->HasRouteBetweenLandmarks(FName(TEXT("LM-TIDECROSS")), FName(TEXT("LM-SILENTLANDING"))));
+    TestFalse(TEXT("Silent Landing remains unavailable before real homecoming"),
+        Region01->IsLandmarkCurrentlyAvailable(FName(TEXT("LM-SILENTLANDING"))));
+    TestFalse(TEXT("Compact cave remains unavailable before the bond"),
+        Region01->IsLandmarkCurrentlyAvailable(FName(TEXT("LM-COMPACTCAVE"))));
+
+    // A genuine control shutdown can end extraction without making Rusk an
+    // artificial route gate. The main flow below separately covers the
+    // primary-claim route.
+    TestTrue(TEXT("Control shutdown can stop extraction before Rusk custody"), Region01->StopCrowncutExtraction());
+    TestTrue(TEXT("Control shutdown records extraction state"),
+        Region01->HasFact(FName(TEXT("quarry.extraction_stopped"))));
+    Region01->ResetRegion01State();
+
+    TestTrue(TEXT("Heart exit receipt is recorded once"), Region01->RecordHeartExitReached());
+    TestTrue(TEXT("Tidecross visit is recorded"), Region01->VisitLandmark(FName(TEXT("LM-TIDECROSS"))));
+    TestTrue(TEXT("Tidecross fact follows actual visit"), Region01->HasFact(FName(TEXT("tidecross.visited"))));
+
+    // REG-03 / REG-04: Sella can be secured before notice or other workers.
+    TestTrue(TEXT("Sella can be secured first (REG-03)"), Region01->SecureWorker(EWyrmRegion01Worker::Sella));
+    TestTrue(TEXT("Sella account becomes available from her actual rescue"), Region01->HasFact(FName(TEXT("evidence.sella_account"))));
+    TestTrue(TEXT("Sella-first rescue exposes the auxiliary option"), Region01->IsAuxiliaryShutdownAvailable());
+    TestTrue(TEXT("Auxiliary restraint can be disabled after Sella"), Region01->DisableAuxiliaryRestraint());
+    TestTrue(TEXT("Physical machine evidence can be observed independently"),
+        Region01->DiscoverEvidence(EWyrmRegion01Evidence::Machine));
+    TestTrue(TEXT("Machine plus Sella account keeps the conflict readable without records (REG-04)"),
+        Region01->HasConflictEvidence());
+    TestTrue(TEXT("Reading the notice later retains the Sella-first facts"), Region01->ReadCrownNotice());
+    TestFalse(TEXT("Sella receipt cannot be issued twice"), Region01->SecureWorker(EWyrmRegion01Worker::Sella));
+
+    // REG-05 / REG-09: Bonding is independent of notice, Rusk, and worker completion.
+    TestTrue(TEXT("Verdance living-defeat fact records"), Region01->RecordVerdanceDefeatedAlive());
+    TestTrue(TEXT("Claim can break only after living defeat"), Region01->BreakVerdanceClaim());
+    TestTrue(TEXT("Primary claim break independently stops extraction"),
+        Region01->HasFact(FName(TEXT("quarry.extraction_stopped"))));
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 9000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Verdance = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 9000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Humanoid exists for bond receipt"), Player);
+    TestNotNull(TEXT("Verdance exists for bond receipt"), Verdance);
+    if (!Player || !Verdance)
+    {
+        if (Verdance) Verdance->Destroy();
+        if (Player) Player->Destroy();
+        return false;
+    }
+
+    TestTrue(TEXT("Verdance enters real defeated-alive state"), Verdance->PerformBossDefeat());
+    TestTrue(TEXT("Existing dragon authority issues its one-way bond receipt"), Verdance->BondWithHumanoid(Player));
+    TestTrue(TEXT("Region records the existing Verdance bond receipt"), Region01->RecordVerdanceBondAccepted(Verdance));
+    TestTrue(TEXT("Bonded dragon availability is immediate before worker cleanup (REG-09)"), Region01->IsBondedDragonAvailable());
+    TestTrue(TEXT("Bond opens the optional compact cave route"),
+        Region01->IsLandmarkCurrentlyAvailable(FName(TEXT("LM-COMPACTCAVE"))));
+    TestTrue(TEXT("Town return has a partial debrief before all workers (REG-09)"), Region01->IsPartialDebriefAvailable());
+    TestFalse(TEXT("Homecoming cannot complete with missing workers"), Region01->IsHomecomingComplete());
+    TestTrue(TEXT("Post-bond unresolved Rusk can take surrendered custody branch (REG-05)"),
+        Region01->ResolveRusk(EWyrmRegion01RuskOutcome::SurrenderedCustody));
+    TestEqual(TEXT("Rusk persisted as surrendered custody"), Region01->GetRuskOutcome(), EWyrmRegion01RuskOutcome::SurrenderedCustody);
+    TestTrue(TEXT("Future relief receipt is accepted only after bond and extraction"), Region01->RecordReliefResolved());
+    TestTrue(TEXT("Optional wage recovery records once without a timer"), Region01->RecoverOptionalWageRecord());
+    TestFalse(TEXT("Optional wage recovery cannot repeat"), Region01->RecoverOptionalWageRecord());
+
+    TestTrue(TEXT("Pell can be secured after bond (REG-09)"), Region01->SecureWorker(EWyrmRegion01Worker::Pell));
+    TestTrue(TEXT("Iven can be secured after bond (REG-09)"), Region01->SecureWorker(EWyrmRegion01Worker::Iven));
+    TestTrue(TEXT("All local closure facts make a homecoming ready (REG-02, REG-09)"),
+        Region01->IsHomecomingReady());
+    TestTrue(TEXT("Actual Tidecross return records full homecoming"), Region01->CompleteHomecoming());
+    TestFalse(TEXT("Homecoming receipt cannot repeat"), Region01->CompleteHomecoming());
+    TestTrue(TEXT("Homecoming opens the optional Silent Landing route"),
+        Region01->IsLandmarkCurrentlyAvailable(FName(TEXT("LM-SILENTLANDING"))));
+
+    UWyrmSaveGame* Snapshot = NewObject<UWyrmSaveGame>();
+    TestNotNull(TEXT("Unified save object can carry the Region 01 record"), Snapshot);
+    if (Snapshot)
+    {
+        Region01->BuildSaveRecord(Snapshot->Region01Record);
+        TestEqual(TEXT("Region 01 save schema is version 2"), Snapshot->SchemaVersion, UWyrmSaveGame::CurrentSchemaVersion);
+        TestTrue(TEXT("Snapshot includes all-worker homecoming fact"),
+            Snapshot->Region01Record.KnownFacts.Contains(FName(TEXT("homecoming.complete"))));
+        TestEqual(TEXT("Snapshot preserves surrendered Rusk outcome"), Snapshot->Region01Record.RuskOutcome,
+            EWyrmRegion01RuskOutcome::SurrenderedCustody);
+
+        Region01->ResetRegion01State();
+        TestFalse(TEXT("Fact reset clears test state before restore"), Region01->IsHomecomingComplete());
+        Region01->RestoreFromSaveRecord(Snapshot->Region01Record);
+        TestTrue(TEXT("Homecoming persists across record restore (REG-10)"), Region01->IsHomecomingComplete());
+        TestTrue(TEXT("Extraction consequence persists across record restore (REG-10)"),
+            Region01->HasFact(FName(TEXT("quarry.extraction_stopped"))));
+        TestTrue(TEXT("Wage receipt persists without duplication (REG-10)"),
+            Region01->HasFact(FName(TEXT("wage.recovered"))));
+    }
+
+    Verdance->Destroy();
+    Player->Destroy();
+    Region01->ResetRegion01State();
     return true;
 }
 #endif

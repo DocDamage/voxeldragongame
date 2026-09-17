@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 17, 2026 · starter v0.2 · evidence reconciled through WP-11 verification**
+**September 17, 2026 · starter v0.2 · evidence reconciled through WP-12 fact-ledger verification**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -10,10 +10,10 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 
 | Area | Current status | Evidence and boundary |
 |---|---|---|
-| Repository | `main`; pushed checkpoint `e90145e` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Repository | `main`; pushed checkpoint `32d1307` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 46/46** | 42 Success + 4 SuccessWithWarnings, 0 failed in `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
+| Native automation | **PASS: selected 46/46 + Region 01 1/1** | 42 Success + 4 SuccessWithWarnings in `Saved/Automation/Scaffold/index.json`, plus `WYRMFALL.Region01.LandmarksFactsAndPersistence`; native automation is not a gameplay gate by itself |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | BOOT-01 | **Historical focused PASS** | Keyboard/mouse movement, jump, cameras, HUD, rebinding, pause/input guards, click rejection and relaunch passed before the current configuration |
 | Physical controller | **NOT_RUN** | No controller was detected; do not report controller acceptance as PASS |
@@ -29,6 +29,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-09 green dragon locomotion, combat & direct control | **PASS in real PIE** | 5/5 test groups passed for genuine modular dragon assets, living defeat (1800 HP -> 0 HP DefeatedAlive), one-way bond (420 Max HP, 210 initial HP), companion orders & GAS combat (24 primary, 18 area 6s cooldown), direct control possession with humanoid body anchoring, 150m tether return, waiting body damage return, and unified save roundtrip; [report](WP09_DRAGON_PROOF.md) |
 | WP-10 green dragon riding, flight locomotion, obstacle collision & mounted persistence | **PASS in real PIE** | 5/5 test groups passed for original humanoid mount socket attachment (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery; [report](WP10_FLIGHT_PROOF.md) |
 | WP-11 Green Dragon Heartfold & compact behavior | **PASS in real PIE (Verdance only)** | 7/7 live groups passed: compact fit, compact combat/direct control, timed state-conserving transitions, blocked growth, interruption, town behavior, and compact save roundtrip. DRG-15 is a separate native/source policy check: unvalidated rigs are blocked from inheriting Green Dragon values; [report](WP11_HEARTFOLD_PROOF.md) |
+| WP-12 Region 01 landmarks & quest facts | **PARTIAL; fact ledger + diagnostic PIE PASS** | 13 logical landmarks plus fact/receipt/save scenarios passed through a real game instance and Green Dragon runtime actor. Production landmark placement and full `REG-01`–`05`, `09`–`11` remain BLOCKED/NOT_RUN because the required approved environment and named-NPC content is not imported; [report](WP12_REGION01_PROOF.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -42,9 +43,10 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 - `UWyrmInventoryComponent` remains the inventory/equipment owner.
   Cross-inventory transfers now preflight target capacity and roll back on an
   unexpected partial failure.
-- `UWyrmSaveSubsystem` remains the save coordinator. It rejects unknown schema,
-  wrong terrain owners, missing terrain payloads, and terrain apply failures
-  before mutating the character.
+- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 2 adds the
+  Region 01 fact record while accepting schema 1 as an empty Region 01 state;
+  it rejects unsupported schemas, wrong terrain owners, missing terrain
+  payloads, and terrain apply failures before mutating the character.
 - WP-06 adds a ranged weapon family, GAS abilities, a physical projectile,
   evade, Level/XP scaling, and progression persistence. It is a functional
   second combat kit on the shared humanoid; distinct ranger body/animation
@@ -59,19 +61,23 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 - WP-09 owners are `AWyrmDragonCharacter` (dragon locomotion, modular mesh, orders),
   `AWyrmPlayerController` (direct control possession & tethering authority),
   `UAbilitySystemComponent` (combat authority for dragon claw/sweep attacks), and
-  `UWyrmSaveSubsystem` (dragon save record in unified schema version 5).
+  `UWyrmSaveSubsystem` (dragon save record in current unified schema version 2).
 - WP-10 owners are `AWyrmDragonCharacter` (rider mounting socket attachment, 3D flight
   locomotion, takeoff wing clearance, obstacle collision, landing slope validation,
   emergency ground recovery, and hub companion recovery), `AWyrmPlayerController`
   (mounted controls, jump takeoff/landing routing, and dual third-person/top-down
   flight cameras), and `UWyrmSaveSubsystem` (airborne mounted save roundtrip and
-  obstructed ground fallback in schema version 5).
+  obstructed ground fallback in current schema version 2).
 - WP-11 keeps Heartfold state in `AWyrmDragonCharacter`: normal requests use a one-second
   transition, revalidate clearance at commit, retain a four-second shared cooldown, and
   preserve the existing GAS attributes and save owner. `AWyrmPlayerController` suppresses
   movement, jump, and attacks during that transition. Only the verified `Verdance`/Green
   Dragon rig profile is enabled; unvalidated rigs cannot silently use its mesh, collision,
   mount, flight, or Heartfold values.
+- WP-12 keeps Region 01 as a fact/receipt ledger in `UWyrmRegion01Subsystem`.
+  It has no save-slot ownership: `UWyrmSaveSubsystem` snapshots/restores the
+  record. Full homecoming is an actual Tidecross event after every local
+  closure fact, not an all-workers counter or a tutorial/activity gate.
 
 ## Fresh verification commands
 
@@ -85,6 +91,7 @@ py -3.12 tools/run_wp08_pie_proof.py
 py -3.12 tools/run_wp09_pie_proof.py
 py -3.12 tools/run_wp10_pie_proof.py
 py -3.12 tools/run_wp11_pie_proof.py
+py -3.12 tools/run_wp12_pie_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -106,9 +113,13 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
   targeting, UI and production-map acceptance.
 - Imported Jadefang validation and its own rig-profile/Heartfold proof. It is intentionally
   blocked from inheriting the Verdance values until that work is performed.
+- Production Region 01 placement and full `REG-01`–`05`, `REG-09`–`11` acceptance.
+  The fact ledger is verified, but no audited quarry, settlement, cave, cart/claim,
+  or distinct named-NPC content exists to place and exercise it.
 
 ## Next bounded task
 
-Review the WP-12 packet for Region 01 generated landmarks and quest facts; do not begin it
-until its bounded inputs and acceptance evidence are identified.
+Provide or import approved existing real Region 01 quarry, settlement, cave,
+cart/claim, and named-NPC content; then place the actual landmarks and run the
+production `REG` cases. Do not begin WP-13 before that blocker is resolved.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.
