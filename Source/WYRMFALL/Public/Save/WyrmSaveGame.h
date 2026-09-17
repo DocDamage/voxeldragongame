@@ -4,6 +4,7 @@
 #include "Inventory/WyrmInventoryTypes.h"
 #include "Building/WyrmBuildingTypes.h"
 #include "Player/WyrmControlTypes.h"
+#include "Dragon/WyrmDragonTypes.h"
 #include "WyrmSaveGame.generated.h"
 
 USTRUCT(BlueprintType)
@@ -148,4 +149,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmCampSaveRecord CampRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmDragonSaveRecord DragonRecord;
 };

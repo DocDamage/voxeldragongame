@@ -71,6 +71,9 @@ void AWyrmCharacter::BeginPlay()
         {
             AbilitySystem->AddLooseGameplayTag(PlayerTeamTag);
         }
+
+        AbilitySystem->GetGameplayAttributeValueChangeDelegate(Attributes->GetHealthAttribute())
+            .AddUObject(this, &AWyrmCharacter::HandleHealthChanged);
     }
     GrantCombatAbilities();
 
@@ -656,4 +659,13 @@ bool AWyrmCharacter::ConsumeItem(const FGuid& ItemInstanceId)
     ApplyFoodBuff(NewBuff);
     InventoryComponent->RemoveItem(ItemInstanceId, 1);
     return true;
+}
+
+void AWyrmCharacter::HandleHealthChanged(const FOnAttributeChangeData& Data)
+{
+    if (Data.NewValue < Data.OldValue)
+    {
+        float DamageTaken = Data.OldValue - Data.NewValue;
+        OnCharacterDamaged.Broadcast(DamageTaken);
+    }
 }

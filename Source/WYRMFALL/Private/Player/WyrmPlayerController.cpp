@@ -1,5 +1,6 @@
 #include "Player/WyrmPlayerController.h"
 #include "Player/WyrmCharacter.h"
+#include "Dragon/WyrmDragonCharacter.h"
 #include "WYRMFALL.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -242,22 +243,38 @@ void AWyrmPlayerController::RefreshCursor()
 }
 void AWyrmPlayerController::Move(const FInputActionValue& Value)
 {
-    auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; } // do not route humanoid inputs to future dragon/car pawns
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked) { return; }
     const FVector2D Axis = Value.Get<FVector2D>().GetClampedToMaxSize(1.f);
     if (Axis.IsNearlyZero()) { return; }
-    StopMovement();
-    const float Yaw = Body->GetCameraMode() == EWyrmCameraMode::TopDown ? 0.f : GetControlRotation().Yaw;
-    const FRotationMatrix Basis(FRotator(0.f, Yaw, 0.f));
-    Body->AddMovementInput(Basis.GetUnitAxis(EAxis::X), Axis.Y);
-    Body->AddMovementInput(Basis.GetUnitAxis(EAxis::Y), Axis.X);
+
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        if (Body->IsMovementLocked()) { return; }
+        StopMovement();
+        const float Yaw = Body->GetCameraMode() == EWyrmCameraMode::TopDown ? 0.f : GetControlRotation().Yaw;
+        const FRotationMatrix Basis(FRotator(0.f, Yaw, 0.f));
+        Body->AddMovementInput(Basis.GetUnitAxis(EAxis::X), Axis.Y);
+        Body->AddMovementInput(Basis.GetUnitAxis(EAxis::Y), Axis.X);
+    }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        StopMovement();
+        const float Yaw = GetControlRotation().Yaw;
+        const FRotationMatrix Basis(FRotator(0.f, Yaw, 0.f));
+        Dragon->AddMovementInput(Basis.GetUnitAxis(EAxis::X), Axis.Y);
+        Dragon->AddMovementInput(Basis.GetUnitAxis(EAxis::Y), Axis.X);
+    }
 }
 void AWyrmPlayerController::Look(const FInputActionValue& Value)
 {
-    const auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || Body->GetCameraMode() == EWyrmCameraMode::TopDown || IsLookInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; }
+    if (IsLookInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked) { return; }
+    if (const auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        if (Body->GetCameraMode() == EWyrmCameraMode::TopDown || Body->IsMovementLocked()) { return; }
+    }
     const FVector2D Axis = Value.Get<FVector2D>();
-    AddYawInput(Axis.X); AddPitchInput(-Axis.Y);
+    AddYawInput(Axis.X);
+    AddPitchInput(-Axis.Y);
 }
 void AWyrmPlayerController::LookGamepad(const FInputActionValue& Value)
 {
@@ -286,31 +303,86 @@ void AWyrmPlayerController::ClickMove()
 }
 void AWyrmPlayerController::JumpPressed()
 {
-    auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked()) { return; }
-    StopMovement();
-    Body->Jump();
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked) { return; }
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        if (Body->IsMovementLocked()) { return; }
+        StopMovement();
+        Body->Jump();
+    }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        StopMovement();
+        Dragon->Jump();
+    }
 }
-void AWyrmPlayerController::JumpReleased() { if (auto* Body = Cast<AWyrmCharacter>(GetPawn())) { Body->StopJumping(); } }
+void AWyrmPlayerController::JumpReleased()
+{
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        Body->StopJumping();
+    }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        Dragon->StopJumping();
+    }
+}
 
 void AWyrmPlayerController::PrimaryAttack()
 {
-    auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked())
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked)
     {
         return;
     }
-    Body->PerformPrimaryAttack();
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        if (Body->IsMovementLocked()) { return; }
+        Body->PerformPrimaryAttack();
+    }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        Dragon->PerformPrimaryAttack();
+    }
 }
 
 void AWyrmPlayerController::SecondaryAttack()
 {
-    auto* Body = Cast<AWyrmCharacter>(GetPawn());
-    if (!Body || IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked || Body->IsMovementLocked())
+    if (IsMoveInputIgnored() || UGameplayStatics::IsGamePaused(this) || bMovementLocked)
     {
         return;
     }
-    Body->PerformSecondaryAttack();
+    if (auto* Body = Cast<AWyrmCharacter>(GetPawn()))
+    {
+        if (Body->IsMovementLocked()) { return; }
+        Body->PerformSecondaryAttack();
+    }
+    else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        Dragon->PerformSecondaryAttack();
+    }
+}
+
+bool AWyrmPlayerController::TransferControlToDragon(AWyrmDragonCharacter* Dragon)
+{
+    if (!Dragon)
+    {
+        return false;
+    }
+    AWyrmCharacter* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (!Body)
+    {
+        return false;
+    }
+    return Dragon->StartDirectControl(this, Body);
+}
+
+bool AWyrmPlayerController::ReturnControlToHumanoid()
+{
+    if (AWyrmDragonCharacter* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
+    {
+        return Dragon->EndDirectControl(this);
+    }
+    return false;
 }
 
 

@@ -30,6 +30,8 @@
 #include "Building/WyrmRecoveryBundleActor.h"
 #include "Building/WyrmBuildingSubsystem.h"
 #include "Terrain/WyrmGeoForgeAdapter.h"
+#include "Dragon/WyrmDragonTypes.h"
+#include "Dragon/WyrmDragonCharacter.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -2158,6 +2160,320 @@ bool FWyrmCampPersistenceAndClearanceTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Growth under restored roof is still blocked (ACT-10)"), bGrowthUnderRestoredRoof);
 
     BuildSys->ClearAllPlacedPieces();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonLivingDefeatBondTest, "WYRMFALL.Scaffold.DragonLivingDefeatAndOneWayBond",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonLivingDefeatBondTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    // 1. Spawn Verdance as hostile boss (DRG-01)
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(100.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Dragon spawned"), Dragon);
+    Dragon->SetDragonRole(EWyrmDragonRole::HostileBoss);
+
+    TestEqual(TEXT("Boss initial MaxHealth is 1800.0"), Dragon->GetAttributes()->GetCurrentMaxHealth(), 1800.f);
+    TestEqual(TEXT("Boss initial Health is 1800.0"), Dragon->GetAttributes()->GetCurrentHealth(), 1800.f);
+    TestFalse(TEXT("Boss has no bond receipt"), Dragon->HasBondReceipt());
+
+    // 2. Defeat logic triggers living terminal state (DRG-01)
+    Dragon->PerformBossDefeat();
+    TestEqual(TEXT("Dragon role transitions to DefeatedAlive"), Dragon->GetDragonRole(), EWyrmDragonRole::DefeatedAlive);
+    TestEqual(TEXT("Dragon health is 0 on defeat"), Dragon->GetAttributes()->GetCurrentHealth(), 0.f);
+    TestTrue(TEXT("Dragon actor is still valid and not destroyed"), IsValid(Dragon));
+
+    // 3. One-way bonding conversion with created humanoid
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Player spawned"), Player);
+
+    const bool bBondSuccess = Dragon->BondWithHumanoid(Player);
+    TestTrue(TEXT("Bonding succeeds on first attempt"), bBondSuccess);
+    TestEqual(TEXT("Role converted to AlliedCompanion"), Dragon->GetDragonRole(), EWyrmDragonRole::AlliedCompanion);
+    TestTrue(TEXT("Bond receipt committed once"), Dragon->HasBondReceipt());
+    TestEqual(TEXT("Allied MaxHealth is 420.0"), Dragon->GetAttributes()->GetCurrentMaxHealth(), 420.f);
+    TestEqual(TEXT("Allied MaxFocus is 100.0"), Dragon->GetAttributes()->GetCurrentMaxFocus(), 100.f);
+    // Explicitly recovers to at least 50% allied maximum (210 HP)
+    TestEqual(TEXT("Allied health recovers to 210.0 (50% max) on first bond"), Dragon->GetAttributes()->GetCurrentHealth(), 210.f);
+
+    // 4. Repeated bond/defeat attempt does NOT re-heal or re-issue bond (DRG-01)
+    const bool bRepeatBond = Dragon->BondWithHumanoid(Player);
+    TestFalse(TEXT("Repeated bond rejected with zero side effects"), bRepeatBond);
+    TestEqual(TEXT("Allied health remains 210.0"), Dragon->GetAttributes()->GetCurrentHealth(), 210.f);
+
+    Dragon->Destroy();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonCompanionCombatTest, "WYRMFALL.Scaffold.DragonCompanionOrdersAndCombat",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonCompanionCombatTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(100.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    Dragon->BondWithHumanoid(Player);
+
+    // Test companion orders (DRG-02)
+    Dragon->IssueOrder(EWyrmCompanionOrder::Hold);
+    TestEqual(TEXT("Companion order is Hold"), Dragon->GetCompanionOrder(), EWyrmCompanionOrder::Hold);
+
+    Dragon->IssueOrder(EWyrmCompanionOrder::Follow);
+    TestEqual(TEXT("Companion order is Follow"), Dragon->GetCompanionOrder(), EWyrmCompanionOrder::Follow);
+
+    // Spawn hostile enemy
+    AWyrmEnemyCharacter* Enemy = AWyrmEnemyCharacter::SpawnWyrmEnemy(
+        World, EWyrmEnemyRole::MeleeChaser, FTransform(FVector(250.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Enemy spawned"), Enemy);
+    Enemy->GetAttributes()->InitArmor(0.f);
+
+    // Primary strike (24 damage)
+    const bool bHit = Dragon->PerformPrimaryAttack(Enemy);
+    TestTrue(TEXT("Dragon primary strike landed"), bHit);
+    TestEqual(TEXT("Enemy received primary strike damage (60 - 24 = 36)"), Enemy->GetAttributes()->GetCurrentHealth(), 36.f);
+
+    // Secondary area strike (18 damage, 6s cooldown)
+    const bool bAreaHit = Dragon->PerformSecondaryAttack(Enemy);
+    TestTrue(TEXT("Dragon area strike executed"), bAreaHit);
+    TestEqual(TEXT("Enemy received area strike damage (36 - 18 = 18)"), Enemy->GetAttributes()->GetCurrentHealth(), 18.f);
+    TestEqual(TEXT("Area attack cooldown committed to 6.0s"), Dragon->GetAreaAttackCooldownRemaining(), 6.0f);
+
+    // Immediate second area attack rejected by cooldown
+    const bool bBlockedAreaHit = Dragon->PerformSecondaryAttack(Enemy);
+    TestFalse(TEXT("Area attack blocked by active cooldown"), bBlockedAreaHit);
+
+    // Return command cancels attack
+    Dragon->IssueOrder(EWyrmCompanionOrder::Return);
+    TestEqual(TEXT("Order switched to Return"), Dragon->GetCompanionOrder(), EWyrmCompanionOrder::Return);
+
+    Enemy->Destroy();
+    Dragon->Destroy();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonDirectControlTest, "WYRMFALL.Scaffold.DragonDirectControlPossession",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonDirectControlTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(200.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    PC->Possess(Player);
+    TestTrue(TEXT("PC initially possesses Player"), PC->GetPawn() == Player);
+
+    // Transfer control to dragon (DRG-03)
+    const bool bControlStarted = PC->TransferControlToDragon(Dragon);
+    TestTrue(TEXT("Control transfer to dragon succeeded"), bControlStarted);
+    TestTrue(TEXT("PC now possesses Dragon"), PC->GetPawn() == Dragon);
+    TestTrue(TEXT("Dragon is marked as directly controlled"), Dragon->IsDirectlyControlled());
+
+    // Waiting humanoid body remains in world, visible, with movement locked
+    TestTrue(TEXT("Waiting humanoid movement is locked"), Player->IsMovementLocked());
+    TestEqual(TEXT("Waiting humanoid position unchanged"), Player->GetActorLocation(), FVector(0.f, 0.f, 100.f));
+    TestTrue(TEXT("Waiting humanoid is still alive and valid"), IsValid(Player));
+
+    // Return control to humanoid (DRG-03)
+    const bool bControlReturned = PC->ReturnControlToHumanoid();
+    TestTrue(TEXT("Control return to humanoid succeeded"), bControlReturned);
+    TestTrue(TEXT("PC possesses humanoid again"), PC->GetPawn() == Player);
+    TestFalse(TEXT("Humanoid movement unlocked"), Player->IsMovementLocked());
+    TestFalse(TEXT("Dragon no longer directly controlled"), Dragon->IsDirectlyControlled());
+
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonTetherAndRiskTest, "WYRMFALL.Scaffold.DragonRemoteTetherAndBodyDamageReaction",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonTetherAndRiskTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(200.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    PC->Possess(Player);
+    PC->TransferControlToDragon(Dragon);
+
+    // 1. Check tether warning at 125m (12,500 cm) (DRG-04)
+    Dragon->SetActorLocation(FVector(12500.f, 0.f, 100.f));
+    Dragon->Tick(0.016f);
+    TestEqual(TEXT("Tether status is Warning at 125m"), Dragon->GetTetherStatus(), EWyrmTetherStatus::Warning);
+    TestTrue(TEXT("PC still possesses Dragon during warning"), PC->GetPawn() == Dragon);
+
+    // 2. Check tether limit at 151m (15,100 cm) -> stops & safely returns control (DRG-04)
+    Dragon->SetActorLocation(FVector(15100.f, 0.f, 100.f));
+    Dragon->Tick(0.016f);
+    TestEqual(TEXT("Tether status is LimitReached at 151m"), Dragon->GetTetherStatus(), EWyrmTetherStatus::LimitReached);
+    TestTrue(TEXT("Control automatically returned to Player at tether limit"), PC->GetPawn() == Player);
+
+    // 3. Remote risk: damage to waiting humanoid immediately returns control (DRG-04)
+    Dragon->SetActorLocation(FVector(500.f, 0.f, 100.f));
+    PC->TransferControlToDragon(Dragon);
+    TestTrue(TEXT("PC re-possesses Dragon"), PC->GetPawn() == Dragon);
+
+    // Simulate damage to waiting humanoid body
+    Dragon->HandleWaitingBodyDamaged(10.f);
+    TestTrue(TEXT("Damaging waiting body immediately returns player control"), PC->GetPawn() == Player);
+    TestFalse(TEXT("Humanoid movement restored"), Player->IsMovementLocked());
+
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmDragonSaveRoundtripTest, "WYRMFALL.Scaffold.DragonSaveLoadRemoteRoundtrip",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmDragonSaveRoundtripTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    AWyrmPlayerController* PC = World->SpawnActor<AWyrmPlayerController>(
+        AWyrmPlayerController::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(100.f, 200.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Dragon = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 600.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    Dragon->BondWithHumanoid(Player);
+    PC->Possess(Player);
+    PC->TransferControlToDragon(Dragon);
+
+    // Custom dragon state
+    Dragon->GetAttributes()->SetCurrentHealth(310.f);
+
+    // Create snapshot while dragon is remotely controlled (SAVE-08)
+    const FString SlotName = TEXT("WyrmSlot_Dragon_UnitTest");
+    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(SlotName, Player, nullptr, World);
+    TestNotNull(TEXT("Snapshot created"), Snapshot);
+    TestEqual(TEXT("Save generation schema is valid"), Snapshot->SchemaVersion, UWyrmSaveGame::CurrentSchemaVersion);
+    TestTrue(TEXT("Dragon record has bond receipt"), Snapshot->DragonRecord.bHasBondReceipt);
+    TestEqual(TEXT("Dragon record has correct health 310.0"), Snapshot->DragonRecord.Health, 310.f);
+    TestTrue(TEXT("Dragon record notes direct control"), Snapshot->DragonRecord.bIsDirectlyControlled);
+    TestEqual(TEXT("Dragon record saved location"), Snapshot->DragonRecord.WorldLocation, FVector(500.f, 600.f, 100.f));
+    TestEqual(TEXT("Dragon record saved humanoid waiting location"), Snapshot->DragonRecord.HumanoidWaitingLocation, FVector(100.f, 200.f, 100.f));
+
+    // Reset dragon state
+    Dragon->SetActorLocation(FVector(0.f, 0.f, 0.f));
+    Dragon->GetAttributes()->SetCurrentHealth(100.f);
+
+    // Restore from snapshot (SAVE-08)
+    const bool bApplySuccess = UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, Player, nullptr, World);
+    TestTrue(TEXT("ApplySnapshotObject succeeded"), bApplySuccess);
+
+    TestEqual(TEXT("Dragon health restored to 310.0"), Dragon->GetAttributes()->GetCurrentHealth(), 310.f);
+    TestEqual(TEXT("Dragon position restored to (500, 600, 100)"), Dragon->GetActorLocation(), FVector(500.f, 600.f, 100.f));
+    TestTrue(TEXT("Dragon direct control re-established"), Dragon->IsDirectlyControlled());
+    TestTrue(TEXT("PC possesses Dragon again"), PC->GetPawn() == Dragon);
+
+    // Clean up
+    PC->ReturnControlToHumanoid();
+    Dragon->Destroy();
+    Player->Destroy();
+    PC->Destroy();
     return true;
 }
 #endif

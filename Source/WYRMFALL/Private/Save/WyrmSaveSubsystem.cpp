@@ -5,6 +5,8 @@
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Terrain/WyrmGeoForgeAdapter.h"
 #include "Building/WyrmBuildingSubsystem.h"
+#include "Dragon/WyrmDragonCharacter.h"
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/UObjectIterator.h"
 
@@ -227,6 +229,19 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         BuildingSub->BuildSaveRecord(SaveObj->CampRecord);
     }
 
+    // Capture active Dragon Companion / Boss (DRG-01..04, SAVE-08)
+    if (WorldContext)
+    {
+        for (TActorIterator<AWyrmDragonCharacter> It(WorldContext); It; ++It)
+        {
+            if (*It && IsValid(*It))
+            {
+                (*It)->BuildSaveRecord(SaveObj->DragonRecord);
+                break;
+            }
+        }
+    }
+
     return SaveObj;
 }
 
@@ -357,6 +372,34 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (UWyrmAttributeSet* Attrs = Character->GetAttributes())
         {
             Attrs->SetCurrentFocus(SaveObj->CharacterRecord.Focus);
+        }
+    }
+
+    // Restore active Dragon Companion / Boss (SAVE-08)
+    if (WorldContext)
+    {
+        AWyrmDragonCharacter* ActiveDragon = nullptr;
+        for (TActorIterator<AWyrmDragonCharacter> It(WorldContext); It; ++It)
+        {
+            if (*It && IsValid(*It))
+            {
+                ActiveDragon = *It;
+                break;
+            }
+        }
+
+        if (SaveObj->DragonRecord.bHasBondReceipt || SaveObj->DragonRecord.Role != EWyrmDragonRole::HostileBoss)
+        {
+            if (!ActiveDragon)
+            {
+                FTransform SpawnTransform(SaveObj->DragonRecord.WorldRotation, SaveObj->DragonRecord.WorldLocation);
+                ActiveDragon = AWyrmDragonCharacter::SpawnWyrmDragon(WorldContext, SaveObj->DragonRecord.Role, SpawnTransform);
+            }
+
+            if (ActiveDragon)
+            {
+                ActiveDragon->RestoreFromSaveRecord(SaveObj->DragonRecord, Character);
+            }
         }
     }
 

@@ -205,7 +205,7 @@
     {
       "id": "save",
       "authority": "UWyrmSaveSubsystem & UWyrmSaveGame",
-      "state": "WP05_PARTIAL_COMBINED_BOUND_TERRAIN_NOT_RUN_WP07_FOOD_BUFF_PIE_PASS",
+      "state": "WP05_PARTIAL_COMBINED_BOUND_TERRAIN_NOT_RUN_WP07_FOOD_BUFF_PIE_PASS_WP09_DRAGON_PASS",
       "actual_source_path": "Source/WYRMFALL/Public/Save/WyrmSaveSubsystem.h",
       "version": "1.0",
       "evidence": [
@@ -215,9 +215,25 @@
         "Saved/Diagnostics/WP07_activities_proof.json",
         "Documentation/Current/WP07_ACTIVITIES_PROOF.md",
         "Saved/Diagnostics/WP08_camp_proof.json",
-        "Documentation/Current/WP08_CAMP_PROOF.md"
+        "Documentation/Current/WP08_CAMP_PROOF.md",
+        "Saved/Diagnostics/WP09_dragon_proof.json",
+        "Documentation/Current/WP09_DRAGON_PROOF.md"
       ],
       "gate": "WP-05"
+    },
+    {
+      "id": "dragon_companion",
+      "authority": "AWyrmDragonCharacter (Same persistent dragon identity)",
+      "state": "WP09_VERIFIED_NATIVE_AND_PIE_PROVED",
+      "actual_source_path": "Source/WYRMFALL/Public/Dragon/WyrmDragonCharacter.h",
+      "version": "1.0",
+      "evidence": [
+        "Saved/Automation/Scaffold/index.json",
+        "Saved/Diagnostics/WP09_dragon_proof.json",
+        "Documentation/Current/WP09_DRAGON_PROOF.md"
+      ],
+      "gate": "WP-09",
+      "candidate_source_path": "G:\\assets\\voxel project\\Content\\WYRMFALL\\Development\\Intake\\WP00\\GreenDragon"
     },
     {
       "id": "dragon_heartfold",
@@ -226,7 +242,7 @@
       "actual_source_path": null,
       "version": null,
       "evidence": [],
-      "gate": "WP-09..11"
+      "gate": "WP-10..11"
     },
     {
       "id": "horror_echoes",
@@ -265,7 +281,7 @@
     "controller": "NOT_RUN"
   },
   "scaffold_release": "0.2",
-  "native_test_cases_authored": 32,
+  "native_test_cases_authored": 37,
   "native_evidence": {
     "initial_onboarding": "Saved/Onboarding/20260915T075513Z_11403aa0a986/run.json",
     "session_report": "Documentation/Current/BOOT-01_C_RECOVERY.md",
@@ -373,12 +389,13 @@
     "date": "2026-09-17",
     "pushed_checkpoint": "6eb5696",
     "editor_build": "PASS_NOUBA_NOPCH_FINAL_SOURCE",
-    "native_automation": "PASS_32_OF_32",
+    "native_automation": "PASS_37_OF_37",
     "wp01_real_pie": "PASS_7_OF_7_GROUPS",
     "wp05_editor_world_commandlet": "PASS_3_OF_3_SCOPED_GROUPS",
     "wp06_real_pie": "PASS_6_OF_6_GROUPS",
     "wp07_real_pie": "PASS_8_OF_8_SCOPED_GROUPS",
     "wp08_real_pie": "PASS_7_OF_7_GROUPS",
+    "wp09_real_pie": "PASS_5_OF_5_GROUPS",
     "portable": "PASS_124_TESTS_2_EXPECTED_SKIPS",
     "controller": "NOT_RUN",
     "cook": "NOT_RUN"
@@ -402,5 +419,13 @@
     "ACT-08": "PASS_NATIVE_AND_REAL_PIE",
     "ACT-09": "PASS_NATIVE_AND_REAL_PIE",
     "ACT-10": "PASS_NATIVE_AND_REAL_PIE"
+  },
+  "wp09_state": "PASS_NATIVE_AND_REAL_PIE",
+  "dragon_acceptance": {
+    "DRG-01": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-02": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-03": "PASS_NATIVE_AND_REAL_PIE",
+    "DRG-04": "PASS_NATIVE_AND_REAL_PIE",
+    "SAVE-08": "PASS_NATIVE_AND_REAL_PIE"
   }
 }

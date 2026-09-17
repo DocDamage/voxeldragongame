@@ -45,6 +45,8 @@ struct WYRMFALL_API FWyrmActiveFoodBuff
     bool IsActive() const { return !BuffId.IsNone() && RemainingDuration > 0.f; }
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWyrmCharacterDamagedDelegate, float, DamageAmount);
+
 // Humanoid host with Mutable visual authority.
 UCLASS()
 class WYRMFALL_API AWyrmCharacter : public ACharacter, public IAbilitySystemInterface
@@ -52,6 +54,9 @@ class WYRMFALL_API AWyrmCharacter : public ACharacter, public IAbilitySystemInte
     GENERATED_BODY()
 public:
     AWyrmCharacter();
+
+    UPROPERTY(BlueprintAssignable, Category="Combat")
+    FWyrmCharacterDamagedDelegate OnCharacterDamaged;
     virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
     UFUNCTION(BlueprintPure, Category="Combat") UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
     virtual void Tick(float DeltaSeconds) override;
@@ -196,6 +201,7 @@ protected:
 private:
     void ApplyCamera();
     void CheckLevelUp();
+    void HandleHealthChanged(const struct FOnAttributeChangeData& Data);
 
     UPROPERTY(VisibleAnywhere, Category="Camera") EWyrmCameraMode CameraMode = EWyrmCameraMode::ThirdPerson;
     UPROPERTY(VisibleAnywhere, Category="Control") bool bMovementLocked = false;

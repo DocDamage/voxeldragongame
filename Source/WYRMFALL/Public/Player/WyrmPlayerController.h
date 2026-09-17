@@ -50,6 +50,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat")
     void SecondaryAttack();
 
+    UFUNCTION(BlueprintCallable, Category="Dragon|Control")
+    bool TransferControlToDragon(class AWyrmDragonCharacter* Dragon);
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Control")
+    bool ReturnControlToHumanoid();
+
 #if WITH_EDITOR
     // BOOT-01 instrumentation: exercise repeated setup on the live PIE controller.
     UFUNCTION(Exec) void WyrmDevRebindInput();
