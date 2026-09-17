@@ -10,7 +10,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 
 | Area | Current status | Evidence and boundary |
 |---|---|---|
-| Repository | `main`; pushed checkpoint `68a7c96` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Repository | `main`; pushed checkpoint `e76bc9a` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
 | Native automation | **PASS: 32/32** | `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
