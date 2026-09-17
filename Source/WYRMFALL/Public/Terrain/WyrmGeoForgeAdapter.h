@@ -53,6 +53,23 @@ public:
     UPROPERTY(Transient)
     TArray<TWeakObjectPtr<class AWyrmWaterVolume>> RegisteredWaterVolumes;
 
+    /** Registers a camp building piece to protect its ground support column from excavations (WRLD-09) */
+    UFUNCTION(BlueprintCallable, Category="Terrain|Camp")
+    void RegisterCampPiece(class AWyrmBuildingPiece* Piece);
+
+    UFUNCTION(BlueprintCallable, Category="Terrain|Camp")
+    void UnregisterCampPiece(class AWyrmBuildingPiece* Piece);
+
+    UPROPERTY(Transient)
+    TArray<TWeakObjectPtr<class AWyrmBuildingPiece>> RegisteredCampPieces;
+
+    /** Last rejection reason string for diagnostic and acceptance checks */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Terrain")
+    FString LastRejectionReason;
+
+    UFUNCTION(BlueprintPure, Category="Terrain")
+    FString GetLastRejectionReason() const { return LastRejectionReason; }
+
     // --- IWyrmTerrainProvider interface ---
     virtual FWyrmTerrainCapabilities GetTerrainCapabilities_Implementation() const override;
     virtual EWyrmTerrainSubmitResult SubmitTerrainEdit_Implementation(const FWyrmTerrainEditRequest& Request) override;

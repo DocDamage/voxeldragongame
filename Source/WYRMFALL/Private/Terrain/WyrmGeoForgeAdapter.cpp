@@ -9,6 +9,7 @@
 #include "Engine/OverlapResult.h"
 #include "CollisionQueryParams.h"
 #include "Water/WyrmWaterVolume.h"
+#include "Building/WyrmBuildingPiece.h"
 
 namespace
 {
@@ -95,6 +96,25 @@ void AWyrmGeoForgeAdapter::UnregisterWaterVolume(AWyrmWaterVolume* Volume)
     }
 }
 
+void AWyrmGeoForgeAdapter::RegisterCampPiece(AWyrmBuildingPiece* Piece)
+{
+    if (Piece)
+    {
+        RegisteredCampPieces.AddUnique(Piece);
+    }
+}
+
+void AWyrmGeoForgeAdapter::UnregisterCampPiece(AWyrmBuildingPiece* Piece)
+{
+    if (Piece)
+    {
+        RegisteredCampPieces.Remove(Piece);
+    }
+    RegisteredCampPieces.RemoveAll([](const TWeakObjectPtr<AWyrmBuildingPiece>& P) {
+        return !P.IsValid() || !IsValid(P.Get());
+    });
+}
+
 FWyrmTerrainCapabilities AWyrmGeoForgeAdapter::GetTerrainCapabilities_Implementation() const
 {
     FWyrmTerrainCapabilities Caps;
@@ -132,8 +152,11 @@ bool AWyrmGeoForgeAdapter::IsVolumeOccupied_Implementation(const FVector& Center
 
 EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(const FWyrmTerrainEditRequest& Request)
 {
+    LastRejectionReason.Empty();
+
     if (!Request.IsWellFormed())
     {
+        LastRejectionReason = TEXT("MalformedRequest");
         return EWyrmTerrainSubmitResult::Rejected;
     }
 
@@ -147,11 +170,6 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
         return EWyrmTerrainSubmitResult::Rejected;
     }
 
-    if (!TerrainActor.IsValid())
-    {
-        return EWyrmTerrainSubmitResult::Unsupported;
-    }
-
     int32 AppliedEditCount = 0;
     float CellVolumeCm3 = 0.f;
 
@@ -161,6 +179,11 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
         if (IsVolumeOccupied_Implementation(Request.WorldCenter, Request.RadiusCm))
         {
             return EWyrmTerrainSubmitResult::Rejected;
+        }
+
+        if (!TerrainActor.IsValid())
+        {
+            return EWyrmTerrainSubmitResult::Unsupported;
         }
 
         FGeoForgeBlockSpecification BlockSpecification;
@@ -177,11 +200,46 @@ EWyrmTerrainSubmitResult AWyrmGeoForgeAdapter::SubmitTerrainEdit_Implementation(
                 FString OutRejectionReason;
                 if (!WaterVol->ValidateTerrainEdit(Request, OutRejectionReason))
                 {
+                    LastRejectionReason = OutRejectionReason;
                     UE_LOG(LogTemp, Warning, TEXT("[WyrmTerrain] Edit %s rejected by water volume: %s"),
                         *Request.ActionId.ToString(), *OutRejectionReason);
                     return EWyrmTerrainSubmitResult::Rejected;
                 }
             }
+        }
+
+        // Camp ground support protection (WRLD-09):
+        for (auto It = RegisteredCampPieces.CreateIterator(); It; ++It)
+        {
+            if (!It->IsValid() || !IsValid(It->Get()))
+            {
+                It.RemoveCurrent();
+                continue;
+            }
+
+            AWyrmBuildingPiece* Piece = It->Get();
+            const FBox SupportBox = Piece->GetSupportBounds();
+            if (!SupportBox.IsValid)
+            {
+                continue;
+            }
+
+            const FBox RequestBox(
+                Request.WorldCenter - FVector(Request.RadiusCm),
+                Request.WorldCenter + FVector(Request.RadiusCm));
+
+            if (SupportBox.Intersect(RequestBox))
+            {
+                LastRejectionReason = TEXT("RejectionReason_CampSupport");
+                UE_LOG(LogTemp, Warning, TEXT("[WyrmTerrain] Edit %s rejected: RejectionReason_CampSupport beneath piece %s"),
+                    *Request.ActionId.ToString(), *Piece->PieceId.ToString());
+                return EWyrmTerrainSubmitResult::Rejected;
+            }
+        }
+
+        if (!TerrainActor.IsValid())
+        {
+            return EWyrmTerrainSubmitResult::Unsupported;
         }
 
         const int32 FilledBefore = CountFilledCellsInSphere(

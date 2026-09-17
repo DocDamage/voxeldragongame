@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 16, 2026 · starter v0.2 · evidence reconciled through scoped WP-07 verification**
+**September 17, 2026 · starter v0.2 · evidence reconciled through WP-08 verification**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -12,8 +12,8 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 |---|---|---|
 | Repository | `main`; pushed checkpoint `68a7c96` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
-| Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, `-NoUBA -NoPCH`; fresh build completed in 36.73 seconds |
-| Native automation | **PASS: 27/27** | `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
+| Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
+| Native automation | **PASS: 32/32** | `Saved/Automation/Scaffold/index.json`; native automation is not a gameplay gate by itself |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | BOOT-01 | **Historical focused PASS** | Keyboard/mouse movement, jump, cameras, HUD, rebinding, pause/input guards, click rejection and relaunch passed before the current configuration |
 | Physical controller | **NOT_RUN** | No controller was detected; do not report controller acceptance as PASS |
@@ -25,6 +25,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-05 inventory/save | **PARTIAL** | Native tests and three editor-world commandlet cases passed. Character/inventory disk roundtrip passed; terrain payload passed separately in WP-01. One combined bound-terrain plus character/inventory save roundtrip remains NOT_RUN |
 | WP-06 ranged progression fixture | **PASS in real PIE** | Imported bow/arrow meshes and textures loaded; projectile used `SM_Arrow`; progression, kit switching, 600 cm ranged hit, evade, both cameras, and progression snapshot restore passed; [report](WP06_PROGRESSION_PROOF.md) |
 | WP-07 scoped activities fixture | **PARTIAL; scoped real PIE PASS** | 8/8 scoped groups passed for real assets, water, fishing, crafting and food buffs. No repository task packet defines full WP-07 acceptance; [report](WP07_ACTIVITIES_PROOF.md) |
+| WP-08 supported camp & storage | **PASS in real PIE** | 7/7 test groups passed for genuine camp assets, atomic placement, zero-side-effect rejection, single-owner storage identity, demolition recovery bundle overflow, camp persistence & companion growth clearance, and ground support terrain excavation locking; [report](WP08_CAMP_PROOF.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -48,15 +49,20 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 - WP-07 scoped owners are `AWyrmWaterVolume`, `UWyrmFishingComponent`, and
   `UWyrmCraftingSubsystem`; GAS and the existing inventory/save owners remain
   authoritative.
+- WP-08 owners are `UWyrmBuildingSubsystem` (building authority),
+  `UWyrmInventoryComponent` / `AWyrmStorageActor` (storage authority),
+  `AWyrmGeoForgeAdapter` (ground support locking), and `UWyrmSaveSubsystem`
+  (camp persistence across save/reload).
 
 ## Fresh verification commands
 
 ```powershell
-& "C:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat" WYRMFALLEditor Win64 Development "-Project=G:/assets/voxel project/WYRMFALL.uproject" -WaitMutex -NoHotReloadFromIDE -NoEngineChanges -NoUBA -NoPCH
+& "C:/Program Files/UE_5.8/Engine/Build/BatchFiles/Build.bat" WYRMFALLEditor Win64 Development "-Project=G:/assets/voxel project/WYRMFALL.uproject" -WaitMutex -NoHotReloadFromIDE -NoEngineChanges
 py -3.12 tools/wyrm.py ue-test --engine-root "C:/Program Files/UE_5.8" --timeout 1800
 py -3.12 tools/run_pie_proof.py
 py -3.12 tools/run_wp06_pie_proof.py
 py -3.12 tools/run_wp07_pie_proof.py
+py -3.12 tools/run_wp08_pie_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -79,7 +85,5 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-Finish the remaining WP-00 readiness acceptance and reconcile the stale
-WP-00 documents with the now-proven WP-01 terrain result. Keep the verified
-WP-07 fixture bounded until a task packet defines the full acceptance surface.
+Reconcile integration readiness records and review next backlog task (e.g. WP-09 dragon companion flight/riding or WP-00 RDY acceptance).
 Use the [current handoff](HANDOFF.md) for the exact continuation state.

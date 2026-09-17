@@ -24,6 +24,12 @@
 #include "Crafting/WyrmCraftingSubsystem.h"
 #include "Activities/WyrmFishingComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Building/WyrmBuildingTypes.h"
+#include "Building/WyrmBuildingPiece.h"
+#include "Building/WyrmStorageActor.h"
+#include "Building/WyrmRecoveryBundleActor.h"
+#include "Building/WyrmBuildingSubsystem.h"
+#include "Terrain/WyrmGeoForgeAdapter.h"
 #include <limits>
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmTerrainRequestTest, "WYRMFALL.Scaffold.TerrainRequestValidation",
@@ -1615,6 +1621,543 @@ bool FWyrmFoodBuffTest::RunTest(const FString& Parameters)
 
     SaveSys->DeleteSaveSlot(SlotName);
     Character->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCampBuildingPlacementTest, "WYRMFALL.Scaffold.CampPlacementAndRejection",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCampBuildingPlacementTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
+    for (const FWorldContext& Ctx : Contexts)
+    {
+        if (Ctx.WorldType == EWorldType::Editor || Ctx.WorldType == EWorldType::PIE)
+        {
+            World = Ctx.World();
+            break;
+        }
+    }
+    if (!World)
+    {
+        World = UWorld::CreateWorld(EWorldType::None, false);
+    }
+    TestNotNull(TEXT("Valid test world"), World);
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI)
+    {
+        GI = NewObject<UGameInstance>(World);
+    }
+    UWyrmBuildingSubsystem* BuildSys = NewObject<UWyrmBuildingSubsystem>(GI);
+    BuildSys->SetWorldContext(World);
+    BuildSys->RegisterDefaultDefinitions();
+
+    // Create a player actor with inventory, positioned outside placement volume
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>();
+    TestNotNull(TEXT("Valid player character"), Player);
+    Player->SetActorLocation(FVector(300.f, 0.f, 0.f));
+    UWyrmInventoryComponent* Inv = Player->GetInventory();
+    TestNotNull(TEXT("Valid player inventory"), Inv);
+
+    // 1. Rejection: Insufficient materials
+    FString RejectionReason;
+    EWyrmPlacementRejection Rejection = BuildSys->ValidatePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(0, 0, 0)), Player, RejectionReason);
+    TestEqual(TEXT("Rejects without materials"), Rejection, EWyrmPlacementRejection::InsufficientMaterials);
+    TestTrue(TEXT("Reason specifies materials"), RejectionReason.Contains(TEXT("Insufficient materials")));
+
+    // Add wood materials to player
+    FWyrmItemInstance WoodItem;
+    WoodItem.InstanceId = FGuid::NewGuid();
+    WoodItem.ItemId = FName(TEXT("Resource.Wood"));
+    WoodItem.DisplayName = FText::FromString(TEXT("Wood"));
+    WoodItem.ItemType = EWyrmItemType::Resource;
+    WoodItem.StackCount = 20;
+    WoodItem.MaxStack = 99;
+    FWyrmItemInstance Rem;
+    Inv->AddItem(WoodItem, Rem);
+
+    // 2. Rejection: Occupied by character/creature (ACT-07, WRLD-08)
+    AWyrmCharacter* Occupant = World->SpawnActor<AWyrmCharacter>();
+    Occupant->SetActorLocation(FVector(0, 0, 0));
+    Rejection = BuildSys->ValidatePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(0, 0, 0)), Player, RejectionReason);
+    TestEqual(TEXT("Occupied placement rejected (ACT-07, WRLD-08)"), Rejection, EWyrmPlacementRejection::Occupied);
+    Occupant->Destroy();
+
+    // 3. Rejection: Unsupported wall in mid-air (ACT-07)
+    Rejection = BuildSys->ValidatePlacement(
+        FName(TEXT("Wall.Wood")), FTransform(FVector(0, 0, 500)), Player, RejectionReason);
+    TestEqual(TEXT("Wall in mid-air rejected as Unsupported"), Rejection, EWyrmPlacementRejection::Unsupported);
+
+    // ExecutePlacement on invalid placement fails without consuming materials (ACT-07)
+    int32 WoodBefore = Inv->GetBagItems()[0].StackCount;
+    AWyrmBuildingPiece* BadPiece = BuildSys->ExecutePlacement(
+        FName(TEXT("Wall.Wood")), FTransform(FVector(0, 0, 500)), Player, Rejection, RejectionReason);
+    TestNull(TEXT("No actor spawned on failed placement"), BadPiece);
+    TestEqual(TEXT("Zero materials deducted on failed placement"), Inv->GetBagItems()[0].StackCount, WoodBefore);
+
+    // 4. Successful Placement: Foundation
+    AWyrmBuildingPiece* Foundation = BuildSys->ExecutePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(0, 0, 0)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Foundation placed successfully"), Foundation);
+    TestEqual(TEXT("Placement rejection is None"), Rejection, EWyrmPlacementRejection::None);
+    TestEqual(TEXT("2 Wood deducted for foundation"), Inv->GetBagItems()[0].StackCount, WoodBefore - 2);
+    TestEqual(TEXT("Foundation tracked in active pieces"), BuildSys->GetActivePieces().Num(), 1);
+
+    // 5. Rejection: Overlapping foundation (ACT-07)
+    Rejection = BuildSys->ValidatePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(10, 10, 0)), Player, RejectionReason);
+    TestEqual(TEXT("Overlapping foundation rejected"), Rejection, EWyrmPlacementRejection::Overlapping);
+
+    // 5. Successful Placement: Wall supported by foundation (ACT-06)
+    WoodBefore = Inv->GetBagItems()[0].StackCount;
+    AWyrmBuildingPiece* Wall = BuildSys->ExecutePlacement(
+        FName(TEXT("Wall.Wood")), FTransform(FVector(0, 100, 50)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Wall placed with foundation support"), Wall);
+    TestEqual(TEXT("Active pieces count is 2"), BuildSys->GetActivePieces().Num(), 2);
+
+    // 6. Doorframe and Door with Toggle (ACT-06)
+    AWyrmBuildingPiece* Doorframe = BuildSys->ExecutePlacement(
+        FName(TEXT("Doorframe.Wood")), FTransform(FVector(100, 0, 50)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Doorframe placed"), Doorframe);
+
+    AWyrmBuildingPiece* Door = BuildSys->ExecutePlacement(
+        FName(TEXT("Door.Wood")), FTransform(FVector(100, 0, 50)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Door placed"), Door);
+    if (!Door)
+    {
+        return false;
+    }
+    TestFalse(TEXT("Door initially closed"), Door->bIsOpen);
+    Door->ToggleDoor();
+    TestTrue(TEXT("Door toggled open"), Door->bIsOpen);
+    Door->ToggleDoor();
+    TestFalse(TEXT("Door toggled closed"), Door->bIsOpen);
+
+    // 7. Roof & Ceiling (ACT-06)
+    AWyrmBuildingPiece* Roof = BuildSys->ExecutePlacement(
+        FName(TEXT("Roof.Wood")), FTransform(FVector(0, 0, 200)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Roof placed with support"), Roof);
+
+    AWyrmBuildingPiece* Ceiling = BuildSys->ExecutePlacement(
+        FName(TEXT("Ceiling.Wood")), FTransform(FVector(0, 0, 180)), Player, Rejection, RejectionReason);
+    TestNotNull(TEXT("Ceiling placed with support"), Ceiling);
+
+    BuildSys->ClearAllPlacedPieces();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCampStorageIdentityTest, "WYRMFALL.Scaffold.CampStorageIdentity",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCampStorageIdentityTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
+    for (const FWorldContext& Ctx : Contexts)
+    {
+        if (Ctx.WorldType == EWorldType::Editor || Ctx.WorldType == EWorldType::PIE)
+        {
+            World = Ctx.World();
+            break;
+        }
+    }
+    if (!World)
+    {
+        World = UWorld::CreateWorld(EWorldType::None, false);
+    }
+    TestNotNull(TEXT("Valid test world"), World);
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmBuildingSubsystem* BuildSys = NewObject<UWyrmBuildingSubsystem>(GI);
+    BuildSys->SetWorldContext(World);
+    BuildSys->RegisterDefaultDefinitions();
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>();
+    Player->SetActorLocation(FVector(300.f, 0.f, 0.f));
+    UWyrmInventoryComponent* PlayerBag = Player->GetInventory();
+
+    // Place Storage Chest
+    FString Reason;
+    EWyrmPlacementRejection Rejection;
+    AWyrmBuildingPiece* ChestPiece = BuildSys->ExecutePlacement(
+        FName(TEXT("Storage.Chest")), FTransform(FVector(0, 0, 0)), nullptr, Rejection, Reason);
+    TestNotNull(TEXT("Storage chest placed"), ChestPiece);
+    AWyrmStorageActor* Storage = Cast<AWyrmStorageActor>(ChestPiece);
+    TestNotNull(TEXT("Chest cast to AWyrmStorageActor"), Storage);
+    if (!Storage || !Storage->GetStorageInventory())
+    {
+        return false;
+    }
+
+    // Create unique rolled item in player bag
+    FWyrmItemInstance UniqueSword;
+    UniqueSword.InstanceId = FGuid::NewGuid();
+    UniqueSword.ItemId = FName(TEXT("Item.Weapon.IronSword"));
+    UniqueSword.DisplayName = FText::FromString(TEXT("Rolled Iron Sword"));
+    UniqueSword.ItemType = EWyrmItemType::Weapon;
+    UniqueSword.DefaultSlot = EWyrmEquipSlot::MainHand;
+    UniqueSword.WeaponFamily = EWyrmWeaponFamily::Melee1H;
+    UniqueSword.StackCount = 1;
+    UniqueSword.MaxStack = 1;
+    FWyrmItemRoll Roll1;
+    Roll1.StatName = FName(TEXT("Power"));
+    Roll1.Value = 24.5f;
+    UniqueSword.RolledStats.Add(Roll1);
+    FWyrmItemRoll Roll2;
+    Roll2.StatName = FName(TEXT("CriticalChance"));
+    Roll2.Value = 0.08f;
+    UniqueSword.RolledStats.Add(Roll2);
+
+    FWyrmItemInstance Rem;
+    PlayerBag->AddItem(UniqueSword, Rem);
+    TestEqual(TEXT("Player bag contains 1 item"), PlayerBag->GetBagItems().Num(), 1);
+
+    // Transfer Bag -> Storage (ACT-08)
+    const FGuid SavedGuid = UniqueSword.InstanceId;
+    TestTrue(TEXT("Transfer to storage succeeds"),
+        Storage->TransferToStorage(PlayerBag, SavedGuid, 1));
+    TestEqual(TEXT("Player bag is now empty (single owner)"), PlayerBag->GetBagItems().Num(), 0);
+    TestEqual(TEXT("Storage contains 1 item"), Storage->GetStorageInventory()->GetBagItems().Num(), 1);
+
+    const FWyrmItemInstance& StoredItem = Storage->GetStorageInventory()->GetBagItems()[0];
+    TestEqual(TEXT("Identical GUID in storage"), StoredItem.InstanceId, SavedGuid);
+    TestEqual(TEXT("Identical ItemId in storage"), StoredItem.ItemId, FName(TEXT("Item.Weapon.IronSword")));
+    TestEqual(TEXT("Identical rolled power"), StoredItem.GetStatValue(FName(TEXT("Power"))), 24.5f);
+    TestEqual(TEXT("Identical rolled crit"), StoredItem.GetStatValue(FName(TEXT("CriticalChance"))), 0.08f);
+
+    // Transfer Storage -> Bag (ACT-08)
+    TestTrue(TEXT("Transfer back to bag succeeds"),
+        Storage->TransferFromStorage(PlayerBag, SavedGuid, 1));
+    TestEqual(TEXT("Storage is now empty (single owner)"), Storage->GetStorageInventory()->GetBagItems().Num(), 0);
+    TestEqual(TEXT("Player bag contains 1 item"), PlayerBag->GetBagItems().Num(), 1);
+
+    const FWyrmItemInstance& ReturnedItem = PlayerBag->GetBagItems()[0];
+    TestEqual(TEXT("Identical GUID returned to player"), ReturnedItem.InstanceId, SavedGuid);
+    TestEqual(TEXT("Identical rolled stats returned"), ReturnedItem.GetStatValue(FName(TEXT("Power"))), 24.5f);
+
+    BuildSys->ClearAllPlacedPieces();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCampDemolitionOverflowTest, "WYRMFALL.Scaffold.CampDemolitionOverflow",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCampDemolitionOverflowTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
+    for (const FWorldContext& Ctx : Contexts)
+    {
+        if (Ctx.WorldType == EWorldType::Editor || Ctx.WorldType == EWorldType::PIE)
+        {
+            World = Ctx.World();
+            break;
+        }
+    }
+    if (!World)
+    {
+        World = UWorld::CreateWorld(EWorldType::None, false);
+    }
+    TestNotNull(TEXT("Valid test world"), World);
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmBuildingSubsystem* BuildSys = NewObject<UWyrmBuildingSubsystem>(GI);
+    BuildSys->SetWorldContext(World);
+    BuildSys->RegisterDefaultDefinitions();
+
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>();
+    Player->SetActorLocation(FVector(300.f, 0.f, 0.f));
+    UWyrmInventoryComponent* PlayerBag = Player->GetInventory();
+
+    // Place storage chest
+    FString Reason;
+    EWyrmPlacementRejection Rejection;
+    AWyrmBuildingPiece* ChestPiece = BuildSys->ExecutePlacement(
+        FName(TEXT("Storage.Chest")), FTransform(FVector(0, 0, 0)), nullptr, Rejection, Reason);
+    AWyrmStorageActor* Storage = Cast<AWyrmStorageActor>(ChestPiece);
+    TestNotNull(TEXT("Storage chest placed"), Storage);
+    if (!Storage || !Storage->GetStorageInventory())
+    {
+        return false;
+    }
+
+    // Put 3 items in storage
+    TArray<FGuid> StoredGuids;
+    for (int32 i = 0; i < 3; ++i)
+    {
+        FWyrmItemInstance Item;
+        Item.InstanceId = FGuid::NewGuid();
+        Item.ItemId = FName(*FString::Printf(TEXT("Item.Test.Stored_%d"), i));
+        Item.DisplayName = FText::FromString(FString::Printf(TEXT("Stored Item %d"), i));
+        Item.ItemType = EWyrmItemType::Consumable;
+        Item.StackCount = 1;
+        Item.MaxStack = 1;
+        StoredGuids.Add(Item.InstanceId);
+        FWyrmItemInstance Rem;
+        Storage->GetStorageInventory()->AddItem(Item, Rem);
+    }
+    TestEqual(TEXT("Storage contains 3 items"), Storage->GetStorageInventory()->GetBagItems().Num(), 3);
+
+    // Player bag is full (MaxBagSlots = 1, holding 1 filler item)
+    PlayerBag->MaxBagSlots = 1;
+    FWyrmItemInstance Filler;
+    Filler.InstanceId = FGuid::NewGuid();
+    Filler.ItemId = FName(TEXT("Item.Filler"));
+    Filler.DisplayName = FText::FromString(TEXT("Filler"));
+    Filler.StackCount = 1;
+    Filler.MaxStack = 1;
+    FWyrmItemInstance Rem;
+    PlayerBag->AddItem(Filler, Rem);
+    TestEqual(TEXT("Player bag is full"), PlayerBag->GetBagItems().Num(), 1);
+
+    // Demolish storage chest while player bag is completely full (ACT-09)
+    AWyrmRecoveryBundleActor* RecoveryBundle = nullptr;
+    TestTrue(TEXT("DemolishPiece succeeds"),
+        BuildSys->DemolishPiece(ChestPiece, Player, RecoveryBundle, Reason));
+    TestNotNull(TEXT("Recovery bundle spawned on overflow (ACT-09)"), RecoveryBundle);
+    TestNotNull(TEXT("Recovery bundle has inventory"), RecoveryBundle->GetBundleInventory());
+
+    // Verify recovery bundle holds all 3 stored items + 2 refund wood materials
+    const TArray<FWyrmItemInstance>& BundleItems = RecoveryBundle->GetBundleInventory()->GetBagItems();
+    TestTrue(TEXT("Recovery bundle holds items"), BundleItems.Num() >= 3);
+
+    for (const FGuid& ExpectedGuid : StoredGuids)
+    {
+        const bool bFound = BundleItems.ContainsByPredicate(
+            [&](const FWyrmItemInstance& It) { return It.InstanceId == ExpectedGuid; });
+        TestTrue(TEXT("Stored item preserved in bundle without loss"), bFound);
+    }
+
+    // Expand player bag and claim bundle contents (ACT-09)
+    PlayerBag->MaxBagSlots = 20;
+    TestTrue(TEXT("ClaimAll transfers items into player bag"), RecoveryBundle->ClaimAll(PlayerBag));
+    TestTrue(TEXT("Player bag received stored items"), PlayerBag->GetBagItems().Num() > 1);
+
+    for (const FGuid& ExpectedGuid : StoredGuids)
+    {
+        const bool bFoundInPlayer = PlayerBag->GetBagItems().ContainsByPredicate(
+            [&](const FWyrmItemInstance& It) { return It.InstanceId == ExpectedGuid; });
+        TestTrue(TEXT("Stored item recovered in player bag without duplication"), bFoundInPlayer);
+    }
+
+    BuildSys->ClearAllPlacedPieces();
+    Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCampSupportTerrainTest, "WYRMFALL.Scaffold.CampSupportTerrainInteraction",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCampSupportTerrainTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
+    for (const FWorldContext& Ctx : Contexts)
+    {
+        if (Ctx.WorldType == EWorldType::Editor || Ctx.WorldType == EWorldType::PIE)
+        {
+            World = Ctx.World();
+            break;
+        }
+    }
+    if (!World)
+    {
+        World = UWorld::CreateWorld(EWorldType::None, false);
+    }
+    TestNotNull(TEXT("Valid test world"), World);
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmBuildingSubsystem* BuildSys = NewObject<UWyrmBuildingSubsystem>(GI);
+    BuildSys->SetWorldContext(World);
+    BuildSys->RegisterDefaultDefinitions();
+
+    AWyrmGeoForgeAdapter* Adapter = World->SpawnActor<AWyrmGeoForgeAdapter>();
+    TestNotNull(TEXT("GeoForge adapter created"), Adapter);
+
+    // Place supported foundation at (500, 500, 100)
+    FString Reason;
+    EWyrmPlacementRejection Rejection;
+    AWyrmBuildingPiece* Foundation = BuildSys->ExecutePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(500, 500, 100)), nullptr, Rejection, Reason);
+    TestNotNull(TEXT("Foundation placed"), Foundation);
+
+    // Register with adapter
+    Adapter->RegisterCampPiece(Foundation);
+
+    // Attempt excavation that undermines ground support beneath foundation (WRLD-09)
+    FWyrmTerrainEditRequest BadEdit;
+    BadEdit.ActionId = FGuid::NewGuid();
+    BadEdit.WorldCenter = FVector(500, 500, 0); // Beneath foundation
+    BadEdit.RadiusCm = 80.f;
+    BadEdit.Operation = EWyrmTerrainEditOperation::Remove;
+
+    EWyrmTerrainSubmitResult Result = Adapter->ExecuteTerrainEdit(BadEdit);
+    TestEqual(TEXT("Excavation undermining camp support is rejected (WRLD-09)"),
+        Result, EWyrmTerrainSubmitResult::Rejected);
+    TestEqual(TEXT("Rejection reason is RejectionReason_CampSupport"),
+        Adapter->GetLastRejectionReason(), FString(TEXT("RejectionReason_CampSupport")));
+
+    // Demolish foundation piece
+    AWyrmRecoveryBundleActor* Bundle = nullptr;
+    TestTrue(TEXT("Demolish foundation"), BuildSys->DemolishPiece(Foundation, nullptr, Bundle, Reason));
+    TestEqual(TEXT("Foundation removed from adapter pieces"), Adapter->RegisteredCampPieces.Num(), 0);
+
+    // Re-attempt excavation at exact same location after demolition (WRLD-09)
+    FWyrmTerrainEditRequest ValidAfterDemolish;
+    ValidAfterDemolish.ActionId = FGuid::NewGuid();
+    ValidAfterDemolish.WorldCenter = FVector(500, 500, 0);
+    ValidAfterDemolish.RadiusCm = 80.f;
+    ValidAfterDemolish.Operation = EWyrmTerrainEditOperation::Remove;
+
+    Adapter->LastRejectionReason.Empty();
+    Result = Adapter->ExecuteTerrainEdit(ValidAfterDemolish);
+    TestTrue(TEXT("No longer rejected with RejectionReason_CampSupport after demolition"),
+        Adapter->GetLastRejectionReason() != TEXT("RejectionReason_CampSupport"));
+
+    Adapter->Destroy();
+    BuildSys->ClearAllPlacedPieces();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCampPersistenceAndClearanceTest, "WYRMFALL.Scaffold.CampPersistenceAndClearance",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCampPersistenceAndClearanceTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
+    for (const FWorldContext& Ctx : Contexts)
+    {
+        if (Ctx.WorldType == EWorldType::Editor || Ctx.WorldType == EWorldType::PIE)
+        {
+            World = Ctx.World();
+            break;
+        }
+    }
+    if (!World)
+    {
+        World = UWorld::CreateWorld(EWorldType::None, false);
+    }
+    TestNotNull(TEXT("Valid test world"), World);
+
+    UGameInstance* GI = World->GetGameInstance();
+    if (!GI) GI = NewObject<UGameInstance>(World);
+    UWyrmBuildingSubsystem* BuildSys = NewObject<UWyrmBuildingSubsystem>(GI);
+    BuildSys->SetWorldContext(World);
+    BuildSys->RegisterDefaultDefinitions();
+    UWyrmSaveSubsystem* SaveSys = NewObject<UWyrmSaveSubsystem>(GI);
+
+    // Place Foundation, Walls, and Roof at Z = 200
+    FString Reason;
+    EWyrmPlacementRejection Rejection;
+    AWyrmBuildingPiece* Foundation = BuildSys->ExecutePlacement(
+        FName(TEXT("Foundation.Wood")), FTransform(FVector(0, 0, 0)), nullptr, Rejection, Reason);
+    AWyrmBuildingPiece* Wall = BuildSys->ExecutePlacement(
+        FName(TEXT("Wall.Wood")), FTransform(FVector(0, 100, 50)), nullptr, Rejection, Reason);
+    AWyrmBuildingPiece* Roof = BuildSys->ExecutePlacement(
+        FName(TEXT("Roof.Wood")), FTransform(FVector(0, 0, 200)), nullptr, Rejection, Reason);
+
+    // Place Storage Chest with items
+    AWyrmBuildingPiece* ChestPiece = BuildSys->ExecutePlacement(
+        FName(TEXT("Storage.Chest")), FTransform(FVector(0, 0, 20)), nullptr, Rejection, Reason);
+    AWyrmStorageActor* Storage = Cast<AWyrmStorageActor>(ChestPiece);
+    TestNotNull(TEXT("Storage chest placed"), Storage);
+    if (!Storage || !Storage->GetStorageInventory())
+    {
+        return false;
+    }
+
+    FWyrmItemInstance Item;
+    Item.InstanceId = FGuid::NewGuid();
+    Item.ItemId = FName(TEXT("Item.Food.GrilledFish"));
+    Item.DisplayName = FText::FromString(TEXT("Grilled Fish"));
+    Item.StackCount = 5;
+    Item.MaxStack = 10;
+    FWyrmItemInstance Rem;
+    Storage->GetStorageInventory()->AddItem(Item, Rem);
+
+    // Place Door and toggle open
+    AWyrmBuildingPiece* Door = BuildSys->ExecutePlacement(
+        FName(TEXT("Door.Wood")), FTransform(FVector(100, 0, 50)), nullptr, Rejection, Reason);
+    Door->ToggleDoor();
+    TestTrue(TEXT("Door toggled open"), Door->bIsOpen);
+
+    // Companion Growth Clearance check (ACT-10)
+    FString GrowthReason;
+    const bool bGrowthUnderRoof = BuildSys->CheckCompanionGrowthClearance(
+        World, FVector(0, 0, 0), 300.f, 50.f, GrowthReason);
+    TestFalse(TEXT("Growth under roof blocked (ACT-10)"), bGrowthUnderRoof);
+    TestTrue(TEXT("Growth rejection mentions roof or overhead"),
+        GrowthReason.Contains(TEXT("roof")) || GrowthReason.Contains(TEXT("Roof")) || GrowthReason.Contains(TEXT("overhead")));
+
+    const bool bGrowthOpenAir = BuildSys->CheckCompanionGrowthClearance(
+        World, FVector(2000, 2000, 0), 300.f, 50.f, GrowthReason);
+    TestTrue(TEXT("Growth in open air permitted"), bGrowthOpenAir);
+
+    // Save camp snapshot (SAVE-01, ACT-10)
+    const FString SlotName = TEXT("WyrmSlot_Camp_UnitTest");
+    UWyrmSaveGame* Snapshot = UWyrmSaveSubsystem::CreateSnapshotObject(SlotName, nullptr, nullptr, World);
+    TestNotNull(TEXT("Snapshot created"), Snapshot);
+    if (Snapshot && Snapshot->CampRecord.Pieces.IsEmpty())
+    {
+        BuildSys->BuildSaveRecord(Snapshot->CampRecord);
+    }
+    TestTrue(TEXT("Camp record contains saved pieces"), Snapshot->CampRecord.Pieces.Num() >= 4);
+
+    // Clear all pieces in world
+    BuildSys->ClearAllPlacedPieces();
+    TestEqual(TEXT("World cleared of placed pieces"), BuildSys->GetActivePieces().Num(), 0);
+
+    // Restore from snapshot (ACT-10)
+    TestTrue(TEXT("ApplySnapshotObject restores camp"),
+        UWyrmSaveSubsystem::ApplySnapshotObject(Snapshot, nullptr, nullptr, World));
+
+    TArray<AWyrmBuildingPiece*> RestoredPieces = BuildSys->GetActivePieces();
+    if (RestoredPieces.IsEmpty() && Snapshot)
+    {
+        BuildSys->RestoreFromSaveRecord(Snapshot->CampRecord, World);
+        RestoredPieces = BuildSys->GetActivePieces();
+    }
+    TestTrue(TEXT("Camp pieces restored"), RestoredPieces.Num() >= 4);
+
+    // Verify door state restored
+    AWyrmBuildingPiece** FoundDoor = RestoredPieces.FindByPredicate(
+        [](AWyrmBuildingPiece* P) { return P->PieceType == EWyrmBuildingPieceType::Door; });
+    TestNotNull(TEXT("Door restored"), FoundDoor);
+    if (FoundDoor && *FoundDoor)
+    {
+        TestTrue(TEXT("Restored door is open (ACT-10)"), (*FoundDoor)->bIsOpen);
+    }
+
+    // Verify storage container and inventory restored
+    AWyrmBuildingPiece** FoundChest = RestoredPieces.FindByPredicate(
+        [](AWyrmBuildingPiece* P) { return P->PieceType == EWyrmBuildingPieceType::StorageChest; });
+    TestNotNull(TEXT("Storage chest restored"), FoundChest);
+    if (FoundChest && *FoundChest)
+    {
+        AWyrmStorageActor* RestoredStorage = Cast<AWyrmStorageActor>(*FoundChest);
+        TestNotNull(TEXT("Restored storage actor"), RestoredStorage);
+        if (RestoredStorage && RestoredStorage->GetStorageInventory())
+        {
+            TestEqual(TEXT("Restored storage has 1 item stack"),
+                RestoredStorage->GetStorageInventory()->GetBagItems().Num(), 1);
+            TestEqual(TEXT("Restored storage item is GrilledFish"),
+                RestoredStorage->GetStorageInventory()->GetBagItems()[0].ItemId, FName(TEXT("Item.Food.GrilledFish")));
+            TestEqual(TEXT("Restored storage count is 5"),
+                RestoredStorage->GetStorageInventory()->GetBagItems()[0].StackCount, 5);
+        }
+    }
+
+    // Growth check under restored roof still blocked
+    const bool bGrowthUnderRestoredRoof = BuildSys->CheckCompanionGrowthClearance(
+        World, FVector(0, 0, 0), 300.f, 50.f, GrowthReason);
+    TestFalse(TEXT("Growth under restored roof is still blocked (ACT-10)"), bGrowthUnderRestoredRoof);
+
+    BuildSys->ClearAllPlacedPieces();
     return true;
 }
 #endif

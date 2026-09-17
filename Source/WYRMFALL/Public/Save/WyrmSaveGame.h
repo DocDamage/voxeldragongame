@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "Inventory/WyrmInventoryTypes.h"
+#include "Building/WyrmBuildingTypes.h"
 #include "Player/WyrmControlTypes.h"
 #include "WyrmSaveGame.generated.h"
 
@@ -144,4 +145,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmTerrainSaveRecord TerrainRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmCampSaveRecord CampRecord;
 };

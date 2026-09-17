@@ -31,17 +31,17 @@ public:
     static bool DeleteSaveSlot(const FString& SlotName);
 
     UFUNCTION(BlueprintCallable, Category="Save")
-    static bool SaveSnapshotToSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr);
+    static bool SaveSnapshotToSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr, UWorld* WorldContext = nullptr);
 
     UFUNCTION(BlueprintCallable, Category="Save")
-    static bool LoadSnapshotFromSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr);
+    static bool LoadSnapshotFromSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr, UWorld* WorldContext = nullptr);
 
     // --- Static snapshot helpers for direct memory or testing ---
     UFUNCTION(BlueprintCallable, Category="Save")
-    static UWyrmSaveGame* CreateSnapshotObject(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr);
+    static UWyrmSaveGame* CreateSnapshotObject(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr, UWorld* WorldContext = nullptr);
 
     UFUNCTION(BlueprintCallable, Category="Save")
-    static bool ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr);
+    static bool ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr, UWorld* WorldContext = nullptr);
 
 private:
     FGuid LastSavedGenerationId;

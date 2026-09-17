@@ -4,7 +4,9 @@
 #include "Combat/WyrmAttributeSet.h"
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Terrain/WyrmGeoForgeAdapter.h"
+#include "Building/WyrmBuildingSubsystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/UObjectIterator.h"
 
 void UWyrmSaveSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -18,7 +20,7 @@ void UWyrmSaveSubsystem::Deinitialize()
 
 bool UWyrmSaveSubsystem::SaveGameSnapshot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor)
 {
-    if (SaveSnapshotToSlot(SlotName, Character, TerrainProviderActor))
+    if (SaveSnapshotToSlot(SlotName, Character, TerrainProviderActor, GetWorld()))
     {
         // Update generation ID if save succeeded
         if (UWyrmSaveGame* Loaded = Cast<UWyrmSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0)))
@@ -37,7 +39,7 @@ bool UWyrmSaveSubsystem::LoadGameSnapshot(const FString& SlotName, AWyrmCharacte
         return false;
     }
 
-    if (LoadSnapshotFromSlot(SlotName, Character, TerrainProviderActor))
+    if (LoadSnapshotFromSlot(SlotName, Character, TerrainProviderActor, GetWorld()))
     {
         if (UWyrmSaveGame* Loaded = Cast<UWyrmSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0)))
         {
@@ -48,14 +50,14 @@ bool UWyrmSaveSubsystem::LoadGameSnapshot(const FString& SlotName, AWyrmCharacte
     return false;
 }
 
-bool UWyrmSaveSubsystem::SaveSnapshotToSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor)
+bool UWyrmSaveSubsystem::SaveSnapshotToSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
     if (SlotName.IsEmpty())
     {
         return false;
     }
 
-    UWyrmSaveGame* SaveObj = CreateSnapshotObject(SlotName, Character, TerrainProviderActor);
+    UWyrmSaveGame* SaveObj = CreateSnapshotObject(SlotName, Character, TerrainProviderActor, WorldContext);
     if (!SaveObj)
     {
         return false;
@@ -64,7 +66,7 @@ bool UWyrmSaveSubsystem::SaveSnapshotToSlot(const FString& SlotName, AWyrmCharac
     return UGameplayStatics::SaveGameToSlot(SaveObj, SlotName, 0);
 }
 
-bool UWyrmSaveSubsystem::LoadSnapshotFromSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor)
+bool UWyrmSaveSubsystem::LoadSnapshotFromSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
     if (SlotName.IsEmpty() || !DoesSaveExist(SlotName))
     {
@@ -77,7 +79,7 @@ bool UWyrmSaveSubsystem::LoadSnapshotFromSlot(const FString& SlotName, AWyrmChar
         return false;
     }
 
-    return ApplySnapshotObject(SaveObj, Character, TerrainProviderActor);
+    return ApplySnapshotObject(SaveObj, Character, TerrainProviderActor, WorldContext);
 }
 
 bool UWyrmSaveSubsystem::DoesSaveExist(const FString& SlotName)
@@ -98,7 +100,7 @@ bool UWyrmSaveSubsystem::DeleteSaveSlot(const FString& SlotName)
     return UGameplayStatics::DeleteGameInSlot(SlotName, 0);
 }
 
-UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor)
+UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
     UWyrmSaveGame* SaveObj = Cast<UWyrmSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UWyrmSaveGame::StaticClass()));
@@ -172,14 +174,120 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->TerrainRecord.ProcessedActionIds = Adapter->ProcessedActionIds.Array();
     }
 
+    // Save placed camp pieces (ACT-10)
+    if (!WorldContext)
+    {
+        if (Character) { WorldContext = Character->GetWorld(); }
+        else if (TerrainProviderActor) { WorldContext = TerrainProviderActor->GetWorld(); }
+    }
+
+    UWyrmBuildingSubsystem* BuildingSub = nullptr;
+    if (WorldContext)
+    {
+        if (UGameInstance* GI = WorldContext->GetGameInstance())
+        {
+            BuildingSub = GI->GetSubsystem<UWyrmBuildingSubsystem>();
+            if (BuildingSub && BuildingSub->GetActivePieces().Num() == 0)
+            {
+                for (TObjectIterator<UWyrmBuildingSubsystem> It; It; ++It)
+                {
+                    if (!It->IsTemplate() && *It != BuildingSub)
+                    {
+                        if (It->GetActivePieces().Num() > 0 && (!WorldContext || It->GetWorldContext() == WorldContext))
+                        {
+                            BuildingSub = *It;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!BuildingSub)
+    {
+        for (TObjectIterator<UWyrmBuildingSubsystem> It; It; ++It)
+        {
+            if (!It->IsTemplate())
+            {
+                if (!WorldContext || It->GetWorldContext() == WorldContext || !BuildingSub)
+                {
+                    BuildingSub = *It;
+                    if (WorldContext && It->GetWorldContext() == WorldContext)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (BuildingSub)
+    {
+        BuildingSub->BuildSaveRecord(SaveObj->CampRecord);
+    }
+
     return SaveObj;
 }
 
-bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor)
+bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
     if (!SaveObj || SaveObj->SchemaVersion != UWyrmSaveGame::CurrentSchemaVersion)
     {
         return false;
+    }
+
+    // Restore placed camp pieces (ACT-10)
+    if (!WorldContext)
+    {
+        if (Character) { WorldContext = Character->GetWorld(); }
+        else if (TerrainProviderActor) { WorldContext = TerrainProviderActor->GetWorld(); }
+    }
+
+    UWyrmBuildingSubsystem* RestoreBuildingSub = nullptr;
+    if (WorldContext)
+    {
+        if (UGameInstance* GI = WorldContext->GetGameInstance())
+        {
+            RestoreBuildingSub = GI->GetSubsystem<UWyrmBuildingSubsystem>();
+            if (RestoreBuildingSub)
+            {
+                for (TObjectIterator<UWyrmBuildingSubsystem> It; It; ++It)
+                {
+                    if (!It->IsTemplate() && *It != RestoreBuildingSub)
+                    {
+                        if (It->GetWorldContext() == WorldContext)
+                        {
+                            RestoreBuildingSub = *It;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (!RestoreBuildingSub)
+    {
+        for (TObjectIterator<UWyrmBuildingSubsystem> It; It; ++It)
+        {
+            if (!It->IsTemplate())
+            {
+                if (!WorldContext || It->GetWorldContext() == WorldContext || !RestoreBuildingSub)
+                {
+                    RestoreBuildingSub = *It;
+                    if (WorldContext && It->GetWorldContext() == WorldContext)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (RestoreBuildingSub)
+    {
+        RestoreBuildingSub->RestoreFromSaveRecord(SaveObj->CampRecord, WorldContext);
     }
 
     // Validate and restore the terrain owner first so a failed terrain payload
