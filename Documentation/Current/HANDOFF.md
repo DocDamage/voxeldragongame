@@ -8,7 +8,7 @@ handoff, and only the packet for the next bounded task.
 
 Repository: https://github.com/DocDamage/voxeldragongame
 
-Branch: `main` (resume at pushed checkpoint `4e80bf2`)
+Branch: `main` (resume at pushed checkpoint `a78aa6f`)
 
 Use `git -c safe.directory="G:/assets/voxel project" ...` for every Git command.
 Do not change global Git settings. Keep editor-generated AndroidFileServer

@@ -11,7 +11,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 
 | Area | Current status | Evidence and boundary |
 |---|---|---|
-| Repository | `main`; pushed checkpoint `4e80bf2` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Repository | `main`; pushed checkpoint `a78aa6f` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
 | Native automation | **PASS: selected 46/46 + Region 01 1/1** | 42 Success + 4 SuccessWithWarnings in `Saved/Automation/Scaffold/index.json`, plus `WYRMFALL.Region01.LandmarksFactsAndPersistence`; native automation is not a gameplay gate by itself |
