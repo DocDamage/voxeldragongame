@@ -16,6 +16,7 @@
 #include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Engine/DamageEvents.h"
+#include "Region/WyrmRegion01Subsystem.h"
 
 AWyrmDragonCharacter::AWyrmDragonCharacter()
 {
@@ -179,6 +180,7 @@ void AWyrmDragonCharacter::SetDragonRole(EWyrmDragonRole NewRole)
     CurrentRole = NewRole;
     if (CurrentRole == EWyrmDragonRole::HostileBoss)
     {
+        bHasBondReceipt = false;
         if (Attributes)
         {
             Attributes->InitMaxHealth(1800.f);
@@ -246,6 +248,21 @@ bool AWyrmDragonCharacter::BondWithHumanoid(AWyrmCharacter* Humanoid)
         return false;
     }
 
+    // REG-07 Consent Sequence: In Region 01, claim must be broken before voluntary bond is permitted
+    if (UWorld* World = GetWorld())
+    {
+        if (UGameInstance* GI = World->GetGameInstance())
+        {
+            if (UWyrmRegion01Subsystem* Region01 = GI->GetSubsystem<UWyrmRegion01Subsystem>())
+            {
+                if (!Region01->HasFact(FName(TEXT("verdance.claim_broken"))))
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
     EnsureAbilitySystemInitialized();
 
     // Role conversion
@@ -277,6 +294,51 @@ bool AWyrmDragonCharacter::BondWithHumanoid(AWyrmCharacter* Humanoid)
     return true;
 }
 
+bool AWyrmDragonCharacter::CanOfferVoluntaryBond(const AActor* Interactor) const
+{
+    if (!Interactor || bHasBondReceipt)
+    {
+        return false;
+    }
+
+    if (CurrentRole != EWyrmDragonRole::DefeatedAlive)
+    {
+        return false;
+    }
+
+    const float DistSq = FVector::DistSquared(GetActorLocation(), Interactor->GetActorLocation());
+    if (DistSq > FMath::Square(500.f))
+    {
+        return false;
+    }
+
+    if (UWorld* World = GetWorld())
+    {
+        if (UGameInstance* GI = World->GetGameInstance())
+        {
+            if (UWyrmRegion01Subsystem* Region01 = GI->GetSubsystem<UWyrmRegion01Subsystem>())
+            {
+                if (!Region01->HasFact(FName(TEXT("verdance.claim_broken"))))
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+bool AWyrmDragonCharacter::InteractVoluntaryBond(AWyrmCharacter* Humanoid)
+{
+    if (!CanOfferVoluntaryBond(Humanoid))
+    {
+        return false;
+    }
+
+    return BondWithHumanoid(Humanoid);
+}
+
 void AWyrmDragonCharacter::SetDragonForm(EWyrmDragonForm NewForm)
 {
     CurrentForm = NewForm;
@@ -291,48 +353,56 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
     if (TargetForm == CurrentForm)
     {
         OutReason = TEXT("Dragon is already in requested form");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (!HasSupportedRigProfile())
     {
         OutReason = FString::Printf(TEXT("Dragon rig '%s' has no validated Heartfold profile"), *DragonId.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (CurrentRole != EWyrmDragonRole::AlliedCompanion)
     {
         OutReason = TEXT("Only allied companion can change form");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (!Attributes || Attributes->GetCurrentHealth() <= 0.f)
     {
         OutReason = TEXT("Dragon must be living to change form");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (CurrentFlightState != EWyrmDragonFlightState::Grounded)
     {
         OutReason = TEXT("Dragon cannot change form while in flight; must be grounded");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (MountedRider.IsValid())
     {
         OutReason = TEXT("Dragon cannot change form while a rider is mounted");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
     if (FormTransitionCooldownRemaining > 0.f)
     {
         OutReason = TEXT("Form transition is on cooldown");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s (Remaining=%.2f)"), *OutReason, FormTransitionCooldownRemaining);
         return false;
     }
 
     if (bIsTransitioningForm)
     {
         OutReason = TEXT("Form transition already in progress");
+        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] CanChangeForm false: %s"), *OutReason);
         return false;
     }
 
@@ -341,8 +411,8 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
         // 3D Volumetric clearance test for True Form capsule (Radius=120, HalfHeight=160)
         // Companion capsule half height is 35. Center of True Form capsule aligns with base:
         // Base Z = CurrentLocation.Z - 35.f. TrueForm Center Z = Base Z + 160.f = CurrentLocation.Z + 125.f
-        // Lift test capsule by a small floor clearance tolerance so ground contact geometry does not register as an obstacle.
-        const float FloorClearanceTolerance = 2.0f;
+        // Lift test capsule by a floor clearance tolerance so ground contact geometry and minor terrain slopes do not register as an obstacle.
+        const float FloorClearanceTolerance = 20.0f;
         FVector TargetCenter = GetActorLocation() + FVector(0.f, 0.f, 125.f + FloorClearanceTolerance);
         FCollisionShape TrueFormCapsule = FCollisionShape::MakeCapsule(120.f, 160.f - FloorClearanceTolerance);
         FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(WyrmDragonFormClearance), false, this);
@@ -372,8 +442,19 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
                     AActor* OverlapActor = Overlap.GetActor();
                     if (OverlapActor && OverlapActor != this && OverlapActor != WaitingHumanoid.Get() && OverlapActor != MountedRider.Get())
                     {
+                        if (Overlap.Component.IsValid() && Overlap.Component->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block)
+                        {
+                            continue;
+                        }
                         bBlocked = true;
                         OutReason = FString::Printf(TEXT("Not enough room for True Form (Blocked by Object: %s)"), *OverlapActor->GetName());
+                        FVector CompLoc = Overlap.Component.IsValid() ? Overlap.Component->GetComponentLocation() : FVector::ZeroVector;
+                        FBoxSphereBounds CompBounds = Overlap.Component.IsValid() ? Overlap.Component->Bounds : FBoxSphereBounds();
+                        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] %s (Actor=%s Class=%s Comp=%s Loc=%s BoxMin=%s BoxMax=%s TargetCenter=%s CapsuleRadius=%.1f CapsuleHalfHeight=%.1f)"),
+                            *OutReason, *OverlapActor->GetName(), *OverlapActor->GetClass()->GetName(),
+                            Overlap.Component.IsValid() ? *Overlap.Component->GetName() : TEXT("None"),
+                            *CompLoc.ToString(), *CompBounds.GetBox().Min.ToString(), *CompBounds.GetBox().Max.ToString(),
+                            *TargetCenter.ToString(), TrueFormCapsule.GetCapsuleRadius(), TrueFormCapsule.GetCapsuleHalfHeight());
                         break;
                     }
                 }
@@ -385,8 +466,13 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
                     AActor* OverlapActor = Overlap.GetActor();
                     if (OverlapActor && OverlapActor != this && OverlapActor != WaitingHumanoid.Get() && OverlapActor != MountedRider.Get())
                     {
+                        if (Overlap.Component.IsValid() && Overlap.Component->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block)
+                        {
+                            continue;
+                        }
                         bBlocked = true;
                         OutReason = FString::Printf(TEXT("Not enough room for True Form (Blocked by Pawn: %s)"), *OverlapActor->GetName());
+                        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] %s (Actor=%s Class=%s Loc=%s)"), *OutReason, *OverlapActor->GetName(), *OverlapActor->GetClass()->GetName(), *OverlapActor->GetActorLocation().ToString());
                         break;
                     }
                 }
@@ -398,8 +484,13 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
                     AActor* OverlapActor = Overlap.GetActor();
                     if (OverlapActor && OverlapActor != this && OverlapActor != WaitingHumanoid.Get() && OverlapActor != MountedRider.Get())
                     {
+                        if (Overlap.Component.IsValid() && Overlap.Component->GetCollisionResponseToChannel(ECC_Pawn) != ECR_Block)
+                        {
+                            continue;
+                        }
                         bBlocked = true;
                         OutReason = FString::Printf(TEXT("Not enough room for True Form (Blocked by Static: %s)"), *OverlapActor->GetName());
+                        UE_LOG(LogTemp, Warning, TEXT("[WyrmDragon] %s (Actor=%s Class=%s Loc=%s)"), *OutReason, *OverlapActor->GetName(), *OverlapActor->GetClass()->GetName(), *OverlapActor->GetActorLocation().ToString());
                         break;
                     }
                 }
@@ -417,6 +508,7 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
     }
 
     OutReason = TEXT("");
+    UE_LOG(LogTemp, Log, TEXT("[WyrmDragon] CanChangeForm TRUE at %s"), *GetActorLocation().ToString());
     return true;
 }
 

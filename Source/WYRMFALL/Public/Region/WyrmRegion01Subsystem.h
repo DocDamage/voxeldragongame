@@ -96,6 +96,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Region 01|Quarry")
     bool RecoverOptionalWageRecord();
 
+    /** Service cache in compact cave ('A Smaller Kind of Strength') commits cache restitution and route unlock. */
+    UFUNCTION(BlueprintCallable, Category="Region 01|Cave")
+    bool RecoverServiceCache();
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Cave")
+    bool IsServiceCacheRecovered() const;
+
     UFUNCTION(BlueprintPure, Category="Region 01|Facts")
     bool HasFact(FName FactId) const;
 

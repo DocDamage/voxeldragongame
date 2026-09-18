@@ -50,10 +50,19 @@ public:
     bool HasBondReceipt() const { return bHasBondReceipt; }
 
     UFUNCTION(BlueprintCallable, Category="Dragon")
+    void ResetBondReceipt() { bHasBondReceipt = false; }
+
+    UFUNCTION(BlueprintCallable, Category="Dragon")
     bool PerformBossDefeat();
 
     UFUNCTION(BlueprintCallable, Category="Dragon")
     bool BondWithHumanoid(AWyrmCharacter* Humanoid);
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Bond")
+    bool CanOfferVoluntaryBond(const AActor* Interactor) const;
+
+    UFUNCTION(BlueprintCallable, Category="Dragon|Bond")
+    bool InteractVoluntaryBond(AWyrmCharacter* Humanoid);
 
     // --- Form & Scale (DRG-01, DRG-03, DRG-08..13) ---
     UFUNCTION(BlueprintPure, Category="Dragon|Form")

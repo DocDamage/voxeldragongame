@@ -39,6 +39,8 @@ namespace WyrmRegion01
     const FName FactReliefResolved(TEXT("relief.resolved"));
     const FName FactHomecomingComplete(TEXT("homecoming.complete"));
     const FName FactWageRecovered(TEXT("wage.recovered"));
+    const FName FactCacheRecovered(TEXT("cache.recovered"));
+    const FName FactCaveServiceUnlocked(TEXT("cave.service_unlocked"));
 }
 
 void UWyrmRegion01Subsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -428,6 +430,25 @@ bool UWyrmRegion01Subsystem::RecordReliefResolved()
 bool UWyrmRegion01Subsystem::RecoverOptionalWageRecord()
 {
     return CommitFact(WyrmRegion01::FactWageRecovered, FName(TEXT("region01.wage.recovered")));
+}
+
+bool UWyrmRegion01Subsystem::RecoverServiceCache()
+{
+    if (!IsBondedDragonAvailable())
+    {
+        return false;
+    }
+    if (!CommitFact(WyrmRegion01::FactCacheRecovered, FName(TEXT("region01.cache.recovered"))))
+    {
+        return false;
+    }
+    EnsureDerivedFact(WyrmRegion01::FactCaveServiceUnlocked, FName(TEXT("region01.cave.service_unlocked")));
+    return true;
+}
+
+bool UWyrmRegion01Subsystem::IsServiceCacheRecovered() const
+{
+    return HasFact(WyrmRegion01::FactCacheRecovered);
 }
 
 bool UWyrmRegion01Subsystem::HasFact(FName FactId) const

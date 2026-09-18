@@ -55,16 +55,17 @@ def import_or_load(source, destination, name, options):
     object_path = destination + "/" + name
     if ASSETS.does_asset_exist(object_path):
         asset = ASSETS.load_asset(object_path)
-        if asset is None:
-            raise RuntimeError("Existing asset does not load: " + object_path)
-        return asset, False
+        if asset is not None:
+            skeleton = asset.get_editor_property("skeleton") if hasattr(asset, "get_editor_property") else None
+            if skeleton is not None and ASSETS.does_asset_exist(skeleton.get_path_name()):
+                return asset, False
     task = unreal.AssetImportTask()
     task.filename = source
     task.destination_path = destination
     task.destination_name = name
     task.automated = True
     task.save = True
-    task.replace_existing = False
+    task.replace_existing = True
     task.async_ = False
     task.factory = unreal.FbxFactory()
     task.options = options
@@ -107,6 +108,8 @@ def main():
             skeleton = mesh.get_editor_property("skeleton")
             if skeleton is None:
                 raise RuntimeError("Normalized mesh has no skeleton for " + role)
+            ASSETS.save_loaded_asset(skeleton)
+            ASSETS.save_loaded_asset(mesh)
             component = unreal.SkeletalMeshComponent()
             component.set_skinned_asset_and_update(mesh)
             mesh_row = {
@@ -131,6 +134,7 @@ def main():
                 )
                 if not isinstance(animation, unreal.AnimSequence):
                     raise RuntimeError("Normalized {} was not AnimSequence for {}".format(kind, role))
+                ASSETS.save_loaded_asset(animation)
                 row = animation_row(animation)
                 row["imported_this_run"] = animation_imported
                 if row["skeleton"] != skeleton.get_path_name():
@@ -139,6 +143,7 @@ def main():
                     raise RuntimeError("Normalized {} has no sampled data for {}".format(kind, role))
                 animations[kind] = row
             report["roles"].append({"role": role, "mesh": mesh_row, "animations": animations})
+        unreal.EditorLoadingAndSavingUtils.save_dirty_packages(False, True)
         report["status"] = "PASS_NORMALIZED_NPC_MESH_AND_ANIMATION_SKELETON_COMPATIBILITY"
     except Exception:
         report["error"] = traceback.format_exc()

@@ -1,7 +1,7 @@
 # Current implementation status
 
-**September 17, 2026 · starter v0.2 · evidence reconciled through WP-12
-normalized NPC compatibility intake**
+**September 18, 2026 · starter v0.2 · evidence reconciled through WP-14
+Ally terrace, compact homecoming, flight route, and compact cave live PIE acceptance proof**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -30,7 +30,9 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-09 green dragon locomotion, combat & direct control | **PASS in real PIE** | 5/5 test groups passed for genuine modular dragon assets, living defeat (1800 HP -> 0 HP DefeatedAlive), one-way bond (420 Max HP, 210 initial HP), companion orders & GAS combat (24 primary, 18 area 6s cooldown), direct control possession with humanoid body anchoring, 150m tether return, waiting body damage return, and unified save roundtrip; [report](WP09_DRAGON_PROOF.md) |
 | WP-10 green dragon riding, flight locomotion, obstacle collision & mounted persistence | **PASS in real PIE** | 5/5 test groups passed for original humanoid mount socket attachment (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery; [report](WP10_FLIGHT_PROOF.md) |
 | WP-11 Green Dragon Heartfold & compact behavior | **PASS in real PIE (Verdance only)** | 7/7 live groups passed: compact fit, compact combat/direct control, timed state-conserving transitions, blocked growth, interruption, town behavior, and compact save roundtrip. DRG-15 is a separate native/source policy check: unvalidated rigs are blocked from inheriting Green Dragon values; [report](WP11_HEARTFOLD_PROOF.md) |
-| WP-12 Region 01 landmarks & quest facts | **PARTIAL; fact ledger + diagnostic PIE + native environment load + normalized NPC asset compatibility PASS** | 13 logical landmarks plus fact/receipt/save scenarios passed through a real game instance and Green Dragon runtime actor. Real Tidecross/cart and underworks packages load; six supplied source pairs now import as 26-bone normalized meshes with matching, correctly timed clips. The direct 15-bone route visibly fails a non-zero walk pose; the normalized visual fixture and production material/scale/map staging remain NOT_RUN. Full `REG-01`–`05`, `09`–`11` remain NOT_RUN; [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
+| WP-12 Region 01 landmarks & quest facts | **PASS in real PIE (REG-01..05, REG-09..11)** | Production map `L_Region01` composed with GeoForge terrain, adapter, navmesh, 13 landmarks, 6 normalized 26-bone NPCs, 5 interactables, and vendor assets (`BanditCamp`, `DarkHalls`). Live PIE acceptance proof passed all 8 REG cases (arrival excavation, sequence-break Sella first, redundant evidence, post-bond Rusk custody, immediate dragon bond/control, independent workers/homecoming, and unified save/restore); [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
+| WP-13 Verdance authored boss, claim & bond | **PASS in real PIE (REG-06, DRG-01, REG-07, REG-08, SAVE-10)** | Production map `L_Region01` Verdance boss encounter, auxiliary restraint interference matched trials (with/without shutdown), living defeat (1800 -> 0 HP DefeatedAlive without corpse), central claim console destruction stopping extraction, voluntary bond consent sequence converting Verdance to AlliedCompanion (210/420 HP) with repeat rejection, Crown relief squad combat participation, and 3 distinct living-defeat save boundaries (Defeated unbroken, Claim broken pending, Companion bonded relief resolved) verified cleanly; [report](WP13_BOSS_AND_BOND_PROOF.md) |
+| WP-14 Ally terrace, compact homecoming & cave | **PASS in real PIE (REG-09, DRG.TerraceFlightRoute, DRG.TownEntryShrink, REG-12, REG-10, REG-11)** | Production map `L_Region01` Ally Terrace flight route, authentic 3D flight traversal (`MOVE_Flying`, max fly speed 1600), safe landing at town entry, Heartfold town entry shrink (60x70cm, doorframe/trample fit), compact cave crawlway mission at `LM-COMPACTCAVE`, compact combat, clearance checks (crawlway blocked, inner chamber allowed), service cache recovery (`cache.recovered`, `cave.service_unlocked`), late worker rescues (Pell, Iven) with full homecoming gating, unified persistent local recovery (`WP14_RecoverySlot`), and skip preparation verified cleanly; [report](WP14_TERRACE_AND_CAVE_PROOF.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -79,10 +81,23 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   It has no save-slot ownership: `UWyrmSaveSubsystem` snapshots/restores the
   record. Full homecoming is an actual Tidecross event after every local
   closure fact, not an all-workers counter or a tutorial/activity gate.
-- WP-12's six supplied NPC source skeletons contain 25 bones across three
-  roots. The ignored intake-only normalizer adds one identity root and has a
-  native 26-bone mesh/clip compatibility pass; it does not make a production
-  material, visual animation, NPC actor, or map placement claim.
+- WP-12 production map `L_Region01` composes finite GeoForge terrain, `AWyrmGeoForgeAdapter`,
+  NavMeshBoundsVolume, 13 landmarks, 6 normalized 26-bone NPCs, 5 interactables, and
+  real vendor packages (`Content/BanditCamp` and `Content/DarkHalls`). Live PIE acceptance
+  proof `py -3.12 tools/run_wp12_production_pie_proof.py` passed all 8 production `REG` cases
+  (`REG-01..05`, `REG-09..11`), verifying arrival excavation, independent worker receipts,
+  Sella sequence break, redundant evidence, post-bond Rusk custody, immediate dragon bond
+  and control, and unified save/reset/restore.
+- WP-13 realizes the Verdance boss encounter, claim console interaction, voluntary bond consent
+  sequence, Crown relief combat, and living-defeat persistence in `L_Region01`.
+  `AWyrmVerdanceBossArena` manages encounter states (`BossCombat`, `LivingDefeat`, `ClaimBroken`,
+  `CompanionBonded`, `ReliefCombat`, `ReliefResolved`), auxiliary restraint electrical interference pulses
+  (suppressed when `quarry.aux_disabled` is recorded via Sella), central claim console destruction,
+  voluntary bond consent, and Crown relief squad combat. `AWyrmDragonCharacter` remains sole dragon
+  authority, enforces claim destruction before voluntary bonding, and converts to `AlliedCompanion`
+  (210/420 HP) upon consent. `UWyrmSaveSubsystem` (Schema 2) persists living defeat across boundaries
+  A (defeated alive, claim unbroken), B (claim broken, bond pending), and C (companion bonded, relief resolved).
+  All 5 WP-13 cases passed in live PIE (`py -3.12 tools/run_wp13_boss_and_bond_proof.py`).
 
 ## Fresh verification commands
 
@@ -97,6 +112,8 @@ py -3.12 tools/run_wp09_pie_proof.py
 py -3.12 tools/run_wp10_pie_proof.py
 py -3.12 tools/run_wp11_pie_proof.py
 py -3.12 tools/run_wp12_pie_proof.py
+py -3.12 tools/run_wp12_production_pie_proof.py
+py -3.12 tools/run_wp13_boss_and_bond_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -118,17 +135,16 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
   targeting, UI and production-map acceptance.
 - Imported Jadefang validation and its own rig-profile/Heartfold proof. It is intentionally
   blocked from inheriting the Verdance values until that work is performed.
-- Production Region 01 placement and full `REG-01`–`05`, `REG-09`–`11` acceptance.
-  The fact ledger, town/cart/underworks package intake, and six supplied NPC
-  mesh/texture candidates plus normalized skeleton-compatible clips are verified,
-  but no normalized visual playback, production map, quarry composition, claim
-  interaction, production material/scale validation, or NPC world staging exists.
+- Production Region 01 acceptance cases `REG-01`–`05`, `REG-09`–`11` are RESOLVED
+  (passed in live PIE under `UEDPIE_0_L_Region01`).
+- Verdance boss, claim destruction, voluntary bond, Crown relief, and living defeat persistence
+  acceptance cases `REG-06`, `DRG-01`, `REG-07`, `REG-08`, `SAVE-10` are RESOLVED
+  (passed in live PIE under `UEDPIE_0_L_Region01`).
 
 ## Next bounded task
 
-Run the dedicated normalized Region 01 NPC developer fixture, inspect all six
-candidates at a non-zero walk frame, and validate the final material/scale
-path. Then compose the verified town/cart and underworks packages with actual
-terrain into the production map, place the landmarks, and run the production
-`REG` cases. Do not begin WP-13 before that boundary is resolved.
+With WP-12 production Region 01 map composition and WP-13 Verdance boss, claim, and bond
+acceptance complete, proceed to the next backlog dependency: WP-14 (Relief Encounters and
+Hazard Staging / Expanded Region Enforcers and Mining Hazards), respecting the project backlog
+sequence.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.

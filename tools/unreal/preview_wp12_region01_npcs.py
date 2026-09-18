@@ -240,12 +240,12 @@ try:
                     set_animation(entry["component"], entry["walk"])
                 stage = 1
                 write_report()
-            elif stage == 1 and elapsed > 11:
-                # Sample a known non-zero walk frame explicitly. Editor
-                # automation does not guarantee that a play-state advances
-                # between Slate ticks, while this verifies the imported pose.
+            elif stage == 1 and elapsed > 10.5:
                 for entry in COMPONENTS:
                     entry["component"].set_position(0.5, False)
+                    entry["component"].play(False)
+                stage = 2
+            elif stage == 2 and elapsed > 11.5:
                 capture(capture_component, target, "walk_front.png")
                 REPORT["status"] = "CAPTURED_REQUIRES_VISUAL_REVIEW"
                 write_report()

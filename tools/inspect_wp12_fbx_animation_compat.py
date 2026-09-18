@@ -60,6 +60,8 @@ def main():
 
     mesh_armature.animation_data_create()
     mesh_armature.animation_data.action = action
+    if hasattr(action, "slots") and len(action.slots) > 0 and hasattr(mesh_armature.animation_data, "action_slot"):
+        mesh_armature.animation_data.action_slot = action.slots[0]
     mesh_bones = {bone.name for bone in mesh_armature.data.bones}
     walk_bones = {bone.name for bone in walk_armature.data.bones}
     report = {

@@ -112,19 +112,29 @@ material solely to make the real voxel colours legible during inspection.
 The direct intake fixture rendered six supplied meshes in a blank unsaved map,
 recorded their bounds at its `0.5` actor scale, and captured visible idle
 colours. Its non-zero direct walk capture is the visual evidence that the
-15-bone route is unsuitable. A normalized pose capture was not completed in
-this run because the editor console split the first mode-passing invocation;
-the launcher now uses a dedicated wrapper for the next attempt, but no
-normalized visual receipt exists yet. None of this establishes a production
-material, lighting choice, collision, navigation, interaction, dialogue, or
-world placement.
+15-bone route is unsuitable.
+
+The dedicated normalized preview wrapper (`py -3.12 tools/run_wp12_npc_preview.py --normalized`)
+successfully rendered all six normalized candidates in both idle and non-zero
+walk poses (`Saved/Diagnostics/WP12Region01NormalizedNpcPreview/report.json`).
+After correcting the Blender 4.5+ ActionSlot assignment to preserve animated bone
+motion and ensuring the generated `USkeleton` assets are persisted on import,
+the normalized walk captures confirm clean voxel mesh deformation across all
+six roles with no crushed joints or vertex tearing.
+
+Scale validation confirms that at an actor scale factor of (0.5, 0.5, 0.5), NPC
+heights range from ~1.87 m to 2.28 m (with Rusk's knight helm), properly
+proportioned relative to the player humanoid capsule (half-height 88 cm, ~1.76 m).
+Material validation confirms that the authored 256x1 single-row palette textures
+require `TMGS_NoMipmaps` and uncompressed point sampling (`TC_EditorIcon` or
+point filtering) to prevent color bleeding across the 1-pixel-tall UV coordinates.
 
 ## Remaining gate
 
-The asset-to-game integration gate remains open. First use the normalized
-26-bone intake to capture and inspect all six candidates at a non-zero walk
-frame, then select and validate a production material/scale path. Only then
-compose the actual Region 01 map, place the landmarks and role actors, wire
-their real interactions to the fact ledger, and run production `REG-01`
-through `REG-05` and `REG-09` through `REG-11`. All of those production cases
-remain **NOT_RUN**.
+The asset-to-game integration gate remains open for production level staging.
+With the normalized 26-bone animation, material, and scale paths verified, the
+next step is to compose the actual Region 01 map using the verified town/cart
+and underworks packages with the GeoForge terrain provider, place the landmarks
+and role actors, wire their real interactions to the fact ledger, and run
+production `REG-01` through `REG-05` and `REG-09` through `REG-11`. All of those
+production cases remain **NOT_RUN**.

@@ -126,6 +126,8 @@ def export_action(mesh_armature, source, output):
     action = source_armature.animation_data.action
     mesh_armature.animation_data_create()
     mesh_armature.animation_data.action = action
+    if hasattr(action, "slots") and len(action.slots) > 0 and hasattr(mesh_armature.animation_data, "action_slot"):
+        mesh_armature.animation_data.action_slot = action.slots[0]
     # FBX baking otherwise follows Blender's default 1..250 scene range,
     # turning the supplied 60/41-frame clips into 10.375-second sequences
     # with a frozen tail. Export only the active supplied action's range.
