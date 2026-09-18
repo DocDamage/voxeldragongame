@@ -76,10 +76,73 @@ public:
     UFUNCTION(BlueprintPure, Category="Combat") UWyrmAttributeSet* GetAttributes() const { return Attributes; }
     UFUNCTION(BlueprintCallable, Category="Combat") bool PerformPrimaryAttack();
     UFUNCTION(BlueprintCallable, Category="Combat") bool PerformSecondaryAttack();
+    UFUNCTION(BlueprintCallable, Category="Combat") bool AttackTarget(AActor* TargetActor);
     UFUNCTION(BlueprintCallable, Category="Combat") bool PerformEvade();
     UFUNCTION(BlueprintCallable, Category="Combat") void GrantCombatAbilities();
     UFUNCTION(BlueprintPure, Category="Combat") EWyrmWeaponFamily GetActiveWeaponFamily() const { return ActiveWeaponFamily; }
     UFUNCTION(BlueprintCallable, Category="Combat") void UpdateActiveWeaponKit();
+
+    // --- Status Reactions & Gating (WP-15) ---
+    UFUNCTION(BlueprintCallable, Category="Combat|Status")
+    void ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude = 1.f);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Status")
+    void ApplyNamedStatusEffect(FName TagName, float DurationSeconds, float Magnitude = 1.f);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Status")
+    void ClearNamedStatusEffect(FName TagName);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Status")
+    void UpdateMovementForStatus();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Status")
+    float GetCurrentSpeed() const;
+
+    UFUNCTION(BlueprintPure, Category="Combat|Status")
+    bool HasMatchingGameplayTag(FName TagName) const;
+
+    // --- Horror Echo Powers (WP-15) ---
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool LearnEcho(FName EchoId);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool EquipEcho(FName EchoId);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void UnequipEcho();
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateEquippedEcho();
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void ActivateRelentlessAdvanceStance(float Duration);
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsEchoUnlocked(FName EchoId) const;
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsEchoEquipped(FName EchoId) const;
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    FName GetEquippedEcho() const { return EquippedEcho; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    const TArray<FName>& GetLearnedEchoes() const { return LearnedEchoes; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsRelentlessAdvanceActive() const { return bRelentlessAdvanceActive; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetRelentlessAdvanceRemainingDuration() const { return RelentlessAdvanceRemainingTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetRelentlessAdvanceRemainingCooldown() const { return RelentlessAdvanceCooldownTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateRelentlessAdvance(FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreEchoState(const TArray<FName>& InLearnedEchoes, FName InEquippedEcho, bool bActive, float RemainingDuration, float RemainingCooldown);
 
     // --- Progression & XP (WP-06) ---
     UFUNCTION(BlueprintCallable, Category="Progression") bool AddExperience(float Amount);
@@ -213,4 +276,19 @@ private:
     FGameplayAbilitySpecHandle PrimaryRangedHandle;
     FGameplayAbilitySpecHandle SecondaryRangedHandle;
     FGameplayAbilitySpecHandle EvadeHandle;
+    FGameplayAbilitySpecHandle RelentlessAdvanceHandle;
+
+    float BaseWalkSpeed = 600.f;
+    float ActiveSlowMagnitude = 0.f;
+    float SlowRemainingTimer = 0.f;
+    float StunRemainingTimer = 0.f;
+    float RootRemainingTimer = 0.f;
+    float StaggerRemainingTimer = 0.f;
+
+    bool bRelentlessAdvanceActive = false;
+    float RelentlessAdvanceRemainingTimer = 0.f;
+    float RelentlessAdvanceCooldownTimer = 0.f;
+
+    TArray<FName> LearnedEchoes;
+    FName EquippedEcho = NAME_None;
 };

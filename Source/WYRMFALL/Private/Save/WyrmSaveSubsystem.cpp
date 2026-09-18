@@ -157,6 +157,13 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.ActiveBuffHealthRegenPerSecond = ActiveBuff.HealthRegenPerSecond;
         SaveObj->CharacterRecord.ActiveBuffPowerBonus = ActiveBuff.PowerBonus;
 
+        // Save Echo state (WP-15)
+        SaveObj->CharacterRecord.LearnedEchoes = Character->GetLearnedEchoes();
+        SaveObj->CharacterRecord.EquippedEcho = Character->GetEquippedEcho();
+        SaveObj->CharacterRecord.bRelentlessAdvanceActive = Character->IsRelentlessAdvanceActive();
+        SaveObj->CharacterRecord.RelentlessAdvanceRemainingDuration = Character->GetRelentlessAdvanceRemainingDuration();
+        SaveObj->CharacterRecord.RelentlessAdvanceRemainingCooldown = Character->GetRelentlessAdvanceRemainingCooldown();
+
         if (Inv)
         {
             SaveObj->InventoryRecord.MaxBagSlots = Inv->MaxBagSlots;
@@ -382,6 +389,14 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         {
             Attrs->SetCurrentFocus(SaveObj->CharacterRecord.Focus);
         }
+
+        // Restore Echo state (WP-15)
+        Character->RestoreEchoState(
+            SaveObj->CharacterRecord.LearnedEchoes,
+            SaveObj->CharacterRecord.EquippedEcho,
+            SaveObj->CharacterRecord.bRelentlessAdvanceActive,
+            SaveObj->CharacterRecord.RelentlessAdvanceRemainingDuration,
+            SaveObj->CharacterRecord.RelentlessAdvanceRemainingCooldown);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)

@@ -282,6 +282,17 @@ def main():
         cave_enemy.set_editor_property("EnemyRole", unreal.WyrmEnemyRole.MELEE_CHASER)
         cave_enemy.configure_for_role(unreal.WyrmEnemyRole.MELEE_CHASER)
 
+    # 14. Counselor Horror Encounter & Practice Target at Silent Landing (WP-15)
+    counselor = actors.spawn_actor_from_class(
+        unreal.WyrmCounselorCharacter, unreal.Vector(3000, -1900, 750))
+    if counselor:
+        counselor.set_actor_label("REG01_Counselor")
+
+    practice_target = actors.spawn_actor_from_class(
+        unreal.WyrmPracticeTarget, unreal.Vector(2900, -2100, 750))
+    if practice_target:
+        practice_target.set_actor_label("REG01_PracticeTarget")
+
     # Save level
     if not levels.save_current_level():
         raise RuntimeError("Failed to save composed Region 01 level.")

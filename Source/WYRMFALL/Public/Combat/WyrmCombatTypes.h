@@ -11,6 +11,16 @@ enum class EWyrmCombatTeam : uint8
     Neutral UMETA(DisplayName="Neutral")
 };
 
+UENUM(BlueprintType)
+enum class EWyrmDamageGeneration : uint8
+{
+    Primary UMETA(DisplayName="Primary"),
+    Periodic UMETA(DisplayName="Periodic"),
+    Reflected UMETA(DisplayName="Reflected"),
+    Repeated UMETA(DisplayName="Repeated"),
+    Summoned UMETA(DisplayName="Summoned")
+};
+
 USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmDamageResult
 {
@@ -33,4 +43,7 @@ struct WYRMFALL_API FWyrmDamageResult
 
     UPROPERTY(BlueprintReadOnly, Category="Combat")
     bool bRejected = false;
+
+    UPROPERTY(BlueprintReadOnly, Category="Combat")
+    EWyrmDamageGeneration Generation = EWyrmDamageGeneration::Primary;
 };

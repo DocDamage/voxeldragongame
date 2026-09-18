@@ -1,7 +1,7 @@
 # Current implementation status
 
-**September 18, 2026 · starter v0.2 · evidence reconciled through WP-14
-Ally terrace, compact homecoming, flight route, and compact cave live PIE acceptance proof**
+**September 18, 2026 · starter v0.2 · evidence reconciled through WP-15
+Echo power manifestation / Relentless Advance and combat evolution live PIE acceptance proof**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -33,6 +33,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-12 Region 01 landmarks & quest facts | **PASS in real PIE (REG-01..05, REG-09..11)** | Production map `L_Region01` composed with GeoForge terrain, adapter, navmesh, 13 landmarks, 6 normalized 26-bone NPCs, 5 interactables, and vendor assets (`BanditCamp`, `DarkHalls`). Live PIE acceptance proof passed all 8 REG cases (arrival excavation, sequence-break Sella first, redundant evidence, post-bond Rusk custody, immediate dragon bond/control, independent workers/homecoming, and unified save/restore); [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
 | WP-13 Verdance authored boss, claim & bond | **PASS in real PIE (REG-06, DRG-01, REG-07, REG-08, SAVE-10)** | Production map `L_Region01` Verdance boss encounter, auxiliary restraint interference matched trials (with/without shutdown), living defeat (1800 -> 0 HP DefeatedAlive without corpse), central claim console destruction stopping extraction, voluntary bond consent sequence converting Verdance to AlliedCompanion (210/420 HP) with repeat rejection, Crown relief squad combat participation, and 3 distinct living-defeat save boundaries (Defeated unbroken, Claim broken pending, Companion bonded relief resolved) verified cleanly; [report](WP13_BOSS_AND_BOND_PROOF.md) |
 | WP-14 Ally terrace, compact homecoming & cave | **PASS in real PIE (REG-09, DRG.TerraceFlightRoute, DRG.TownEntryShrink, REG-12, REG-10, REG-11)** | Production map `L_Region01` Ally Terrace flight route, authentic 3D flight traversal (`MOVE_Flying`, max fly speed 1600), safe landing at town entry, Heartfold town entry shrink (60x70cm, doorframe/trample fit), compact cave crawlway mission at `LM-COMPACTCAVE`, compact combat, clearance checks (crawlway blocked, inner chamber allowed), service cache recovery (`cache.recovered`, `cave.service_unlocked`), late worker rescues (Pell, Iven) with full homecoming gating, unified persistent local recovery (`WP14_RecoverySlot`), and skip preparation verified cleanly; [report](WP14_TERRACE_AND_CAVE_PROOF.md) |
+| WP-15 Echo power manifestation & Counselor | **PASS in real PIE (ECHO-01..06, REG-13)** | Production map `L_Region01` Counselor encounter at Silent Landing, stance demonstration/resistances (slow suppressed to base speed, stagger resisted, damage taken normally, hard stun stops movement, rooted activation permitted without cleansing), living defeat & permanent `echo.relentless_advance` unlock, GAS Focus (30)/duration (6s)/cooldown (18s) commit, cooldown retention on unequip, full bag safety with preserved loot claim, optional skip verification, dragon combat support, 75% ability damage reduction ceiling, and Quiet Water horror separation verified cleanly; [report](WP15_ECHO_PROOF.md) |
 | Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
 
 ## Important implementation facts
@@ -98,6 +99,21 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   (210/420 HP) upon consent. `UWyrmSaveSubsystem` (Schema 2) persists living defeat across boundaries
   A (defeated alive, claim unbroken), B (claim broken, bond pending), and C (companion bonded, relief resolved).
   All 5 WP-13 cases passed in live PIE (`py -3.12 tools/run_wp13_boss_and_bond_proof.py`).
+- WP-14 realizes the post-bond Ally Terrace gameplay route, authentic 3D flight traversal across the canyon,
+  town entry Heartfold compact shrink into Tidecross (60cm x 70cm, doorframe/citizen clearance),
+  compact cave crawlway mission at `LM-COMPACTCAVE`, compact combat, clearance checks (crawlway blocked,
+  inner chamber allowed), service cache recovery (`cache.recovered`, `cave.service_unlocked`), late worker
+  rescues (Pell, Iven) with full homecoming gating, unified persistent local recovery (`WP14_RecoverySlot`),
+  and skip preparation verified cleanly (`py -3.12 tools/run_wp14_terrace_cave_proof.py`).
+- WP-15 realizes the first permanent usable horror power ("Echo: Relentless Advance") unlocked from the
+  Counselor encounter at Silent Landing. Authoritative GAS abilities `UWyrmGameplayAbility` and
+  `UWyrmRelentlessAdvanceAbility` commit 30 Focus, 6.0s duration, and 18.0s cooldown together.
+  Stance suppresses movement slows to base walk speed without granting a speed boost, resists light/medium
+  stagger, takes damage normally (no iframes/healing), respects hard stuns, and allows rooted activation
+  without root cleansing. `UWyrmAttributeSet` enforces an explicit 75% ceiling on ability damage reduction.
+  Full bags safely unlock the Echo outside inventory, with Counselor preserving ordinary loot until bag
+  space opens. Replaying resolution strictly rejects duplicate grants. Quiet Water fishing remains
+  peaceful and separated (> 3800 units away). All 7 WP-15 cases passed in live PIE (`py -3.12 tools/run_wp15_echo_proof.py`).
 
 ## Fresh verification commands
 
@@ -114,6 +130,8 @@ py -3.12 tools/run_wp11_pie_proof.py
 py -3.12 tools/run_wp12_pie_proof.py
 py -3.12 tools/run_wp12_production_pie_proof.py
 py -3.12 tools/run_wp13_boss_and_bond_proof.py
+py -3.12 tools/run_wp14_terrace_cave_proof.py
+py -3.12 tools/run_wp15_echo_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -140,11 +158,16 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Verdance boss, claim destruction, voluntary bond, Crown relief, and living defeat persistence
   acceptance cases `REG-06`, `DRG-01`, `REG-07`, `REG-08`, `SAVE-10` are RESOLVED
   (passed in live PIE under `UEDPIE_0_L_Region01`).
+- Ally Terrace, flight route, town entry shrink, compact cave, and local recovery acceptance
+  cases `DRG.TerraceFlightRoute`, `DRG.TownEntryShrink`, `REG-12` are RESOLVED
+  (passed in live PIE under `UEDPIE_0_L_Region01`).
+- Echo power manifestation and Counselor acceptance cases `ECHO-01` through `ECHO-06` and `REG-13`
+  are RESOLVED (passed in live PIE under `UEDPIE_0_L_Region01`).
 
 ## Next bounded task
 
-With WP-12 production Region 01 map composition and WP-13 Verdance boss, claim, and bond
-acceptance complete, proceed to the next backlog dependency: WP-14 (Relief Encounters and
+With WP-15 Echo power manifestation, Counselor encounter, GAS authority, full bag safety,
+and horror separation complete, proceed to the next backlog dependency: WP-16 (Relief Encounters and
 Hazard Staging / Expanded Region Enforcers and Mining Hazards), respecting the project backlog
 sequence.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.

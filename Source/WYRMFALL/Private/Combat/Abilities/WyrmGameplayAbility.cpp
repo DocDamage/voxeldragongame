@@ -64,7 +64,7 @@ void UWyrmGameplayAbility::ApplyCost(const FGameplayAbilitySpecHandle Handle, co
     if (Set)
     {
         const float NewFocus = FMath::Max(0.f, Set->GetFocus() - FocusCost);
-        Set->SetFocus(NewFocus);
+        Set->SetCurrentFocus(NewFocus);
     }
 }
 
@@ -78,6 +78,19 @@ const FGameplayTagContainer* UWyrmGameplayAbility::GetCooldownTags() const
     return &TempCooldownTags;
 }
 
+bool UWyrmGameplayAbility::CheckCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags) const
+{
+    const FGameplayTagContainer* CDTags = GetCooldownTags();
+    if (CDTags && CDTags->Num() > 0 && ActorInfo && ActorInfo->AbilitySystemComponent.IsValid())
+    {
+        if (ActorInfo->AbilitySystemComponent->HasAnyMatchingGameplayTags(*CDTags))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 
 void UWyrmGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const
@@ -85,6 +98,11 @@ void UWyrmGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle
     if (CooldownDuration <= 0.f || !CooldownTag.IsValid() || !ActorInfo || !ActorInfo->AbilitySystemComponent.IsValid())
     {
         return;
+    }
+
+    if (!ActorInfo->AbilitySystemComponent->HasMatchingGameplayTag(CooldownTag))
+    {
+        ActorInfo->AbilitySystemComponent->AddLooseGameplayTag(CooldownTag);
     }
 
     UGameplayEffect* CooldownGE = NewObject<UGameplayEffect>();

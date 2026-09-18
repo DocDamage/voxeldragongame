@@ -79,6 +79,22 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float ActiveBuffPowerBonus = 0.f;
+
+    // --- Horror Echo State (WP-15) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    TArray<FName> LearnedEchoes;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName EquippedEcho = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bRelentlessAdvanceActive = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float RelentlessAdvanceRemainingDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float RelentlessAdvanceRemainingCooldown = 0.f;
 };
 
 USTRUCT(BlueprintType)

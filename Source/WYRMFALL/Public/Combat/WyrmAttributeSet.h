@@ -77,6 +77,9 @@ public:
     UFUNCTION(BlueprintPure, Category="Combat") float GetCurrentShield() const { return GetShield(); }
     UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentShield(float NewVal);
 
+    UFUNCTION(BlueprintPure, Category="Combat") float GetCurrentIncomingDamage() const { return GetIncomingDamage(); }
+    UFUNCTION(BlueprintCallable, Category="Combat") void SetCurrentIncomingDamage(float NewVal) { SetIncomingDamage(NewVal); }
+
     // --- Attribute Lifecycle ---
     virtual void PreAttributeBaseChange(const FGameplayAttribute& Attribute, float& NewValue) const override;
     virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
@@ -92,6 +95,12 @@ public:
 
     UFUNCTION(BlueprintPure, Category="Combat")
     static float CalculateMitigatedDamage(float InRawDamage, float InArmor, float InAttackerLevel);
+
+    UFUNCTION(BlueprintPure, Category="Combat")
+    static float CalculateMitigatedDamageWithAbilityReduction(float InRawDamage, float InArmor, float InAttackerLevel, float InAbilityReductionPercent);
+
+    UFUNCTION(BlueprintPure, Category="Combat")
+    static float GetMaxAbilityDamageReductionPercent() { return 0.75f; } // 75% explicit cap per Section 9
 
     UFUNCTION(BlueprintPure, Category="Combat")
     static float CalculateMaxHealthForLevel(float InLevel);

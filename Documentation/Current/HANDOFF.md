@@ -61,6 +61,15 @@ settings out of commits.
   - `REG-12.CompactCave` ("A Smaller Kind of Strength" at `LM-COMPACTCAVE` `1300, -1500, 888`): humanoid staged safely outside cave entrance; player transfers direct control to compact Verdance; compact dragon navigates low crawlway tunnel beneath low ceiling obstacle (`StaticMeshActor` at `1500, -1500, 950`, scaled `2.0, 2.0, 0.5`); defeats cave crawler enemy with compact attacks (9 primary, 6 area sweep); growth check blocked under low crawlway ceiling (`can_change_form(TrueForm)` rejected); wide inner chamber growth check succeeds (`can_change_form(TrueForm)` succeeds); service cache interactable interacted with to commit `cache.recovered` and `cave.service_unlocked` in `UWyrmRegion01Subsystem`; control returned cleanly to staged humanoid waiting outside cave without teleporting through pet hole.
   - `REG-10.PersistentLocalRecovery`: unified save/load roundtrip via `UWyrmSaveSubsystem` (Schema 2) verifying persistence of homecoming, cache recovery, camp piece, wage recovery, and dragon companion state without duplicate rewards or world regeneration.
   - `REG-11.SkipPreparation`: verifies that main quest progression requires zero optional activity/cave facts.
+- WP-15 is **PASS in real PIE (ECHO-01..06, REG-13)**:
+  `Content/WYRMFALL/World/Regions/L_Region01.umap` Counselor horror encounter at Silent Landing, Relentless Advance stance demonstration & resistances (slow suppressed to base walk speed, stagger resisted, damage taken normally, hard stun stops movement, rooted activation permitted without cleansing), living defeat & permanent `echo.relentless_advance` unlock, GAS Focus (30)/duration (6s)/cooldown (18s) commit, cooldown retention on unequip, full-bag safety & preserved loot claim, optional skip verification, dragon combat support, 75% ability damage reduction ceiling, and Quiet Water horror separation verified in live PIE under `UEDPIE_0_L_Region01` via `py -3.12 tools/run_wp15_echo_proof.py`:
+  - `ECHO-01.RealCounselorReward`: Counselor enters Relentless Advance stance, demonstrates slow resistance (maintains 450 cm/s), takes damage normally when attacked, strikes player for 14.0 damage, defeated at 0 HP without corpse/ragdoll, permanently unlocks and equips `Echo: Relentless Advance`, grants `Unlock.Echo.RelentlessAdvance`, records `echo.relentless_advance` fact in `UWyrmRegion01Subsystem`, and delivers ordinary loot (`Item_CounselorShard`) to player inventory.
+  - `ECHO-02.RelentlessStatuses`: player slows to 225 cm/s, activates Relentless Advance to restore base walk speed (450 cm/s) with zero speed boost while slow timer continues running; resists light/medium stagger (`State.Combat.Stagger`); takes normal damage when struck; hard stun (`State.Combat.Stun`) halts movement completely; rooted activation (`State.Combat.Root`) is permitted by contract but does not cleanse root or restore movement until root expires.
+  - `ECHO-03.RelentlessFailureAndTime`: activation fails with zero Focus spend when Focus < 30 or during control transition (`State.Control.Transition`); valid activation authoritatively commits 30 Focus cost, 6.0s duration, and 18.0s cooldown together via GAS; subsequent activation while on cooldown is rejected; unequipping the Echo retains cooldown without refund or reset.
+  - `ECHO-04.FullBagAndDoubleOutcome`: player inventory filled completely (10/10 slots); encounter resolution succeeds and unlocks Echo outside bag storage; ordinary loot safely preserved in `counselor.preserved_loot`; replaying resolution callback returns False (strict idempotency); freeing 1 bag slot allows clean claim of preserved loot.
+  - `ECHO-05.OptionalSkipAndDragonSupport`: full homecoming ready with zero Echo/Counselor facts required; bonded dragon Verdance moves to Silent Landing and attacks Counselor for 24.0 damage; Counselor at Silent Landing is 3842 units away from Mara at Quiet Water, ensuring zero cross-encounter interference.
+  - `ECHO-06.ProcCap`: `UWyrmAttributeSet` returns 0.75 for max ability damage reduction; 90% requested reduction is clamped to 75% (100 raw damage mitigated to 25.0); Relentless Advance has zero offensive damage procs; secondary/reflected damage cannot recursively trigger Echoes.
+  - `REG-13.HorrorSeparation`: peaceful fishing lesson at Quiet Water without horror combat triggers; deliberate traversal to Silent Landing and landmark visit recorded after homecoming; practice target slow triggered and tested; safe retreat to town entry with normal speed restored.
 
 Evidence:
 
@@ -86,6 +95,7 @@ Evidence:
 - `Saved/Diagnostics/WP12_production_pie_proof.json`
 - `Saved/Diagnostics/WP13_boss_and_bond_proof.json`
 - `Saved/Diagnostics/WP14_terrace_cave_proof.json`
+- `Saved/Diagnostics/WP15_echo_proof.json`
 - `Saved/Automation/Region01/index.json`
 - [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md)
 - [WP-06 report](WP06_PROGRESSION_PROOF.md)
@@ -97,6 +107,7 @@ Evidence:
 - [WP-12 report](WP12_REGION01_PROOF.md)
 - [WP-13 report](WP13_BOSS_AND_BOND_PROOF.md)
 - [WP-14 report](WP14_TERRACE_AND_CAVE_PROOF.md)
+- [WP-15 report](WP15_ECHO_PROOF.md)
 
 ## Verification corrections
 
@@ -133,6 +144,12 @@ Evidence:
 - In Unreal Engine Python reflection for `can_change_form`, a successful form change returns the empty string `""` while a blocked change returns `None`; probes check `res is not None`.
 - In `compose_wp12_region01_map.py`, all existing level actors are cleared prior to spawning to guarantee clean idempotent composition and prevent duplicate actors.
 - In `UWyrmSaveSubsystem`, `SaveSnapshotToSlot` and `LoadSnapshotFromSlot` are static methods on the class invoked as `unreal.WyrmSaveSubsystem.save_snapshot_to_slot(...)`.
+- In `UWyrmGameplayAbility::ApplyCooldown`, loose cooldown tag is added immediately to the ASC and committed via GAS GameplayEffect; `Tick` and `RestoreEchoState` clean up both loose cooldown tags and active gameplay effects when cooldown expires or resets.
+- In `AWyrmCharacter::ClearNamedStatusEffect`, clearing a named tag now removes both loose tags and granted gameplay effects, and resets the corresponding character status timers (`SlowRemainingTimer`, `RootRemainingTimer`, `StunRemainingTimer`, `StaggerRemainingTimer`, `RelentlessAdvanceCooldownTimer`).
+- In `AWyrmCharacter::ApplyStatusEffect`, custom control tags (such as `State.Control.Transition`) are safely preserved as loose tags on the ASC via fallback branch.
+- In `UWyrmAttributeSet`, added `GetMaxAbilityDamageReductionPercent()` returning an explicit 0.75 ceiling, and `CalculateMitigatedDamageWithAbilityReduction` clamping requested ability damage reduction to 75% before physical armor mitigation.
+- In `UWyrmFishingComponent::StartFishing`, authoritative state checking evaluates `is_fishing_active()` directly on the component.
+- In `UWyrmRegion01Subsystem`, `VisitLandmark("LM-SILENTLANDING")` enforces homecoming completion prerequisites (`IsHomecomingComplete()`).
 
 ## Boundaries
 
@@ -143,13 +160,14 @@ Evidence:
 - WP-12 production Region 01 map placement, composition, and all 8 REG acceptance cases (`REG-01`–`05`, `REG-09`–`11`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - WP-13 Verdance authored boss, claim, voluntary bond consent sequence, Crown relief combat, and living-defeat persistence boundaries (`REG-06`, `DRG-01`, `REG-07`, `REG-08`, `SAVE-10`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - WP-14 Ally Terrace flight route, town entry Heartfold shrink, compact cave ("A Smaller Kind of Strength"), late worker rescues with homecoming gating, persistent local recovery, and skip preparation (`REG-09`, `DRG.TerraceFlightRoute`, `DRG.TownEntryShrink`, `REG-12`, `REG-10`, `REG-11`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
+- WP-15 Echo power manifestation, Counselor encounter, GAS authority, full bag safety, and horror separation acceptance cases (`ECHO-01`–`06`, `REG-13`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - `py -3.12 tools/wyrm.py report` is stale because its old onboarding receipt predates the current source and `Saved/Diagnostics/doctor.json` is absent. Do not use it as current proof.
 
 ## Next bounded task
 
-With WP-12, WP-13, and WP-14 complete in live PIE in production map `L_Region01`:
+With WP-12, WP-13, WP-14, and WP-15 complete in live PIE in production map `L_Region01`:
 Proceed to the next backlog dependency:
-WP-15 (Echo Power Manifestation / Relentless Advance and Combat Evolution),
+WP-16 (Relief Encounters and Hazard Staging / Expanded Region Enforcers and Mining Hazards),
 respecting the project backlog sequence.
 Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
 

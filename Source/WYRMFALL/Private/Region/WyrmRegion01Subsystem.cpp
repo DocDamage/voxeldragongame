@@ -634,3 +634,13 @@ void UWyrmRegion01Subsystem::NormalizeRestoredState()
         });
     }
 }
+
+bool UWyrmRegion01Subsystem::RecordEchoRelentlessAdvance()
+{
+    return CommitFact(FName(TEXT("echo.relentless_advance")), FName(TEXT("region01.echo.relentless_advance")));
+}
+
+bool UWyrmRegion01Subsystem::IsEchoRelentlessAdvanceUnlocked() const
+{
+    return HasFact(FName(TEXT("echo.relentless_advance")));
+}

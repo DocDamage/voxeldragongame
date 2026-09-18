@@ -4,6 +4,7 @@
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Combat/Abilities/WyrmRangedAttackAbility.h"
 #include "Combat/Abilities/WyrmEvadeAbility.h"
+#include "Combat/Abilities/WyrmRelentlessAdvanceAbility.h"
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Activities/WyrmFishingComponent.h"
 #include "Camera/CameraComponent.h"
@@ -11,6 +12,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameplayTagsManager.h"
 #include "MuCO/CustomizableSkeletalComponent.h"
 #include "MuCO/CustomizableObject.h"
 #include "MuCO/CustomizableObjectInstance.h"
@@ -26,7 +28,8 @@ AWyrmCharacter::AWyrmCharacter()
     bUseControllerRotationYaw = false;
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
-    GetCharacterMovement()->MaxWalkSpeed = 450.f; // development-only tuning
+    BaseWalkSpeed = 450.f;
+    GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed; // development-only tuning
     AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilitySystem"));
     Attributes = CreateDefaultSubobject<UWyrmAttributeSet>(TEXT("Attributes"));
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -153,6 +156,112 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
         {
             ClearFoodBuff();
         }
+    }
+
+    // Status effect and Echo timers (WP-15)
+    bool bNeedsMovementUpdate = false;
+
+    if (SlowRemainingTimer > 0.f)
+    {
+        SlowRemainingTimer -= DeltaSeconds;
+        if (SlowRemainingTimer <= 0.f)
+        {
+            SlowRemainingTimer = 0.f;
+            ActiveSlowMagnitude = 0.f;
+            bNeedsMovementUpdate = true;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag SlowTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Slow")), false);
+                if (SlowTag.IsValid()) { AbilitySystem->RemoveLooseGameplayTag(SlowTag); }
+            }
+        }
+    }
+
+    if (RootRemainingTimer > 0.f)
+    {
+        RootRemainingTimer -= DeltaSeconds;
+        if (RootRemainingTimer <= 0.f)
+        {
+            RootRemainingTimer = 0.f;
+            bNeedsMovementUpdate = true;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag RootTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Root")), false);
+                if (RootTag.IsValid()) { AbilitySystem->RemoveLooseGameplayTag(RootTag); }
+            }
+        }
+    }
+
+    if (StunRemainingTimer > 0.f)
+    {
+        StunRemainingTimer -= DeltaSeconds;
+        if (StunRemainingTimer <= 0.f)
+        {
+            StunRemainingTimer = 0.f;
+            bNeedsMovementUpdate = true;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag StunTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Stun")), false);
+                if (StunTag.IsValid()) { AbilitySystem->RemoveLooseGameplayTag(StunTag); }
+            }
+        }
+    }
+
+    if (StaggerRemainingTimer > 0.f)
+    {
+        StaggerRemainingTimer -= DeltaSeconds;
+        if (StaggerRemainingTimer <= 0.f)
+        {
+            StaggerRemainingTimer = 0.f;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag StaggerTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Stagger")), false);
+                if (StaggerTag.IsValid()) { AbilitySystem->RemoveLooseGameplayTag(StaggerTag); }
+            }
+        }
+    }
+
+    if (bRelentlessAdvanceActive)
+    {
+        RelentlessAdvanceRemainingTimer -= DeltaSeconds;
+        if (RelentlessAdvanceRemainingTimer <= 0.f)
+        {
+            RelentlessAdvanceRemainingTimer = 0.f;
+            bRelentlessAdvanceActive = false;
+            bNeedsMovementUpdate = true;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag RelentlessTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.RelentlessAdvance")), false);
+                if (RelentlessTag.IsValid()) { AbilitySystem->RemoveLooseGameplayTag(RelentlessTag); }
+            }
+        }
+    }
+
+    if (RelentlessAdvanceCooldownTimer > 0.f)
+    {
+        RelentlessAdvanceCooldownTimer = FMath::Max(0.f, RelentlessAdvanceCooldownTimer - DeltaSeconds);
+        if (RelentlessAdvanceCooldownTimer <= 0.f)
+        {
+            RelentlessAdvanceCooldownTimer = 0.f;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.RelentlessAdvance")), false);
+                if (CooldownTag.IsValid())
+                {
+                    if (AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+                    {
+                        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                    }
+                    FGameplayTagContainer CDContainer(CooldownTag);
+                    AbilitySystem->RemoveActiveEffectsWithGrantedTags(CDContainer);
+                }
+            }
+        }
+    }
+
+    if (bNeedsMovementUpdate)
+    {
+        UpdateMovementForStatus();
     }
 
 #if !UE_BUILD_SHIPPING
@@ -423,6 +532,24 @@ bool AWyrmCharacter::PerformSecondaryAttack()
     return SecondaryMeleeHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryMeleeHandle);
 }
 
+bool AWyrmCharacter::AttackTarget(AActor* TargetActor)
+{
+    if (!TargetActor || !AbilitySystem || !Attributes)
+    {
+        return false;
+    }
+
+    IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(TargetActor);
+    UAbilitySystemComponent* TargetASC = TargetASI ? TargetASI->GetAbilitySystemComponent() : nullptr;
+    if (!TargetASC)
+    {
+        return false;
+    }
+
+    const float RawDamage = UWyrmAttributeSet::CalculateRawDamage(10.f, Attributes->GetPower(), 0.5f);
+    return UWyrmMeleeAttackAbility::ApplyDamageEffect(AbilitySystem, TargetASC, RawDamage);
+}
+
 bool AWyrmCharacter::PerformEvade()
 {
     if (bMovementLocked || !AbilitySystem || !EvadeHandle.IsValid())
@@ -668,4 +795,403 @@ void AWyrmCharacter::HandleHealthChanged(const FOnAttributeChangeData& Data)
         float DamageTaken = Data.OldValue - Data.NewValue;
         OnCharacterDamaged.Broadcast(DamageTaken);
     }
+}
+
+// --- Status Reactions & Gating (WP-15) ---
+
+void AWyrmCharacter::ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude)
+{
+    if (Attributes && Attributes->GetHealth() <= 0.f)
+    {
+        return;
+    }
+
+    static const FGameplayTag SlowTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Slow")), false);
+    static const FGameplayTag RootTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Root")), false);
+    static const FGameplayTag StunTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Stun")), false);
+    static const FGameplayTag StaggerTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.Stagger")), false);
+
+    if (StatusTag == SlowTag)
+    {
+        ActiveSlowMagnitude = FMath::Max(ActiveSlowMagnitude, Magnitude);
+        SlowRemainingTimer = FMath::Max(SlowRemainingTimer, DurationSeconds);
+        if (AbilitySystem && SlowTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(SlowTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(SlowTag);
+        }
+    }
+    else if (StatusTag == RootTag)
+    {
+        RootRemainingTimer = FMath::Max(RootRemainingTimer, DurationSeconds);
+        if (AbilitySystem && RootTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(RootTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(RootTag);
+        }
+    }
+    else if (StatusTag == StunTag)
+    {
+        StunRemainingTimer = FMath::Max(StunRemainingTimer, DurationSeconds);
+        if (AbilitySystem && StunTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(StunTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(StunTag);
+        }
+    }
+    else if (StatusTag == StaggerTag)
+    {
+        // Relentless Advance resists light/medium stagger reactions (Section 7)
+        if (!bRelentlessAdvanceActive)
+        {
+            StaggerRemainingTimer = FMath::Max(StaggerRemainingTimer, DurationSeconds);
+            if (AbilitySystem && StaggerTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(StaggerTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(StaggerTag);
+            }
+        }
+    }
+    else
+    {
+        // Fallback for custom or control tags (e.g. State.Control.Transition)
+        if (AbilitySystem && StatusTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(StatusTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(StatusTag);
+        }
+    }
+
+    UpdateMovementForStatus();
+}
+
+void AWyrmCharacter::ApplyNamedStatusEffect(FName TagName, float DurationSeconds, float Magnitude)
+{
+    const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName, false);
+    if (Tag.IsValid())
+    {
+        ApplyStatusEffect(Tag, DurationSeconds, Magnitude);
+    }
+}
+
+void AWyrmCharacter::ClearNamedStatusEffect(FName TagName)
+{
+    const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName, false);
+    if (Tag.IsValid() && AbilitySystem)
+    {
+        if (AbilitySystem->HasMatchingGameplayTag(Tag))
+        {
+            AbilitySystem->RemoveLooseGameplayTag(Tag);
+        }
+        FGameplayTagContainer TagContainer(Tag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(TagContainer);
+    }
+
+    if (TagName == FName(TEXT("State.Combat.Slow")))
+    {
+        SlowRemainingTimer = 0.f;
+        ActiveSlowMagnitude = 0.f;
+    }
+    else if (TagName == FName(TEXT("State.Combat.Root")))
+    {
+        RootRemainingTimer = 0.f;
+    }
+    else if (TagName == FName(TEXT("State.Combat.Stun")))
+    {
+        StunRemainingTimer = 0.f;
+    }
+    else if (TagName == FName(TEXT("State.Combat.Stagger")))
+    {
+        StaggerRemainingTimer = 0.f;
+    }
+    else if (TagName == FName(TEXT("State.Combat.RelentlessAdvance")))
+    {
+        bRelentlessAdvanceActive = false;
+        RelentlessAdvanceRemainingTimer = 0.f;
+    }
+    else if (TagName == FName(TEXT("Cooldown.Echo.RelentlessAdvance")))
+    {
+        RelentlessAdvanceCooldownTimer = 0.f;
+    }
+
+    UpdateMovementForStatus();
+}
+
+void AWyrmCharacter::UpdateMovementForStatus()
+{
+    if (!GetCharacterMovement())
+    {
+        return;
+    }
+
+    const bool bDead = (Attributes && Attributes->GetHealth() <= 0.f);
+    if (bDead || bMovementLocked || StunRemainingTimer > 0.f || RootRemainingTimer > 0.f)
+    {
+        GetCharacterMovement()->MaxWalkSpeed = 0.f;
+    }
+    else if (bRelentlessAdvanceActive)
+    {
+        // Suppress movement slows during active Relentless Advance (Section 7)
+        // No speed boost: capped at BaseWalkSpeed.
+        GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+    }
+    else if (SlowRemainingTimer > 0.f && ActiveSlowMagnitude > 0.f)
+    {
+        const float Multiplier = FMath::Clamp(1.0f - ActiveSlowMagnitude, 0.1f, 1.0f);
+        GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed * Multiplier;
+    }
+    else
+    {
+        GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+    }
+}
+
+float AWyrmCharacter::GetCurrentSpeed() const
+{
+    return GetCharacterMovement() ? GetCharacterMovement()->MaxWalkSpeed : 0.f;
+}
+
+bool AWyrmCharacter::HasMatchingGameplayTag(FName TagName) const
+{
+    if (!AbilitySystem)
+    {
+        return false;
+    }
+    const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TagName, false);
+    return Tag.IsValid() && AbilitySystem->HasMatchingGameplayTag(Tag);
+}
+
+// --- Horror Echo Powers (WP-15) ---
+
+bool AWyrmCharacter::LearnEcho(FName EchoId)
+{
+    if (EchoId.IsNone())
+    {
+        return false;
+    }
+
+    if (!LearnedEchoes.Contains(EchoId))
+    {
+        LearnedEchoes.Add(EchoId);
+    }
+
+    if (EchoId == FName(TEXT("RelentlessAdvance")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.RelentlessAdvance")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            }
+
+            if (!RelentlessAdvanceHandle.IsValid())
+            {
+                RelentlessAdvanceHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmRelentlessAdvanceAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
+
+    // Auto-equip if first echo and none equipped
+    if (EquippedEcho.IsNone())
+    {
+        EquipEcho(EchoId);
+    }
+
+    return true;
+}
+
+bool AWyrmCharacter::EquipEcho(FName EchoId)
+{
+    if (!LearnedEchoes.Contains(EchoId))
+    {
+        return false;
+    }
+    EquippedEcho = EchoId;
+    return true;
+}
+
+void AWyrmCharacter::UnequipEcho()
+{
+    // Cooldown is NOT cleared on unequip per Section 7 contract.
+    EquippedEcho = NAME_None;
+}
+
+bool AWyrmCharacter::IsEchoUnlocked(FName EchoId) const
+{
+    return LearnedEchoes.Contains(EchoId);
+}
+
+bool AWyrmCharacter::IsEchoEquipped(FName EchoId) const
+{
+    return !EquippedEcho.IsNone() && EquippedEcho == EchoId;
+}
+
+bool AWyrmCharacter::CanActivateRelentlessAdvance(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("RelentlessAdvance"))))
+    {
+        OutFailureReason = TEXT("NotUnlocked");
+        return false;
+    }
+
+    if (EquippedEcho != FName(TEXT("RelentlessAdvance")))
+    {
+        OutFailureReason = TEXT("NotEquipped");
+        return false;
+    }
+
+    if (Attributes && Attributes->GetHealth() <= 0.f)
+    {
+        OutFailureReason = TEXT("Dead");
+        return false;
+    }
+
+    if (StunRemainingTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))))
+    {
+        OutFailureReason = TEXT("HardStunned");
+        return false;
+    }
+
+    if (HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    {
+        OutFailureReason = TEXT("ControlTransitioning");
+        return false;
+    }
+
+    if (RelentlessAdvanceCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.RelentlessAdvance"))))
+    {
+        OutFailureReason = TEXT("OnCooldown");
+        return false;
+    }
+
+    if (Attributes && Attributes->GetFocus() < 30.f)
+    {
+        OutFailureReason = TEXT("InsufficientFocus");
+        return false;
+    }
+
+    OutFailureReason = TEXT("");
+    return true;
+}
+
+bool AWyrmCharacter::ActivateEquippedEcho()
+{
+    if (EquippedEcho.IsNone())
+    {
+        return false;
+    }
+
+    if (EquippedEcho == FName(TEXT("RelentlessAdvance")))
+    {
+        FString Reason;
+        if (!CanActivateRelentlessAdvance(Reason))
+        {
+            return false;
+        }
+
+        if (AbilitySystem && RelentlessAdvanceHandle.IsValid())
+        {
+            return AbilitySystem->TryActivateAbility(RelentlessAdvanceHandle);
+        }
+    }
+
+    return false;
+}
+
+void AWyrmCharacter::ActivateRelentlessAdvanceStance(float Duration)
+{
+    bRelentlessAdvanceActive = true;
+    RelentlessAdvanceRemainingTimer = Duration > 0.f ? Duration : 6.0f;
+    RelentlessAdvanceCooldownTimer = 18.0f;
+
+    if (AbilitySystem)
+    {
+        static const FGameplayTag RelentlessTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.RelentlessAdvance")), false);
+        if (RelentlessTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(RelentlessTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(RelentlessTag);
+        }
+
+        static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.RelentlessAdvance")), false);
+        if (CooldownTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(CooldownTag);
+        }
+    }
+
+    // Suppress any existing slow immediately
+    UpdateMovementForStatus();
+}
+
+void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FName InEquippedEcho, bool bActive, float RemainingDuration, float RemainingCooldown)
+{
+    LearnedEchoes = InLearnedEchoes;
+    EquippedEcho = InEquippedEcho;
+
+    for (const FName& EchoId : LearnedEchoes)
+    {
+        if (EchoId == FName(TEXT("RelentlessAdvance")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.RelentlessAdvance")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                }
+
+                if (!RelentlessAdvanceHandle.IsValid())
+                {
+                    RelentlessAdvanceHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmRelentlessAdvanceAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+    }
+
+    bRelentlessAdvanceActive = bActive;
+    RelentlessAdvanceRemainingTimer = FMath::Max(0.f, RemainingDuration);
+    RelentlessAdvanceCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+
+    if (AbilitySystem)
+    {
+        static const FGameplayTag RelentlessTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.RelentlessAdvance")), false);
+        if (RelentlessTag.IsValid())
+        {
+            if (bRelentlessAdvanceActive)
+            {
+                if (!AbilitySystem->HasMatchingGameplayTag(RelentlessTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(RelentlessTag);
+                }
+            }
+            else
+            {
+                if (AbilitySystem->HasMatchingGameplayTag(RelentlessTag))
+                {
+                    AbilitySystem->RemoveLooseGameplayTag(RelentlessTag);
+                }
+            }
+        }
+
+        static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.RelentlessAdvance")), false);
+        if (CooldownTag.IsValid())
+        {
+            if (RelentlessAdvanceCooldownTimer > 0.f)
+            {
+                if (!AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(CooldownTag);
+                }
+            }
+            else
+            {
+                if (AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+                {
+                    AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                }
+                FGameplayTagContainer CDContainer(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CDContainer);
+            }
+        }
+    }
+
+    UpdateMovementForStatus();
 }

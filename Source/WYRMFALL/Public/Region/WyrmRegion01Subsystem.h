@@ -132,12 +132,20 @@ public:
     UFUNCTION(BlueprintPure, Category="Region 01|Facts")
     EWyrmRegion01RuskOutcome GetRuskOutcome() const { return State.RuskOutcome; }
 
+    UFUNCTION(BlueprintCallable, Category="Region 01|Echo")
+    bool RecordEchoRelentlessAdvance();
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Echo")
+    bool IsEchoRelentlessAdvanceUnlocked() const;
+
+    UFUNCTION(BlueprintCallable, Category="Region 01|Facts")
+    bool CommitFact(FName FactId, FName ReceiptId);
+
     /** Called by the unified save owner; this subsystem never writes slots itself. */
     void BuildSaveRecord(FWyrmRegion01SaveRecord& OutRecord) const;
     void RestoreFromSaveRecord(const FWyrmRegion01SaveRecord& InRecord);
 
 private:
-    bool CommitFact(FName FactId, FName ReceiptId);
     void EnsureDerivedFact(FName FactId, FName ReceiptId);
     bool HasReceipt(FName ReceiptId) const;
     void RefreshDerivedFacts();

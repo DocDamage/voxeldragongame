@@ -31,6 +31,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat")
     int32 ExecuteHitboxSweep(TArray<AActor*>& OutHitActors);
 
+    UFUNCTION(BlueprintCallable, Category="Combat")
     static bool ApplyDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage);
 };
 

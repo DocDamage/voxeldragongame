@@ -45,7 +45,7 @@ public:
     bool AttackTarget(AActor* TargetActor);
 
     UFUNCTION(BlueprintCallable, Category="Enemy")
-    void ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude = 1.f);
+    virtual void ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude = 1.f);
 
     UFUNCTION(BlueprintCallable, Category="Combat")
     void ApplyNamedStatusEffect(FName TagName, float DurationSeconds, float Magnitude = 1.f);
@@ -76,11 +76,12 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Combat")
     TObjectPtr<UWyrmAttributeSet> Attributes;
 
+    float BaseWalkSpeed = 600.f;
+
 private:
     void HandleHealthChanged(const struct FOnAttributeChangeData& Data);
     void UpdateMovementForStatus();
 
-    float BaseWalkSpeed = 600.f;
     float ActiveSlowMagnitude = 0.f;
     float SlowRemainingTimer = 0.f;
     float StunRemainingTimer = 0.f;

@@ -168,6 +168,17 @@ float UWyrmAttributeSet::CalculateMitigatedDamage(float InRawDamage, float InArm
     return InRawDamage * (1.0f - Mitigation);
 }
 
+float UWyrmAttributeSet::CalculateMitigatedDamageWithAbilityReduction(float InRawDamage, float InArmor, float InAttackerLevel, float InAbilityReductionPercent)
+{
+    if (!FMath::IsFinite(InRawDamage) || InRawDamage <= 0.f)
+    {
+        return 0.f;
+    }
+    const float CappedReduction = FMath::Clamp(InAbilityReductionPercent, 0.f, 0.75f); // 75% max cap per Section 9
+    const float ReducedRaw = InRawDamage * (1.0f - CappedReduction);
+    return CalculateMitigatedDamage(ReducedRaw, InArmor, InAttackerLevel);
+}
+
 void UWyrmAttributeSet::ClampAttributeValue(const FGameplayAttribute& Attribute, float& NewValue) const
 {
     if (!FMath::IsFinite(NewValue))
