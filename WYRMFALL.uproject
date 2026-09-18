@@ -44,6 +44,20 @@
       "TargetAllowList": [
         "Editor"
       ]
+    },
+    {
+      "Name": "GameInput",
+      "Enabled": true,
+      "SupportedTargetPlatforms": [
+        "Win64"
+      ]
+    },
+    {
+      "Name": "GameInputWindows",
+      "Enabled": true,
+      "SupportedTargetPlatforms": [
+        "Win64"
+      ]
     }
   ],
   "TargetPlatforms": [

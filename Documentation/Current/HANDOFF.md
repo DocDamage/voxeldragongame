@@ -70,6 +70,16 @@ settings out of commits.
   - `ECHO-05.OptionalSkipAndDragonSupport`: full homecoming ready with zero Echo/Counselor facts required; bonded dragon Verdance moves to Silent Landing and attacks Counselor for 24.0 damage; Counselor at Silent Landing is 3842 units away from Mara at Quiet Water, ensuring zero cross-encounter interference.
   - `ECHO-06.ProcCap`: `UWyrmAttributeSet` returns 0.75 for max ability damage reduction; 90% requested reduction is clamped to 75% (100 raw damage mitigated to 25.0); Relentless Advance has zero offensive damage procs; secondary/reflected damage cannot recursively trigger Echoes.
   - `REG-13.HorrorSeparation`: peaceful fishing lesson at Quiet Water without horror combat triggers; deliberate traversal to Silent Landing and landmark visit recorded after homecoming; practice target slow triggered and tested; safe retreat to town entry with normal speed restored.
+- WP-16 is **PASS in real PIE (SLICE-01..08)**:
+  `Content/WYRMFALL/World/Regions/L_Region01.umap` full G5 connected slice from Arrival excavation through Tidecross, Old Quarry, Verdance living bond, Terrace flight, Heartfold shrink, compact cave crawl, Homecoming resolution, Silent Landing Counselor encounter, permanent Echo manifestation, unified Schema 2 save/restore roundtrip, and GameInput Windows DualSense controller verification verified in live PIE under `UEDPIE_0_L_Region01` via `py -3.12 tools/run_wp16_connected_slice_proof.py`:
+  - `SLICE-01.ArrivalAndHub`: real terrain removal edit clears exit; player navigates opened passage into Tidecross (`LM-TIDECROSS`), unlocking landmark visit and meeting Overseer Tamsin.
+  - `SLICE-02.QuarryAndAuxiliary`: worker Pell and Sella rescued independently; redundant machinery evidence discovered (`evidence.machine_seen`); auxiliary restraint conduits disabled.
+  - `SLICE-03.VerdanceLivingBond`: Verdance defeated alive (1800 -> 0 HP `DefeatedAlive`); Central Claim Console destroyed (`verdance.claim_broken`); mutual voluntary bond consented to (`verdance.bond_accepted`); role converted to `AlliedCompanion` (210/420 HP).
+  - `SLICE-04.TerraceFlightAndShrink`: Verdance mounted on Ally Terrace (`LM-TERRACE`); authentic 3D flight traversal across canyon airspace (`MOVE_Flying`, max speed 1600); safe ground landing at town apron; Heartfold compact shrink to 60x70cm capsule fitting Tidecross doorframes without citizen trampling.
+  - `SLICE-05.HomecomingAndCompactCave`: worker Iven secured; full homecoming resolved (`relief.resolved`, `SURRENDERED_CUSTODY`); player transfers direct control to compact Verdance at `LM-COMPACTCAVE`; crawlway traversed beneath low ceiling; cave crawler defeated via primary melee; growth check succeeds in main chamber; service cache recovered (`cache.recovered`); control returned cleanly to humanoid waiting outside.
+  - `SLICE-06.SilentLandingAndRelentlessEcho`: Quiet Water fishing confirmed safe and separate (> 3100 units away); deliberate entry to Silent Landing; Counselor horror fight; stance demonstration and living defeat; permanent `Echo: Relentless Advance` unlocked (`Unlock.Echo.RelentlessAdvance`, `echo.relentless_advance`); practice dummy test confirms slow suppression and stagger resistance.
+  - `SLICE-07.EndToEndSaveRestore`: full connected slice state serialized to `WP16_ConnectedSlice_Slot` via `UWyrmSaveSubsystem` (Schema 2); clean session reset; restored snapshot recovers all world modifications, facts, companion allied and compact state, Echo ability, and camp structures without duplicate entities or terrain regeneration.
+  - `SLICE-08.GameInputControllerPresence`: `GameInput` and `GameInputWindows` plugins verified mounted and enabled for Win64; physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired); Enhanced Input gamepad action bindings validated for locomotion, look, jump, and camera.
 
 Evidence:
 
@@ -96,6 +106,8 @@ Evidence:
 - `Saved/Diagnostics/WP13_boss_and_bond_proof.json`
 - `Saved/Diagnostics/WP14_terrace_cave_proof.json`
 - `Saved/Diagnostics/WP15_echo_proof.json`
+- `Saved/Diagnostics/WP16_connected_slice_proof.json`
+- `Saved/Diagnostics/controller_presence_probe.json`
 - `Saved/Automation/Region01/index.json`
 - [WP-01 report](WP01_TERRAIN_PROVIDER_PROOF.md)
 - [WP-06 report](WP06_PROGRESSION_PROOF.md)
@@ -108,6 +120,7 @@ Evidence:
 - [WP-13 report](WP13_BOSS_AND_BOND_PROOF.md)
 - [WP-14 report](WP14_TERRACE_AND_CAVE_PROOF.md)
 - [WP-15 report](WP15_ECHO_PROOF.md)
+- [WP-16 report](WP16_CONNECTED_SLICE_PROOF.md)
 
 ## Verification corrections
 
@@ -150,24 +163,26 @@ Evidence:
 - In `UWyrmAttributeSet`, added `GetMaxAbilityDamageReductionPercent()` returning an explicit 0.75 ceiling, and `CalculateMitigatedDamageWithAbilityReduction` clamping requested ability damage reduction to 75% before physical armor mitigation.
 - In `UWyrmFishingComponent::StartFishing`, authoritative state checking evaluates `is_fishing_active()` directly on the component.
 - In `UWyrmRegion01Subsystem`, `VisitLandmark("LM-SILENTLANDING")` enforces homecoming completion prerequisites (`IsHomecomingComplete()`).
+- `GameInput` and `GameInputWindows` are enabled in `WYRMFALL.uproject` for Win64. In `Config/DefaultInput.ini`, `[GameInputPlatformSettings_Windows GameInputPlatformSettings]` configures `bProcessGamepad=True`, `bProcessController=True`, and `bSpecialDevicesRequireExplicitDeviceConfiguration=False` so external controllers such as the PlayStation 5 DualSense (VID `0x054C`, PID `0x0CE6`) over USB are processed seamlessly alongside Enhanced Input gamepad action bindings.
 
 ## Boundaries
 
 - WP-00 remains PARTIAL; RDY-02/03/04 are open.
 - WP-02 through WP-05 full proof scripts remain editor-world evidence.
-- Physical controller, cook and packaged-game validation remain NOT_RUN.
+- Physical controller is VERIFIED (PASS) via Sony DualSense Win32 RawInput enumeration and GameInput Windows integration. Cook and packaged-game validation remain NOT_RUN.
 - Jadefang has source metadata only; it is not an imported, playable, or Heartfold-proven rig.
 - WP-12 production Region 01 map placement, composition, and all 8 REG acceptance cases (`REG-01`–`05`, `REG-09`–`11`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - WP-13 Verdance authored boss, claim, voluntary bond consent sequence, Crown relief combat, and living-defeat persistence boundaries (`REG-06`, `DRG-01`, `REG-07`, `REG-08`, `SAVE-10`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - WP-14 Ally Terrace flight route, town entry Heartfold shrink, compact cave ("A Smaller Kind of Strength"), late worker rescues with homecoming gating, persistent local recovery, and skip preparation (`REG-09`, `DRG.TerraceFlightRoute`, `DRG.TownEntryShrink`, `REG-12`, `REG-10`, `REG-11`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - WP-15 Echo power manifestation, Counselor encounter, GAS authority, full bag safety, and horror separation acceptance cases (`ECHO-01`–`06`, `REG-13`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
+- WP-16 G5 Connected Slice & PlayStation 5 Controller Integration acceptance cases (`SLICE-01`–`08`) are RESOLVED in live PIE (`UEDPIE_0_L_Region01`).
 - `py -3.12 tools/wyrm.py report` is stale because its old onboarding receipt predates the current source and `Saved/Diagnostics/doctor.json` is absent. Do not use it as current proof.
 
 ## Next bounded task
 
-With WP-12, WP-13, WP-14, and WP-15 complete in live PIE in production map `L_Region01`:
-Proceed to the next backlog dependency:
-WP-16 (Relief Encounters and Hazard Staging / Expanded Region Enforcers and Mining Hazards),
+With WP-12, WP-13, WP-14, WP-15, and WP-16 complete in live PIE in production map `L_Region01`:
+Proceed to the next milestone:
+WP-17 (Audio-Visual Integration, Polish Pass, and Playthrough Optimization),
 respecting the project backlog sequence.
 Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
 
