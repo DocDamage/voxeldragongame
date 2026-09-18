@@ -1,4 +1,4 @@
-# WYRMFALL handoff — September 17, 2026
+# WYRMFALL handoff — September 18, 2026
 
 ## Resume here
 
@@ -8,7 +8,7 @@ handoff, and only the packet for the next bounded task.
 
 Repository: https://github.com/DocDamage/voxeldragongame
 
-Branch: `main`
+Branch: `main` (resume at pushed checkpoint `bb09254`)
 
 Use `git -c safe.directory="G:/assets/voxel project" ...` for every Git command.
 Do not change global Git settings. Keep editor-generated AndroidFileServer
