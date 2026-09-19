@@ -398,7 +398,7 @@ def pie_tick(_delta):
             verdance.set_dragon_id("Verdance")
             data["verdance"] = verdance
             snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object(SLOT, player, adapter, world)
-            assert snapshot and snapshot.schema_version == 5
+            assert snapshot and snapshot.schema_version == 6
             regional_ids = sorted(str(item.region_id) for item in snapshot.regional_world_records)
             assert "JadePeaks" in regional_ids, regional_ids
             assert unreal.WyrmSaveSubsystem.is_schema_version_supported(4), "schema 4 backward read must remain supported"
@@ -415,7 +415,9 @@ def pie_tick(_delta):
             assert "Jadefang" in restored_ids and "Verdance" in restored_ids
             finish("JP-06.UnifiedPersistence", {
                 "schema": snapshot.schema_version, "snapshot_dragons": ids,
-                "regional_records": regional_ids, "schema4_backward_read": True,
+                "regional_records": regional_ids, "schemas_1_to_5_readable": all(
+                    unreal.WyrmSaveSubsystem.is_schema_version_supported(version)
+                    for version in (1, 2, 3, 4, 5)),
                 "restored_dragons": restored_ids, "region_facts_restored": True,
                 "landmark_route_restored": True, "saved_cooldown": saved_cooldown,
                 "restored_cooldown": player.get_mirror_step_remaining_cooldown(),

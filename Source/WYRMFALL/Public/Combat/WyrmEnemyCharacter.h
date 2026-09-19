@@ -44,6 +44,10 @@ public:
     UFUNCTION(BlueprintCallable, Category="Enemy")
     bool AttackTarget(AActor* TargetActor);
 
+    /** Bosses counter the veil; ordinary enemies drop and cannot immediately reacquire its user. */
+    UFUNCTION(BlueprintPure, Category="Enemy|Perception")
+    bool CanAcquireTarget(AActor* TargetActor) const;
+
     UFUNCTION(BlueprintCallable, Category="Enemy")
     virtual void ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude = 1.f);
 

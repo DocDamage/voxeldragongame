@@ -125,7 +125,7 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
     SaveObj->Timestamp = FDateTime::UtcNow();
     SaveObj->SaveGenerationId = FGuid::NewGuid();
 
-    // Carry forward other regions when updating an existing Schema 5 slot.
+    // Carry forward other regions when updating an existing Schema 5+ slot.
     if (!SlotName.IsEmpty() && UGameplayStatics::DoesSaveGameExist(SlotName, 0))
     {
         if (const UWyrmSaveGame* Previous = Cast<UWyrmSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0)))
@@ -191,6 +191,9 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.LastSafeHumanoidLocation = Character->GetLastSafeHumanoidLocation();
         SaveObj->CharacterRecord.MirrorStepRemainingCooldown = Character->GetMirrorStepRemainingCooldown();
         SaveObj->CharacterRecord.UnseenHandRemainingCooldown = Character->GetUnseenHandRemainingCooldown();
+        SaveObj->CharacterRecord.bHuntersVeilActive = Character->IsHuntersVeilActive();
+        SaveObj->CharacterRecord.HuntersVeilRemainingDuration = Character->GetHuntersVeilRemainingDuration();
+        SaveObj->CharacterRecord.HuntersVeilRemainingCooldown = Character->GetHuntersVeilRemainingCooldown();
 
         if (Inv)
         {
@@ -494,6 +497,10 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             SaveObj->CharacterRecord.LastSafeHumanoidLocation);
         Character->RestoreMirrorStepState(SaveObj->CharacterRecord.MirrorStepRemainingCooldown);
         Character->RestoreUnseenHandState(SaveObj->CharacterRecord.UnseenHandRemainingCooldown);
+        Character->RestoreHuntersVeilState(
+            SaveObj->CharacterRecord.bHuntersVeilActive,
+            SaveObj->CharacterRecord.HuntersVeilRemainingDuration,
+            SaveObj->CharacterRecord.HuntersVeilRemainingCooldown);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)

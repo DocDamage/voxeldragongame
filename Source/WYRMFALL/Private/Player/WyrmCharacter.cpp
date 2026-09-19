@@ -8,6 +8,7 @@
 #include "Combat/Abilities/WyrmMoonboundFormAbility.h"
 #include "Combat/Abilities/WyrmMirrorStepAbility.h"
 #include "Combat/Abilities/WyrmUnseenHandAbility.h"
+#include "Combat/Abilities/WyrmHuntersVeilAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Combat/WyrmUnseenHandTarget.h"
@@ -349,6 +350,30 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
         }
     }
 
+    if (bHuntersVeilActive)
+    {
+        HuntersVeilRemainingTimer = FMath::Max(0.f, HuntersVeilRemainingTimer - DeltaSeconds);
+        if (HuntersVeilRemainingTimer <= 0.f)
+        {
+            BreakHuntersVeil();
+        }
+    }
+
+    if (HuntersVeilCooldownTimer > 0.f)
+    {
+        HuntersVeilCooldownTimer = FMath::Max(0.f, HuntersVeilCooldownTimer - DeltaSeconds);
+        if (HuntersVeilCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.HuntersVeil")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+
     if (bNeedsMovementUpdate)
     {
         UpdateMovementForStatus();
@@ -624,6 +649,7 @@ bool AWyrmCharacter::PerformPrimaryAttack()
         return PrimaryBeastClawHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryBeastClawHandle);
     }
 
+    BreakHuntersVeil();
     if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
     {
         return PrimaryRangedHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryRangedHandle);
@@ -648,6 +674,7 @@ bool AWyrmCharacter::PerformSecondaryAttack()
         return SecondaryBeastPounceHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryBeastPounceHandle);
     }
 
+    BreakHuntersVeil();
     if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
     {
         return SecondaryRangedHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryRangedHandle);
@@ -670,6 +697,7 @@ bool AWyrmCharacter::AttackTarget(AActor* TargetActor)
         return false;
     }
 
+    BreakHuntersVeil();
     const float RawDamage = UWyrmAttributeSet::CalculateRawDamage(10.f, Attributes->GetPower(), 0.5f);
     return UWyrmMeleeAttackAbility::ApplyDamageEffect(AbilitySystem, TargetASC, RawDamage);
 }
@@ -916,6 +944,7 @@ void AWyrmCharacter::HandleHealthChanged(const FOnAttributeChangeData& Data)
 {
     if (Data.NewValue < Data.OldValue)
     {
+        BreakHuntersVeil();
         float DamageTaken = Data.OldValue - Data.NewValue;
         OnCharacterDamaged.Broadcast(DamageTaken);
     }
@@ -1187,6 +1216,19 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             }
         }
     }
+    else if (EchoId == FName(TEXT("HuntersVeil")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.HuntersVeil")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!HuntersVeilHandle.IsValid())
+            {
+                HuntersVeilHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmHuntersVeilAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
 
     // Auto-equip if first echo and none equipped
     if (EquippedEcho.IsNone())
@@ -1303,6 +1345,10 @@ bool AWyrmCharacter::ActivateEquippedEcho()
         {
             return AbilitySystem->TryActivateAbility(MoonboundFormHandle);
         }
+    }
+    else if (EquippedEcho == FName(TEXT("HuntersVeil")))
+    {
+        return ActivateHuntersVeil();
     }
 
     return false;
@@ -1572,6 +1618,80 @@ void AWyrmCharacter::RestoreUnseenHandState(float RemainingCooldown)
     }
 }
 
+bool AWyrmCharacter::CanActivateHuntersVeil(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("HuntersVeil")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("HuntersVeil"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (bHuntersVeilActive) { OutFailureReason = TEXT("AlreadyActive"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (HuntersVeilCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.HuntersVeil"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 25.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    OutFailureReason.Reset();
+    return true;
+}
+
+bool AWyrmCharacter::ActivateHuntersVeil()
+{
+    FString Reason;
+    return CanActivateHuntersVeil(Reason) && AbilitySystem && HuntersVeilHandle.IsValid() &&
+        AbilitySystem->TryActivateAbility(HuntersVeilHandle);
+}
+
+bool AWyrmCharacter::CommitHuntersVeil()
+{
+    if (bHuntersVeilActive)
+    {
+        return false;
+    }
+    bHuntersVeilActive = true;
+    HuntersVeilRemainingTimer = 5.f;
+    HuntersVeilCooldownTimer = 16.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag StateTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.HuntersVeil")), false);
+        if (StateTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(StateTag)) AbilitySystem->AddLooseGameplayTag(StateTag);
+    }
+    return true;
+}
+
+void AWyrmCharacter::BreakHuntersVeil()
+{
+    bHuntersVeilActive = false;
+    HuntersVeilRemainingTimer = 0.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag StateTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.HuntersVeil")), false);
+        if (StateTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(StateTag);
+    }
+}
+
+void AWyrmCharacter::RestoreHuntersVeilState(bool bActive, float RemainingDuration, float RemainingCooldown)
+{
+    bHuntersVeilActive = bActive && RemainingDuration > 0.f;
+    HuntersVeilRemainingTimer = bHuntersVeilActive ? FMath::Min(5.f, RemainingDuration) : 0.f;
+    HuntersVeilCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+    static const FGameplayTag StateTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.HuntersVeil")), false);
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.HuntersVeil")), false);
+    if (StateTag.IsValid())
+    {
+        if (bHuntersVeilActive) AbilitySystem->AddLooseGameplayTag(StateTag); else AbilitySystem->RemoveLooseGameplayTag(StateTag);
+    }
+    if (CooldownTag.IsValid())
+    {
+        if (HuntersVeilCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+        else
+        {
+            AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+            FGameplayTagContainer CooldownTags(CooldownTag);
+            AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        }
+    }
+}
+
 void AWyrmCharacter::ActivateRelentlessAdvanceStance(float Duration)
 {
     bRelentlessAdvanceActive = true;
@@ -1647,6 +1767,19 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
                 {
                     UnseenHandHandle = AbilitySystem->GiveAbility(
                         FGameplayAbilitySpec(UWyrmUnseenHandAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("HuntersVeil")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.HuntersVeil")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!HuntersVeilHandle.IsValid())
+                {
+                    HuntersVeilHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmHuntersVeilAbility::StaticClass(), 1, INDEX_NONE, this));
                 }
             }
         }

@@ -95,3 +95,9 @@ Every later regional spec must list: required capabilities, optional shortcuts, 
 Under WP-23, choose the next region based on actual content readiness and the most useful next gameplay risk; the Hallowwood story lead does not obligate parallel production tracks. Advance one dragon/form kit and its local story to playable acceptance, then expand. The existing V1/Z1 proofs do not claim the entire Zenith region or colony complete.
 
 The home/stay ending preserves the same regions and player-built history. A pre-departure continuation branch keeps the game playable after home without silently deleting the character. WP-23.0–23.13 name the planned portions of the full-world graph; planning must never be reported as implementation.
+**Verdant closure note (September 19, 2026):** WP-23.1 closes the remaining
+Verdant crown claim inside `L_Region01` without killing Queen Meridess or adding
+a new dragon identity. Evidence and authored-guard routes converge on one
+closure; the canopy hunter and Hunter's Veil remain optional. Schema 6 preserves
+the Schema 5 regional/travel contract, adds Hunter's Veil state, and accepts
+Schemas 1–5.

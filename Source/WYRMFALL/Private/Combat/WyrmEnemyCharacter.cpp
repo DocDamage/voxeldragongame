@@ -7,6 +7,7 @@
 #include "GameplayTagsManager.h"
 #include "Engine/World.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Player/WyrmCharacter.h"
 
 AWyrmEnemyCharacter::AWyrmEnemyCharacter()
 {
@@ -86,7 +87,7 @@ void AWyrmEnemyCharacter::ConfigureForRole(EWyrmEnemyRole InRole)
 
 bool AWyrmEnemyCharacter::AttackTarget(AActor* TargetActor)
 {
-    if (!TargetActor || IsDefeated() || StunRemainingTimer > 0.f || !AbilitySystem || !Attributes)
+    if (!CanAcquireTarget(TargetActor) || IsDefeated() || StunRemainingTimer > 0.f || !AbilitySystem || !Attributes)
     {
         return false;
     }
@@ -102,6 +103,16 @@ bool AWyrmEnemyCharacter::AttackTarget(AActor* TargetActor)
     // Calculate raw damage: Enemy Power with 0.5 coefficient
     const float RawDamage = UWyrmAttributeSet::CalculateRawDamage(5.f, Attributes->GetPower(), 0.5f);
     return UWyrmMeleeAttackAbility::ApplyDamageEffect(AbilitySystem, TargetASC, RawDamage);
+}
+
+bool AWyrmEnemyCharacter::CanAcquireTarget(AActor* TargetActor) const
+{
+    if (!TargetActor)
+    {
+        return false;
+    }
+    const AWyrmCharacter* Player = Cast<AWyrmCharacter>(TargetActor);
+    return !Player || bIsBoss || !Player->IsHuntersVeilActive();
 }
 
 void AWyrmEnemyCharacter::ApplyStatusEffect(FGameplayTag StatusTag, float DurationSeconds, float Magnitude)

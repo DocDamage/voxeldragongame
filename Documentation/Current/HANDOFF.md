@@ -8,7 +8,7 @@ handoff, and only the packet for the next bounded task.
 
 Repository: https://github.com/DocDamage/voxeldragongame
 
-Branch: `main` (checkpoint `cd6efd4`; WP-22/WP-23.2 work is currently uncommitted)
+Branch: `main` (use current Git history as the checkpoint authority)
 
 Use `git -c safe.directory="G:/assets/voxel project" ...` for every Git command.
 Do not change global Git settings. Keep editor-generated AndroidFileServer
@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Selected scaffold native automation completed 54/54 tests with 0 failures.
+- Full scaffold native automation completed 55/55 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -44,6 +44,7 @@ settings out of commits.
 - WP-19 real PIE passed all 9 pilotable civilian hovercar acceptance cases (`VEH-01..09`).
 - WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`).
 - WP-23.2 real PIE passed all 8 Jade Peaks closure cases (`JC-01..08`): supplied Emperor Wei Longzhu art; diplomacy/living-defeat pact parity; trust/living-defeat disciple parity; permanent GAS Unseen Hand with 25 Focus/8s cooldown and fail-closed target policy; bounded Region01↔JadePeaks travel; Schema 5 region-keyed recovery; and WP-22 continuity. Focused manual frame review also passed Emperor grounding/scale and supplied spear placement. See `Documentation/Current/WP23_2_JADE_CLOSURE_PROOF.md`.
+- WP-23.1 real PIE passed all 8 Verdant Reach closure cases (`VR-01..08`): supplied Ranger character/environment presentation; evidence and authored-guard route parity without attacking Meridess; optional trust/living-defeat canopy hunter; permanent GAS Hunter's Veil; four live route navigation projections; Verdance continuity; and backward-readable Schema 6 recovery. Four rendered frames passed manual lighting, scale, grounding/collision, and route-readability review. WP-16 and WP-23.2 regressions remain green. See `Documentation/Current/WP23_1_VERDANT_REACH_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -295,7 +296,7 @@ Evidence:
 - Disablement occurs at 0 HP with full depot recovery (`RecoverToDepot`) restoring health, parking state, and staging companion safely at depot.
 - `UWyrmSaveSubsystem` (Schema 3) persists occupied/parked hovercar state, transform, health, and mecha circuit upgrades.
 - `AWyrmDragonCharacter` supports multi-dragon companion management with authoritative rig profiles (`FWyrmDragonRigProfile`). Jadefang utilizes genuine GLTF Chinese dragon assets with long-bodied modular anatomy (leader mesh `Hip-Local` and 38 follower meshes bound via `SetLeaderPoseComponent`), distinct Companion (30x35cm) vs TrueForm (110x150cm) envelopes, distinct ground/flight speeds (480/1700), back ridge mount socket `(0, 0, 140)`, 4s Heartfold cooldown with low-ceiling clearance check, and Schema 3 save persistence. DRG-15 fail-closed policy blocks unvalidated rig profiles from inheriting dragon values.
-- Current unified save schema is 5. It preserves earlier fields, accepts Schemas 1–4, and adds region-keyed terrain/camp records, bounded travel state, and Unseen Hand cooldown under the existing save coordinator.
+- Current unified save schema is 6. It preserves Schema 5 region-keyed terrain/camp records, bounded travel state, and Unseen Hand cooldown; adds Hunter's Veil active/duration/cooldown state; and accepts Schemas 1–5 under the existing save coordinator.
 - `UWyrmJadePeaksSubsystem` is the narrow regional fact owner. It does not own inventory, combat, dragons, terrain, or save slots.
 - `UWyrmWorldTravelSubsystem` is the bounded travel owner for Region01↔JadePeaks only; it does not own save slots.
 
@@ -320,16 +321,16 @@ Evidence:
   boundary does not override the recorded deterministic PIE evidence. See
   `Documentation/Current/WP22_VISUAL_QA.md`.
 - WP-23 is user-authorized as the rest-of-world umbrella and split into
-  WP-23.0–23.13. WP-23.0 and WP-23.2 are COMPLETE. All ten named dragon source
-  GLTFs are present, but only Verdance/Jadefang have validated rig and PIE
-  evidence. Archive presence does not imply any new-dragon implementation.
+  WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. WP-23.5 readiness
+  passes: Nyxaroth is import-feasible; Cathedral/cemetery candidates and the
+  required 331-part horror roster with WYRMFALL pun-name aliases are retained.
+  Only Verdance/Jadefang have validated rig and PIE evidence; Nyxaroth remains
+  profile- and gameplay-gated.
 
 ## Next bounded task
 
-WP-23.2 is complete. The next bounded task is to author the WP-23.1 Verdant
-Reach closure packet using the verified Region 01/Verdance baseline and
-supplied forest/ranger content. Do not start a new-dragon child until its
-rig/profile and real-content fit are verified. Mutable remains creator, GAS
-remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence coordinator.
-See `Documentation/Current/WP23_READINESS.md` and
-`Documentation/Current/tasks/WP-23.md`.
+WP-23.5 readiness passes. Implement the bounded Nyxaroth fail-closed rig/profile
+proof next, then compile and exercise its profile-level dragon behavior in
+focused PIE. Do not compose Gloaming Marches until that gate passes. Mutable
+remains creator, GAS remains combat authority, and `UWyrmSaveSubsystem` remains
+the sole persistence coordinator. See `Documentation/Current/tasks/WP-23.5.md`.

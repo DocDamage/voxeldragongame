@@ -225,6 +225,30 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void RestoreUnseenHandState(float RemainingCooldown);
 
+    // --- Hunter's Veil (WP-23.1) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateHuntersVeil(FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateHuntersVeil();
+
+    bool CommitHuntersVeil();
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void BreakHuntersVeil();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsHuntersVeilActive() const { return bHuntersVeilActive; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetHuntersVeilRemainingDuration() const { return HuntersVeilRemainingTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetHuntersVeilRemainingCooldown() const { return HuntersVeilCooldownTimer; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreHuntersVeilState(bool bActive, float RemainingDuration, float RemainingCooldown);
+
     // --- Progression & XP (WP-06) ---
     UFUNCTION(BlueprintCallable, Category="Progression") bool AddExperience(float Amount);
     UFUNCTION(BlueprintPure, Category="Progression") float GetCurrentXP() const { return CurrentXP; }
@@ -374,6 +398,7 @@ private:
     FGameplayAbilitySpecHandle MoonboundFormHandle;
     FGameplayAbilitySpecHandle MirrorStepHandle;
     FGameplayAbilitySpecHandle UnseenHandHandle;
+    FGameplayAbilitySpecHandle HuntersVeilHandle;
     FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
     FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
@@ -402,6 +427,10 @@ private:
 
     float UnseenHandCooldownTimer = 0.f;
     TWeakObjectPtr<AActor> PendingUnseenHandTarget;
+
+    bool bHuntersVeilActive = false;
+    float HuntersVeilRemainingTimer = 0.f;
+    float HuntersVeilCooldownTimer = 0.f;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

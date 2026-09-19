@@ -7,6 +7,7 @@
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Combat/Abilities/WyrmMoonboundFormAbility.h"
 #include "Combat/Abilities/WyrmMirrorStepAbility.h"
+#include "Combat/Abilities/WyrmHuntersVeilAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
@@ -3151,7 +3152,7 @@ bool FWyrmRegion01FactsAndPersistenceTest::RunTest(const FString& Parameters)
     }
 
     Region01->ResetRegion01State();
-    TestTrue(TEXT("Region 01 defines a valid 13-landmark graph (REG-01)"), Region01->HasValidLandmarkGraph());
+    TestTrue(TEXT("Region 01 defines a valid 16-landmark graph while preserving REG-01"), Region01->HasValidLandmarkGraph());
     TestTrue(TEXT("Heart exit can reach Tidecross without an ordered trigger (REG-01)"),
         Region01->HasRouteBetweenLandmarks(FName(TEXT("LM-HEART")), FName(TEXT("LM-TIDECROSS"))));
     TestTrue(TEXT("Tidecross can reach the quarry arena through valid alternatives (REG-05)"),
@@ -3522,7 +3523,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema5Test, "WYRMFALL.Scaffol
 bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
 {
     // Schema Version Contract (VEH-07)
-    TestEqual(TEXT("CurrentSchemaVersion is 5"), UWyrmSaveGame::CurrentSchemaVersion, 5);
+    TestEqual(TEXT("CurrentSchemaVersion is 6"), UWyrmSaveGame::CurrentSchemaVersion, 6);
     TestEqual(TEXT("MinimumSupportedSchemaVersion is 1"), UWyrmSaveGame::MinimumSupportedSchemaVersion, 1);
 
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
@@ -3547,7 +3548,7 @@ bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
         TestNotNull(TEXT("Snapshot created"), SaveObj);
         if (SaveObj)
         {
-            TestEqual(TEXT("Schema version is 5"), SaveObj->SchemaVersion, 5);
+            TestEqual(TEXT("Schema version is 6"), SaveObj->SchemaVersion, 6);
             TestTrue(TEXT("Hovercar record marked spawned"), SaveObj->HovercarRecord.bHasBeenSpawned);
             TestEqual(TEXT("Saved health is 190"), SaveObj->HovercarRecord.Health, 190.f);
             TestTrue(TEXT("Saved Mecha circuit unlocked"), SaveObj->HovercarRecord.bMechaCircuitUnlocked);
@@ -3763,7 +3764,7 @@ bool FWyrmJadePeaksSliceTest::RunTest(const FString& Parameters)
         TestNotNull(TEXT("JP-06 unified snapshot created"), Save);
         if (Save)
         {
-            TestEqual(TEXT("JP-06 Schema 5"), Save->SchemaVersion, 5);
+            TestEqual(TEXT("JP-06 current schema"), Save->SchemaVersion, UWyrmSaveGame::CurrentSchemaVersion);
             TestEqual(TEXT("JP-06 both dragon identities serialized"), Save->DragonRecords.Num(), 2);
             TestTrue(TEXT("Verdance record present"), Save->DragonRecords.ContainsByPredicate([](const FWyrmDragonSaveRecord& Item)
             {
@@ -3785,6 +3786,42 @@ bool FWyrmJadePeaksSliceTest::RunTest(const FString& Parameters)
     if (Verdance) { Verdance->Destroy(); }
     if (Player) { Player->Destroy(); }
     World->DestroyWorld(false);
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmVerdantReachClosureTest, "WYRMFALL.Scaffold.VerdantReachClosure",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmVerdantReachClosureTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmRegion01Subsystem* Region = NewObject<UWyrmRegion01Subsystem>(TestGI);
+    TestNotNull(TEXT("VR fact owner created"), Region);
+    if (!Region) return false;
+
+    FWyrmRegion01SaveRecord Ready;
+    Ready.RuskOutcome = EWyrmRegion01RuskOutcome::DefeatedCustody;
+    Ready.KnownFacts = {
+        FName(TEXT("tidecross.visited")), FName(TEXT("worker.pell.secured")),
+        FName(TEXT("worker.iven.secured")), FName(TEXT("worker.sella.secured")),
+        FName(TEXT("quarry.extraction_stopped")), FName(TEXT("verdance.bond_accepted")),
+        FName(TEXT("relief.resolved")), FName(TEXT("rusk.outcome")),
+        FName(TEXT("homecoming.complete")), FName(TEXT("evidence.machine_seen")),
+        FName(TEXT("evidence.records"))};
+    Region->RestoreFromSaveRecord(Ready);
+
+    TestTrue(TEXT("VR landmark graph is valid"), Region->HasValidLandmarkGraph());
+    TestEqual(TEXT("VR extends Region01 to sixteen landmarks"), Region->GetLandmarkDefinitions().Num(), 16);
+    TestTrue(TEXT("Evidence route relinquishes remaining crown claim"), Region->ResolveVerdantCrownClaim(true));
+    TestTrue(TEXT("Regional closure is complete"), Region->IsVerdantRegionalClosureComplete());
+    TestFalse(TEXT("Regional closure cannot duplicate"), Region->ResolveVerdantCrownClaim(false));
+    TestTrue(TEXT("Optional hunter trust route resolves independently"), Region->ResolveCanopyHunter(true));
+    TestTrue(TEXT("Hunter's Veil fact is permanent"), Region->IsHuntersVeilUnlocked());
+    TestFalse(TEXT("Hunter reward cannot duplicate"), Region->ResolveCanopyHunter(false));
+
+    UWyrmHuntersVeilAbility* Ability = NewObject<UWyrmHuntersVeilAbility>();
+    TestEqual(TEXT("Hunter's Veil costs 25 Focus"), Ability->FocusCost, 25.f);
+    TestEqual(TEXT("Hunter's Veil cooldown is 16 seconds"), Ability->CooldownDuration, 16.f);
+    TestEqual(TEXT("Schema 6 is current"), UWyrmSaveGame::CurrentSchemaVersion, 6);
+    TestTrue(TEXT("Schema 5 remains supported"), UWyrmSaveSubsystem::IsSchemaVersionSupported(5));
     return true;
 }
 #endif

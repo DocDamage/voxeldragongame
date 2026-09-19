@@ -123,6 +123,16 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float UnseenHandRemainingCooldown = 0.f;
+
+    // --- Verdant Reach Echo State (WP-23.1) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bHuntersVeilActive = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float HuntersVeilRemainingDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float HuntersVeilRemainingCooldown = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -161,7 +171,7 @@ struct WYRMFALL_API FWyrmTerrainSaveRecord
     TArray<FGuid> ProcessedActionIds;
 };
 
-/** Schema 5 region-keyed mutable-world payload. Legacy singular fields remain readable. */
+/** Schema 5+ region-keyed mutable-world payload. Legacy singular fields remain readable. */
 USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmRegionalWorldSaveRecord
 {
@@ -204,10 +214,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    // Schema 5 adds Jade closure, Unseen Hand, two-region travel, and
-    // region-keyed terrain/camp payloads. Schemas 1-4 remain readable.
+    // Schema 6 adds Verdant Reach closure and Hunter's Veil state while
+    // retaining Schemas 1-5 and the region-keyed Schema 5 world payload.
     static const int32 MinimumSupportedSchemaVersion = 1;
-    static const int32 CurrentSchemaVersion = 5;
+    static const int32 CurrentSchemaVersion = 6;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;

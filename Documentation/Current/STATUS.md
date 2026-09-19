@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.2**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 readiness**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -11,10 +11,10 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 
 | Area | Current status | Evidence and boundary |
 |---|---|---|
-| Repository | `main`; current checkpoint `cd6efd4` plus uncommitted WP-22 work | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: selected 54/54** | All source-declared `WYRMFALL.Scaffold` tests passed; log `Saved/ScaffoldLogs/20260919T160136Z_70954ed478a0_ue-test.log` |
+| Native automation | **PASS: 55/55** | All source-declared `WYRMFALL.Scaffold` tests passed; report `Saved/Automation/Scaffold/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -29,7 +29,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-09 green dragon locomotion, combat & direct control | **PASS in real PIE** | 5/5 test groups passed for genuine modular dragon assets, living defeat (1800 HP -> 0 HP DefeatedAlive), one-way bond (420 Max HP, 210 initial HP), companion orders & GAS combat (24 primary, 18 area 6s cooldown), direct control possession with humanoid body anchoring, 150m tether return, waiting body damage return, and unified save roundtrip; [report](WP09_DRAGON_PROOF.md) |
 | WP-10 green dragon riding, flight locomotion, obstacle collision & mounted persistence | **PASS in real PIE** | 5/5 test groups passed for original humanoid mount socket attachment (0, 0, 160) without duplicate actors, compact mount rejection, 3D flight locomotion (`MOVE_Flying`, max fly speed 1600), overhead clearance box sweep & obstacle collision, in-flight dismount rejection, dual flight camera views (third-person 1100cm / top-down 1800cm), safe ground landing with slope limits, mounted defeat emergency ground recovery, hub companion recovery (420 Max HP), and airborne mounted save roundtrip and recovery; [report](WP10_FLIGHT_PROOF.md) |
 | WP-11 Green Dragon Heartfold & compact behavior | **PASS in real PIE (Verdance only)** | 7/7 live groups passed: compact fit, compact combat/direct control, timed state-conserving transitions, blocked growth, interruption, town behavior, and compact save roundtrip. DRG-15 is a separate native/source policy check: unvalidated rigs are blocked from inheriting Green Dragon values; [report](WP11_HEARTFOLD_PROOF.md) |
-| WP-12 Region 01 landmarks & quest facts | **PASS in real PIE (REG-01..05, REG-09..11)** | Production map `L_Region01` composed with GeoForge terrain, adapter, navmesh, 13 landmarks, 6 normalized 26-bone NPCs, 5 interactables, and vendor assets (`BanditCamp`, `DarkHalls`). Live PIE acceptance proof passed all 8 REG cases (arrival excavation, sequence-break Sella first, redundant evidence, post-bond Rusk custody, immediate dragon bond/control, independent workers/homecoming, and unified save/restore); [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
+| WP-12 Region 01 landmarks & quest facts | **PASS in real PIE (REG-01..05, REG-09..11)** | The verified 13-landmark baseline remains intact; WP-23.1 extends the same `L_Region01` owner/map to 16 landmarks. The original 8 REG cases and the current WP-16 connected regression pass; [report](WP12_REGION01_PROOF.md), [intake](WP12_REGION01_ASSET_INTAKE.md) |
 | WP-13 Verdance authored boss, claim & bond | **PASS in real PIE (REG-06, DRG-01, REG-07, REG-08, SAVE-10)** | Production map `L_Region01` Verdance boss encounter, auxiliary restraint interference matched trials (with/without shutdown), living defeat (1800 -> 0 HP DefeatedAlive without corpse), central claim console destruction stopping extraction, voluntary bond consent sequence converting Verdance to AlliedCompanion (210/420 HP) with repeat rejection, Crown relief squad combat participation, and 3 distinct living-defeat save boundaries (Defeated unbroken, Claim broken pending, Companion bonded relief resolved) verified cleanly; [report](WP13_BOSS_AND_BOND_PROOF.md) |
 | WP-14 Ally terrace, compact homecoming & cave | **PASS in real PIE (REG-09, DRG.TerraceFlightRoute, DRG.TownEntryShrink, REG-12, REG-10, REG-11)** | Production map `L_Region01` Ally Terrace flight route, authentic 3D flight traversal (`MOVE_Flying`, max fly speed 1600), safe landing at town entry, Heartfold town entry shrink (60x70cm, doorframe/trample fit), compact cave crawlway mission at `LM-COMPACTCAVE`, compact combat, clearance checks (crawlway blocked, inner chamber allowed), service cache recovery (`cache.recovered`, `cave.service_unlocked`), late worker rescues (Pell, Iven) with full homecoming gating, unified persistent local recovery (`WP14_RecoverySlot`), and skip preparation verified cleanly; [report](WP14_TERRACE_AND_CAVE_PROOF.md) |
 | WP-15 Echo power manifestation & Counselor | **PASS in real PIE (ECHO-01..06, REG-13)** | Production map `L_Region01` Counselor encounter at Silent Landing, stance demonstration/resistances (slow suppressed to base speed, stagger resisted, damage taken normally, hard stun stops movement, rooted activation permitted without cleansing), living defeat & permanent `echo.relentless_advance` unlock, GAS Focus (30)/duration (6s)/cooldown (18s) commit, cooldown retention on unequip, full bag safety with preserved loot claim, optional skip verification, dragon combat support, 75% ability damage reduction ceiling, and Quiet Water horror separation verified cleanly; [report](WP15_ECHO_PROOF.md) |
@@ -41,7 +41,8 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
-| WP-23 rest-of-world umbrella | **WP-23.0 and WP-23.2 COMPLETE** | The Jade Peaks closure passed JC-01..08 with supplied Emperor art, route parity, permanent Unseen Hand, bounded Region01↔JadePeaks travel, and backward-readable Schema 5 recovery. Focused visual QA also passed grounded Emperor/prop placement. WP-23.1 is next; new-dragon children remain gated; [proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md), [packet](tasks/WP-23.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, Schema 6 recovery, supplied Ranger art, and rendered QA. Jade Peaks JC-01..08 was rerun successfully under Schema 6; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
+| WP-23.5 Gloaming readiness | **READINESS PASS / PRODUCTION GATED** | UE 5.8.2 imported Nyxaroth as one `Hip-Local` leader plus 32 follower meshes, one skeleton, 20 animations, and 33 material instances. Cathedral/cemetery candidates and the required 331-part horror roster are retained; production aliases, assembly, profile, visual, and PIE gates remain; [report](WP23_5_GLOAMING_READINESS.md) |
 
 ## Important implementation facts
 
@@ -54,10 +55,10 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 - `UWyrmInventoryComponent` remains the inventory/equipment owner.
   Cross-inventory transfers now preflight target capacity and roll back on an
   unexpected partial failure.
-- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 5 adds
-  region-keyed terrain/camp records, travel state, and Unseen Hand cooldown to
-  the prior Jade Peaks, Region 01, character, dragon, vehicle, inventory, and
-  Echo fields. Schemas 1 through 5 remain loadable;
+- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 6 adds
+  Hunter's Veil active/duration/cooldown state to the Schema 5 region-keyed
+  terrain/camp records, travel state, Unseen Hand cooldown, and prior character,
+  dragon, vehicle, inventory, and Echo fields. Schemas 1 through 6 remain loadable;
   it rejects unsupported schemas, wrong terrain owners, missing terrain
   payloads, and terrain apply failures before mutating the character.
 - WP-06 adds a ranged weapon family, GAS abilities, a physical projectile,
@@ -143,9 +144,10 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
   visual QA additionally recorded 6/6 navigable anchors and 4/4 complete route paths.
 - WP-23.0 verified the supplied ten-dragon source set without treating source
   presence as rig readiness. Verdance and Jadefang remain the only validated
-  identities. WP-23.2 then added the minimal allowlisted Region01↔JadePeaks
-  travel owner and backward-readable Schema 5 region-keyed persistence under
-  `UWyrmSaveSubsystem`; JC-01..08 and the WP-22 regression passed in real PIE.
+  identities. WP-23.2 added the minimal allowlisted Region01↔JadePeaks travel
+  owner and Schema 5 region-keyed persistence. WP-23.1 extends the same save
+  owner to backward-readable Schema 6 for Hunter's Veil and closes Verdant Reach
+  without adding a dragon or travel owner.
 
 ## Fresh verification commands
 
@@ -172,6 +174,8 @@ py -3.12 tools/run_wp20_jadefang_proof.py
 py -3.12 tools/run_wp21_moonbound_proof.py
 py -3.12 tools/run_wp22_jade_peaks_proof.py
 py -3.12 tools/run_wp23_2_jade_closure_proof.py
+py -3.12 tools/run_wp23_1_verdant_closure_proof.py
+py -3.12 tools/run_wp23_1_visual_qa.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -208,13 +212,14 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Standalone packaging, cook validation, and packaged client execution are RESOLVED (PASS in WP-18).
 - Pilotable Zenith civilian hovercar slice acceptance cases `VEH-01` through `VEH-09` are RESOLVED (PASS in WP-19).
 - Heartfold expansion and Jadefang multi-dragon rig validation acceptance cases `JADE-01` through `JADE-05` and `SAVE` are RESOLVED (PASS in WP-20).
-- Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED (PASS in WP-23.2); later WP-23 children remain separate.
+- Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED and rerun under Schema 6.
+- Verdant Reach closure cases `VR-01` through `VR-08` are RESOLVED (PASS in WP-23.1); later WP-23 children remain separate.
 
 ## Next bounded task
 
-WP-23.2 is complete. The next bounded task is to author **WP-23.1 Verdant Reach
-closure** from the verified Region 01/Verdance baseline and supplied
-forest/ranger content. Every new-dragon region remains gated on its own
-rig/profile and real-content fit. See the
-[readiness ledger](WP23_READINESS.md), [WP-23 packet](tasks/WP-23.md), and
+WP-23.5 readiness passes. The next bounded task is the **Nyxaroth fail-closed
+rig/profile proof**: implement and compile its distinct profile, then exercise
+Companion/TrueForm, Heartfold, mount, flight, direct control, GAS combat, and
+save behavior in focused PIE. Do not compose Gloaming Marches before this gate
+passes. See the [readiness ledger](WP23_READINESS.md), [WP-23.5 packet](tasks/WP-23.5.md), and
 [current handoff](HANDOFF.md).

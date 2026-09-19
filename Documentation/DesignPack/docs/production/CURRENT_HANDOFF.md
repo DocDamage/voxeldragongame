@@ -7,8 +7,10 @@
 
 > **Current runtime authority:** See `Documentation/Current/HANDOFF.md` and
 > `Documentation/Current/STATUS.md` in the project workspace. As of September
-> 19, 2026, WP-23.0 and WP-23.2 are complete; JC-01..08 passed in real PIE,
-> and WP-23.1 packet authoring is next. The remainder of this file preserves the
+> 19, 2026, WP-23.0, WP-23.1, and WP-23.2 are complete; VR-01..08 and
+> JC-01..08 pass in real PIE under current Schema 6. WP-23.5 import/content
+> readiness passes, but production remains gated. The next bounded work is the
+> Nyxaroth fail-closed rig/profile and focused PIE proof. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 
 ## Actual status

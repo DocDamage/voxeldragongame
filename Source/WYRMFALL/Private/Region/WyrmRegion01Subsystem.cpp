@@ -19,6 +19,9 @@ namespace WyrmRegion01
     const FName LandmarkTownEntry(TEXT("LM-TOWNENTRY"));
     const FName LandmarkCompactCave(TEXT("LM-COMPACTCAVE"));
     const FName LandmarkSilentLanding(TEXT("LM-SILENTLANDING"));
+    const FName LandmarkCanopyEntry(TEXT("LM-CANOPYENTRY"));
+    const FName LandmarkTidecallerOutpost(TEXT("LM-TIDECALLEROUTPOST"));
+    const FName LandmarkCanopyHunt(TEXT("LM-CANOPYHUNT"));
 
     const FName FactHeartExit(TEXT("heart.exit_reached"));
     const FName FactTidecrossVisited(TEXT("tidecross.visited"));
@@ -41,6 +44,9 @@ namespace WyrmRegion01
     const FName FactWageRecovered(TEXT("wage.recovered"));
     const FName FactCacheRecovered(TEXT("cache.recovered"));
     const FName FactCaveServiceUnlocked(TEXT("cave.service_unlocked"));
+    const FName FactVerdantCrownClaimResolved(TEXT("verdant.crown_claim_relinquished"));
+    const FName FactCanopyHunterResolved(TEXT("canopy.hunter_resolved"));
+    const FName FactHuntersVeil(TEXT("echo.hunters_veil"));
 }
 
 void UWyrmRegion01Subsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -81,7 +87,7 @@ const TArray<FWyrmRegion01LandmarkDefinition>& UWyrmRegion01Subsystem::GetDefini
     static const TArray<FWyrmRegion01LandmarkDefinition> Definitions = {
         {LandmarkHeart, {LandmarkTamsin}, false, true},
         {LandmarkTamsin, {LandmarkHeart, LandmarkTidecross}, false, true},
-        {LandmarkTidecross, {LandmarkTamsin, LandmarkQuietwater, LandmarkCamp, LandmarkCutting, LandmarkTownEntry, LandmarkSilentLanding}, false, true},
+        {LandmarkTidecross, {LandmarkTamsin, LandmarkQuietwater, LandmarkCamp, LandmarkCutting, LandmarkTownEntry, LandmarkSilentLanding, LandmarkCanopyEntry}, false, true},
         {LandmarkQuietwater, {LandmarkTidecross}, true, true},
         {LandmarkCamp, {LandmarkTidecross}, true, true},
         {LandmarkCutting, {LandmarkTidecross, LandmarkSella, LandmarkControl}, false, true},
@@ -93,6 +99,10 @@ const TArray<FWyrmRegion01LandmarkDefinition>& UWyrmRegion01Subsystem::GetDefini
         {LandmarkCompactCave, {LandmarkTownEntry}, true, true},
         // A separate optional horror route, fact-gated after real local closure.
         {LandmarkSilentLanding, {LandmarkTidecross}, true, true},
+        // Post-homecoming Verdant Reach closure remains part of this connected region.
+        {LandmarkCanopyEntry, {LandmarkTidecross, LandmarkTidecallerOutpost, LandmarkCanopyHunt}, false, true},
+        {LandmarkTidecallerOutpost, {LandmarkCanopyEntry}, false, true},
+        {LandmarkCanopyHunt, {LandmarkCanopyEntry}, true, true},
     };
     return Definitions;
 }
@@ -113,7 +123,7 @@ bool UWyrmRegion01Subsystem::IsKnownLandmark(FName LandmarkId) const
 bool UWyrmRegion01Subsystem::HasValidLandmarkGraph() const
 {
     const TArray<FWyrmRegion01LandmarkDefinition>& Definitions = GetDefinitions();
-    if (Definitions.Num() != 13)
+    if (Definitions.Num() != 16)
     {
         return false;
     }
@@ -188,6 +198,12 @@ bool UWyrmRegion01Subsystem::IsLandmarkCurrentlyAvailable(FName LandmarkId) cons
         return IsBondedDragonAvailable();
     }
     if (LandmarkId == WyrmRegion01::LandmarkSilentLanding)
+    {
+        return IsHomecomingComplete();
+    }
+    if (LandmarkId == WyrmRegion01::LandmarkCanopyEntry ||
+        LandmarkId == WyrmRegion01::LandmarkTidecallerOutpost ||
+        LandmarkId == WyrmRegion01::LandmarkCanopyHunt)
     {
         return IsHomecomingComplete();
     }
@@ -668,4 +684,64 @@ bool UWyrmRegion01Subsystem::RecordCorvynCured()
 bool UWyrmRegion01Subsystem::IsCorvynResolved() const
 {
     return HasFact(FName(TEXT("corvyn.defeated_hostile"))) || HasFact(FName(TEXT("corvyn.cured")));
+}
+
+bool UWyrmRegion01Subsystem::ResolveVerdantCrownClaim(bool bEvidenceRoute)
+{
+    if (!IsHomecomingComplete() || !IsBondedDragonAvailable() || IsVerdantRegionalClosureComplete())
+    {
+        return false;
+    }
+    if (bEvidenceRoute && !HasConflictEvidence())
+    {
+        return false;
+    }
+    const FName RouteFact = bEvidenceRoute
+        ? FName(TEXT("verdant.crown_route.evidence"))
+        : FName(TEXT("verdant.crown_route.guard_defeat"));
+    const FName RouteReceipt = bEvidenceRoute
+        ? FName(TEXT("region01.verdant.crown.evidence"))
+        : FName(TEXT("region01.verdant.crown.guard_defeat"));
+    if (!CommitFact(RouteFact, RouteReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmRegion01::FactVerdantCrownClaimResolved,
+        FName(TEXT("region01.verdant.crown_claim_relinquished")));
+}
+
+bool UWyrmRegion01Subsystem::IsVerdantRegionalClosureComplete() const
+{
+    return HasFact(WyrmRegion01::FactVerdantCrownClaimResolved);
+}
+
+bool UWyrmRegion01Subsystem::ResolveCanopyHunter(bool bTrustRoute)
+{
+    if (!IsHomecomingComplete() || IsCanopyHunterResolved())
+    {
+        return false;
+    }
+    const FName RouteFact = bTrustRoute
+        ? FName(TEXT("canopy.hunter_route.trust"))
+        : FName(TEXT("canopy.hunter_route.living_defeat"));
+    const FName RouteReceipt = bTrustRoute
+        ? FName(TEXT("region01.canopy.hunter.trust"))
+        : FName(TEXT("region01.canopy.hunter.living_defeat"));
+    if (!CommitFact(RouteFact, RouteReceipt) ||
+        !CommitFact(WyrmRegion01::FactCanopyHunterResolved, FName(TEXT("region01.canopy.hunter.resolved"))))
+    {
+        return false;
+    }
+    EnsureDerivedFact(WyrmRegion01::FactHuntersVeil, FName(TEXT("region01.echo.hunters_veil")));
+    return true;
+}
+
+bool UWyrmRegion01Subsystem::IsCanopyHunterResolved() const
+{
+    return HasFact(WyrmRegion01::FactCanopyHunterResolved);
+}
+
+bool UWyrmRegion01Subsystem::IsHuntersVeilUnlocked() const
+{
+    return HasFact(WyrmRegion01::FactHuntersVeil);
 }

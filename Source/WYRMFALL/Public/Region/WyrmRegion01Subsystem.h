@@ -153,6 +153,23 @@ public:
     UFUNCTION(BlueprintPure, Category="Region 01|Corvyn")
     bool IsCorvynResolved() const;
 
+    /** Ends the remaining Verdant crown claim without making Meridess a boss. */
+    UFUNCTION(BlueprintCallable, Category="Region 01|Verdant Reach")
+    bool ResolveVerdantCrownClaim(bool bEvidenceRoute);
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Verdant Reach")
+    bool IsVerdantRegionalClosureComplete() const;
+
+    /** Optional hunt resolution. Both authored routes grant the same once-only Echo fact. */
+    UFUNCTION(BlueprintCallable, Category="Region 01|Verdant Reach")
+    bool ResolveCanopyHunter(bool bTrustRoute);
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Verdant Reach")
+    bool IsCanopyHunterResolved() const;
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Echo")
+    bool IsHuntersVeilUnlocked() const;
+
     UFUNCTION(BlueprintCallable, Category="Region 01|Facts")
     bool CommitFact(FName FactId, FName ReceiptId);
 

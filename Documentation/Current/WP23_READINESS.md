@@ -20,9 +20,9 @@ source candidates and stay fail-closed under DRG-15.
 
 | Order | Child | Evidence-backed state | Exact gate |
 |---:|---|---|---|
-| 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed with supplied King art, pact/disciple route parity, Unseen Hand, two-route travel, and Schema 5 recovery. |
-| 2 | WP-23.1 Verdant Reach closure | READY FOR PACKET | Verified Region 01/Verdance plus supplied forest scene, trees, and Ranger characters/animations. Intake and content-fit review still belong to the child. |
-| 3 | WP-23.5 Gloaming Marches | BLOCKED | Validate Nyxaroth/Dark Dragon rig; select Ashgrave and horror fits from Cathedral, cemetery/church, and horror-character candidates. |
+| 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under Schema 6 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
+| 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, rendered QA, and Schema 6 recovery. |
+| 3 | WP-23.5 Gloaming Marches | **READINESS PASS / PRODUCTION GATED** | UE 5.8.2 imported Nyxaroth as a 33-part modular skeletal candidate with 20 animations. Cathedral content provides generic fits; the required horror FBX imports as 331 modular static parts and needs authored assembly/proof. A fail-closed rig profile and all gameplay/PIE evidence remain open. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -38,7 +38,7 @@ ordering may change when a blocker is cleared by real evidence.
 ## Travel/save contract for regional children
 
 WP-23.2 introduced the bounded `UWyrmWorldTravelSubsystem` owner with only the
-Region01↔JadePeaks routes. `UWyrmSaveSubsystem` Schema 5 remains the sole save
+Region01↔JadePeaks routes. `UWyrmSaveSubsystem` Schema 6 remains the sole save
 coordinator and now owns region-keyed terrain/camp records, current travel
 region/arrival data, the existing character/inventory/dragon/vehicle records,
 and both regional fact records. Later work extends these owners rather than
@@ -62,8 +62,9 @@ contract:
 5. Regional facts and one-time rewards commit only after successful arrival or
    the authored interaction—not when travel is requested. Duplicate travel and
    reload cannot duplicate a dragon, reward, camp piece, or hovercar.
-6. Full-world persistence uses the Schema 5 region-keyed terrain/camp array plus
-   current region and arrival/return identifiers. Schemas 1–4 remain accepted;
+6. Full-world persistence uses the Schema 6 record, retaining the Schema 5
+   region-keyed terrain/camp array plus current region and arrival/return
+   identifiers and adding Hunter's Veil state. Schemas 1–5 remain accepted;
    later regions must extend this contract without another save owner.
 7. Inactive dragons remain saved by stable `DragonId`; destination restoration
    may spawn only a known validated profile. DRG-15 remains fail-closed.
@@ -80,6 +81,8 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Author the bounded **WP-23.1 Verdant Reach closure** packet using the verified
-Region 01/Verdance baseline and supplied forest/ranger content. Content-fit
-review remains part of that child; do not start a new-dragon region.
+Implement the bounded **Nyxaroth fail-closed rig/profile proof** described in
+[WP-23.5](tasks/WP-23.5.md). Compile against UE 5.8.2 and prove the
+profile-level Companion/TrueForm, Heartfold, mount, flight, direct-control,
+GAS-combat, and save behaviors in focused PIE. Do not compose Gloaming Marches
+until that gate passes.
