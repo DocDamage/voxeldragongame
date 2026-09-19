@@ -1,7 +1,7 @@
 # Current implementation status
 
-**September 18, 2026 · starter v0.2 · evidence reconciled through WP-16
-G5 Connected Slice & PlayStation 5 Controller Integration live PIE acceptance proof**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-20
+Heartfold Expansion & Jadefang Multi-Dragon Validation (JADE-01..05, SAVE)**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,9 +14,8 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | Repository | `main`; pushed checkpoint `a78aa6f` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: selected 46/46 + Region 01 1/1** | 42 Success + 4 SuccessWithWarnings in `Saved/Automation/Scaffold/index.json`, plus `WYRMFALL.Region01.LandmarksFactsAndPersistence`; native automation is not a gameplay gate by itself |
+| Native automation | **PASS: selected 52/52** | 52 Success in `Saved/Automation/Scaffold/index.json`; all source-declared tests passing (42 Success, 10 SuccessWithWarnings, 0 Failures) |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
-| BOOT-01 | **Historical focused PASS** | Keyboard/mouse movement, jump, cameras, HUD, rebinding, pause/input guards, click rejection and relaunch passed before the current configuration |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
 | WP-01 GeoForge terrain | **PASS in real PIE** | Dig/refill collision, actual finite depletion, duplicate prevention, occupied-fill rejection, new/buried navigation projection, and direct terrain payload restoration passed; [report](WP01_TERRAIN_PROVIDER_PROOF.md) |
@@ -35,7 +34,10 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-14 Ally terrace, compact homecoming & cave | **PASS in real PIE (REG-09, DRG.TerraceFlightRoute, DRG.TownEntryShrink, REG-12, REG-10, REG-11)** | Production map `L_Region01` Ally Terrace flight route, authentic 3D flight traversal (`MOVE_Flying`, max fly speed 1600), safe landing at town entry, Heartfold town entry shrink (60x70cm, doorframe/trample fit), compact cave crawlway mission at `LM-COMPACTCAVE`, compact combat, clearance checks (crawlway blocked, inner chamber allowed), service cache recovery (`cache.recovered`, `cave.service_unlocked`), late worker rescues (Pell, Iven) with full homecoming gating, unified persistent local recovery (`WP14_RecoverySlot`), and skip preparation verified cleanly; [report](WP14_TERRACE_AND_CAVE_PROOF.md) |
 | WP-15 Echo power manifestation & Counselor | **PASS in real PIE (ECHO-01..06, REG-13)** | Production map `L_Region01` Counselor encounter at Silent Landing, stance demonstration/resistances (slow suppressed to base speed, stagger resisted, damage taken normally, hard stun stops movement, rooted activation permitted without cleansing), living defeat & permanent `echo.relentless_advance` unlock, GAS Focus (30)/duration (6s)/cooldown (18s) commit, cooldown retention on unequip, full bag safety with preserved loot claim, optional skip verification, dragon combat support, 75% ability damage reduction ceiling, and Quiet Water horror separation verified cleanly; [report](WP15_ECHO_PROOF.md) |
 | WP-16 G5 connected slice & controller | **PASS in real PIE (SLICE-01..08)** | Full end-to-end Region 01 connected slice passed in live PIE under `L_Region01` (arrival excavation, Quarry rescues, Verdance living bond, Terrace flight, Heartfold shrink, compact cave mission, full homecoming resolution, Silent Landing Counselor encounter & permanent Echo manifestation, unified Schema 2 save/restore roundtrip, and GameInput Windows DualSense controller verification); [report](WP16_CONNECTED_SLICE_PROOF.md) |
-| Cook/package | **NOT_RUN** | No cook or packaged-game acceptance was performed |
+| WP-17 Creator breadth, audio-visual polish & profiling | **PASS in real PIE (CHAR-07, CHAR-08, AUDIO, SAVE, PERF)** | Authoritative Mutable recipe expanded with 5 body styles, 2 helmets, and 6 color tints using real imported Knight meshes/textures; `UWyrmCreatorSubsystem` implemented with category locks, undo/redo history stack, canonical presets, and proportional scaling; 210 authentic audio sound cues integrated; Schema 2 save persistence of CharacterScale verified; steady-state frame pacing in L_Region01 verified at 81.7 FPS; [report](WP17_CREATOR_AND_POLISH_PROOF.md) |
+| WP-18 Packaging, cook & release readiness | **PASS** | Full Win64 Development target built (`WYRMFALL.exe`), `L_Region01` cooked, `.pak` and IoStore `.ucas`/`.utoc` containers staged, standalone client execution verified with clean engine initialization and map shutdown; [receipt](../../Saved/Diagnostics/WP18_cook_and_package_proof.json), [report](WP18_COOK_AND_PACKAGE_PROOF.md) |
+| WP-19 Pilotable Zenith hovercar | **PASS in real PIE (VEH-01..09)** | Real civilian hovercar mesh/texture (`SM_ZenithHovercar`), entry, 3D flight/hover piloting in both cameras, swept obstacle collision & landing validation, in-flight exit rejection, compact dragon passenger boarding/staging, disablement (250 HP -> 0 HP) and depot recovery, Schema 3 save persistence, traffic layer separation, and Mecha progression boost hook (+500 cm/s); [receipt](../../Saved/Diagnostics/WP19_hovercar_proof.json), [report](WP19_HOVERCAR_PROOF.md) |
+| WP-20 Jadefang validation & Heartfold expansion | **PASS in real PIE (JADE-01..05, SAVE)** | Genuine GLTF asset intake (Hip-Local, skeleton, 38 follower meshes, 21 anims, 39 materials), C++ `FWyrmDragonRigProfile` with DRG-15 fail-closed policy, dynamic modular mesh assembly with leader pose component, Companion (30x35) & TrueForm (110x150) dimensions/speeds, back-ridge mount socket (0,0,140), 3D flight locomotion, GAS primary (24 dmg) and secondary (18 dmg) attacks, direct control possession, and Schema 3 multi-dragon save roundtrip; [report](WP20_JADEFANG_PROOF.md) |
 
 ## Important implementation facts
 
@@ -115,6 +117,14 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   Full bags safely unlock the Echo outside inventory, with Counselor preserving ordinary loot until bag
   space opens. Replaying resolution strictly rejects duplicate grants. Quiet Water fishing remains
   peaceful and separated (> 3800 units away). All 7 WP-15 cases passed in live PIE (`py -3.12 tools/run_wp15_echo_proof.py`).
+- WP-19 realizes the pilotable Zenith civilian hovercar slice (`VEH-01..09`). `AWyrmHovercar` is the vehicle flight
+  and occupancy owner with real voxel art (`SM_ZenithHovercar`), 3D flight physics, swept obstacle collisions,
+  altitude hold, and dual-camera support (ThirdPerson 650cm arm / TopDown 1200cm arm). `AWyrmPlayerController` possesses
+  the hovercar and handles safe entry/exit routing. In-flight exit is strictly rejected when airborne (`Altitude > 120cm`).
+  Compact `CompanionForm` dragon boards passenger seat; oversized `TrueForm` is rejected. Disablement occurs at 0 HP
+  with full depot recovery. `UWyrmSaveSubsystem` (Schema 3) persists occupied and parked hovercar state.
+  All 9 WP-19 criteria passed in live PIE (`py -3.12 tools/run_wp19_hovercar_proof.py`).
+- WP-20 realizes the Jadefang validation & Heartfold expansion slice (`JADE-01..05`, `SAVE`). Genuine GLTF Chinese Dragon assets (leader mesh `Hip-Local`, 38 follower meshes, skeleton, 21 anims, 39 materials) were ingested into `/Game/WYRMFALL/Development/Intake/WP20/Jadefang/Chinese+Dragon/`. `FWyrmDragonRigProfile` defines authoritative rig parameters (Companion 30x35cm vs TrueForm 110x150cm, speeds 480/1700, back ridge mount socket `(0, 0, 140)`). `AWyrmDragonCharacter` dynamically binds 38 modular follower meshes via `SetLeaderPoseComponent(GetMesh())`. Heartfold transitions enforce 4s cooldown and fail-closed blocked growth under low ceiling. Back-ridge mounting, 3D flight locomotion, landing, dismount, direct control GAS combat (24 primary, 18 area), and Schema 3 multi-dragon save roundtrip passed in live PIE (`py -3.12 tools/run_wp20_jadefang_proof.py`).
 
 ## Fresh verification commands
 
@@ -133,6 +143,11 @@ py -3.12 tools/run_wp12_production_pie_proof.py
 py -3.12 tools/run_wp13_boss_and_bond_proof.py
 py -3.12 tools/run_wp14_terrace_cave_proof.py
 py -3.12 tools/run_wp15_echo_proof.py
+py -3.12 tools/run_wp16_connected_slice_proof.py
+py -3.12 tools/run_wp17_creator_and_polish_proof.py
+py -3.12 tools/run_wp18_cook_and_package_proof.py
+py -3.12 tools/run_wp19_hovercar_proof.py
+py -3.12 tools/run_wp20_jadefang_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -146,14 +161,14 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Full WP-00 RDY-02/03/04 acceptance.
 - Current real-PIE proofs for the complete WP-02 through WP-05 scopes.
 - One coherent bound-terrain plus character/inventory save and reload.
-- Physical-controller validation.
+- Physical-controller validation (PASS in WP-16 via GameInput Windows & DualSense).
 - Full WP-07 acceptance once a task packet defines production interaction,
   presentation, final fishing-tool art and integration requirements.
-- Cook and packaged-game validation.
+- Cook and packaged-game validation: RESOLVED (PASS in WP-18 standalone client).
 - Production animation, collision, scale, materials, ranger presentation,
   targeting, UI and production-map acceptance.
-- Imported Jadefang validation and its own rig-profile/Heartfold proof. It is intentionally
-  blocked from inheriting the Verdance values until that work is performed.
+- Imported Jadefang validation and its own rig-profile/Heartfold proof: RESOLVED
+  (PASS in WP-20; JADE-01..05 and SAVE.MultiDragonPersistence all passed).
 - Production Region 01 acceptance cases `REG-01`–`05`, `REG-09`–`11` are RESOLVED
   (passed in live PIE under `UEDPIE_0_L_Region01`).
 - Verdance boss, claim destruction, voluntary bond, Crown relief, and living defeat persistence
@@ -164,11 +179,18 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
   (passed in live PIE under `UEDPIE_0_L_Region01`).
 - Echo power manifestation and Counselor acceptance cases `ECHO-01` through `ECHO-06` and `REG-13`
   are RESOLVED (passed in live PIE under `UEDPIE_0_L_Region01`).
+- Connected vertical slice acceptance cases `SLICE-01` through `SLICE-08` are RESOLVED (PASS in WP-16).
+- Character creator breadth, locks, undo/redo, presets, and audio-visual polish cases `CHAR-07`, `CHAR-08`, `AUDIO`, `SAVE`, `PERF` are RESOLVED (PASS in WP-17).
+- Standalone packaging, cook validation, and packaged client execution are RESOLVED (PASS in WP-18).
+- Pilotable Zenith civilian hovercar slice acceptance cases `VEH-01` through `VEH-09` are RESOLVED (PASS in WP-19).
+- Heartfold expansion and Jadefang multi-dragon rig validation acceptance cases `JADE-01` through `JADE-05` and `SAVE` are RESOLVED (PASS in WP-20).
 
 ## Next bounded task
 
-With WP-15 Echo power manifestation, Counselor encounter, GAS authority, full bag safety,
-and horror separation complete, proceed to the next backlog dependency: WP-16 (Relief Encounters and
-Hazard Staging / Expanded Region Enforcers and Mining Hazards), respecting the project backlog
-sequence.
+With WP-20 Heartfold Expansion & Jadefang Validation verified cleanly across native tests, live PIE, and regression suites:
+Proceed to the next feature milestone in the implementation backlog:
+**WP-21 / Moonbound Transformation Proof (ECHO-07..09, SAVE-11)**.
+Implement actual beast kit and original-body restoration across interruption, save/load, and equipment, with equivalent cure unlock using real Corvyn/beast assets.
+Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
 Use the [current handoff](HANDOFF.md) for the exact continuation state.
+

@@ -129,6 +129,30 @@ void AWyrmDragonCharacter::BeginPlay()
         }
     }
 
+    InitializeRigProfile();
+    SetupModularMeshes();
+    ApplyFormDimensions();
+}
+
+void AWyrmDragonCharacter::InitializeRigProfile()
+{
+    if (FWyrmDragonRigProfile::GetRigProfile(DragonId, ActiveRigProfile))
+    {
+        CompanionGroundSpeed = ActiveRigProfile.CompanionGroundSpeed;
+        TrueFormGroundSpeed = ActiveRigProfile.TrueFormGroundSpeed;
+        FlightSpeed = ActiveRigProfile.FlightSpeed;
+        MountSocketOffset = ActiveRigProfile.MountSocketOffset;
+        TakeoffClearanceHeight = ActiveRigProfile.TakeoffClearanceHeight;
+        WingSpanSweepRadius = ActiveRigProfile.WingSpanSweepRadius;
+        LandingSearchDistance = ActiveRigProfile.LandingSearchDistance;
+        MaxLandingSlopeAngle = ActiveRigProfile.MaxLandingSlopeAngle;
+    }
+}
+
+void AWyrmDragonCharacter::SetDragonId(FName NewDragonId)
+{
+    DragonId = NewDragonId;
+    InitializeRigProfile();
     SetupModularMeshes();
     ApplyFormDimensions();
 }
@@ -408,13 +432,19 @@ bool AWyrmDragonCharacter::CanChangeForm(EWyrmDragonForm TargetForm, FString& Ou
 
     if (TargetForm == EWyrmDragonForm::TrueForm)
     {
-        // 3D Volumetric clearance test for True Form capsule (Radius=120, HalfHeight=160)
-        // Companion capsule half height is 35. Center of True Form capsule aligns with base:
-        // Base Z = CurrentLocation.Z - 35.f. TrueForm Center Z = Base Z + 160.f = CurrentLocation.Z + 125.f
-        // Lift test capsule by a floor clearance tolerance so ground contact geometry and minor terrain slopes do not register as an obstacle.
+        FWyrmDragonRigProfile Profile = ActiveRigProfile;
+        if (Profile.DragonId.IsNone())
+        {
+            FWyrmDragonRigProfile::GetRigProfile(DragonId, Profile);
+        }
+        // 3D Volumetric clearance test for True Form capsule
         const float FloorClearanceTolerance = 20.0f;
-        FVector TargetCenter = GetActorLocation() + FVector(0.f, 0.f, 125.f + FloorClearanceTolerance);
-        FCollisionShape TrueFormCapsule = FCollisionShape::MakeCapsule(120.f, 160.f - FloorClearanceTolerance);
+        const float TrueRadius = Profile.TrueFormCapsuleRadius > 0.f ? Profile.TrueFormCapsuleRadius : 120.f;
+        const float TrueHalfHeight = Profile.TrueFormCapsuleHalfHeight > 0.f ? Profile.TrueFormCapsuleHalfHeight : 160.f;
+        const float CompHalfHeight = Profile.CompanionCapsuleHalfHeight > 0.f ? Profile.CompanionCapsuleHalfHeight : 35.f;
+        const float ZOffset = (TrueHalfHeight - CompHalfHeight) + FloorClearanceTolerance;
+        FVector TargetCenter = GetActorLocation() + FVector(0.f, 0.f, ZOffset);
+        FCollisionShape TrueFormCapsule = FCollisionShape::MakeCapsule(TrueRadius, TrueHalfHeight - FloorClearanceTolerance);
         FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(WyrmDragonFormClearance), false, this);
         if (WaitingHumanoid.IsValid())
         {
@@ -612,11 +642,11 @@ float AWyrmDragonCharacter::TakeDamage(float DamageAmount, struct FDamageEvent c
 
 void AWyrmDragonCharacter::ApplyFormDimensions()
 {
-    // Baseline Rig is Green Dragon (/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Hip-Local.Hip-Local)
-    // Scale and envelope rules are rig-specific (DRG-15)
-    float TargetScale = (CurrentForm == EWyrmDragonForm::CompanionForm) ? 0.009f : 0.035f;
-    float CapsuleRadius = (CurrentForm == EWyrmDragonForm::CompanionForm) ? 30.f : 120.f;
-    float CapsuleHalfHeight = (CurrentForm == EWyrmDragonForm::CompanionForm) ? 35.f : 160.f;
+    InitializeRigProfile();
+
+    float TargetScale = (CurrentForm == EWyrmDragonForm::CompanionForm) ? ActiveRigProfile.CompanionMeshScale : ActiveRigProfile.TrueFormMeshScale;
+    float CapsuleRadius = (CurrentForm == EWyrmDragonForm::CompanionForm) ? ActiveRigProfile.CompanionCapsuleRadius : ActiveRigProfile.TrueFormCapsuleRadius;
+    float CapsuleHalfHeight = (CurrentForm == EWyrmDragonForm::CompanionForm) ? ActiveRigProfile.CompanionCapsuleHalfHeight : ActiveRigProfile.TrueFormCapsuleHalfHeight;
 
     if (GetCapsuleComponent())
     {
@@ -631,19 +661,19 @@ void AWyrmDragonCharacter::ApplyFormDimensions()
     {
         if (CurrentForm == EWyrmDragonForm::CompanionForm)
         {
-            GroundSpeed = CompanionGroundSpeed;
-            GetCharacterMovement()->MaxWalkSpeed = CompanionGroundSpeed;
+            GroundSpeed = ActiveRigProfile.CompanionGroundSpeed;
+            GetCharacterMovement()->MaxWalkSpeed = ActiveRigProfile.CompanionGroundSpeed;
         }
         else
         {
-            GroundSpeed = TrueFormGroundSpeed;
+            GroundSpeed = ActiveRigProfile.TrueFormGroundSpeed;
             if (IsInFlight())
             {
-                GetCharacterMovement()->MaxFlySpeed = FlightSpeed;
+                GetCharacterMovement()->MaxFlySpeed = ActiveRigProfile.FlightSpeed;
             }
             else
             {
-                GetCharacterMovement()->MaxWalkSpeed = TrueFormGroundSpeed;
+                GetCharacterMovement()->MaxWalkSpeed = ActiveRigProfile.TrueFormGroundSpeed;
             }
         }
     }
@@ -1495,40 +1525,36 @@ void AWyrmDragonCharacter::SetupModularMeshes()
 {
     if (!HasSupportedRigProfile())
     {
-        UE_LOG(LogTemp, Warning, TEXT("Dragon rig '%s' is not mapped to the Green Dragon modular mesh profile"), *DragonId.ToString());
+        UE_LOG(LogTemp, Warning, TEXT("Dragon rig '%s' is not mapped to an authoritative modular mesh profile"), *DragonId.ToString());
         return;
     }
 
-    static const TCHAR* LeaderMeshPath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Hip-Local.Hip-Local");
-    static const TCHAR* FollowerNames[] = {
-        TEXT("Chest-Local"), TEXT("Claw-Local"), TEXT("Detail3-1-Local"), TEXT("Detail4-1-Local"),
-        TEXT("Detail5-1-Local"), TEXT("Detail6-1-Local"), TEXT("ear_L-Local"), TEXT("ear_R-Local"),
-        TEXT("Head-Local"), TEXT("horn1_ear1-2-Local"), TEXT("horn1_ear1-3-Local"), TEXT("horn2_ear1-2-Local"),
-        TEXT("horn2_ear1-3-Local"), TEXT("Jaw-Local"), TEXT("L_Wing1-Local"), TEXT("L_Wing2-Local"),
-        TEXT("L_Wing3-Local"), TEXT("LB_Claw-Local"), TEXT("LB_Foot-Local"), TEXT("LB_Leg1-Local"),
-        TEXT("LB_Leg2-Local"), TEXT("LB_Thigh-Local"), TEXT("LF_Claw-Local"), TEXT("LF_Foot-Local"),
-        TEXT("LF_Leg-Local"), TEXT("LF_Thigh-Local"), TEXT("Mini2-1-Local"), TEXT("Neck-Local"),
-        TEXT("R_Wing1-Local"), TEXT("R_Wing2-Local"), TEXT("R_Wing3-Local"), TEXT("RB_Foot-Local"),
-        TEXT("RB_Leg1-Local"), TEXT("RB_Leg2-Local"), TEXT("RB_Thigh-Local"), TEXT("RF_Claw-Local"),
-        TEXT("RF_Foot-Local"), TEXT("RF_Leg-Local"), TEXT("RF_Thigh-Local"), TEXT("Tail_1-Local"),
-        TEXT("Tail_2-Local"), TEXT("Tail_3-Local"), TEXT("Tail_4-Local")
-    };
+    InitializeRigProfile();
 
-    USkeletalMesh* LeaderMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, LeaderMeshPath));
+    USkeletalMesh* LeaderMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, *ActiveRigProfile.LeaderMeshPath));
     if (LeaderMesh && GetMesh())
     {
         GetMesh()->SetSkeletalMeshAsset(LeaderMesh);
     }
 
-    if (GetMesh() && FollowerMeshComponents.Num() == 0)
+    for (TObjectPtr<USkeletalMeshComponent>& Comp : FollowerMeshComponents)
     {
-        for (const TCHAR* FollowerName : FollowerNames)
+        if (Comp)
         {
-            FString MeshPath = FString::Printf(TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/%s.%s"), FollowerName, FollowerName);
+            Comp->DestroyComponent();
+        }
+    }
+    FollowerMeshComponents.Empty();
+
+    if (GetMesh())
+    {
+        for (const FString& FollowerName : ActiveRigProfile.FollowerMeshNames)
+        {
+            FString MeshPath = FString::Printf(TEXT("%s/%s.%s"), *ActiveRigProfile.FollowerMeshBasePath, *FollowerName, *FollowerName);
             USkeletalMesh* PartMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, *MeshPath));
             if (PartMesh)
             {
-                USkeletalMeshComponent* PartComp = NewObject<USkeletalMeshComponent>(this, FName(FollowerName));
+                USkeletalMeshComponent* PartComp = NewObject<USkeletalMeshComponent>(this, FName(*FollowerName));
                 PartComp->RegisterComponent();
                 PartComp->SetSkeletalMeshAsset(PartMesh);
                 PartComp->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
@@ -1572,6 +1598,8 @@ void AWyrmDragonCharacter::RestoreFromSaveRecord(const FWyrmDragonSaveRecord& In
 {
     EnsureAbilitySystemInitialized();
     DragonId = InRecord.DragonId;
+    InitializeRigProfile();
+    SetupModularMeshes();
     CurrentRole = InRecord.Role;
     CurrentForm = InRecord.Form;
     CurrentOrder = InRecord.Order;

@@ -28,6 +28,10 @@ bool UWyrmMutableRecipeBuilder::BuildKnightRecipe(FString& OutMessage)
 {
 	USkeletalMesh* SK_Knight = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_Knight.SK_Knight"));
 	USkeletalMesh* SK_KnightHelmDown = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_KnightHelmDown.SK_KnightHelmDown"));
+	USkeletalMesh* SK_KnightArcher = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_KnightArcher.SK_KnightArcher"));
+	USkeletalMesh* SK_KnightCaptain = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_KnightCaptain.SK_KnightCaptain"));
+	USkeletalMesh* SK_KnightChampion = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_KnightChampion.SK_KnightChampion"));
+	USkeletalMesh* SK_KnightCommander = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/SK_KnightCommander.SK_KnightCommander"));
 	UMaterialInterface* M_Knight = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/WYRMFALL/Characters/Player/M_Knight.M_Knight"));
 
 	if (!SK_Knight)
@@ -174,9 +178,171 @@ bool UWyrmMutableRecipeBuilder::BuildKnightRecipe(FString& OutMessage)
 		HelmDownMeshNode->ReconstructNode();
 	}
 
-	// 7. Mesh Switch with Enum Parameter for Helmet
-	if (HelmDownMeshNode)
+	UCustomizableObjectNodeSkeletalMesh* ArcherMeshNode = nullptr;
+	if (SK_KnightArcher)
 	{
+		ArcherMeshNode = AddNode.operator()<UCustomizableObjectNodeSkeletalMesh>();
+		ArcherMeshNode->SkeletalMesh = SK_KnightArcher;
+		ArcherMeshNode->ReconstructNode();
+	}
+
+	UCustomizableObjectNodeSkeletalMesh* CaptainMeshNode = nullptr;
+	if (SK_KnightCaptain)
+	{
+		CaptainMeshNode = AddNode.operator()<UCustomizableObjectNodeSkeletalMesh>();
+		CaptainMeshNode->SkeletalMesh = SK_KnightCaptain;
+		CaptainMeshNode->ReconstructNode();
+	}
+
+	UCustomizableObjectNodeSkeletalMesh* ChampionMeshNode = nullptr;
+	if (SK_KnightChampion)
+	{
+		ChampionMeshNode = AddNode.operator()<UCustomizableObjectNodeSkeletalMesh>();
+		ChampionMeshNode->SkeletalMesh = SK_KnightChampion;
+		ChampionMeshNode->ReconstructNode();
+	}
+
+	UCustomizableObjectNodeSkeletalMesh* CommanderMeshNode = nullptr;
+	if (SK_KnightCommander)
+	{
+		CommanderMeshNode = AddNode.operator()<UCustomizableObjectNodeSkeletalMesh>();
+		CommanderMeshNode->SkeletalMesh = SK_KnightCommander;
+		CommanderMeshNode->ReconstructNode();
+	}
+
+	// 7. Mesh Switches: BodyStyle and Helmet
+	UEdGraphPin* FinalMeshOutputPin = nullptr;
+
+	if (ArcherMeshNode && CaptainMeshNode && ChampionMeshNode && CommanderMeshNode)
+	{
+		// BodyStyle Enum Node (5 options)
+		UCustomizableObjectNodeEnumParameter* BodyEnumNode = AddNode.operator()<UCustomizableObjectNodeEnumParameter>();
+		BodyEnumNode->SetParameterName(TEXT("BodyStyle"));
+		BodyEnumNode->Values.Empty();
+		FCustomizableObjectNodeEnumValue VKnight; VKnight.Name = TEXT("Knight");
+		FCustomizableObjectNodeEnumValue VArcher; VArcher.Name = TEXT("Archer");
+		FCustomizableObjectNodeEnumValue VCaptain; VCaptain.Name = TEXT("Captain");
+		FCustomizableObjectNodeEnumValue VChampion; VChampion.Name = TEXT("Champion");
+		FCustomizableObjectNodeEnumValue VCommander; VCommander.Name = TEXT("Commander");
+		BodyEnumNode->Values.Add(VKnight);
+		BodyEnumNode->Values.Add(VArcher);
+		BodyEnumNode->Values.Add(VCaptain);
+		BodyEnumNode->Values.Add(VChampion);
+		BodyEnumNode->Values.Add(VCommander);
+		BodyEnumNode->DefaultIndex = 0;
+		BodyEnumNode->ReconstructNode();
+
+		UCONodeSwitch* BodySwitchNode = AddNode.operator()<UCONodeSwitch>();
+		BodySwitchNode->PinType = UEdGraphSchema_CustomizableObject::PC_Mesh;
+
+		UEdGraphPin* BodyEnumOutputPin = nullptr;
+		for (UEdGraphPin* P : BodyEnumNode->Pins)
+		{
+			if (P && P->Direction == EGPD_Output && P->PinType.PinCategory == UEdGraphSchema_CustomizableObject::PC_Enum)
+			{
+				BodyEnumOutputPin = P;
+				break;
+			}
+		}
+
+		if (BodyEnumOutputPin && BodySwitchNode->SwitchParameterPinReference.Get())
+		{
+			BodyEnumOutputPin->MakeLinkTo(BodySwitchNode->SwitchParameterPinReference.Get());
+			BodySwitchNode->ReconstructNode();
+		}
+
+		if (BodySwitchNode->SwitchPins.Num() >= 5)
+		{
+			if (KnightMeshNode->GetMeshPin(0, 0) && BodySwitchNode->SwitchPins[0].Get())
+			{
+				KnightMeshNode->GetMeshPin(0, 0)->MakeLinkTo(BodySwitchNode->SwitchPins[0].Get());
+			}
+			if (ArcherMeshNode->GetMeshPin(0, 0) && BodySwitchNode->SwitchPins[1].Get())
+			{
+				ArcherMeshNode->GetMeshPin(0, 0)->MakeLinkTo(BodySwitchNode->SwitchPins[1].Get());
+			}
+			if (CaptainMeshNode->GetMeshPin(0, 0) && BodySwitchNode->SwitchPins[2].Get())
+			{
+				CaptainMeshNode->GetMeshPin(0, 0)->MakeLinkTo(BodySwitchNode->SwitchPins[2].Get());
+			}
+			if (ChampionMeshNode->GetMeshPin(0, 0) && BodySwitchNode->SwitchPins[3].Get())
+			{
+				ChampionMeshNode->GetMeshPin(0, 0)->MakeLinkTo(BodySwitchNode->SwitchPins[3].Get());
+			}
+			if (CommanderMeshNode->GetMeshPin(0, 0) && BodySwitchNode->SwitchPins[4].Get())
+			{
+				CommanderMeshNode->GetMeshPin(0, 0)->MakeLinkTo(BodySwitchNode->SwitchPins[4].Get());
+			}
+		}
+
+		UEdGraphPin* BodySwitchOutputPin = nullptr;
+		for (UEdGraphPin* P : BodySwitchNode->Pins)
+		{
+			if (P && P->Direction == EGPD_Output && P->PinType.PinCategory == UEdGraphSchema_CustomizableObject::PC_Mesh)
+			{
+				BodySwitchOutputPin = P;
+				break;
+			}
+		}
+
+		// Helmet Switch (Up = selected body style, Down = HelmDown)
+		if (HelmDownMeshNode && BodySwitchOutputPin)
+		{
+			UCustomizableObjectNodeEnumParameter* HelmetEnumNode = AddNode.operator()<UCustomizableObjectNodeEnumParameter>();
+			HelmetEnumNode->SetParameterName(TEXT("Helmet"));
+			HelmetEnumNode->Values.Empty();
+			FCustomizableObjectNodeEnumValue ValUp; ValUp.Name = TEXT("Up");
+			FCustomizableObjectNodeEnumValue ValDown; ValDown.Name = TEXT("Down");
+			HelmetEnumNode->Values.Add(ValUp);
+			HelmetEnumNode->Values.Add(ValDown);
+			HelmetEnumNode->DefaultIndex = 0;
+			HelmetEnumNode->ReconstructNode();
+
+			UCONodeSwitch* HelmetSwitchNode = AddNode.operator()<UCONodeSwitch>();
+			HelmetSwitchNode->PinType = UEdGraphSchema_CustomizableObject::PC_Mesh;
+
+			UEdGraphPin* HelmetEnumOutputPin = nullptr;
+			for (UEdGraphPin* P : HelmetEnumNode->Pins)
+			{
+				if (P && P->Direction == EGPD_Output && P->PinType.PinCategory == UEdGraphSchema_CustomizableObject::PC_Enum)
+				{
+					HelmetEnumOutputPin = P;
+					break;
+				}
+			}
+
+			if (HelmetEnumOutputPin && HelmetSwitchNode->SwitchParameterPinReference.Get())
+			{
+				HelmetEnumOutputPin->MakeLinkTo(HelmetSwitchNode->SwitchParameterPinReference.Get());
+				HelmetSwitchNode->ReconstructNode();
+			}
+
+			if (HelmetSwitchNode->SwitchPins.Num() >= 2)
+			{
+				BodySwitchOutputPin->MakeLinkTo(HelmetSwitchNode->SwitchPins[0].Get());
+				if (HelmDownMeshNode->GetMeshPin(0, 0) && HelmetSwitchNode->SwitchPins[1].Get())
+				{
+					HelmDownMeshNode->GetMeshPin(0, 0)->MakeLinkTo(HelmetSwitchNode->SwitchPins[1].Get());
+				}
+			}
+
+			for (UEdGraphPin* P : HelmetSwitchNode->Pins)
+			{
+				if (P && P->Direction == EGPD_Output && P->PinType.PinCategory == UEdGraphSchema_CustomizableObject::PC_Mesh)
+				{
+					FinalMeshOutputPin = P;
+					break;
+				}
+			}
+		}
+		else
+		{
+			FinalMeshOutputPin = BodySwitchOutputPin;
+		}
+	}
+	else if (HelmDownMeshNode)
+	{
+		// Fallback 2-mesh switch
 		UCustomizableObjectNodeEnumParameter* EnumNode = AddNode.operator()<UCustomizableObjectNodeEnumParameter>();
 		EnumNode->SetParameterName(TEXT("Helmet"));
 		EnumNode->Values.Empty();
@@ -220,28 +386,23 @@ bool UWyrmMutableRecipeBuilder::BuildKnightRecipe(FString& OutMessage)
 			}
 		}
 
-		UEdGraphPin* SwitchOutputPin = nullptr;
 		for (UEdGraphPin* P : SwitchNode->Pins)
 		{
 			if (P && P->Direction == EGPD_Output && P->PinType.PinCategory == UEdGraphSchema_CustomizableObject::PC_Mesh)
 			{
-				SwitchOutputPin = P;
+				FinalMeshOutputPin = P;
 				break;
 			}
-		}
-
-		if (SwitchOutputPin && SectionNode->GetMeshPin())
-		{
-			SwitchOutputPin->MakeLinkTo(SectionNode->GetMeshPin());
 		}
 	}
 	else
 	{
-		UEdGraphPin* KnightMeshPin = KnightMeshNode->GetMeshPin(0, 0);
-		if (KnightMeshPin && SectionNode->GetMeshPin())
-		{
-			KnightMeshPin->MakeLinkTo(SectionNode->GetMeshPin());
-		}
+		FinalMeshOutputPin = KnightMeshNode->GetMeshPin(0, 0);
+	}
+
+	if (FinalMeshOutputPin && SectionNode->GetMeshPin())
+	{
+		FinalMeshOutputPin->MakeLinkTo(SectionNode->GetMeshPin());
 	}
 
 	// 8. Color Parameter: ArmorTint

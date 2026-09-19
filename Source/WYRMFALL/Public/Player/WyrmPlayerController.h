@@ -68,6 +68,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Dragon|Flight")
     bool LandDragon();
 
+    UFUNCTION(BlueprintCallable, Category="Vehicle|Control")
+    bool EnterHovercar(class AWyrmHovercar* Hovercar);
+
+    UFUNCTION(BlueprintCallable, Category="Vehicle|Control")
+    bool ExitHovercar();
+
 #if WITH_EDITOR
     // BOOT-01 instrumentation: exercise repeated setup on the live PIE controller.
     UFUNCTION(Exec) void WyrmDevRebindInput();
@@ -99,4 +105,5 @@ private:
     UPROPERTY(Transient) TObjectPtr<UInputAction> JumpAction;
     bool bClickMoveEnabled = true;
     bool bMovementLocked = false;
+    UPROPERTY(Transient) TWeakObjectPtr<class AWyrmCharacter> ControlledHumanoidBody;
 };

@@ -33,6 +33,9 @@
 #include "Dragon/WyrmDragonTypes.h"
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
+#include "Customization/WyrmCreatorSubsystem.h"
+#include "Vehicles/WyrmVehicleTypes.h"
+#include "Vehicles/WyrmHovercar.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
 #include <limits>
@@ -3081,18 +3084,27 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
         AWyrmDragonCharacter::StaticClass(), FVector(500.f, 5000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
 
     Dragon->BondWithHumanoid(Player);
-    Dragon->DragonId = FName(TEXT("Jadefang"));
-    TestFalse(TEXT("Jadefang cannot inherit Verdance's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
+    Dragon->DragonId = FName(TEXT("Rotwing"));
+    TestFalse(TEXT("Rotwing cannot inherit Verdance or Jadefang validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
 
     FString Reason;
-    TestFalse(TEXT("Jadefang Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+    TestFalse(TEXT("Rotwing Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
     TestTrue(TEXT("Heartfold rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated Heartfold profile")));
 
     Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
-    TestFalse(TEXT("Jadefang cannot inherit Verdance's mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
+    TestFalse(TEXT("Rotwing cannot inherit mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Mount rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated mount profile")));
-    TestFalse(TEXT("Jadefang cannot inherit Verdance's flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
+    TestFalse(TEXT("Rotwing cannot inherit flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
     TestTrue(TEXT("Flight rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated flight profile")));
+
+    // WP-20: Jadefang has its own authoritative validated rig profile
+    Dragon->SetDragonId(FName(TEXT("Jadefang")));
+    TestTrue(TEXT("Jadefang has authoritative validated rig profile (WP-20)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Jadefang companion walk speed is 480"), Dragon->GetActiveRigProfile().CompanionGroundSpeed, 480.f);
+    TestEqual(TEXT("Jadefang true form fly speed is 1700"), Dragon->GetActiveRigProfile().FlightSpeed, 1700.f);
+    TestEqual(TEXT("Jadefang mount socket offset is (0, 0, 140)"), Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 140.f));
+    TestTrue(TEXT("Jadefang can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Jadefang can take off in True Form"), Dragon->CanTakeOff(Reason));
 
     Dragon->Destroy();
     Player->Destroy();
@@ -3237,4 +3249,375 @@ bool FWyrmRegion01FactsAndPersistenceTest::RunTest(const FString& Parameters)
     Region01->ResetRegion01State();
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCreatorSubsystemTest, "WYRMFALL.Scaffold.CreatorSubsystemAndProportions",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FWyrmCreatorSubsystemTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    if (!World)
+    {
+        return false;
+    }
+
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>();
+    TestNotNull(TEXT("Character valid"), Character);
+    if (!Character)
+    {
+        World->DestroyWorld(false);
+        return false;
+    }
+
+    // Default scale
+    TestEqual(TEXT("Initial CharacterScale is One"), Character->GetCharacterScale(), FVector::OneVector);
+
+    // Proportions (CHAR-07)
+    Character->SetCharacterScale(FVector(0.85f, 0.85f, 0.85f));
+    TestEqual(TEXT("Shortest scale applied"), Character->GetCharacterScale(), FVector(0.85f, 0.85f, 0.85f));
+
+    Character->SetCharacterScale(FVector(1.15f, 1.15f, 1.15f));
+    TestEqual(TEXT("Tallest scale applied"), Character->GetCharacterScale(), FVector(1.15f, 1.15f, 1.15f));
+
+    Character->SetCharacterScale(FVector(1.25f, 1.25f, 1.0f));
+    TestEqual(TEXT("Broadest scale applied"), Character->GetCharacterScale(), FVector(1.25f, 1.25f, 1.0f));
+
+    // CreatorSubsystem
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCreatorSubsystem* CreatorSubsystem = NewObject<UWyrmCreatorSubsystem>(TestGI);
+    TestNotNull(TEXT("CreatorSubsystem instantiated"), CreatorSubsystem);
+    if (CreatorSubsystem)
+    {
+        CreatorSubsystem->InitializePresets();
+
+        // Category Locks (CHAR-08)
+        TestFalse(TEXT("BodyStyle unlocked initially"), CreatorSubsystem->IsCategoryLocked(TEXT("BodyStyle")));
+        CreatorSubsystem->SetCategoryLocked(TEXT("BodyStyle"), true);
+        TestTrue(TEXT("BodyStyle locked"), CreatorSubsystem->IsCategoryLocked(TEXT("BodyStyle")));
+        CreatorSubsystem->SetCategoryLocked(TEXT("BodyStyle"), false);
+        TestFalse(TEXT("BodyStyle unlocked again"), CreatorSubsystem->IsCategoryLocked(TEXT("BodyStyle")));
+
+        // Presets (CHAR-08)
+        TArray<FName> Presets = CreatorSubsystem->GetAvailablePresets();
+        TestTrue(TEXT("Presets registered"), Presets.Num() >= 4);
+        TestTrue(TEXT("Has Knight_Standard"), Presets.Contains(TEXT("Knight_Standard")));
+        TestTrue(TEXT("Has Knight_Commander"), Presets.Contains(TEXT("Knight_Commander")));
+        TestTrue(TEXT("Has Knight_Archer"), Presets.Contains(TEXT("Knight_Archer")));
+        TestTrue(TEXT("Has Knight_Champion"), Presets.Contains(TEXT("Knight_Champion")));
+        TestTrue(TEXT("Has Knight_Shortest"), Presets.Contains(TEXT("Knight_Shortest")));
+        TestTrue(TEXT("Has Knight_Tallest"), Presets.Contains(TEXT("Knight_Tallest")));
+        TestTrue(TEXT("Has Knight_Broadest"), Presets.Contains(TEXT("Knight_Broadest")));
+
+        // Undo / Redo (CHAR-08)
+        TestFalse(TEXT("Cannot undo initially"), CreatorSubsystem->CanUndo());
+        TestFalse(TEXT("Cannot redo initially"), CreatorSubsystem->CanRedo());
+
+        CreatorSubsystem->PushAppearanceUndoState(Character);
+        TestTrue(TEXT("Can undo after push"), CreatorSubsystem->CanUndo());
+
+        Character->SetCharacterScale(FVector(1.10f, 1.10f, 1.10f));
+        TestTrue(TEXT("Undo succeeds"), CreatorSubsystem->Undo(Character));
+        TestEqual(TEXT("State reverted by undo"), Character->GetCharacterScale(), FVector(1.25f, 1.25f, 1.0f));
+        TestTrue(TEXT("Can redo after undo"), CreatorSubsystem->CanRedo());
+
+        TestTrue(TEXT("Redo succeeds"), CreatorSubsystem->Redo(Character));
+        TestEqual(TEXT("State restored by redo"), Character->GetCharacterScale(), FVector(1.10f, 1.10f, 1.10f));
+    }
+
+    Character->Destroy();
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarLocomotionTest, "WYRMFALL.Scaffold.HovercarLocomotion",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmHovercarLocomotionTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    TestNotNull(TEXT("World created"), World);
+    if (!World) { return false; }
+
+    AWyrmHovercar* Hovercar = AWyrmHovercar::SpawnWyrmHovercar(World, FTransform(FVector(0.f, 0.f, 100.f)));
+    TestNotNull(TEXT("Hovercar spawned"), Hovercar);
+    if (!Hovercar)
+    {
+        World->DestroyWorld(false);
+        return false;
+    }
+
+    // Extents (VEH-01: 400cm length, 160cm width, 140cm height)
+    TestNotNull(TEXT("CollisionBox present"), Hovercar->CollisionBox.Get());
+    if (Hovercar->CollisionBox)
+    {
+        TestEqual(TEXT("BoxExtent correct"), Hovercar->CollisionBox->GetUnscaledBoxExtent(), FVector(200.f, 80.f, 70.f));
+    }
+
+    // Initial State & Speeds (VEH-02, VEH-09)
+    TestEqual(TEXT("Initial state is Parked"), Hovercar->GetHovercarState(), EWyrmHovercarState::Parked);
+    TestEqual(TEXT("Base cruise speed is 1500"), Hovercar->GetCruiseSpeed(), 1500.f);
+    TestEqual(TEXT("Vertical speed is 600"), Hovercar->GetVerticalSpeed(), 600.f);
+
+    // Mecha Progression Boost (VEH-09)
+    TestFalse(TEXT("Mecha circuit locked by default"), Hovercar->IsMechaCircuitUnlocked());
+    Hovercar->SetMechaCircuitUnlocked(true);
+    TestTrue(TEXT("Mecha circuit unlocked"), Hovercar->IsMechaCircuitUnlocked());
+    TestEqual(TEXT("Boosted cruise speed is 2000 (+500 boost)"), Hovercar->GetCruiseSpeed(), 2000.f);
+    Hovercar->SetMechaCircuitUnlocked(false);
+    TestEqual(TEXT("Reverted to base cruise speed"), Hovercar->GetCruiseSpeed(), 1500.f);
+
+    // TakeOff and Landing (VEH-02)
+    TestTrue(TEXT("TakeOff succeeds"), Hovercar->TakeOff());
+    TestEqual(TEXT("State is Hovering after TakeOff"), Hovercar->GetHovercarState(), EWyrmHovercarState::Hovering);
+
+    Hovercar->AddFlightInput(FVector2D(1.0f, 0.0f));
+    Hovercar->Tick(0.1f);
+    TestEqual(TEXT("State is Cruising under directional input"), Hovercar->GetHovercarState(), EWyrmHovercarState::Cruising);
+
+    TestTrue(TEXT("Land succeeds"), Hovercar->Land());
+    TestEqual(TEXT("State is Landing"), Hovercar->GetHovercarState(), EWyrmHovercarState::Landing);
+
+    // Camera Toggle (VEH-02)
+    TestEqual(TEXT("Default camera mode is ThirdPerson"), Hovercar->GetCameraMode(), EWyrmCameraMode::ThirdPerson);
+    Hovercar->ToggleCameraMode();
+    TestEqual(TEXT("Toggled camera mode is TopDown"), Hovercar->GetCameraMode(), EWyrmCameraMode::TopDown);
+    Hovercar->ToggleCameraMode();
+    TestEqual(TEXT("Toggled camera mode back to ThirdPerson"), Hovercar->GetCameraMode(), EWyrmCameraMode::ThirdPerson);
+
+    Hovercar->Destroy();
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarOccupancyAndCompanionTest, "WYRMFALL.Scaffold.HovercarOccupancyAndCompanion",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmHovercarOccupancyAndCompanionTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    TestNotNull(TEXT("World created"), World);
+    if (!World) { return false; }
+
+    AWyrmHovercar* Hovercar = AWyrmHovercar::SpawnWyrmHovercar(World, FTransform(FVector(0.f, 0.f, 100.f)));
+    AWyrmCharacter* Pilot = World->SpawnActor<AWyrmCharacter>();
+    AWyrmDragonCharacter* Dragon = AWyrmDragonCharacter::SpawnWyrmDragon(World, EWyrmDragonRole::AlliedCompanion, FTransform(FVector(200.f, 0.f, 100.f)));
+
+    TestNotNull(TEXT("Hovercar valid"), Hovercar);
+    TestNotNull(TEXT("Pilot valid"), Pilot);
+    TestNotNull(TEXT("Dragon valid"), Dragon);
+
+    if (Hovercar && Pilot && Dragon)
+    {
+        // 1. Pilot Entry (VEH-01)
+        FString Reason;
+        TestTrue(TEXT("Can enter hovercar"), Hovercar->CanEnter(Pilot, Reason));
+        TestTrue(TEXT("EnterHovercar succeeds"), Hovercar->EnterHovercar(Pilot));
+        TestTrue(TEXT("Hovercar is occupied"), Hovercar->IsOccupied());
+        TestEqual(TEXT("Driver is Pilot"), Hovercar->GetDriver(), Pilot);
+        TestTrue(TEXT("Pilot movement is locked while driving"), Pilot->IsMovementLocked());
+
+        // 2. In-flight Exit Rejection (VEH-04)
+        Hovercar->SetHovercarState(EWyrmHovercarState::Cruising);
+        FVector ExitLoc;
+        TestFalse(TEXT("Cannot exit while airborne/cruising"), Hovercar->CanExit(ExitLoc, Reason));
+        TestTrue(TEXT("Reason explains in-flight rejection"), Reason.Contains(TEXT("airborne")));
+
+        // 3. Valid Exit when Parked/Grounded (VEH-04)
+        Hovercar->SetHovercarState(EWyrmHovercarState::Parked);
+        TestTrue(TEXT("Can exit when parked"), Hovercar->CanExit(ExitLoc, Reason));
+        TestTrue(TEXT("ExitHovercar succeeds"), Hovercar->ExitHovercar(ExitLoc));
+        TestFalse(TEXT("Hovercar is no longer occupied"), Hovercar->IsOccupied());
+        TestFalse(TEXT("Pilot movement restored"), Pilot->IsMovementLocked());
+
+        // 4. Companion Boarding & Heartfold Contract (VEH-05)
+        Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
+        TestFalse(TEXT("TrueForm dragon cannot board passenger seat"), Hovercar->CanBoardPet(Dragon, Reason));
+        TestTrue(TEXT("TrueForm rejection mentions Heartfold"), Reason.Contains(TEXT("Heartfold")));
+
+        Dragon->SetDragonForm(EWyrmDragonForm::CompanionForm);
+        TestTrue(TEXT("Compact CompanionForm dragon can board"), Hovercar->CanBoardPet(Dragon, Reason));
+        TestTrue(TEXT("BoardPet succeeds"), Hovercar->BoardPet(Dragon));
+        TestTrue(TEXT("HasCompanionBoarded is true"), Hovercar->HasCompanionBoarded());
+        TestEqual(TEXT("Boarded companion is Dragon"), Hovercar->GetBoardedCompanion(), Dragon);
+
+        FVector UnboardLoc;
+        TestTrue(TEXT("UnboardPet succeeds"), Hovercar->UnboardPet(UnboardLoc));
+        TestFalse(TEXT("Companion unboarded"), Hovercar->HasCompanionBoarded());
+    }
+
+    if (Dragon) { Dragon->Destroy(); }
+    if (Pilot) { Pilot->Destroy(); }
+    if (Hovercar) { Hovercar->Destroy(); }
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarDamageAndDepotTest, "WYRMFALL.Scaffold.HovercarDamageAndDepot",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmHovercarDamageAndDepotTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    TestNotNull(TEXT("World created"), World);
+    if (!World) { return false; }
+
+    AWyrmHovercar* Hovercar = AWyrmHovercar::SpawnWyrmHovercar(World, FTransform(FVector(0.f, 0.f, 100.f)));
+    AWyrmCharacter* Pilot = World->SpawnActor<AWyrmCharacter>();
+    AWyrmDragonCharacter* Dragon = AWyrmDragonCharacter::SpawnWyrmDragon(World, EWyrmDragonRole::AlliedCompanion, FTransform(FVector(100.f, 0.f, 100.f)));
+
+    TestNotNull(TEXT("Hovercar valid"), Hovercar);
+
+    if (Hovercar && Pilot && Dragon)
+    {
+        // Baseline Health (VEH-06: 250 HP)
+        TestEqual(TEXT("Max health is 250"), Hovercar->GetMaxHealth(), 250.f);
+        TestEqual(TEXT("Current health is 250"), Hovercar->GetHealth(), 250.f);
+
+        // Damage Application (VEH-03, VEH-06)
+        TestTrue(TEXT("Damage applied"), Hovercar->ApplyDamage(100.f));
+        TestEqual(TEXT("Health reduced to 150"), Hovercar->GetHealth(), 150.f);
+        TestFalse(TEXT("Vehicle not disabled yet"), Hovercar->IsDisabled());
+
+        // Disablement at 0 HP (VEH-06)
+        TestTrue(TEXT("Lethal damage applied"), Hovercar->ApplyDamage(150.f));
+        TestEqual(TEXT("Health at 0"), Hovercar->GetHealth(), 0.f);
+        TestTrue(TEXT("Vehicle is Disabled"), Hovercar->IsDisabled());
+        TestEqual(TEXT("State is Disabled"), Hovercar->GetHovercarState(), EWyrmHovercarState::Disabled);
+
+        // Entry rejected when disabled
+        FString Reason;
+        TestFalse(TEXT("Cannot enter disabled hovercar"), Hovercar->CanEnter(Pilot, Reason));
+        TestTrue(TEXT("Disabled rejection message given"), Reason.Contains(TEXT("disabled")));
+
+        // Board pet for depot recovery staging test
+        Dragon->SetDragonForm(EWyrmDragonForm::CompanionForm);
+        Hovercar->BoardPet(Dragon);
+        TestTrue(TEXT("Companion boarded"), Hovercar->HasCompanionBoarded());
+
+        // Depot Recovery (VEH-06)
+        const FVector DepotLoc(1200.f, 3400.f, 150.f);
+        const FRotator DepotRot(0.f, 90.f, 0.f);
+        TestTrue(TEXT("RecoverToDepot succeeds"), Hovercar->RecoverToDepot(DepotLoc, DepotRot));
+        TestEqual(TEXT("Health fully repaired"), Hovercar->GetHealth(), 250.f);
+        TestEqual(TEXT("State restored to Parked"), Hovercar->GetHovercarState(), EWyrmHovercarState::Parked);
+        TestEqual(TEXT("Vehicle at depot location"), Hovercar->GetActorLocation(), DepotLoc);
+        TestFalse(TEXT("Companion safely staged at depot and unboarded"), Hovercar->HasCompanionBoarded());
+    }
+
+    if (Dragon) { Dragon->Destroy(); }
+    if (Pilot) { Pilot->Destroy(); }
+    if (Hovercar) { Hovercar->Destroy(); }
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema3Test, "WYRMFALL.Scaffold.HovercarSaveSchema3",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmHovercarSaveSchema3Test::RunTest(const FString& Parameters)
+{
+    // Schema Version Contract (VEH-07)
+    TestEqual(TEXT("CurrentSchemaVersion is 3"), UWyrmSaveGame::CurrentSchemaVersion, 3);
+    TestEqual(TEXT("MinimumSupportedSchemaVersion is 1"), UWyrmSaveGame::MinimumSupportedSchemaVersion, 1);
+
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    TestNotNull(TEXT("World created"), World);
+    if (!World) { return false; }
+
+    AWyrmCharacter* Character = World->SpawnActor<AWyrmCharacter>();
+    AWyrmHovercar* Hovercar = AWyrmHovercar::SpawnWyrmHovercar(World, FTransform(FVector(500.f, 1000.f, 200.f)));
+
+    TestNotNull(TEXT("Character valid"), Character);
+    TestNotNull(TEXT("Hovercar valid"), Hovercar);
+
+    if (Character && Hovercar)
+    {
+        Character->SetActorLocation(Hovercar->GetActorLocation());
+        Hovercar->SetMechaCircuitUnlocked(true);
+        Hovercar->ApplyDamage(60.f);
+        Hovercar->EnterHovercar(Character);
+
+        // Snapshot Creation (VEH-07)
+        UWyrmSaveGame* SaveObj = UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("HovercarSaveTest"), Character, nullptr, World);
+        TestNotNull(TEXT("Snapshot created"), SaveObj);
+        if (SaveObj)
+        {
+            TestEqual(TEXT("Schema version is 3"), SaveObj->SchemaVersion, 3);
+            TestTrue(TEXT("Hovercar record marked spawned"), SaveObj->HovercarRecord.bHasBeenSpawned);
+            TestEqual(TEXT("Saved health is 190"), SaveObj->HovercarRecord.Health, 190.f);
+            TestTrue(TEXT("Saved Mecha circuit unlocked"), SaveObj->HovercarRecord.bMechaCircuitUnlocked);
+            TestTrue(TEXT("Saved is occupied"), SaveObj->HovercarRecord.bIsOccupied);
+            TestEqual(TEXT("Saved location matches"), SaveObj->HovercarRecord.WorldLocation, Hovercar->GetActorLocation());
+
+            // Backwards compatibility check: Schema 1 and 2 saves accepted
+            UWyrmSaveGame* LegacySave = NewObject<UWyrmSaveGame>();
+            LegacySave->SchemaVersion = 2;
+            LegacySave->HovercarRecord.bHasBeenSpawned = false;
+            TestTrue(TEXT("Schema 2 legacy snapshot accepted"), UWyrmSaveSubsystem::ApplySnapshotObject(LegacySave, Character, nullptr, World));
+
+            LegacySave->SchemaVersion = 1;
+            TestTrue(TEXT("Schema 1 legacy snapshot accepted"), UWyrmSaveSubsystem::ApplySnapshotObject(LegacySave, Character, nullptr, World));
+        }
+    }
+
+    if (Character) { Character->Destroy(); }
+    if (Hovercar) { Hovercar->Destroy(); }
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmJadefangValidationTest, "WYRMFALL.Scaffold.JadefangValidation",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmJadefangValidationTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = UWorld::CreateWorld(EWorldType::GamePreview, false);
+    if (!World) { return true; }
+
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Jadefang = World->SpawnActor<AWyrmDragonCharacter>(AWyrmDragonCharacter::StaticClass(), FVector(300.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+
+    TestNotNull(TEXT("Player spawned"), Player);
+    TestNotNull(TEXT("Jadefang spawned"), Jadefang);
+    if (!Player || !Jadefang)
+    {
+        if (Player) Player->Destroy();
+        if (Jadefang) Jadefang->Destroy();
+        World->DestroyWorld(false);
+        return false;
+    }
+
+    Jadefang->SetDragonId(FName(TEXT("Jadefang")));
+    TestTrue(TEXT("Jadefang has supported rig profile"), Jadefang->HasSupportedRigProfile());
+    TestEqual(TEXT("Active rig profile is Jadefang"), Jadefang->GetActiveRigProfile().DragonId, FName(TEXT("Jadefang")));
+    TestEqual(TEXT("Follower mesh count is 38"), Jadefang->GetActiveRigProfile().FollowerMeshNames.Num(), 38);
+
+    // Bond and form envelopes
+    Jadefang->BondWithHumanoid(Player);
+
+    Jadefang->SetDragonForm(EWyrmDragonForm::CompanionForm);
+    TestEqual(TEXT("Companion radius is 30"), Jadefang->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), 30.f);
+    TestEqual(TEXT("Companion half height is 35"), Jadefang->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight(), 35.f);
+
+    Jadefang->SetDragonForm(EWyrmDragonForm::TrueForm);
+    TestEqual(TEXT("True form radius is 110"), Jadefang->GetCapsuleComponent()->GetUnscaledCapsuleRadius(), 110.f);
+    TestEqual(TEXT("True form half height is 150"), Jadefang->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight(), 150.f);
+
+    // Save/Restore roundtrip
+    FWyrmDragonSaveRecord Record;
+    Jadefang->BuildSaveRecord(Record);
+    TestEqual(TEXT("Saved dragon id is Jadefang"), Record.DragonId, FName(TEXT("Jadefang")));
+    TestEqual(TEXT("Saved role is AlliedCompanion"), Record.Role, EWyrmDragonRole::AlliedCompanion);
+    TestEqual(TEXT("Saved form is TrueForm"), Record.Form, EWyrmDragonForm::TrueForm);
+
+    AWyrmDragonCharacter* RestoredDragon = World->SpawnActor<AWyrmDragonCharacter>(AWyrmDragonCharacter::StaticClass(), FVector(600.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    RestoredDragon->RestoreFromSaveRecord(Record, Player);
+    TestEqual(TEXT("Restored dragon id is Jadefang"), RestoredDragon->DragonId, FName(TEXT("Jadefang")));
+    TestEqual(TEXT("Restored dragon form is TrueForm"), RestoredDragon->GetDragonForm(), EWyrmDragonForm::TrueForm);
+    TestEqual(TEXT("Restored dragon role is AlliedCompanion"), RestoredDragon->GetDragonRole(), EWyrmDragonRole::AlliedCompanion);
+
+    Jadefang->Destroy();
+    RestoredDragon->Destroy();
+    Player->Destroy();
+    World->DestroyWorld(false);
+    return true;
+}
 #endif
+

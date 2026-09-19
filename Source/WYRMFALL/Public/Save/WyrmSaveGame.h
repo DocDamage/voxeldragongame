@@ -6,6 +6,7 @@
 #include "Player/WyrmControlTypes.h"
 #include "Dragon/WyrmDragonTypes.h"
 #include "Region/WyrmRegion01Types.h"
+#include "Vehicles/WyrmVehicleTypes.h"
 #include "WyrmSaveGame.generated.h"
 
 USTRUCT(BlueprintType)
@@ -54,6 +55,9 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FString AppearanceDescriptor;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FVector CharacterScale = FVector::OneVector;
 
     // --- Active Food Preparation Buff (ACT-04) ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
@@ -141,10 +145,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    // Schema 2 adds Region 01's fact/receipt record. Version 1 is still
-    // accepted as an empty Region 01 state by UWyrmSaveSubsystem.
+    // Schema 3 adds Zenith Hovercar state record (VEH-07). Version 1 and 2 are still
+    // accepted as an unspawned hovercar state by UWyrmSaveSubsystem.
     static const int32 MinimumSupportedSchemaVersion = 1;
-    static const int32 CurrentSchemaVersion = 2;
+    static const int32 CurrentSchemaVersion = 3;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;
@@ -175,4 +179,7 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmRegion01SaveRecord Region01Record;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmHovercarSaveRecord HovercarRecord;
 };

@@ -3,6 +3,7 @@ Binaries/
 Intermediate/
 Saved/
 DerivedDataCache/
+Build/
 dist/
 .vs/
 *.sln
@@ -38,6 +39,7 @@ ExternalAssets/*
 # in source control.
 /Content/BanditCamp/
 /Content/DarkHalls/
+/Content/UltimateUIMenusSFX/
 # Retain source-side VS Code tasks; do not add machine-specific settings.
 .vscode/*
 !.vscode/tasks.json

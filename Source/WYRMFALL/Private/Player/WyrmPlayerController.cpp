@@ -1,6 +1,7 @@
 #include "Player/WyrmPlayerController.h"
 #include "Player/WyrmCharacter.h"
 #include "Dragon/WyrmDragonCharacter.h"
+#include "Vehicles/WyrmHovercar.h"
 #include "WYRMFALL.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -66,6 +67,10 @@ EWyrmCameraMode AWyrmPlayerController::GetActiveCameraMode() const
     {
         return Body->GetCameraMode();
     }
+    else if (const auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        return Hovercar->GetCameraMode();
+    }
     return EWyrmCameraMode::ThirdPerson;
 }
 
@@ -76,6 +81,10 @@ void AWyrmPlayerController::SetActiveCameraMode(EWyrmCameraMode NewMode)
         StopMovement();
         Body->SetCameraMode(NewMode);
         RefreshCursor();
+    }
+    else if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->SetCameraMode(NewMode);
     }
 }
 
@@ -265,6 +274,10 @@ void AWyrmPlayerController::Move(const FInputActionValue& Value)
         Dragon->AddMovementInput(Basis.GetUnitAxis(EAxis::X), Axis.Y);
         Dragon->AddMovementInput(Basis.GetUnitAxis(EAxis::Y), Axis.X);
     }
+    else if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->AddFlightInput(FVector2D(Axis.Y, Axis.X));
+    }
 }
 void AWyrmPlayerController::Look(const FInputActionValue& Value)
 {
@@ -274,6 +287,12 @@ void AWyrmPlayerController::Look(const FInputActionValue& Value)
         if (Body->GetCameraMode() == EWyrmCameraMode::TopDown || Body->IsMovementLocked()) { return; }
     }
     const FVector2D Axis = Value.Get<FVector2D>();
+    if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->AddTurnInput(Axis.X);
+        AddPitchInput(-Axis.Y);
+        return;
+    }
     AddYawInput(Axis.X);
     AddPitchInput(-Axis.Y);
 }
@@ -292,6 +311,10 @@ void AWyrmPlayerController::SwitchCamera()
         static bool bDragonTopDown = false;
         bDragonTopDown = !bDragonTopDown;
         Dragon->SetFlightCameraMode(bDragonTopDown);
+    }
+    else if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->ToggleCameraMode();
     }
 }
 void AWyrmPlayerController::ToggleClickMove() { SetClickMoveEnabled(!bClickMoveEnabled); }
@@ -345,6 +368,10 @@ void AWyrmPlayerController::JumpPressed()
             Dragon->Jump();
         }
     }
+    else if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->AddAltitudeInput(1.0f);
+    }
 }
 void AWyrmPlayerController::JumpReleased()
 {
@@ -355,6 +382,10 @@ void AWyrmPlayerController::JumpReleased()
     else if (auto* Dragon = Cast<AWyrmDragonCharacter>(GetPawn()))
     {
         Dragon->StopJumping();
+    }
+    else if (auto* Hovercar = Cast<AWyrmHovercar>(GetPawn()))
+    {
+        Hovercar->AddAltitudeInput(0.0f);
     }
 }
 
@@ -457,3 +488,53 @@ bool AWyrmPlayerController::LandDragon()
     }
     return false;
 }
+
+bool AWyrmPlayerController::EnterHovercar(AWyrmHovercar* Hovercar)
+{
+    if (!Hovercar)
+    {
+        return false;
+    }
+    AWyrmCharacter* Body = Cast<AWyrmCharacter>(GetPawn());
+    if (!Body)
+    {
+        return false;
+    }
+    if (!Hovercar->EnterHovercar(Body))
+    {
+        return false;
+    }
+    ControlledHumanoidBody = Body;
+    UnPossess();
+    Possess(Hovercar);
+    return true;
+}
+
+bool AWyrmPlayerController::ExitHovercar()
+{
+    AWyrmHovercar* Hovercar = Cast<AWyrmHovercar>(GetPawn());
+    if (!Hovercar)
+    {
+        return false;
+    }
+    FVector ExitLoc;
+    FString Reason;
+    if (!Hovercar->CanExit(ExitLoc, Reason))
+    {
+        return false;
+    }
+    AWyrmCharacter* Body = ControlledHumanoidBody.IsValid() ? ControlledHumanoidBody.Get() : Hovercar->GetDriver();
+    if (!Body)
+    {
+        return false;
+    }
+    if (!Hovercar->ExitHovercar(ExitLoc))
+    {
+        return false;
+    }
+    UnPossess();
+    Possess(Body);
+    ControlledHumanoidBody.Reset();
+    return true;
+}
+

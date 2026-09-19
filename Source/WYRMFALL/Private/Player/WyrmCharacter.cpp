@@ -399,6 +399,22 @@ bool AWyrmCharacter::RestoreAppearanceDescriptor(const FString& InDescriptor)
     return true;
 }
 
+void AWyrmCharacter::SetCharacterScale(FVector NewScale)
+{
+    CharacterScale = NewScale;
+    if (GetMesh())
+    {
+        GetMesh()->SetRelativeScale3D(CharacterScale);
+    }
+    if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+    {
+        const float BaseHalfHeight = 96.0f;
+        const float BaseRadius = 42.0f;
+        const float MaxHoriz = FMath::Max(CharacterScale.X, CharacterScale.Y);
+        Capsule->SetCapsuleSize(BaseRadius * MaxHoriz, BaseHalfHeight * CharacterScale.Z);
+    }
+}
+
 bool AWyrmCharacter::AttachEquipmentMesh(USceneComponent* ItemMesh, FName SocketName)
 {
     if (!ItemMesh || !GetMesh())

@@ -31,14 +31,19 @@ public:
     UFUNCTION(BlueprintPure, Category="Combat") UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
     UFUNCTION(BlueprintPure, Category="Combat") UWyrmAttributeSet* GetAttributes() const { return Attributes; }
 
-    // --- Identification & Role (DRG-01) ---
+    // --- Identification & Role (DRG-01, WP-20) ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon")
     FName DragonId = FName(TEXT("Verdance"));
 
-    // Only the imported Green Dragon/Verdance rig has a validated profile in this
-    // work package. Future dragon rigs must register and prove their own profile.
+    UFUNCTION(BlueprintCallable, Category="Dragon")
+    void SetDragonId(FName NewDragonId);
+
+    // Validates whether DragonId corresponds to an authoritative rig profile (Verdance, Jadefang)
     UFUNCTION(BlueprintPure, Category="Dragon|Rig")
-    bool HasSupportedRigProfile() const { return DragonId == FName(TEXT("Verdance")); }
+    bool HasSupportedRigProfile() const { return FWyrmDragonRigProfile::IsValidDragonRig(DragonId); }
+
+    UFUNCTION(BlueprintPure, Category="Dragon|Rig")
+    const FWyrmDragonRigProfile& GetActiveRigProfile() const { return ActiveRigProfile; }
 
     UFUNCTION(BlueprintPure, Category="Dragon")
     EWyrmDragonRole GetDragonRole() const { return CurrentRole; }
@@ -257,6 +262,10 @@ private:
     void UpdateCompanionAI(float DeltaSeconds);
     void ApplyFormDimensions();
     void CompleteFormTransition();
+    void InitializeRigProfile();
+
+    UPROPERTY(VisibleAnywhere, Category="Dragon|Rig")
+    FWyrmDragonRigProfile ActiveRigProfile;
 
     UPROPERTY(VisibleAnywhere, Category="Dragon|Form")
     bool bIsTransitioningForm = false;

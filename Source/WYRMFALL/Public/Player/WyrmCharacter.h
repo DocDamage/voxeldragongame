@@ -194,6 +194,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Appearance")
     bool RestoreAppearanceDescriptor(const FString& InDescriptor);
 
+    // --- Scale & Proportions Authority (CHAR-07) ---
+    UFUNCTION(BlueprintCallable, Category="Appearance")
+    void SetCharacterScale(FVector NewScale);
+
+    UFUNCTION(BlueprintPure, Category="Appearance")
+    FVector GetCharacterScale() const { return CharacterScale; }
+
     // --- Equipment Attachment (CHAR-04) ---
     UFUNCTION(BlueprintCallable, Category="Equipment")
     bool AttachEquipmentMesh(USceneComponent* ItemMesh, FName SocketName);
@@ -248,6 +255,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance")
     TObjectPtr<UCustomizableObjectInstance> CustomizableInstance;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance")
+    FVector CharacterScale = FVector::OneVector;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
     TObjectPtr<UWyrmInventoryComponent> InventoryComponent;

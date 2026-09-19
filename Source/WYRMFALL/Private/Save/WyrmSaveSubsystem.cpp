@@ -7,6 +7,7 @@
 #include "Building/WyrmBuildingSubsystem.h"
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
+#include "Vehicles/WyrmHovercar.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/UObjectIterator.h"
@@ -146,6 +147,7 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.WorldLocation = Character->GetActorLocation();
         SaveObj->CharacterRecord.WorldRotation = Character->GetActorRotation();
         SaveObj->CharacterRecord.AppearanceDescriptor = Character->CaptureAppearanceDescriptor();
+        SaveObj->CharacterRecord.CharacterScale = Character->GetCharacterScale();
 
         // Save active food buff (ACT-04)
         SaveObj->CharacterRecord.bHasActiveBuff = ActiveBuff.IsActive();
@@ -255,6 +257,16 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
                 break;
             }
         }
+
+        // Capture active Zenith Hovercar (VEH-07)
+        for (TActorIterator<AWyrmHovercar> It(WorldContext); It; ++It)
+        {
+            if (*It && IsValid(*It))
+            {
+                (*It)->BuildSaveRecord(SaveObj->HovercarRecord);
+                break;
+            }
+        }
     }
 
     return SaveObj;
@@ -354,6 +366,7 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         Character->SetCameraMode(SaveObj->CharacterRecord.CameraMode);
         Character->SetMovementLocked(SaveObj->CharacterRecord.bMovementLocked);
         Character->SetActorLocationAndRotation(SaveObj->CharacterRecord.WorldLocation, SaveObj->CharacterRecord.WorldRotation);
+        Character->SetCharacterScale(SaveObj->CharacterRecord.CharacterScale);
         if (!SaveObj->CharacterRecord.AppearanceDescriptor.IsEmpty())
         {
             Character->RestoreAppearanceDescriptor(SaveObj->CharacterRecord.AppearanceDescriptor);
@@ -431,6 +444,31 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (UWyrmRegion01Subsystem* Region01 = UWyrmRegion01Subsystem::GetRegion01Subsystem(WorldContext))
         {
             Region01->RestoreFromSaveRecord(SaveObj->Region01Record);
+        }
+
+        // Restore active Zenith Hovercar (VEH-07)
+        if (SaveObj->HovercarRecord.bHasBeenSpawned)
+        {
+            AWyrmHovercar* ActiveHovercar = nullptr;
+            for (TActorIterator<AWyrmHovercar> It(WorldContext); It; ++It)
+            {
+                if (*It && IsValid(*It))
+                {
+                    ActiveHovercar = *It;
+                    break;
+                }
+            }
+
+            if (!ActiveHovercar)
+            {
+                FTransform SpawnTransform(SaveObj->HovercarRecord.WorldRotation, SaveObj->HovercarRecord.WorldLocation);
+                ActiveHovercar = AWyrmHovercar::SpawnWyrmHovercar(WorldContext, SpawnTransform);
+            }
+
+            if (ActiveHovercar)
+            {
+                ActiveHovercar->RestoreFromSaveRecord(SaveObj->HovercarRecord, Character);
+            }
         }
     }
 

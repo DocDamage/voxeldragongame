@@ -46,6 +46,81 @@ enum class EWyrmDragonFlightState : uint8
 };
 
 USTRUCT(BlueprintType)
+struct WYRMFALL_API FWyrmDragonRigProfile
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FName DragonId = FName(TEXT("Verdance"));
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString DisplayName = TEXT("Verdance");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString LeaderMeshPath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Hip-Local.Hip-Local");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString FollowerMeshBasePath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    TArray<FString> FollowerMeshNames;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString SkeletonPath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Hip-Local_Skeleton.Hip-Local_Skeleton");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString IdleAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Green_DragonIdle_01.Green_DragonIdle_01");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FString FlightAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP00/GreenDragon/Green_Dragon/SkeletalMeshes/Green_DragonFlying_01.Green_DragonFlying_01");
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float CompanionMeshScale = 0.009f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float CompanionCapsuleRadius = 30.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float CompanionCapsuleHalfHeight = 35.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float CompanionGroundSpeed = 450.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float TrueFormMeshScale = 0.035f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float TrueFormCapsuleRadius = 120.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float TrueFormCapsuleHalfHeight = 160.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float TrueFormGroundSpeed = 550.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float FlightSpeed = 1600.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    FVector MountSocketOffset = FVector(0.f, 0.f, 160.f);
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float TakeoffClearanceHeight = 500.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float WingSpanSweepRadius = 350.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float LandingSearchDistance = 1200.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dragon|Rig")
+    float MaxLandingSlopeAngle = 45.f;
+
+    static bool GetRigProfile(FName InDragonId, FWyrmDragonRigProfile& OutProfile);
+    static bool IsValidDragonRig(FName InDragonId);
+};
+
+USTRUCT(BlueprintType)
 struct WYRMFALL_API FWyrmDragonSaveRecord
 {
     GENERATED_BODY()
@@ -110,3 +185,4 @@ struct WYRMFALL_API FWyrmDragonSaveRecord
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     bool bTownModeEnabled = false;
 };
+
