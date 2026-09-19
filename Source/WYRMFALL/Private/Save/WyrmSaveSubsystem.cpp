@@ -166,6 +166,13 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.RelentlessAdvanceRemainingDuration = Character->GetRelentlessAdvanceRemainingDuration();
         SaveObj->CharacterRecord.RelentlessAdvanceRemainingCooldown = Character->GetRelentlessAdvanceRemainingCooldown();
 
+        // Save Moonbound Beast state (WP-21 / SAVE-11)
+        SaveObj->CharacterRecord.bMoonboundActive = Character->IsMoonboundActive();
+        SaveObj->CharacterRecord.MoonboundRemainingDuration = Character->GetMoonboundRemainingDuration();
+        SaveObj->CharacterRecord.MoonboundRemainingCooldown = Character->GetMoonboundRemainingCooldown();
+        SaveObj->CharacterRecord.bMoonboundReturnPending = Character->IsMoonboundReturnPending();
+        SaveObj->CharacterRecord.LastSafeHumanoidLocation = Character->GetLastSafeHumanoidLocation();
+
         if (Inv)
         {
             SaveObj->InventoryRecord.MaxBagSlots = Inv->MaxBagSlots;
@@ -410,6 +417,14 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             SaveObj->CharacterRecord.bRelentlessAdvanceActive,
             SaveObj->CharacterRecord.RelentlessAdvanceRemainingDuration,
             SaveObj->CharacterRecord.RelentlessAdvanceRemainingCooldown);
+
+        // Restore Moonbound Beast state (WP-21 / SAVE-11)
+        Character->RestoreMoonboundState(
+            SaveObj->CharacterRecord.bMoonboundActive,
+            SaveObj->CharacterRecord.MoonboundRemainingDuration,
+            SaveObj->CharacterRecord.MoonboundRemainingCooldown,
+            SaveObj->CharacterRecord.bMoonboundReturnPending,
+            SaveObj->CharacterRecord.LastSafeHumanoidLocation);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)

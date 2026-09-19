@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Selected scaffold native automation completed 52/52 tests: 42 Success, 10 SuccessWithWarnings, and 0 failures.
+- Selected scaffold native automation completed 53/53 tests: 43 Success, 10 SuccessWithWarnings, and 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -42,7 +42,12 @@ settings out of commits.
 - WP-17 real PIE passed all 5 creator breadth, audio-visual polish & profiling cases (`CHAR-07`, `CHAR-08`, `AUDIO`, `SAVE`, `PERF`).
 - WP-18 standalone packaging, cook validation, and packaged client execution passed cleanly.
 - WP-19 real PIE passed all 9 pilotable civilian hovercar acceptance cases (`VEH-01..09`).
-- WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`):
+- WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`).
+- WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
+  - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
+  - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
+  - `ECHO-09.BeastReturnBlockage`: Low-ceiling obstacle (<192 cm) triggers `bMoonboundReturnPending`, beast attacks suppressed to prevent combat extension, and safe return to `LastSafeHumanoidLocation`.
+  - `SAVE-11.BeastFormSave`: Schema 3 persistence of active Moonbound state, remaining duration, and cooldown across save/load.
   - `JADE-01.AssetIntake`: Genuine GLTF Chinese Dragon asset intake into `/Game/WYRMFALL/Development/Intake/WP20/Jadefang/Chinese+Dragon/` (leader mesh `Hip-Local`, skeleton, 38 follower meshes, 21 anims, 39 materials).
   - `JADE-02.RigProfileAndDimensions`: `FWyrmDragonRigProfile` applied with long-bodied modular anatomy (38 follower meshes bound via `SetLeaderPoseComponent`), distinct Companion (30x35cm) vs TrueForm (110x150cm) envelopes, and distinct ground/flight speeds.
   - `JADE-03.HeartfoldTransitions`: Form transitions between CompanionForm and TrueForm with 4.0s cooldown, and fail-closed blocked growth under low ceiling obstacle.
@@ -299,14 +304,12 @@ Evidence:
 - WP-18 Packaging, Cook Validation & Release Readiness is RESOLVED (PASS in standalone client build).
 - WP-19 Pilotable Zenith Civilian Hovercar (`VEH-01..09`) is RESOLVED (PASS in live PIE).
 - WP-20 Heartfold Expansion & Jadefang Multi-Dragon Validation (`JADE-01..05`, `SAVE`) is RESOLVED (PASS in live PIE).
+- WP-21 Moonbound Transformation Proof (`ECHO-07..09`, `SAVE-11`) is RESOLVED (PASS in live PIE).
 
 ## Next bounded task
 
-With WP-20 Heartfold Expansion & Jadefang Validation verified cleanly across native tests, live PIE, and regression suites:
+With WP-21 Moonbound Transformation Proof verified cleanly across native tests, live PIE, and regression suites:
 Proceed to the next feature milestone in the implementation backlog:
-**WP-21 / Moonbound Transformation Proof (ECHO-07..09, SAVE-11)**.
-Implement actual beast kit and original-body restoration across interruption, save/load, and equipment, with equivalent cure unlock using real Corvyn/beast assets.
+**WP-22 / Second Production Region & Expansion**.
+Continue building upon the established Region 01, multi-dragon Heartfold, horror Echoes, and unified save architecture.
 Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
-
-
-

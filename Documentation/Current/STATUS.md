@@ -1,7 +1,7 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-20
-Heartfold Expansion & Jadefang Multi-Dragon Validation (JADE-01..05, SAVE)**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-21
+Moonbound Transformation Proof (ECHO-07..09, SAVE-11)**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | Repository | `main`; pushed checkpoint `a78aa6f` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: selected 52/52** | 52 Success in `Saved/Automation/Scaffold/index.json`; all source-declared tests passing (42 Success, 10 SuccessWithWarnings, 0 Failures) |
+| Native automation | **PASS: selected 53/53** | 53 Success in `Saved/Automation/Scaffold/index.json`; all source-declared tests passing (43 Success, 10 SuccessWithWarnings, 0 Failures) |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -38,6 +38,7 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-18 Packaging, cook & release readiness | **PASS** | Full Win64 Development target built (`WYRMFALL.exe`), `L_Region01` cooked, `.pak` and IoStore `.ucas`/`.utoc` containers staged, standalone client execution verified with clean engine initialization and map shutdown; [receipt](../../Saved/Diagnostics/WP18_cook_and_package_proof.json), [report](WP18_COOK_AND_PACKAGE_PROOF.md) |
 | WP-19 Pilotable Zenith hovercar | **PASS in real PIE (VEH-01..09)** | Real civilian hovercar mesh/texture (`SM_ZenithHovercar`), entry, 3D flight/hover piloting in both cameras, swept obstacle collision & landing validation, in-flight exit rejection, compact dragon passenger boarding/staging, disablement (250 HP -> 0 HP) and depot recovery, Schema 3 save persistence, traffic layer separation, and Mecha progression boost hook (+500 cm/s); [receipt](../../Saved/Diagnostics/WP19_hovercar_proof.json), [report](WP19_HOVERCAR_PROOF.md) |
 | WP-20 Jadefang validation & Heartfold expansion | **PASS in real PIE (JADE-01..05, SAVE)** | Genuine GLTF asset intake (Hip-Local, skeleton, 38 follower meshes, 21 anims, 39 materials), C++ `FWyrmDragonRigProfile` with DRG-15 fail-closed policy, dynamic modular mesh assembly with leader pose component, Companion (30x35) & TrueForm (110x150) dimensions/speeds, back-ridge mount socket (0,0,140), 3D flight locomotion, GAS primary (24 dmg) and secondary (18 dmg) attacks, direct control possession, and Schema 3 multi-dragon save roundtrip; [report](WP20_JADEFANG_PROOF.md) |
+| WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 
 ## Important implementation facts
 

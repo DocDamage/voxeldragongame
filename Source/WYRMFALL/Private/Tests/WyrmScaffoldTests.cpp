@@ -5,6 +5,8 @@
 #include "Combat/WyrmCombatTypes.h"
 #include "Combat/Abilities/WyrmGameplayAbility.h"
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
+#include "Combat/Abilities/WyrmMoonboundFormAbility.h"
+#include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
 #include "Player/WyrmPlayerController.h"
@@ -91,6 +93,10 @@ bool FWyrmTagTest::RunTest(const FString& Parameters)
 {
     TestTrue(TEXT("Dead tag configured"), FGameplayTag::RequestGameplayTag(FName(TEXT("State.Dead")), false).IsValid());
     TestTrue(TEXT("Echo tag configured, not unlocked"), FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.RelentlessAdvance")), false).IsValid());
+    TestTrue(TEXT("Moonbound Echo tag configured, not unlocked"), FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.MoonboundForm")), false).IsValid());
+    TestTrue(TEXT("Moonbound State tag configured"), FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.MoonboundForm")), false).IsValid());
+    TestTrue(TEXT("Beast Claw tag configured"), FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Combat.BeastClaw")), false).IsValid());
+    TestTrue(TEXT("Beast Pounce tag configured"), FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Combat.BeastPounce")), false).IsValid());
     return true;
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmBaseAttributeTest, "WYRMFALL.Scaffold.AttributeBaseClamps",
@@ -3615,6 +3621,79 @@ bool FWyrmJadefangValidationTest::RunTest(const FString& Parameters)
 
     Jadefang->Destroy();
     RestoredDragon->Destroy();
+    Player->Destroy();
+    World->DestroyWorld(false);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmMoonboundScaffoldTest, "WYRMFALL.Scaffold.MoonboundFormAndBeastKit",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmMoonboundScaffoldTest::RunTest(const FString& Parameters)
+{
+    // 1. Ability Defaults
+    UWyrmMoonboundFormAbility* FormAbility = NewObject<UWyrmMoonboundFormAbility>();
+    TestEqual(TEXT("Moonbound focus cost is 40"), FormAbility->FocusCost, 40.f);
+    TestEqual(TEXT("Moonbound cooldown is 35s"), FormAbility->CooldownDuration, 35.f);
+    TestEqual(TEXT("Moonbound active duration is 12s"), FormAbility->ActiveDuration, 12.f);
+
+    UWyrmBeastClawAbility* ClawAbility = NewObject<UWyrmBeastClawAbility>();
+    TestEqual(TEXT("Beast claw weapon base is 25"), ClawAbility->WeaponBase, 25.f);
+    TestEqual(TEXT("Beast claw focus cost is 0"), ClawAbility->FocusCost, 0.f);
+
+    UWyrmBeastPounceAbility* PounceAbility = NewObject<UWyrmBeastPounceAbility>();
+    TestEqual(TEXT("Beast pounce focus cost is 15"), PounceAbility->FocusCost, 15.f);
+    TestEqual(TEXT("Beast pounce cooldown is 4s"), PounceAbility->CooldownDuration, 4.f);
+    TestEqual(TEXT("Beast pounce damage is 35"), PounceAbility->PounceDamage, 35.f);
+
+    // 2. Character Execution in Test World
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    if (!World)
+    {
+        return false;
+    }
+    FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
+    Context.SetCurrentWorld(World);
+
+    FActorSpawnParameters SpawnParams;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(AWyrmCharacter::StaticClass(), FVector(0.f, 0.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    if (!Player)
+    {
+        World->DestroyWorld(false);
+        return false;
+    }
+
+    // Learn and Equip Moonbound Form
+    Player->LearnEcho(FName(TEXT("MoonboundForm")));
+    TestTrue(TEXT("MoonboundForm is learned"), Player->IsEchoUnlocked(FName(TEXT("MoonboundForm"))));
+    Player->EquipEcho(FName(TEXT("MoonboundForm")));
+    TestTrue(TEXT("MoonboundForm is equipped"), Player->IsEchoEquipped(FName(TEXT("MoonboundForm"))));
+
+    // Activate Moonbound Form
+    Player->ActivateMoonboundForm(12.0f);
+    TestTrue(TEXT("Moonbound Form is active"), Player->IsMoonboundActive());
+    TestEqual(TEXT("Remaining duration is 12s"), Player->GetMoonboundRemainingDuration(), 12.0f);
+    TestEqual(TEXT("Remaining cooldown is 35s"), Player->GetMoonboundRemainingCooldown(), 35.0f);
+    TestFalse(TEXT("Humanoid mesh is hidden"), Player->GetMesh()->IsVisible());
+    TestTrue(TEXT("Beast mesh is visible"), Player->GetBeastMeshComponent()->IsVisible());
+
+    // Save and restore
+    FWyrmCharacterSaveRecord SaveRec;
+    SaveRec.bMoonboundActive = Player->IsMoonboundActive();
+    SaveRec.MoonboundRemainingDuration = Player->GetMoonboundRemainingDuration();
+    SaveRec.MoonboundRemainingCooldown = Player->GetMoonboundRemainingCooldown();
+    SaveRec.bMoonboundReturnPending = Player->IsMoonboundReturnPending();
+    SaveRec.LastSafeHumanoidLocation = Player->GetLastSafeHumanoidLocation();
+
+    Player->DeactivateMoonboundForm();
+    TestFalse(TEXT("Moonbound Form deactivated"), Player->IsMoonboundActive());
+    TestTrue(TEXT("Humanoid mesh is visible"), Player->GetMesh()->IsVisible());
+    TestFalse(TEXT("Beast mesh is hidden"), Player->GetBeastMeshComponent()->IsVisible());
+
+    // Restore Moonbound state
+    Player->RestoreMoonboundState(SaveRec.bMoonboundActive, SaveRec.MoonboundRemainingDuration, SaveRec.MoonboundRemainingCooldown, SaveRec.bMoonboundReturnPending, SaveRec.LastSafeHumanoidLocation);
+    TestTrue(TEXT("Restored Moonbound active"), Player->IsMoonboundActive());
+    TestEqual(TEXT("Restored duration"), Player->GetMoonboundRemainingDuration(), 12.0f);
+
     Player->Destroy();
     World->DestroyWorld(false);
     return true;

@@ -141,8 +141,45 @@ public:
     UFUNCTION(BlueprintPure, Category="Combat|Echo")
     bool CanActivateRelentlessAdvance(FString& OutFailureReason) const;
 
+    // --- Moonbound Form (WP-21 / ECHO-08, ECHO-09) ---
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void ActivateMoonboundForm(float Duration);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void DeactivateMoonboundForm();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsMoonboundActive() const { return bMoonboundActive; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetMoonboundRemainingDuration() const { return MoonboundRemainingTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetMoonboundRemainingCooldown() const { return MoonboundCooldownTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateMoonboundForm(FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsMoonboundReturnPending() const { return bMoonboundReturnPending; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ResolveMoonboundReturnBlockage();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    FVector GetLastSafeHumanoidLocation() const { return LastSafeHumanoidLocation; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void SetLastSafeHumanoidLocation(const FVector& InLocation) { LastSafeHumanoidLocation = InLocation; }
+
+    UFUNCTION(BlueprintPure, Category="Appearance")
+    USkeletalMeshComponent* GetBeastMeshComponent() const { return BeastMeshComponent; }
+
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void RestoreEchoState(const TArray<FName>& InLearnedEchoes, FName InEquippedEcho, bool bActive, float RemainingDuration, float RemainingCooldown);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreMoonboundState(bool bInActive, float RemainingDuration, float RemainingCooldown, bool bInPending, const FVector& InLastSafeLoc);
 
     // --- Progression & XP (WP-06) ---
     UFUNCTION(BlueprintCallable, Category="Progression") bool AddExperience(float Amount);
@@ -253,6 +290,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Appearance")
     TObjectPtr<UCustomizableSkeletalComponent> CustomizableSkeletalComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Appearance")
+    TObjectPtr<USkeletalMeshComponent> BeastMeshComponent;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Appearance")
     TObjectPtr<UCustomizableObjectInstance> CustomizableInstance;
 
@@ -287,6 +327,9 @@ private:
     FGameplayAbilitySpecHandle SecondaryRangedHandle;
     FGameplayAbilitySpecHandle EvadeHandle;
     FGameplayAbilitySpecHandle RelentlessAdvanceHandle;
+    FGameplayAbilitySpecHandle MoonboundFormHandle;
+    FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
+    FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
     float BaseWalkSpeed = 600.f;
     float ActiveSlowMagnitude = 0.f;
@@ -298,6 +341,14 @@ private:
     bool bRelentlessAdvanceActive = false;
     float RelentlessAdvanceRemainingTimer = 0.f;
     float RelentlessAdvanceCooldownTimer = 0.f;
+
+    bool bMoonboundActive = false;
+    float MoonboundRemainingTimer = 0.f;
+    float MoonboundCooldownTimer = 0.f;
+    bool bMoonboundReturnPending = false;
+    FVector LastSafeHumanoidLocation = FVector::ZeroVector;
+    float SavedHumanoidCapsuleRadius = 42.f;
+    float SavedHumanoidCapsuleHalfHeight = 96.f;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

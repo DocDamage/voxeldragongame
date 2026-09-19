@@ -5,6 +5,10 @@
 #include "Combat/Abilities/WyrmRangedAttackAbility.h"
 #include "Combat/Abilities/WyrmEvadeAbility.h"
 #include "Combat/Abilities/WyrmRelentlessAdvanceAbility.h"
+#include "Combat/Abilities/WyrmMoonboundFormAbility.h"
+#include "Combat/Abilities/WyrmBeastAttackAbilities.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/OverlapResult.h"
 #include "Inventory/WyrmInventoryComponent.h"
 #include "Activities/WyrmFishingComponent.h"
 #include "Camera/CameraComponent.h"
@@ -40,6 +44,11 @@ AWyrmCharacter::AWyrmCharacter()
     Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     CustomizableSkeletalComponent = CreateDefaultSubobject<UCustomizableSkeletalComponent>(TEXT("CustomizableSkeletalComponent"));
     CustomizableSkeletalComponent->SetupAttachment(GetMesh());
+    BeastMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BeastMeshComponent"));
+    BeastMeshComponent->SetupAttachment(GetCapsuleComponent());
+    BeastMeshComponent->SetRelativeLocation(FVector(0.f, 0.f, -45.f));
+    BeastMeshComponent->SetVisibility(false);
+    BeastMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     InventoryComponent = CreateDefaultSubobject<UWyrmInventoryComponent>(TEXT("InventoryComponent"));
     FishingComponent = CreateDefaultSubobject<UWyrmFishingComponent>(TEXT("FishingComponent"));
     ApplyCamera();
@@ -86,6 +95,18 @@ void AWyrmCharacter::BeginPlay()
     {
         CustomizableSkeletalComponent->SetCustomizableObjectInstance(CustomizableInstance);
         ApplyAppearance(true);
+    }
+
+    if (BeastMeshComponent && !BeastMeshComponent->GetSkeletalMeshAsset())
+    {
+        USkeletalMesh* WolfMesh = Cast<USkeletalMesh>(StaticLoadObject(
+            USkeletalMesh::StaticClass(),
+            nullptr,
+            TEXT("/Game/WYRMFALL/Development/Intake/WP00/Review/Wolf/wolf1.wolf1")));
+        if (WolfMesh)
+        {
+            BeastMeshComponent->SetSkeletalMeshAsset(WolfMesh);
+        }
     }
 }
 UAbilitySystemComponent* AWyrmCharacter::GetAbilitySystemComponent() const { return AbilitySystem; }
@@ -246,6 +267,38 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
             if (AbilitySystem)
             {
                 static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.RelentlessAdvance")), false);
+                if (CooldownTag.IsValid())
+                {
+                    if (AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+                    {
+                        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                    }
+                    FGameplayTagContainer CDContainer(CooldownTag);
+                    AbilitySystem->RemoveActiveEffectsWithGrantedTags(CDContainer);
+                }
+            }
+        }
+    }
+
+    if (bMoonboundActive)
+    {
+        MoonboundRemainingTimer -= DeltaSeconds;
+        if (MoonboundRemainingTimer <= 0.f)
+        {
+            MoonboundRemainingTimer = 0.f;
+            DeactivateMoonboundForm();
+        }
+    }
+
+    if (MoonboundCooldownTimer > 0.f)
+    {
+        MoonboundCooldownTimer = FMath::Max(0.f, MoonboundCooldownTimer - DeltaSeconds);
+        if (MoonboundCooldownTimer <= 0.f)
+        {
+            MoonboundCooldownTimer = 0.f;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.MoonboundForm")), false);
                 if (CooldownTag.IsValid())
                 {
                     if (AbilitySystem->HasMatchingGameplayTag(CooldownTag))
@@ -525,6 +578,15 @@ bool AWyrmCharacter::PerformPrimaryAttack()
         return false;
     }
 
+    if (bMoonboundActive)
+    {
+        if (bMoonboundReturnPending)
+        {
+            return false;
+        }
+        return PrimaryBeastClawHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryBeastClawHandle);
+    }
+
     if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
     {
         return PrimaryRangedHandle.IsValid() && AbilitySystem->TryActivateAbility(PrimaryRangedHandle);
@@ -538,6 +600,15 @@ bool AWyrmCharacter::PerformSecondaryAttack()
     if (bMovementLocked || !AbilitySystem)
     {
         return false;
+    }
+
+    if (bMoonboundActive)
+    {
+        if (bMoonboundReturnPending)
+        {
+            return false;
+        }
+        return SecondaryBeastPounceHandle.IsValid() && AbilitySystem->TryActivateAbility(SecondaryBeastPounceHandle);
     }
 
     if (ActiveWeaponFamily == EWyrmWeaponFamily::RangedBow)
@@ -924,6 +995,14 @@ void AWyrmCharacter::ClearNamedStatusEffect(FName TagName)
     {
         RelentlessAdvanceCooldownTimer = 0.f;
     }
+    else if (TagName == FName(TEXT("State.Combat.MoonboundForm")))
+    {
+        DeactivateMoonboundForm();
+    }
+    else if (TagName == FName(TEXT("Cooldown.Echo.MoonboundForm")))
+    {
+        MoonboundCooldownTimer = 0.f;
+    }
 
     UpdateMovementForStatus();
 }
@@ -945,6 +1024,18 @@ void AWyrmCharacter::UpdateMovementForStatus()
         // Suppress movement slows during active Relentless Advance (Section 7)
         // No speed boost: capped at BaseWalkSpeed.
         GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+    }
+    else if (bMoonboundActive)
+    {
+        float BeastBase = 700.f;
+        if (SlowRemainingTimer > 0.f && ActiveSlowMagnitude > 0.f)
+        {
+            GetCharacterMovement()->MaxWalkSpeed = BeastBase * FMath::Clamp(1.f - ActiveSlowMagnitude, 0.1f, 1.f);
+        }
+        else
+        {
+            GetCharacterMovement()->MaxWalkSpeed = BeastBase;
+        }
     }
     else if (SlowRemainingTimer > 0.f && ActiveSlowMagnitude > 0.f)
     {
@@ -1000,6 +1091,33 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             {
                 RelentlessAdvanceHandle = AbilitySystem->GiveAbility(
                     FGameplayAbilitySpec(UWyrmRelentlessAdvanceAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
+    else if (EchoId == FName(TEXT("MoonboundForm")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.MoonboundForm")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            }
+
+            if (!MoonboundFormHandle.IsValid())
+            {
+                MoonboundFormHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmMoonboundFormAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+            if (!PrimaryBeastClawHandle.IsValid())
+            {
+                PrimaryBeastClawHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmBeastClawAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+            if (!SecondaryBeastPounceHandle.IsValid())
+            {
+                SecondaryBeastPounceHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmBeastPounceAbility::StaticClass(), 1, INDEX_NONE, this));
             }
         }
     }
@@ -1107,6 +1225,19 @@ bool AWyrmCharacter::ActivateEquippedEcho()
             return AbilitySystem->TryActivateAbility(RelentlessAdvanceHandle);
         }
     }
+    else if (EquippedEcho == FName(TEXT("MoonboundForm")))
+    {
+        FString Reason;
+        if (!CanActivateMoonboundForm(Reason))
+        {
+            return false;
+        }
+
+        if (AbilitySystem && MoonboundFormHandle.IsValid())
+        {
+            return AbilitySystem->TryActivateAbility(MoonboundFormHandle);
+        }
+    }
 
     return false;
 }
@@ -1210,4 +1341,310 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
     }
 
     UpdateMovementForStatus();
+}
+
+bool AWyrmCharacter::CanActivateMoonboundForm(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("MoonboundForm"))))
+    {
+        OutFailureReason = TEXT("NotUnlocked");
+        return false;
+    }
+
+    if (EquippedEcho != FName(TEXT("MoonboundForm")))
+    {
+        OutFailureReason = TEXT("NotEquipped");
+        return false;
+    }
+
+    if (Attributes && Attributes->GetHealth() <= 0.f)
+    {
+        OutFailureReason = TEXT("Dead");
+        return false;
+    }
+
+    if (StunRemainingTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))))
+    {
+        OutFailureReason = TEXT("HardStunned");
+        return false;
+    }
+
+    if (HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    {
+        OutFailureReason = TEXT("ControlTransitioning");
+        return false;
+    }
+
+    if (MoonboundCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.MoonboundForm"))))
+    {
+        OutFailureReason = TEXT("OnCooldown");
+        return false;
+    }
+
+    if (Attributes && Attributes->GetFocus() < 40.f)
+    {
+        OutFailureReason = TEXT("InsufficientFocus");
+        return false;
+    }
+
+    if (bMoonboundActive)
+    {
+        OutFailureReason = TEXT("AlreadyActive");
+        return false;
+    }
+
+    if (GetCharacterMovement() && GetCharacterMovement()->IsFalling())
+    {
+        OutFailureReason = TEXT("Airborne");
+        return false;
+    }
+
+    OutFailureReason = TEXT("");
+    return true;
+}
+
+void AWyrmCharacter::ActivateMoonboundForm(float Duration)
+{
+    SavedHumanoidCapsuleRadius = GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+    SavedHumanoidCapsuleHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+    LastSafeHumanoidLocation = GetActorLocation();
+
+    bMoonboundActive = true;
+    bMoonboundReturnPending = false;
+    MoonboundRemainingTimer = Duration > 0.f ? Duration : 12.0f;
+    MoonboundCooldownTimer = 35.0f;
+
+    if (AbilitySystem)
+    {
+        static const FGameplayTag MoonboundTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.MoonboundForm")), false);
+        if (MoonboundTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(MoonboundTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(MoonboundTag);
+        }
+
+        static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.MoonboundForm")), false);
+        if (CooldownTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+        {
+            AbilitySystem->AddLooseGameplayTag(CooldownTag);
+        }
+    }
+
+    if (GetMesh())
+    {
+        GetMesh()->SetVisibility(false);
+    }
+
+    if (BeastMeshComponent)
+    {
+        BeastMeshComponent->SetVisibility(true);
+    }
+
+    // Adjust capsule to beast profile
+    GetCapsuleComponent()->SetCapsuleSize(45.f, 45.f);
+
+    UpdateMovementForStatus();
+}
+
+void AWyrmCharacter::DeactivateMoonboundForm()
+{
+    // Test return clearance for humanoid envelope
+    UWorld* World = GetWorld();
+    if (World)
+    {
+        const float BeastHalfHeight = GetCapsuleComponent() ? GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() : 45.f;
+        const float HumanoidHalfHeight = FMath::Max(88.f, SavedHumanoidCapsuleHalfHeight);
+        const float HumanoidRadius = FMath::Max(34.f, SavedHumanoidCapsuleRadius);
+        const float FloorClearanceTolerance = 15.0f;
+        const float ZOffset = (HumanoidHalfHeight - BeastHalfHeight) + FloorClearanceTolerance;
+        const FVector TargetCenter = GetActorLocation() + FVector(0.f, 0.f, ZOffset);
+        const FCollisionShape HumanoidCapsule = FCollisionShape::MakeCapsule(HumanoidRadius, HumanoidHalfHeight - FloorClearanceTolerance);
+
+        FCollisionQueryParams QueryParams;
+        QueryParams.AddIgnoredActor(this);
+
+        FCollisionResponseParams ResponseParams;
+
+        FCollisionObjectQueryParams ObjParams;
+        ObjParams.AddObjectTypesToQuery(ECC_WorldStatic);
+        ObjParams.AddObjectTypesToQuery(ECC_WorldDynamic);
+        ObjParams.AddObjectTypesToQuery(ECC_PhysicsBody);
+
+        TArray<FOverlapResult> Overlaps;
+        bool bBlocked = false;
+
+        if (World->OverlapMultiByObjectType(Overlaps, TargetCenter, FQuat::Identity, ObjParams, HumanoidCapsule, QueryParams))
+        {
+            for (const FOverlapResult& Overlap : Overlaps)
+            {
+                AActor* OverlapActor = Overlap.GetActor();
+                if (OverlapActor && OverlapActor != this)
+                {
+                    if (Overlap.Component.IsValid() && Overlap.Component->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block)
+                    {
+                        bBlocked = true;
+                        UE_LOG(LogTemp, Warning, TEXT("[WyrmCharacter] DeactivateMoonboundForm blocked by Object: %s (Comp: %s)"),
+                            *OverlapActor->GetName(), Overlap.Component.IsValid() ? *Overlap.Component->GetName() : TEXT("None"));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!bBlocked && World->OverlapMultiByChannel(Overlaps, TargetCenter, FQuat::Identity, ECC_Pawn, HumanoidCapsule, QueryParams, ResponseParams))
+        {
+            for (const FOverlapResult& Overlap : Overlaps)
+            {
+                AActor* OverlapActor = Overlap.GetActor();
+                if (OverlapActor && OverlapActor != this)
+                {
+                    if (Overlap.Component.IsValid() && Overlap.Component->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block)
+                    {
+                        bBlocked = true;
+                        UE_LOG(LogTemp, Warning, TEXT("[WyrmCharacter] DeactivateMoonboundForm blocked by Channel: %s (Comp: %s)"),
+                            *OverlapActor->GetName(), Overlap.Component.IsValid() ? *Overlap.Component->GetName() : TEXT("None"));
+                        break;
+                    }
+                }
+            }
+        }
+
+        UE_LOG(LogTemp, Display, TEXT("[WyrmCharacter] DeactivateMoonboundForm clearance check: TargetCenter=%s Radius=%.1f HalfHeight=%.1f bBlocked=%d"),
+            *TargetCenter.ToString(), HumanoidCapsule.GetCapsuleRadius(), HumanoidCapsule.GetCapsuleHalfHeight(), bBlocked ? 1 : 0);
+
+        if (bBlocked)
+        {
+            // Blocked by low ceiling or obstacle! Enter return-pending state (ECHO-09)
+            bMoonboundReturnPending = true;
+            return;
+        }
+    }
+
+    // Clear return-pending and deactivate beast presentation
+    bMoonboundActive = false;
+    bMoonboundReturnPending = false;
+
+    if (AbilitySystem)
+    {
+        static const FGameplayTag MoonboundTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.MoonboundForm")), false);
+        if (MoonboundTag.IsValid() && AbilitySystem->HasMatchingGameplayTag(MoonboundTag))
+        {
+            AbilitySystem->RemoveLooseGameplayTag(MoonboundTag);
+        }
+    }
+
+    if (BeastMeshComponent)
+    {
+        BeastMeshComponent->SetVisibility(false);
+    }
+
+    if (GetMesh())
+    {
+        GetMesh()->SetVisibility(true);
+    }
+
+    GetCapsuleComponent()->SetCapsuleSize(SavedHumanoidCapsuleRadius, SavedHumanoidCapsuleHalfHeight);
+    UpdateMovementForStatus();
+}
+
+bool AWyrmCharacter::ResolveMoonboundReturnBlockage()
+{
+    if (!bMoonboundReturnPending)
+    {
+        return false;
+    }
+
+    // Teleport safely to the last validated same-side return location
+    SetActorLocation(LastSafeHumanoidLocation, false, nullptr, ETeleportType::TeleportPhysics);
+
+    // Now restore humanoid form safely
+    bMoonboundActive = false;
+    bMoonboundReturnPending = false;
+
+    if (AbilitySystem)
+    {
+        static const FGameplayTag MoonboundTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.MoonboundForm")), false);
+        if (MoonboundTag.IsValid() && AbilitySystem->HasMatchingGameplayTag(MoonboundTag))
+        {
+            AbilitySystem->RemoveLooseGameplayTag(MoonboundTag);
+        }
+    }
+
+    if (BeastMeshComponent)
+    {
+        BeastMeshComponent->SetVisibility(false);
+    }
+
+    if (GetMesh())
+    {
+        GetMesh()->SetVisibility(true);
+    }
+
+    GetCapsuleComponent()->SetCapsuleSize(SavedHumanoidCapsuleRadius, SavedHumanoidCapsuleHalfHeight);
+    UpdateMovementForStatus();
+    return true;
+}
+
+void AWyrmCharacter::RestoreMoonboundState(bool bInActive, float RemainingDuration, float RemainingCooldown, bool bInPending, const FVector& InLastSafeLoc)
+{
+    bMoonboundActive = bInActive;
+    MoonboundRemainingTimer = FMath::Max(0.f, RemainingDuration);
+    MoonboundCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    bMoonboundReturnPending = bInPending;
+    LastSafeHumanoidLocation = InLastSafeLoc;
+
+    for (const FName& EchoId : LearnedEchoes)
+    {
+        if (EchoId == FName(TEXT("MoonboundForm")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.MoonboundForm")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                }
+
+                if (!MoonboundFormHandle.IsValid())
+                {
+                    MoonboundFormHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmMoonboundFormAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+                if (!PrimaryBeastClawHandle.IsValid())
+                {
+                    PrimaryBeastClawHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmBeastClawAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+                if (!SecondaryBeastPounceHandle.IsValid())
+                {
+                    SecondaryBeastPounceHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmBeastPounceAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+    }
+
+    if (bMoonboundActive)
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag MoonboundTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.MoonboundForm")), false);
+            if (MoonboundTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(MoonboundTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(MoonboundTag);
+            }
+        }
+
+        if (GetMesh())
+        {
+            GetMesh()->SetVisibility(false);
+        }
+
+        if (BeastMeshComponent)
+        {
+            BeastMeshComponent->SetVisibility(true);
+        }
+
+        GetCapsuleComponent()->SetCapsuleSize(45.f, 45.f);
+        UpdateMovementForStatus();
+    }
 }

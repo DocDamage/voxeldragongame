@@ -644,3 +644,28 @@ bool UWyrmRegion01Subsystem::IsEchoRelentlessAdvanceUnlocked() const
 {
     return HasFact(FName(TEXT("echo.relentless_advance")));
 }
+
+bool UWyrmRegion01Subsystem::RecordEchoMoonboundForm()
+{
+    return CommitFact(FName(TEXT("echo.moonbound_form")), FName(TEXT("region01.echo.moonbound_form")));
+}
+
+bool UWyrmRegion01Subsystem::IsEchoMoonboundFormUnlocked() const
+{
+    return HasFact(FName(TEXT("echo.moonbound_form")));
+}
+
+bool UWyrmRegion01Subsystem::RecordCorvynDefeatHostile()
+{
+    return CommitFact(FName(TEXT("corvyn.defeated_hostile")), FName(TEXT("region01.corvyn.defeated_hostile")));
+}
+
+bool UWyrmRegion01Subsystem::RecordCorvynCured()
+{
+    return CommitFact(FName(TEXT("corvyn.cured")), FName(TEXT("region01.corvyn.cured")));
+}
+
+bool UWyrmRegion01Subsystem::IsCorvynResolved() const
+{
+    return HasFact(FName(TEXT("corvyn.defeated_hostile"))) || HasFact(FName(TEXT("corvyn.cured")));
+}

@@ -99,6 +99,22 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float RelentlessAdvanceRemainingCooldown = 0.f;
+
+    // --- Moonbound Beast State (WP-21 / SAVE-11) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bMoonboundActive = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float MoonboundRemainingDuration = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float MoonboundRemainingCooldown = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    bool bMoonboundReturnPending = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FVector LastSafeHumanoidLocation = FVector::ZeroVector;
 };
 
 USTRUCT(BlueprintType)

@@ -138,6 +138,21 @@ public:
     UFUNCTION(BlueprintPure, Category="Region 01|Echo")
     bool IsEchoRelentlessAdvanceUnlocked() const;
 
+    UFUNCTION(BlueprintCallable, Category="Region 01|Echo")
+    bool RecordEchoMoonboundForm();
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Echo")
+    bool IsEchoMoonboundFormUnlocked() const;
+
+    UFUNCTION(BlueprintCallable, Category="Region 01|Corvyn")
+    bool RecordCorvynDefeatHostile();
+
+    UFUNCTION(BlueprintCallable, Category="Region 01|Corvyn")
+    bool RecordCorvynCured();
+
+    UFUNCTION(BlueprintPure, Category="Region 01|Corvyn")
+    bool IsCorvynResolved() const;
+
     UFUNCTION(BlueprintCallable, Category="Region 01|Facts")
     bool CommitFact(FName FactId, FName ReceiptId);
 
