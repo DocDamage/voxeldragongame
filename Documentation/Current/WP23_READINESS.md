@@ -22,7 +22,7 @@ source candidates and stay fail-closed under DRG-15.
 |---:|---|---|---|
 | 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under Schema 6 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
 | 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, rendered QA, and Schema 6 recovery. |
-| 3 | WP-23.5 Gloaming Marches | **READINESS PASS / PRODUCTION GATED** | UE 5.8.2 imported Nyxaroth as a 33-part modular skeletal candidate with 20 animations. Cathedral content provides generic fits; the required horror FBX imports as 331 modular static parts and needs authored assembly/proof. A fail-closed rig profile and all gameplay/PIE evidence remain open. |
+| 3 | WP-23.5 Gloaming Marches | **CONTENT FIXTURE PASS / REGION GATED** | Nyxaroth passed NYX-01..05. Four Cathedral roles and representative required horror actor Michael Mire passed scoped editor material, scale, animation-strategy, collision, and manual visual review. Cemetery/environment navigation, the broader roster, provenance, and production gameplay remain gated. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -81,8 +81,7 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Implement the bounded **Nyxaroth fail-closed rig/profile proof** described in
-[WP-23.5](tasks/WP-23.5.md). Compile against UE 5.8.2 and prove the
-profile-level Companion/TrueForm, Heartfold, mount, flight, direct-control,
-GAS-combat, and save behaviors in focused PIE. Do not compose Gloaming Marches
-until that gate passes.
+Build the bounded **Gloaming environment/navigation foundation** described in
+[WP-23.5](tasks/WP-23.5.md): selectively import a small Cathedral plus
+cemetery/church subset, establish scale/material/collision, create the route
+skeleton, and prove navigation and route readability without encounters.

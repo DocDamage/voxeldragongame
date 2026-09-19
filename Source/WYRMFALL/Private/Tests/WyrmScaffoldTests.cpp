@@ -3095,7 +3095,7 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
 
     Dragon->BondWithHumanoid(Player);
     Dragon->DragonId = FName(TEXT("Rotwing"));
-    TestFalse(TEXT("Rotwing cannot inherit Verdance or Jadefang validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
+    TestFalse(TEXT("Rotwing cannot inherit another dragon's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
 
     FString Reason;
     TestFalse(TEXT("Rotwing Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
@@ -3115,6 +3115,21 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
     TestEqual(TEXT("Jadefang mount socket offset is (0, 0, 140)"), Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 140.f));
     TestTrue(TEXT("Jadefang can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Jadefang can take off in True Form"), Dragon->CanTakeOff(Reason));
+
+    // WP-23.5: Nyxaroth has a distinct authoritative profile and must not
+    // inherit Verdance/Jadefang dimensions, speeds, or mount offsets.
+    Dragon->SetDragonId(FName(TEXT("Nyxaroth")));
+    TestTrue(TEXT("Nyxaroth has an authoritative validated rig profile (WP-23.5)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Nyxaroth binds exactly 32 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 32);
+    TestEqual(TEXT("Nyxaroth companion capsule radius is 28"), Dragon->GetActiveRigProfile().CompanionCapsuleRadius, 28.f);
+    TestEqual(TEXT("Nyxaroth true form capsule is 115x155"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(115.f, 155.f));
+    TestEqual(TEXT("Nyxaroth true form fly speed is 1650"), Dragon->GetActiveRigProfile().FlightSpeed, 1650.f);
+    TestEqual(TEXT("Nyxaroth mount socket offset is distinct (0, 0, 150)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 150.f));
+    TestTrue(TEXT("Nyxaroth can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Nyxaroth can take off in True Form"), Dragon->CanTakeOff(Reason));
 
     Dragon->Destroy();
     Player->Destroy();

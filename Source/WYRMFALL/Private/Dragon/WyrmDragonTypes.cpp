@@ -2,7 +2,9 @@
 
 bool FWyrmDragonRigProfile::IsValidDragonRig(FName InDragonId)
 {
-    return InDragonId == FName(TEXT("Verdance")) || InDragonId == FName(TEXT("Jadefang"));
+    return InDragonId == FName(TEXT("Verdance")) ||
+        InDragonId == FName(TEXT("Jadefang")) ||
+        InDragonId == FName(TEXT("Nyxaroth"));
 }
 
 bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfile& OutProfile)
@@ -79,6 +81,42 @@ bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfil
             TEXT("RB_Leg2-Local"), TEXT("RB_Thigh-Local"), TEXT("RF_Claw-Local"), TEXT("RF_Foot-Local"),
             TEXT("RF_Leg-Local"), TEXT("RF_Thigh-Local"), TEXT("Tail_1-Local"), TEXT("Tail_2-Local"),
             TEXT("Tail_3-Local"), TEXT("Tail_4-Local")
+        };
+        return true;
+    }
+    else if (InDragonId == FName(TEXT("Nyxaroth")))
+    {
+        OutProfile.DragonId = FName(TEXT("Nyxaroth"));
+        OutProfile.DisplayName = TEXT("Nyxaroth");
+        OutProfile.LeaderMeshPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_5/Nyxaroth/Dark_Dragon/SkeletalMeshes/Hip-Local.Hip-Local");
+        OutProfile.FollowerMeshBasePath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_5/Nyxaroth/Dark_Dragon/SkeletalMeshes");
+        OutProfile.SkeletonPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_5/Nyxaroth/Dark_Dragon/SkeletalMeshes/Hip-Local_Skeleton.Hip-Local_Skeleton");
+        OutProfile.IdleAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_5/Nyxaroth/Dark_Dragon/SkeletalMeshes/Dark_DragonIdle_01.Dark_DragonIdle_01");
+        OutProfile.FlightAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_5/Nyxaroth/Dark_Dragon/SkeletalMeshes/Dark_DragonFlying_01.Dark_DragonFlying_01");
+        OutProfile.CompanionMeshScale = 0.0085f;
+        OutProfile.CompanionCapsuleRadius = 28.f;
+        OutProfile.CompanionCapsuleHalfHeight = 34.f;
+        OutProfile.CompanionGroundSpeed = 460.f;
+        OutProfile.TrueFormMeshScale = 0.032f;
+        OutProfile.TrueFormCapsuleRadius = 115.f;
+        OutProfile.TrueFormCapsuleHalfHeight = 155.f;
+        OutProfile.TrueFormGroundSpeed = 575.f;
+        OutProfile.FlightSpeed = 1650.f;
+        OutProfile.MountSocketOffset = FVector(0.f, 0.f, 150.f);
+        OutProfile.TakeoffClearanceHeight = 480.f;
+        OutProfile.WingSpanSweepRadius = 325.f;
+        OutProfile.LandingSearchDistance = 1200.f;
+        OutProfile.MaxLandingSlopeAngle = 45.f;
+        OutProfile.FollowerMeshNames = {
+            TEXT("Chest-Local"), TEXT("Head-Local"), TEXT("Jaw-Local"),
+            TEXT("LB_Foot-Local"), TEXT("LB_Leg1-Local"), TEXT("LB_Leg2-Local"), TEXT("LB_Thigh-Local"),
+            TEXT("LF_Claw-Local"), TEXT("LF_Foot-Local"), TEXT("LF_Leg-Local"), TEXT("LF_Thigh-Local"),
+            TEXT("L_Wing1-Local"), TEXT("L_Wing2-Local"), TEXT("L_Wing3-Local"), TEXT("Neck-Local"),
+            TEXT("RB_Foot-Local"), TEXT("RB_Leg1-Local"), TEXT("RB_Leg2-Local"), TEXT("RB_Thigh-Local"),
+            TEXT("RF_Claw-Local"), TEXT("RF_Foot-Local"), TEXT("RF_Leg-Local"), TEXT("RF_Thigh-Local"),
+            TEXT("R_Wing1-Local"), TEXT("R_Wing2-Local"), TEXT("R_Wing3-Local"),
+            TEXT("Tail_1-Local"), TEXT("Tail_2-Local"), TEXT("Tail_3-Local"), TEXT("Tail_4-Local"),
+            TEXT("ear_L-Local"), TEXT("ear_R-Local")
         };
         return true;
     }

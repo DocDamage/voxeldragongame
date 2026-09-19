@@ -38,7 +38,7 @@ All tasks originally started **NOT STARTED** because this deliverable was docume
 | WP-20 | Next regional dragon and selected Echo content | WP-16; explicit next-region scope | Terra/Sol by integration risk | NOT STARTED |
 | WP-21 | Moonbound transformation proof | WP-16; real Corvyn/beast assets | Sol | NOT STARTED |
 | WP-22 | Jade Peaks production-region slice | WP-20; supplied Jadefang and palace content | Sol | VERIFIED (JP-01–06 + WP-22-QA1) |
-| WP-23 | Rest-of-world production umbrella (WP-23.0–23.13) | WP-22 functional foundation; explicit September 19, 2026 user scope; child-specific real content | Sol | WP-23.0 + WP-23.1 + WP-23.2 COMPLETE / WP-23.5 READINESS PASS, PRODUCTION GATED |
+| WP-23 | Rest-of-world production umbrella (WP-23.0–23.13) | WP-22 functional foundation; explicit September 19, 2026 user scope; child-specific real content | Sol | WP-23.0 + WP-23.1 + WP-23.2 COMPLETE / WP-23.5 CONTENT FIXTURE PASS, REGION GATED |
 
 ## Task packets
 
@@ -280,7 +280,7 @@ All tasks originally started **NOT STARTED** because this deliverable was docume
 
 **Stop / evidence:** Each child stops at its own region/integration acceptance boundary. The finale retains ECHO-10 and END-01–02; every regional child adds focused travel, route, dragon, Echo, and save-recovery evidence before it can feed WP-23.11.
 
-**Boundary:** WP-23 is an umbrella, not one unbounded implementation pass. Work on one eligible child at a time. Missing art or rigs block only their dependent child; never substitute diagnostic primitives, create parallel owners, require optional Echoes, or claim the ten-region/finale state before integration evidence exists. WP-23.0, WP-23.1, and WP-23.2 are complete: Jade Peaks passed JC-01–08 and Verdant Reach passed VR-01–08 under current Schema 6. WP-23.5 import/content readiness passes, retaining the required modular horror roster under original WYRMFALL pun-name aliases, but Gloaming production remains gated on a distinct fail-closed Nyxaroth profile and focused PIE proof; every new-dragon child remains rig/content gated.
+**Boundary:** WP-23 is an umbrella, not one unbounded implementation pass. Work on one eligible child at a time. Missing art or rigs block only their dependent child; never substitute diagnostic primitives, create parallel owners, require optional Echoes, or claim the ten-region/finale state before integration evidence exists. WP-23.0, WP-23.1, and WP-23.2 are complete: Jade Peaks passed JC-01–08 and Verdant Reach passed VR-01–08 under current Schema 6. WP-23.5 Nyxaroth passed NYX-01–05, and the representative Cathedral/Michael Mire editor fixture passed. Gloaming production remains gated on environment/navigation, the broader required horror roster, provenance, and gameplay; every later new-dragon child remains rig/content gated.
 
 ## Reporting and scope changes
 

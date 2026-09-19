@@ -296,6 +296,11 @@ Evidence:
 - Disablement occurs at 0 HP with full depot recovery (`RecoverToDepot`) restoring health, parking state, and staging companion safely at depot.
 - `UWyrmSaveSubsystem` (Schema 3) persists occupied/parked hovercar state, transform, health, and mecha circuit upgrades.
 - `AWyrmDragonCharacter` supports multi-dragon companion management with authoritative rig profiles (`FWyrmDragonRigProfile`). Jadefang utilizes genuine GLTF Chinese dragon assets with long-bodied modular anatomy (leader mesh `Hip-Local` and 38 follower meshes bound via `SetLeaderPoseComponent`), distinct Companion (30x35cm) vs TrueForm (110x150cm) envelopes, distinct ground/flight speeds (480/1700), back ridge mount socket `(0, 0, 140)`, 4s Heartfold cooldown with low-ceiling clearance check, and Schema 3 save persistence. DRG-15 fail-closed policy blocks unvalidated rig profiles from inheriting dragon values.
+- Nyxaroth uses its own Dark Dragon profile with `Hip-Local` plus 32 followers,
+  28x34cm Companion and 115x155cm TrueForm envelopes, 460/575cm/s ground
+  speeds, 1650cm/s flight, and a `(0,0,150)` mount offset. NYX-01..05 passed
+  living bond, Heartfold/clearance, mount/flight, GAS control/combat, and save
+  identity in focused real PIE.
 - Current unified save schema is 6. It preserves Schema 5 region-keyed terrain/camp records, bounded travel state, and Unseen Hand cooldown; adds Hunter's Veil active/duration/cooldown state; and accepts Schemas 1–5 under the existing save coordinator.
 - `UWyrmJadePeaksSubsystem` is the narrow regional fact owner. It does not own inventory, combat, dragons, terrain, or save slots.
 - `UWyrmWorldTravelSubsystem` is the bounded travel owner for Region01↔JadePeaks only; it does not own save slots.
@@ -321,16 +326,20 @@ Evidence:
   boundary does not override the recorded deterministic PIE evidence. See
   `Documentation/Current/WP22_VISUAL_QA.md`.
 - WP-23 is user-authorized as the rest-of-world umbrella and split into
-  WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. WP-23.5 readiness
-  passes: Nyxaroth is import-feasible; Cathedral/cemetery candidates and the
-  required 331-part horror roster with WYRMFALL pun-name aliases are retained.
-  Only Verdance/Jadefang have validated rig and PIE evidence; Nyxaroth remains
-  profile- and gameplay-gated.
+  WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. Nyxaroth's distinct
+  profile now passes NYX-01..05 in focused PIE, including Heartfold,
+  mount/flight, GAS combat/control, living bond, and save identity. The
+  The representative content fixture also passes: four supplied Cathedral
+  roles have distinct palettes/animations at 180 cm, and Michael Mire is a
+  coherent 17-part, 190 cm required-horror assembly with proven collision.
+  The broader roster, cemetery content, provenance, and region remain gated.
 
 ## Next bounded task
 
-WP-23.5 readiness passes. Implement the bounded Nyxaroth fail-closed rig/profile
-proof next, then compile and exercise its profile-level dragon behavior in
-focused PIE. Do not compose Gloaming Marches until that gate passes. Mutable
-remains creator, GAS remains combat authority, and `UWyrmSaveSubsystem` remains
-the sole persistence coordinator. See `Documentation/Current/tasks/WP-23.5.md`.
+Build a bounded Gloaming environment/navigation foundation next: selectively
+import a small Cathedral plus cemetery/church subset, establish production
+scale/material/collision, create the route skeleton, and prove navigation and
+route readability. Do not implement encounters or claim regional completion.
+Mutable remains creator, GAS remains combat authority, and
+`UWyrmSaveSubsystem` remains the sole persistence coordinator. See
+`Documentation/Current/tasks/WP-23.5.md`.

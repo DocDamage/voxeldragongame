@@ -91,28 +91,43 @@ def main():
         archive.extractall(cathedral_root)
 
     asset_sub = unreal.get_editor_subsystem(unreal.EditorAssetSubsystem)
-    if len(asset_sub.list_assets(DEST_DRAGON, recursive=True)) < 25:
+    if not asset_sub.load_asset(f"{DEST_DRAGON}/Dark_Dragon/SkeletalMeshes/Hip-Local.Hip-Local"):
         import_asset(EXTRACTED, DEST_DRAGON)
-    if not asset_sub.list_assets(DEST_HORROR, recursive=True):
+    if not any((ROOT / "Content/WYRMFALL/Development/Intake/WP23_5/Horror").glob("*.uasset")):
         import_asset(HORROR, DEST_HORROR)
-    if not asset_sub.list_assets(DEST_GLOAMING, recursive=True):
-        cathedral_files = cathedral_root / "Voxel Cathedral/FBX"
-        selected = [
-            cathedral_files / "Characters/TVS_VoxelCathedral_Crusader.fbx",
-            cathedral_files / "Characters/TVS_VoxelCathedral_Priest.fbx",
-            cathedral_files / "Characters/TVS_VoxelCathedral_Nun.fbx",
-            cathedral_files / "Environment/TVS_VoxelCathedral_Cathedral.fbx",
-            cathedral_files / "Environment/TVS_VoxelCathedral_CrossGrave.fbx",
-            cathedral_files / "Environment/TVS_VoxelCathedral_Grave.fbx",
-            cathedral_files / "Environment/TVS_VoxelCathedral_Statue.fbx",
-            cathedral_files / "Environment/TVS_VoxelCathedral_Tree.fbx",
-        ]
-        for source in selected:
-            import_asset(source, DEST_GLOAMING)
+    cathedral_files = cathedral_root / "Voxel Cathedral/FBX"
+    # Keep each source FBX in its own namespace. Several files contain a
+    # material named ``palette_001``; flattening them into one destination
+    # silently reused the first palette and rendered later roles white.
+    selected = [
+        (cathedral_files / "Characters/TVS_VoxelCathedral_Crusader.fbx", "Roles/Ashgrave"),
+        (cathedral_files / "Characters/TVS_VoxelCathedral_Priest.fbx", "Roles/CountMalvaine"),
+        (cathedral_files / "Characters/TVS_VoxelCathedral_Nun.fbx", "Roles/HollowTwins"),
+        (cathedral_files / "Environment/TVS_VoxelCathedral_Cathedral.fbx", "Environment/Cathedral"),
+        (cathedral_files / "Environment/TVS_VoxelCathedral_CrossGrave.fbx", "Environment/CrossGrave"),
+        (cathedral_files / "Environment/TVS_VoxelCathedral_Grave.fbx", "Environment/Grave"),
+        (cathedral_files / "Environment/TVS_VoxelCathedral_Statue.fbx", "Environment/Statue"),
+        (cathedral_files / "Environment/TVS_VoxelCathedral_Tree.fbx", "Environment/Tree"),
+    ]
+    for source, relative_destination in selected:
+        destination = f"{DEST_GLOAMING}/{relative_destination}"
+        expected = f"{destination}/{source.stem}.{source.stem}"
+        if not asset_sub.load_asset(expected):
+            import_asset(source, destination)
 
     dragon_assets = summarize_assets(asset_sub, DEST_DRAGON)
     horror_assets = summarize_assets(asset_sub, DEST_HORROR)
-    gloaming_assets = summarize_assets(asset_sub, DEST_GLOAMING)
+    # Report only the isolated canonical intake. Older flat diagnostic assets
+    # may remain locally from a pre-fix run and must not inflate the receipt.
+    role_assets = summarize_assets(asset_sub, DEST_GLOAMING + "/Roles")
+    environment_assets = summarize_assets(asset_sub, DEST_GLOAMING + "/Environment")
+    gloaming_assets = {}
+    for source_summary in (role_assets, environment_assets):
+        for class_name, names in source_summary.items():
+            gloaming_assets.setdefault(class_name, []).extend(names)
+    gloaming_assets = {
+        class_name: sorted(set(names)) for class_name, names in sorted(gloaming_assets.items())
+    }
     skeletal = dragon_assets.get("SkeletalMesh", [])
     animations = dragon_assets.get("AnimSequence", [])
     materials = dragon_assets.get("Material", []) + dragon_assets.get("MaterialInstanceConstant", [])
@@ -179,7 +194,7 @@ def main():
             "follower_mesh_count": max(0, len(skeletal) - (1 if has_leader else 0)),
             "motion_coverage": motion_hits,
             "rig_import_ready": rig_import_ready,
-            "profile_validated": False,
+            "profile_validation_scope": "not evaluated by this readiness probe; see the focused Nyxaroth profile proof",
         },
         "gloaming_content": archive_summary,
         "selected_cathedral_import": gloaming_assets,
@@ -205,8 +220,6 @@ def main():
             "horror_roster": "horror characters.fbx (required; modular static-part assembly and production proof pending)",
         },
         "remaining_gates": [
-            "Implement and compile a fail-closed Nyxaroth FWyrmDragonRigProfile",
-            "Prove Companion/TrueForm dimensions, Heartfold clearance, mount, flight, combat, direct control, and save in real PIE",
             "Visually review scale/materials for the selected cathedral character and environment subset",
             "Author and prove the required horror-character assemblies, animation strategy, collision, scale, materials, and provenance clearance",
             "Prove Ashgrave, Count Malvaine, and Hollow Twins as distinct authored actors in the eventual regional slice",

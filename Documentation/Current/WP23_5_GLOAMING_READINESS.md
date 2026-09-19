@@ -1,8 +1,9 @@
 # WP-23.5 Gloaming Marches readiness evidence
 
 **Result:** PASS for bounded import/content readiness on September 19, 2026.
-**Production status:** GATED. No Gloaming map, Nyxaroth rig profile, or gameplay
-acceptance is claimed.
+**Production status:** REGION GATED. This readiness command does not itself
+claim a Gloaming map or profile/gameplay acceptance; the later focused profile
+proof closes NYX-01..05.
 
 ## Command and receipt
 
@@ -28,9 +29,10 @@ meshes, 20 animations, 33 materials, and 66 embedded images. UE imported one
 sequences, and 33 material instances. Named motion coverage includes idle,
 walk, flying, takeoff, landing, and attacks.
 
-This is an import-feasible modular candidate, structurally close to the proven
-Jadefang source. It is not a validated production rig: the receipt deliberately
-records `profile_validated: false`.
+This readiness command established an import-feasible modular candidate,
+structurally close to the proven Jadefang source. It did not validate the
+runtime profile. The later focused [Nyxaroth profile proof](WP23_5_NYXAROTH_PROFILE_PROOF.md)
+closes that separate gate with NYX-01..05 in real PIE.
 
 ## Gloaming content fit
 
@@ -60,20 +62,25 @@ Canniball, Bellraiser, Knit, Machete Mason, Pleatherface, Michael Mire,
 Dreadator, Pyre-Midhead, Sad Echo, Mum's the Wyrd, and Wherewolf. These aliases
 reduce direct naming overlap but do not by themselves establish permission.
 
-## Unrun production gates
+## Gate closed after this readiness run
 
-- No fail-closed Nyxaroth `FWyrmDragonRigProfile` was implemented or compiled.
-- No Companion/TrueForm dimensions, Heartfold, mount, flight, direct control,
-  GAS combat, living bond, or save behavior was run in PIE.
+- The distinct fail-closed Nyxaroth `FWyrmDragonRigProfile` now compiles and
+  passes Companion/TrueForm, Heartfold, mount/flight, direct control, GAS
+  combat, living bond, and save identity in NYX-01..05.
+
+## Unrun regional production gates
+
 - No Gloaming region map, navigation route, ruler encounter, Hollow Twin
   encounter, optional Echo outcome, travel/return, or recovery case exists.
-- Selected Cathedral and cemetery content has not received interactive visual
-  QA for scale, materials, collision, lighting, or route readability.
-- The required horror roster has not yet been assembled into authored actors or
-  proven for animation, collision, scale, materials, or permission/provenance.
+- The four selected Cathedral roles and representative Michael Mire assembly
+  passed the bounded content fixture; the environment and cemetery content has
+  not received route-scale, collision, navigation, or readability proof.
+- The remaining required horror roster has not yet been assembled into authored
+  actors or proven for animation, collision, scale, materials, or provenance.
 
 ## Decision
 
-The readiness blocker is narrowed from unknown source suitability to explicit
-runtime authoring work. Begin with a bounded Nyxaroth profile proof. Do not
-start regional composition until it passes.
+The Nyxaroth profile and representative content-integration fixture pass.
+Continue with a bounded environment/navigation foundation using a selective
+Cathedral and cemetery/church subset. Prove production scale, materials,
+collision, navigation, and route readability before encounter authoring.

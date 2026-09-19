@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 readiness**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 Gloaming content fixture**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -42,7 +42,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, Schema 6 recovery, supplied Ranger art, and rendered QA. Jade Peaks JC-01..08 was rerun successfully under Schema 6; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
-| WP-23.5 Gloaming readiness | **READINESS PASS / PRODUCTION GATED** | UE 5.8.2 imported Nyxaroth as one `Hip-Local` leader plus 32 follower meshes, one skeleton, 20 animations, and 33 material instances. Cathedral/cemetery candidates and the required 331-part horror roster are retained; production aliases, assembly, profile, visual, and PIE gates remain; [report](WP23_5_GLOAMING_READINESS.md) |
+| WP-23.5 Gloaming / Nyxaroth | **CONTENT FIXTURE PASS / REGION GATED** | NYX-01..05 remain passed. The editor fixture additionally proved four supplied Cathedral roles at 180 cm with role-specific palettes/animations and the required horror set through a coherent 17-part, 190 cm Michael Mire assembly with explicit collision. Environment/navigation and the production region remain open; [fixture proof](WP23_5_GLOAMING_CONTENT_FIXTURE.md), [profile proof](WP23_5_NYXAROTH_PROFILE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -214,12 +214,16 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Heartfold expansion and Jadefang multi-dragon rig validation acceptance cases `JADE-01` through `JADE-05` and `SAVE` are RESOLVED (PASS in WP-20).
 - Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED and rerun under Schema 6.
 - Verdant Reach closure cases `VR-01` through `VR-08` are RESOLVED (PASS in WP-23.1); later WP-23 children remain separate.
+- Nyxaroth profile cases `NYX-01` through `NYX-05` are RESOLVED in focused
+  live PIE. The representative Gloaming content-integration fixture is also
+  RESOLVED; regional environment, navigation, encounters, and production remain open.
 
 ## Next bounded task
 
-WP-23.5 readiness passes. The next bounded task is the **Nyxaroth fail-closed
-rig/profile proof**: implement and compile its distinct profile, then exercise
-Companion/TrueForm, Heartfold, mount, flight, direct control, GAS combat, and
-save behavior in focused PIE. Do not compose Gloaming Marches before this gate
-passes. See the [readiness ledger](WP23_READINESS.md), [WP-23.5 packet](tasks/WP-23.5.md), and
+The Nyxaroth profile and representative content fixture pass. The next bounded
+task is a **Gloaming environment/navigation foundation**: selectively import a
+small Cathedral plus cemetery/church subset, establish production-scale
+materials and collision, create the route skeleton, and prove navigation and
+route readability without implementing encounters or completion. See the
+[readiness ledger](WP23_READINESS.md), [WP-23.5 packet](tasks/WP-23.5.md), and
 [current handoff](HANDOFF.md).
