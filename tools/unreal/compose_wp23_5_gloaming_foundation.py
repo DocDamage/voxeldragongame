@@ -205,6 +205,9 @@ def main():
     ashgrave_seal = actors.spawn_actor_from_class(
         unreal.WyrmGloamingAshgraveSeal, unreal.Vector(-2600, -500, SURFACE_Z + 120))
     ashgrave_seal.set_actor_label("GLM_INTERACT_AshgraveExtractionSeal")
+    malvaine = actors.spawn_actor_from_class(
+        unreal.WyrmCountMalvaineCharacter, unreal.Vector(650, -250, SURFACE_Z + 90), unreal.Rotator(0, 0, 180))
+    malvaine.set_actor_label("GLM_ENCOUNTER_CountMalvaine")
 
     # Cool pools preserve the horror palette while making the critical route silhouettes readable.
     for label, location, color, intensity, radius in (
@@ -228,7 +231,8 @@ def main():
         "scope": "environment_navigation_foundation_only",
         "terrain_material": ground.get_path_name(), "surface_z": SURFACE_Z,
         "route_anchors": [label for label, _ in route], "supplied_placements": placed,
-        "gameplay_actors": [arrival_trigger.get_actor_label(), ashgrave_seal.get_actor_label()],
+        "gameplay_actors": [
+            arrival_trigger.get_actor_label(), ashgrave_seal.get_actor_label(), malvaine.get_actor_label()],
         "nav_bounds_extent_cm": list(nav_extent.to_tuple()),
         "not_claimed": ["encounters", "region completion", "interactive walkthrough"],
     }, indent=2) + "\n", encoding="utf-8")

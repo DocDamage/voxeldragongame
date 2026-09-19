@@ -54,8 +54,7 @@ before PIE when invoked without `--pie-only`.
 
 ## Next bounded task
 
-Author a focused Count Malvaine encounter slice using the already validated
-supplied Priest presentation and the existing Gloaming fact owner. Preserve an
-ordinary non-Echo approach and keep Sanguine Strike, the Hollow Twins,
-travel/save recovery, and regional completion outside that slice until each has
-its own acceptance boundary.
+Completed by [Count Malvaine encounter proof](WP23_5_MALVAINE_SLICE_PROOF.md).
+The next bounded task is a focused Hollow Twins encounter using two distinct
+authored identities; keep Second Turn, travel/save recovery, and regional
+completion outside that slice.

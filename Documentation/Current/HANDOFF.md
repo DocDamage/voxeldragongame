@@ -47,6 +47,7 @@ settings out of commits.
 - WP-23.1 real PIE passed all 8 Verdant Reach closure cases (`VR-01..08`): supplied Ranger character/environment presentation; evidence and authored-guard route parity without attacking Meridess; optional trust/living-defeat canopy hunter; permanent GAS Hunter's Veil; four live route navigation projections; Verdance continuity; and backward-readable Schema 6 recovery. Four rendered frames passed manual lighting, scale, grounding/collision, and route-readability review. WP-16 and WP-23.2 regressions remain green. See `Documentation/Current/WP23_1_VERDANT_REACH_PROOF.md`.
 - WP-23.5 environment/navigation foundation passed in `L_GloamingMarches`: finite GeoForge terrain, supplied Cathedral/cemetery composition, explicit supplied materials and `BlockAll` profiles, 4/4 navigable route anchors, 3/3 complete non-partial ordered paths, and accepted final rendered QA after correcting overexposure and off-center OBJ pivots. Encounters, travel/save recovery, and regional completion remain gated. See `Documentation/Current/WP23_5_GLOAMING_FOUNDATION_PROOF.md`.
 - WP-23.5 Arrival-to-Ashgrave gameplay passed in live PIE: `UWyrmGloamingSubsystem` owns the bounded fact/receipt state, the authored Arrival overlap commits once, the Ashgrave extraction seal rejects before Arrival and commits once afterward, and the live route is valid/non-partial. Malvaine, Twins, Echo, travel/save, and completion facts remain absent. See `Documentation/Current/WP23_5_ASHGRAVE_SLICE_PROOF.md`.
+- WP-23.5 Count Malvaine gameplay passed in live PIE: the supplied Priest is grounded at 179.34 cm; ordinary parley and GAS-driven living submission (700→100 HP) commit distinct route receipts plus one shared resolution exactly once. Sanguine Strike, Twins, travel/save, and completion remain absent. See `Documentation/Current/WP23_5_MALVAINE_SLICE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -331,16 +332,16 @@ Evidence:
   WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. Nyxaroth's distinct
   profile and the representative Cathedral/Michael Mire content fixture pass.
   The Gloaming production environment/navigation foundation and bounded
-  Arrival-to-Ashgrave gameplay slice now also pass in real PIE. The broader
+  Arrival-to-Ashgrave gameplay slice and Count Malvaine encounter now also pass
+  in real PIE. The broader
   horror roster, provenance, later encounters, travel/save recovery, and region
   completion remain gated.
 
 ## Next bounded task
 
-Build one bounded Count Malvaine encounter slice next in
-`L_GloamingMarches`, reusing the validated Priest presentation and
-`UWyrmGloamingSubsystem`. Preserve an ordinary non-Echo approach. Do not add
-Sanguine Strike, Hollow Twins, travel/save recovery, or regional completion in
-the same slice. Mutable remains creator, GAS remains combat authority, and
+Build one bounded Hollow Twins encounter slice next in `L_GloamingMarches`,
+using two distinct authored identities and `UWyrmGloamingSubsystem`. Do not add
+Second Turn, travel/save recovery, or regional completion in the same slice.
+Mutable remains creator, GAS remains combat authority, and
 `UWyrmSaveSubsystem` remains the sole persistence coordinator. See
 `Documentation/Current/tasks/WP-23.5.md`.

@@ -25,6 +25,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|Ashgrave")
     bool ResolveAshgraveExtractionSeal();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Malvaine")
+    bool RecordMalvaineResolution(bool bParley);
+
     UFUNCTION(BlueprintPure, Category="Gloaming|Facts")
     bool HasFact(FName FactId) const;
 

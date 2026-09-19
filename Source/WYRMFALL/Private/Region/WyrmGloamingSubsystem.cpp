@@ -9,6 +9,8 @@ namespace WyrmGloamingFacts
     const FName AshgraveSealResolved(TEXT("gloaming.ashgrave_extraction_seal_resolved"));
     const FName ArrivalReceipt(TEXT("gloaming.arrival.recorded"));
     const FName AshgraveSealReceipt(TEXT("gloaming.ashgrave_extraction_seal.resolved"));
+    const FName MalvaineResolved(TEXT("gloaming.malvaine_encounter_resolved"));
+    const FName MalvaineResolvedReceipt(TEXT("gloaming.malvaine.encounter_resolved"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -51,6 +53,27 @@ bool UWyrmGloamingSubsystem::ResolveAshgraveExtractionSeal()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::AshgraveSealResolved, WyrmGloamingFacts::AshgraveSealReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordMalvaineResolution(bool bParley)
+{
+    if (!HasFact(WyrmGloamingFacts::AshgraveSealResolved) ||
+        HasFact(WyrmGloamingFacts::MalvaineResolved) ||
+        HasReceipt(WyrmGloamingFacts::MalvaineResolvedReceipt))
+    {
+        return false;
+    }
+    const FName RouteFact = bParley
+        ? FName(TEXT("gloaming.malvaine_parley"))
+        : FName(TEXT("gloaming.malvaine_living_defeat"));
+    const FName RouteReceipt = bParley
+        ? FName(TEXT("gloaming.malvaine.parley"))
+        : FName(TEXT("gloaming.malvaine.living_defeat"));
+    if (HasReceipt(RouteReceipt) || !CommitFact(RouteFact, RouteReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::MalvaineResolved, WyrmGloamingFacts::MalvaineResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::CommitFact(FName FactId, FName ReceiptId)

@@ -3833,6 +3833,20 @@ bool FWyrmGloamingArrivalAshgraveTest::RunTest(const FString& Parameters)
         Region->HasFact(FName(TEXT("gloaming.malvaine_resolved"))));
     TestFalse(TEXT("Hollow Twins remain out of scope"),
         Region->HasFact(FName(TEXT("gloaming.hollow_twins_resolved"))));
+
+    Region->ResetGloamingState();
+    TestFalse(TEXT("Malvaine cannot resolve before Ashgrave"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Arrival recommits after reset"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave recommits after reset"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine parley route commits"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Malvaine common resolution fact commits"),
+        Region->HasFact(FName(TEXT("gloaming.malvaine_encounter_resolved"))));
+    TestTrue(TEXT("Malvaine parley receipt commits"),
+        Region->HasReceipt(FName(TEXT("gloaming.malvaine.parley"))));
+    TestFalse(TEXT("Malvaine resolution cannot duplicate through combat route"),
+        Region->RecordMalvaineResolution(false));
+    TestFalse(TEXT("Malvaine slice does not grant Sanguine Strike"),
+        Region->HasFact(FName(TEXT("echo.sanguine_strike"))));
     return true;
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmVerdantReachClosureTest, "WYRMFALL.Scaffold.VerdantReachClosure",

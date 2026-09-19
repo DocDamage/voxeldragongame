@@ -22,7 +22,7 @@ source candidates and stay fail-closed under DRG-15.
 |---:|---|---|---|
 | 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under Schema 6 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
 | 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, rendered QA, and Schema 6 recovery. |
-| 3 | WP-23.5 Gloaming Marches | **ARRIVAL→ASHGRAVE PASS / LATER GAMEPLAY GATED** | Nyxaroth, the representative content fixture, and the environment foundation pass. The first live gameplay route now proves one-time Arrival and prerequisite-gated Ashgrave seal receipts without granting later encounter/Echo/completion facts. The broader roster, provenance, later encounters, travel/save recovery, and completion remain gated. |
+| 3 | WP-23.5 Gloaming Marches | **MALVAINE ENCOUNTER PASS / LATER GAMEPLAY GATED** | Nyxaroth, content fixture, foundation, Arrival→Ashgrave, and Count Malvaine pass. Parley and GAS-driven living submission commit distinct one-time routes with shared resolution and no Echo leakage. Hollow Twins, Echoes, travel/save recovery, and completion remain gated. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -81,7 +81,7 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Build a bounded **Count Malvaine encounter slice** described in
-[WP-23.5](tasks/WP-23.5.md), reusing the validated Priest presentation and the
-existing Gloaming fact owner. Keep Sanguine Strike, Hollow Twins,
-travel/save recovery, and regional completion outside that slice.
+Build a bounded **Hollow Twins encounter slice** described in
+[WP-23.5](tasks/WP-23.5.md), using two distinct authored identities and the
+existing Gloaming fact owner. Keep Second Turn, travel/save recovery, and
+regional completion outside that slice.

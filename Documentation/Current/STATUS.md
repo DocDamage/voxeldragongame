@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 Arrival-to-Ashgrave gameplay**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 Count Malvaine gameplay**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -42,7 +42,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, Schema 6 recovery, supplied Ranger art, and rendered QA. Jade Peaks JC-01..08 was rerun successfully under Schema 6; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
-| WP-23.5 Gloaming / Nyxaroth | **ARRIVAL→ASHGRAVE PASS / LATER GAMEPLAY GATED** | NYX-01..05, the content fixture, and the environment foundation remain passed. Live PIE now proves the navigable Arrival→Ashgrave route, one-time arrival fact, prerequisite-gated Ashgrave extraction-seal interaction, and strict exclusion of Malvaine/Twins/Echo/completion outcomes. Later encounters, travel/save recovery, and regional completion remain open; [gameplay proof](WP23_5_ASHGRAVE_SLICE_PROOF.md), [foundation proof](WP23_5_GLOAMING_FOUNDATION_PROOF.md) |
+| WP-23.5 Gloaming / Nyxaroth | **MALVAINE ENCOUNTER PASS / LATER GAMEPLAY GATED** | NYX-01..05, content fixture, foundation, Arrival→Ashgrave, and Count Malvaine pass. PIE proves parley and GAS-driven living submission parity, one-time facts/receipts, supplied Priest presentation at 179.34 cm, and no Sanguine Strike/Twins/completion leakage. Hollow Twins, Echoes, travel/save recovery, and completion remain open; [Malvaine proof](WP23_5_MALVAINE_SLICE_PROOF.md), [Ashgrave proof](WP23_5_ASHGRAVE_SLICE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -215,16 +215,16 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED and rerun under Schema 6.
 - Verdant Reach closure cases `VR-01` through `VR-08` are RESOLVED (PASS in WP-23.1); later WP-23 children remain separate.
 - Nyxaroth profile cases `NYX-01` through `NYX-05`, the representative content
-  fixture, the Gloaming environment/navigation foundation, and the bounded
-  Arrival-to-Ashgrave gameplay slice are RESOLVED. Later encounters,
+  fixture, the Gloaming environment/navigation foundation, the bounded
+  Arrival-to-Ashgrave gameplay slice, and the Count Malvaine encounter are
+  RESOLVED. Later encounters,
   travel/save recovery, and regional completion remain open.
 
 ## Next bounded task
 
-The Arrival-to-Ashgrave gameplay slice passes. The next bounded task is a
-**Count Malvaine encounter slice** in `L_GloamingMarches`, reusing the validated
-Priest presentation and `UWyrmGloamingSubsystem`. Preserve an ordinary
-non-Echo approach and keep Sanguine Strike, Hollow Twins, travel/save recovery,
-and regional completion outside that slice. See the
-[gameplay proof](WP23_5_ASHGRAVE_SLICE_PROOF.md),
+The Count Malvaine encounter slice passes. The next bounded task is a
+**Hollow Twins encounter slice** in `L_GloamingMarches`, using two distinct
+authored identities and `UWyrmGloamingSubsystem`. Keep Second Turn,
+travel/save recovery, and regional completion outside that slice. See the
+[Malvaine proof](WP23_5_MALVAINE_SLICE_PROOF.md),
 [WP-23.5 packet](tasks/WP-23.5.md), and [current handoff](HANDOFF.md).
