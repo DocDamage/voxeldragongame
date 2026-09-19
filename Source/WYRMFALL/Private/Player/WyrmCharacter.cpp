@@ -6,7 +6,11 @@
 #include "Combat/Abilities/WyrmEvadeAbility.h"
 #include "Combat/Abilities/WyrmRelentlessAdvanceAbility.h"
 #include "Combat/Abilities/WyrmMoonboundFormAbility.h"
+#include "Combat/Abilities/WyrmMirrorStepAbility.h"
+#include "Combat/Abilities/WyrmUnseenHandAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
+#include "Combat/WyrmEnemyCharacter.h"
+#include "Combat/WyrmUnseenHandTarget.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/OverlapResult.h"
 #include "Inventory/WyrmInventoryComponent.h"
@@ -16,6 +20,9 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "NavigationSystem.h"
+#include "EngineUtils.h"
+#include "Water/WyrmWaterVolume.h"
 #include "GameplayTagsManager.h"
 #include "MuCO/CustomizableSkeletalComponent.h"
 #include "MuCO/CustomizableObject.h"
@@ -308,6 +315,36 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
                     FGameplayTagContainer CDContainer(CooldownTag);
                     AbilitySystem->RemoveActiveEffectsWithGrantedTags(CDContainer);
                 }
+            }
+        }
+    }
+
+    if (MirrorStepCooldownTimer > 0.f)
+    {
+        MirrorStepCooldownTimer = FMath::Max(0.f, MirrorStepCooldownTimer - DeltaSeconds);
+        if (MirrorStepCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.MirrorStep")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+
+    if (UnseenHandCooldownTimer > 0.f)
+    {
+        UnseenHandCooldownTimer = FMath::Max(0.f, UnseenHandCooldownTimer - DeltaSeconds);
+        if (UnseenHandCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.UnseenHand")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
             }
         }
     }
@@ -1121,6 +1158,35 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             }
         }
     }
+    else if (EchoId == FName(TEXT("MirrorStep")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.MirrorStep")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            }
+            if (!MirrorStepHandle.IsValid())
+            {
+                MirrorStepHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmMirrorStepAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
+    else if (EchoId == FName(TEXT("UnseenHand")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.UnseenHand")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!UnseenHandHandle.IsValid())
+            {
+                UnseenHandHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmUnseenHandAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
 
     // Auto-equip if first echo and none equipped
     if (EquippedEcho.IsNone())
@@ -1242,6 +1308,270 @@ bool AWyrmCharacter::ActivateEquippedEcho()
     return false;
 }
 
+bool AWyrmCharacter::CanActivateMirrorStep(const FVector& Destination, FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("MirrorStep"))))
+    {
+        OutFailureReason = TEXT("NotUnlocked");
+        return false;
+    }
+    if (EquippedEcho != FName(TEXT("MirrorStep")))
+    {
+        OutFailureReason = TEXT("NotEquipped");
+        return false;
+    }
+    if (!Attributes || Attributes->GetHealth() <= 0.f)
+    {
+        OutFailureReason = TEXT("Dead");
+        return false;
+    }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) ||
+        HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    {
+        OutFailureReason = TEXT("ControlBlocked");
+        return false;
+    }
+    if (MirrorStepCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.MirrorStep"))))
+    {
+        OutFailureReason = TEXT("OnCooldown");
+        return false;
+    }
+    if (Attributes->GetFocus() < 20.f)
+    {
+        OutFailureReason = TEXT("InsufficientFocus");
+        return false;
+    }
+    const FVector Start = GetActorLocation();
+    if (FVector::Dist(Start, Destination) > 400.f + KINDA_SMALL_NUMBER)
+    {
+        OutFailureReason = TEXT("OutOfRange");
+        return false;
+    }
+    UWorld* World = GetWorld();
+    if (!World || !GetCapsuleComponent())
+    {
+        OutFailureReason = TEXT("NoWorld");
+        return false;
+    }
+    for (TActorIterator<AWyrmWaterVolume> It(World); It; ++It)
+    {
+        if (It->IsPointInWater(Destination))
+        {
+            OutFailureReason = TEXT("WaterDestination");
+            return false;
+        }
+    }
+    FNavLocation Projected;
+    UNavigationSystemV1* Nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+    if (!Nav || !Nav->ProjectPointToNavigation(Destination, Projected, FVector(50.f, 50.f, 150.f)))
+    {
+        OutFailureReason = TEXT("UnreachableOrVoid");
+        return false;
+    }
+    if (FVector::DistSquared2D(Projected.Location, Destination) > FMath::Square(60.f))
+    {
+        OutFailureReason = TEXT("UnreachableOrVoid");
+        return false;
+    }
+
+    const FVector LandingLocation = Projected.Location + FVector(
+        0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MirrorStepValidation), false, this);
+    FHitResult BarrierHit;
+    const FVector EyeOffset(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.5f);
+    if (World->LineTraceSingleByChannel(BarrierHit, Start + EyeOffset, LandingLocation + EyeOffset, ECC_Visibility, Params))
+    {
+        OutFailureReason = TEXT("SealedBoundary");
+        return false;
+    }
+
+    const FCollisionShape Capsule = FCollisionShape::MakeCapsule(
+        GetCapsuleComponent()->GetScaledCapsuleRadius(), GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+    if (World->OverlapBlockingTestByChannel(LandingLocation, GetActorQuat(), ECC_Pawn, Capsule, Params))
+    {
+        OutFailureReason = TEXT("DestinationOccupied");
+        return false;
+    }
+
+    FHitResult FloorHit;
+    if (!World->LineTraceSingleByChannel(FloorHit, LandingLocation + FVector(0.f, 0.f, 100.f),
+        LandingLocation - FVector(0.f, 0.f, 250.f), ECC_Visibility, Params))
+    {
+        OutFailureReason = TEXT("NoSafeFloor");
+        return false;
+    }
+
+    OutFailureReason.Reset();
+    return true;
+}
+
+FString AWyrmCharacter::GetMirrorStepFailureReason(const FVector& Destination) const
+{
+    FString FailureReason;
+    return CanActivateMirrorStep(Destination, FailureReason) ? FString() : FailureReason;
+}
+
+bool AWyrmCharacter::ActivateMirrorStep(const FVector& Destination)
+{
+    FString Reason;
+    if (!CanActivateMirrorStep(Destination, Reason) || !AbilitySystem || !MirrorStepHandle.IsValid())
+    {
+        return false;
+    }
+    PendingMirrorStepDestination = Destination;
+    bHasPendingMirrorStepDestination = true;
+    const bool bActivated = AbilitySystem->TryActivateAbility(MirrorStepHandle);
+    if (!bActivated)
+    {
+        bHasPendingMirrorStepDestination = false;
+    }
+    return bActivated;
+}
+
+bool AWyrmCharacter::CommitMirrorStep()
+{
+    if (!bHasPendingMirrorStepDestination)
+    {
+        return false;
+    }
+    FNavLocation Projected;
+    UNavigationSystemV1* Nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+    if (!Nav || !Nav->ProjectPointToNavigation(PendingMirrorStepDestination, Projected, FVector(50.f, 50.f, 150.f)))
+    {
+        bHasPendingMirrorStepDestination = false;
+        return false;
+    }
+    const FVector LandingLocation = Projected.Location + FVector(
+        0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
+    const bool bMoved = SetActorLocation(LandingLocation, false, nullptr, ETeleportType::TeleportPhysics);
+    bHasPendingMirrorStepDestination = false;
+    if (bMoved)
+    {
+        MirrorStepCooldownTimer = 10.f;
+    }
+    return bMoved;
+}
+
+void AWyrmCharacter::RestoreMirrorStepState(float RemainingCooldown)
+{
+    MirrorStepCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem)
+    {
+        return;
+    }
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.MirrorStep")), false);
+    if (CooldownTag.IsValid())
+    {
+        if (MirrorStepCooldownTimer > 0.f)
+        {
+            if (!AbilitySystem->HasMatchingGameplayTag(CooldownTag))
+            {
+                AbilitySystem->AddLooseGameplayTag(CooldownTag);
+            }
+        }
+        else
+        {
+            AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+            FGameplayTagContainer CooldownTags(CooldownTag);
+            AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        }
+    }
+}
+
+bool AWyrmCharacter::CanActivateUnseenHand(AActor* Target, FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("UnseenHand")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("UnseenHand"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Target || Target == this) { OutFailureReason = TEXT("InvalidTarget"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (UnseenHandCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.UnseenHand"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 25.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    if (FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) > FMath::Square(900.f))
+    { OutFailureReason = TEXT("OutOfRange"); return false; }
+
+    if (const AWyrmEnemyCharacter* Enemy = Cast<AWyrmEnemyCharacter>(Target))
+    {
+        if (Enemy->bIsBoss || Enemy->IsDefeated()) { OutFailureReason = TEXT("HeavyOrBossTarget"); return false; }
+        OutFailureReason.Reset(); return true;
+    }
+    if (const AWyrmUnseenHandTarget* Prop = Cast<AWyrmUnseenHandTarget>(Target))
+    {
+        if (!Prop->IsEligibleForUnseenHand()) { OutFailureReason = TEXT("HeavyOrUnauthoredTarget"); return false; }
+        OutFailureReason.Reset(); return true;
+    }
+    OutFailureReason = TEXT("HeavyOrUnauthoredTarget");
+    return false;
+}
+
+bool AWyrmCharacter::ActivateUnseenHand(AActor* Target)
+{
+    FString Reason;
+    if (!CanActivateUnseenHand(Target, Reason) || !AbilitySystem || !UnseenHandHandle.IsValid()) return false;
+    PendingUnseenHandTarget = Target;
+    const bool bActivated = AbilitySystem->TryActivateAbility(UnseenHandHandle);
+    if (!bActivated) PendingUnseenHandTarget.Reset();
+    return bActivated;
+}
+
+FString AWyrmCharacter::GetUnseenHandFailureReason(AActor* Target) const
+{
+    FString Reason;
+    return CanActivateUnseenHand(Target, Reason) ? FString() : Reason;
+}
+
+bool AWyrmCharacter::CommitUnseenHand()
+{
+    AActor* Target = PendingUnseenHandTarget.Get();
+    const AWyrmEnemyCharacter* EnemyTarget = Cast<AWyrmEnemyCharacter>(Target);
+    const AWyrmUnseenHandTarget* PropTarget = Cast<AWyrmUnseenHandTarget>(Target);
+    const bool bEligibleEnemy = EnemyTarget && !EnemyTarget->bIsBoss && !EnemyTarget->IsDefeated();
+    const bool bEligibleProp = PropTarget && PropTarget->IsEligibleForUnseenHand();
+    if (!Target || (!bEligibleEnemy && !bEligibleProp) ||
+        FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) > FMath::Square(900.f))
+    {
+        PendingUnseenHandTarget.Reset();
+        return false;
+    }
+    FVector Direction = Target->GetActorLocation() - GetActorLocation();
+    Direction.Z = FMath::Max(Direction.Z, 100.f);
+    Direction = Direction.GetSafeNormal();
+    bool bApplied = false;
+    if (AWyrmEnemyCharacter* Enemy = Cast<AWyrmEnemyCharacter>(Target))
+    {
+        Enemy->LaunchCharacter(Direction * 900.f + FVector(0.f, 0.f, 250.f), true, true);
+        bApplied = true;
+    }
+    else if (AWyrmUnseenHandTarget* Prop = Cast<AWyrmUnseenHandTarget>(Target))
+    {
+        bApplied = Prop->ApplyUnseenHandImpulse(Direction * 1100.f);
+    }
+    PendingUnseenHandTarget.Reset();
+    if (bApplied) UnseenHandCooldownTimer = 8.f;
+    return bApplied;
+}
+
+void AWyrmCharacter::RestoreUnseenHandState(float RemainingCooldown)
+{
+    UnseenHandCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.UnseenHand")), false);
+    if (!CooldownTag.IsValid()) return;
+    if (UnseenHandCooldownTimer > 0.f)
+    {
+        if (!AbilitySystem->HasMatchingGameplayTag(CooldownTag)) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+    }
+    else
+    {
+        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+        FGameplayTagContainer CooldownTags(CooldownTag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+    }
+}
+
 void AWyrmCharacter::ActivateRelentlessAdvanceStance(float Duration)
 {
     bRelentlessAdvanceActive = true;
@@ -1288,6 +1618,35 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
                 {
                     RelentlessAdvanceHandle = AbilitySystem->GiveAbility(
                         FGameplayAbilitySpec(UWyrmRelentlessAdvanceAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("MirrorStep")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.MirrorStep")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag))
+                {
+                    AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                }
+                if (!MirrorStepHandle.IsValid())
+                {
+                    MirrorStepHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmMirrorStepAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("UnseenHand")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.UnseenHand")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!UnseenHandHandle.IsValid())
+                {
+                    UnseenHandHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmUnseenHandAbility::StaticClass(), 1, INDEX_NONE, this));
                 }
             }
         }

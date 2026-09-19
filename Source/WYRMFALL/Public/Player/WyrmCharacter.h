@@ -181,6 +181,50 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void RestoreMoonboundState(bool bInActive, float RemainingDuration, float RemainingCooldown, bool bInPending, const FVector& InLastSafeLoc);
 
+    // --- Mirror Step (WP-22 / JP-05) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateMirrorStep(const FVector& Destination, FString& OutFailureReason) const;
+
+    /** Reflection-friendly single-value view of the authoritative validator. Empty means valid. */
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    FString GetMirrorStepFailureReason(const FVector& Destination) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateMirrorStep(const FVector& Destination);
+
+    /** Called only by UWyrmMirrorStepAbility after GAS commits cost/cooldown. */
+    bool CommitMirrorStep();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    FVector GetPendingMirrorStepDestination() const { return PendingMirrorStepDestination; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetMirrorStepRemainingCooldown() const { return MirrorStepCooldownTimer; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreMirrorStepState(float RemainingCooldown);
+
+    // --- Unseen Hand (WP-23.2) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateUnseenHand(AActor* Target, FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    FString GetUnseenHandFailureReason(AActor* Target) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateUnseenHand(AActor* Target);
+
+    bool CommitUnseenHand();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    AActor* GetPendingUnseenHandTarget() const { return PendingUnseenHandTarget.Get(); }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetUnseenHandRemainingCooldown() const { return UnseenHandCooldownTimer; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreUnseenHandState(float RemainingCooldown);
+
     // --- Progression & XP (WP-06) ---
     UFUNCTION(BlueprintCallable, Category="Progression") bool AddExperience(float Amount);
     UFUNCTION(BlueprintPure, Category="Progression") float GetCurrentXP() const { return CurrentXP; }
@@ -328,6 +372,8 @@ private:
     FGameplayAbilitySpecHandle EvadeHandle;
     FGameplayAbilitySpecHandle RelentlessAdvanceHandle;
     FGameplayAbilitySpecHandle MoonboundFormHandle;
+    FGameplayAbilitySpecHandle MirrorStepHandle;
+    FGameplayAbilitySpecHandle UnseenHandHandle;
     FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
     FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
@@ -349,6 +395,13 @@ private:
     FVector LastSafeHumanoidLocation = FVector::ZeroVector;
     float SavedHumanoidCapsuleRadius = 42.f;
     float SavedHumanoidCapsuleHalfHeight = 96.f;
+
+    float MirrorStepCooldownTimer = 0.f;
+    FVector PendingMirrorStepDestination = FVector::ZeroVector;
+    bool bHasPendingMirrorStepDestination = false;
+
+    float UnseenHandCooldownTimer = 0.f;
+    TWeakObjectPtr<AActor> PendingUnseenHandTarget;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

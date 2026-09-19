@@ -1,9 +1,15 @@
-# Current Handoff — Documentation Complete, Runtime Unverified
+# DesignPack v0.1 handoff — superseded runtime snapshot
 
 **Documentation release:** v0.1 · September 14, 2026  
-**Status:** Factual handoff; no implementation claimed  
+**Status:** Historical documentation-release handoff; superseded for runtime status
 **Basis:** All current pack sources; actual documentation work performed; see [source register](../SOURCES_AND_EVIDENCE.md).  
 **Rule:** Existing requirements remain binding. New numbers and detailed behavior are draft baselines for a bounded prototype, not claims of user approval or runtime validation.
+
+> **Current runtime authority:** See `Documentation/Current/HANDOFF.md` and
+> `Documentation/Current/STATUS.md` in the project workspace. As of September
+> 19, 2026, WP-23.0 and WP-23.2 are complete; JC-01..08 passed in real PIE,
+> and WP-23.1 packet authoring is next. The remainder of this file preserves the
+> v0.1 documentation-release handoff and must not be read as current runtime state.
 
 ## Actual status
 
@@ -27,7 +33,7 @@ BASELINE proposals now make prototypes concrete: initial combat math/slots, form
 
 VERIFY: actual project/engine/plugin versions, selected inventory/terrain/water/building owners, real content paths/rigs/animations/collision, rider/pet/car fit and performance. OPEN: release count/order, full campaign travel order/cap/length, cross-region car policy, final tuning and content breadth beyond preserved source targets.
 
-## One next implementation task
+## Historical next implementation task
 
 **WP-00: G0 real project/content/owner readiness.** Use [the bounded G0/G1 assignment](G0_G1_READINESS_AND_TERRAIN_PROOF.md). Locate the authorized project's .uproject/engine/working tree, then actual approved materials/humanoid/Green Dragon and available terrain candidate. Populate real registry/matrix fields. Continue to WP-01 only within actual coding authorization and sufficient inputs.
 

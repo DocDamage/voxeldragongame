@@ -30,6 +30,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Save")
     static bool DeleteSaveSlot(const FString& SlotName);
 
+    UFUNCTION(BlueprintPure, Category="Save")
+    static bool IsSchemaVersionSupported(int32 SchemaVersion);
+
     UFUNCTION(BlueprintCallable, Category="Save")
     static bool SaveSnapshotToSlot(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor = nullptr, UWorld* WorldContext = nullptr);
 

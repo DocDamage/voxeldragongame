@@ -7,6 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include "Engine/OverlapResult.h"
+#include "EngineUtils.h"
 #include "CollisionQueryParams.h"
 #include "Water/WyrmWaterVolume.h"
 #include "Building/WyrmBuildingPiece.h"

@@ -7,6 +7,8 @@
 #include "Building/WyrmBuildingSubsystem.h"
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
+#include "Region/WyrmJadePeaksSubsystem.h"
+#include "Region/WyrmWorldTravelSubsystem.h"
 #include "Vehicles/WyrmHovercar.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
@@ -104,6 +106,12 @@ bool UWyrmSaveSubsystem::DeleteSaveSlot(const FString& SlotName)
     return UGameplayStatics::DeleteGameInSlot(SlotName, 0);
 }
 
+bool UWyrmSaveSubsystem::IsSchemaVersionSupported(int32 SchemaVersion)
+{
+    return SchemaVersion >= UWyrmSaveGame::MinimumSupportedSchemaVersion &&
+           SchemaVersion <= UWyrmSaveGame::CurrentSchemaVersion;
+}
+
 UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
     UWyrmSaveGame* SaveObj = Cast<UWyrmSaveGame>(
@@ -116,6 +124,15 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
     SaveObj->SlotName = SlotName;
     SaveObj->Timestamp = FDateTime::UtcNow();
     SaveObj->SaveGenerationId = FGuid::NewGuid();
+
+    // Carry forward other regions when updating an existing Schema 5 slot.
+    if (!SlotName.IsEmpty() && UGameplayStatics::DoesSaveGameExist(SlotName, 0))
+    {
+        if (const UWyrmSaveGame* Previous = Cast<UWyrmSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0)))
+        {
+            if (Previous->SchemaVersion >= 5) SaveObj->RegionalWorldRecords = Previous->RegionalWorldRecords;
+        }
+    }
 
     if (Character)
     {
@@ -172,6 +189,8 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.MoonboundRemainingCooldown = Character->GetMoonboundRemainingCooldown();
         SaveObj->CharacterRecord.bMoonboundReturnPending = Character->IsMoonboundReturnPending();
         SaveObj->CharacterRecord.LastSafeHumanoidLocation = Character->GetLastSafeHumanoidLocation();
+        SaveObj->CharacterRecord.MirrorStepRemainingCooldown = Character->GetMirrorStepRemainingCooldown();
+        SaveObj->CharacterRecord.UnseenHandRemainingCooldown = Character->GetUnseenHandRemainingCooldown();
 
         if (Inv)
         {
@@ -246,11 +265,42 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         BuildingSub->BuildSaveRecord(SaveObj->CampRecord);
     }
 
+    const FName CurrentRegionId = UWyrmWorldTravelSubsystem::RegionIdForMapName(
+        WorldContext ? WorldContext->GetMapName() : FString());
+    if (!CurrentRegionId.IsNone())
+    {
+        SaveObj->RegionalWorldRecords.RemoveAll([CurrentRegionId](const FWyrmRegionalWorldSaveRecord& Record)
+        {
+            return Record.RegionId == CurrentRegionId || Record.RegionId.IsNone();
+        });
+        FWyrmRegionalWorldSaveRecord RegionalRecord;
+        RegionalRecord.RegionId = CurrentRegionId;
+        RegionalRecord.TerrainRecord = SaveObj->TerrainRecord;
+        RegionalRecord.CampRecord = SaveObj->CampRecord;
+        SaveObj->RegionalWorldRecords.Add(RegionalRecord);
+        SaveObj->RegionalWorldRecords.Sort([](const FWyrmRegionalWorldSaveRecord& A, const FWyrmRegionalWorldSaveRecord& B)
+        {
+            return A.RegionId.LexicalLess(B.RegionId);
+        });
+    }
+
+    if (UWyrmWorldTravelSubsystem* Travel = UWyrmWorldTravelSubsystem::GetWorldTravelSubsystem(WorldContext))
+    {
+        Travel->BuildSaveRecord(SaveObj->WorldTravelRecord);
+        if (SaveObj->WorldTravelRecord.CurrentRegionId.IsNone())
+            SaveObj->WorldTravelRecord.CurrentRegionId = CurrentRegionId;
+    }
+
     // Region 01 owns facts only; this unified subsystem remains the sole
     // serializer and slot owner for those facts.
     if (UWyrmRegion01Subsystem* Region01 = UWyrmRegion01Subsystem::GetRegion01Subsystem(WorldContext))
     {
         Region01->BuildSaveRecord(SaveObj->Region01Record);
+    }
+
+    if (UWyrmJadePeaksSubsystem* JadePeaks = UWyrmJadePeaksSubsystem::GetJadePeaksSubsystem(WorldContext))
+    {
+        JadePeaks->BuildSaveRecord(SaveObj->JadePeaksRecord);
     }
 
     // Capture active Dragon Companion / Boss (DRG-01..04, SAVE-08)
@@ -260,9 +310,18 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         {
             if (*It && IsValid(*It))
             {
-                (*It)->BuildSaveRecord(SaveObj->DragonRecord);
-                break;
+                FWyrmDragonSaveRecord Record;
+                (*It)->BuildSaveRecord(Record);
+                SaveObj->DragonRecords.Add(Record);
             }
+        }
+        SaveObj->DragonRecords.Sort([](const FWyrmDragonSaveRecord& A, const FWyrmDragonSaveRecord& B)
+        {
+            return A.DragonId.LexicalLess(B.DragonId);
+        });
+        if (!SaveObj->DragonRecords.IsEmpty())
+        {
+            SaveObj->DragonRecord = SaveObj->DragonRecords[0];
         }
 
         // Capture active Zenith Hovercar (VEH-07)
@@ -281,8 +340,7 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
 
 bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrmCharacter* Character, AActor* TerrainProviderActor, UWorld* WorldContext)
 {
-    if (!SaveObj || SaveObj->SchemaVersion < UWyrmSaveGame::MinimumSupportedSchemaVersion ||
-        SaveObj->SchemaVersion > UWyrmSaveGame::CurrentSchemaVersion)
+    if (!SaveObj || !IsSchemaVersionSupported(SaveObj->SchemaVersion))
     {
         return false;
     }
@@ -293,6 +351,15 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (Character) { WorldContext = Character->GetWorld(); }
         else if (TerrainProviderActor) { WorldContext = TerrainProviderActor->GetWorld(); }
     }
+
+    const FName CurrentRegionId = UWyrmWorldTravelSubsystem::RegionIdForMapName(
+        WorldContext ? WorldContext->GetMapName() : FString());
+    const FWyrmRegionalWorldSaveRecord* RegionalRecord = SaveObj->SchemaVersion >= 5
+        ? SaveObj->RegionalWorldRecords.FindByPredicate([CurrentRegionId](const FWyrmRegionalWorldSaveRecord& Record)
+          { return Record.RegionId == CurrentRegionId; })
+        : nullptr;
+    const FWyrmCampSaveRecord& CampToRestore = RegionalRecord ? RegionalRecord->CampRecord : SaveObj->CampRecord;
+    const FWyrmTerrainSaveRecord& TerrainToRestore = RegionalRecord ? RegionalRecord->TerrainRecord : SaveObj->TerrainRecord;
 
     UWyrmBuildingSubsystem* RestoreBuildingSub = nullptr;
     if (WorldContext)
@@ -337,7 +404,7 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
 
     if (RestoreBuildingSub)
     {
-        RestoreBuildingSub->RestoreFromSaveRecord(SaveObj->CampRecord, WorldContext);
+        RestoreBuildingSub->RestoreFromSaveRecord(CampToRestore, WorldContext);
     }
 
     // Validate and restore the terrain owner first so a failed terrain payload
@@ -345,12 +412,12 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
     if (TerrainProviderActor)
     {
         AWyrmGeoForgeAdapter* Adapter = Cast<AWyrmGeoForgeAdapter>(TerrainProviderActor);
-        if (!Adapter || SaveObj->TerrainRecord.TerrainDeltaPayload.IsEmpty() ||
-            !Adapter->ApplySavePayload(SaveObj->TerrainRecord.TerrainDeltaPayload))
+        if (!Adapter || TerrainToRestore.TerrainDeltaPayload.IsEmpty() ||
+            !Adapter->ApplySavePayload(TerrainToRestore.TerrainDeltaPayload))
         {
             return false;
         }
-        Adapter->ProcessedActionIds = TSet<FGuid>(SaveObj->TerrainRecord.ProcessedActionIds);
+        Adapter->ProcessedActionIds = TSet<FGuid>(TerrainToRestore.ProcessedActionIds);
     }
 
     if (Character)
@@ -425,32 +492,49 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             SaveObj->CharacterRecord.MoonboundRemainingCooldown,
             SaveObj->CharacterRecord.bMoonboundReturnPending,
             SaveObj->CharacterRecord.LastSafeHumanoidLocation);
+        Character->RestoreMirrorStepState(SaveObj->CharacterRecord.MirrorStepRemainingCooldown);
+        Character->RestoreUnseenHandState(SaveObj->CharacterRecord.UnseenHandRemainingCooldown);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)
     if (WorldContext)
     {
-        AWyrmDragonCharacter* ActiveDragon = nullptr;
+        TArray<FWyrmDragonSaveRecord> RecordsToRestore = SaveObj->DragonRecords;
+        if (RecordsToRestore.IsEmpty() &&
+            (SaveObj->DragonRecord.bHasBondReceipt || SaveObj->DragonRecord.Role != EWyrmDragonRole::HostileBoss))
+        {
+            RecordsToRestore.Add(SaveObj->DragonRecord);
+        }
+
+        TMap<FName, AWyrmDragonCharacter*> ExistingDragons;
         for (TActorIterator<AWyrmDragonCharacter> It(WorldContext); It; ++It)
         {
-            if (*It && IsValid(*It))
+            if (*It && IsValid(*It) && !ExistingDragons.Contains((*It)->DragonId))
             {
-                ActiveDragon = *It;
-                break;
+                ExistingDragons.Add((*It)->DragonId, *It);
             }
         }
 
-        if (SaveObj->DragonRecord.bHasBondReceipt || SaveObj->DragonRecord.Role != EWyrmDragonRole::HostileBoss)
+        for (const FWyrmDragonSaveRecord& Record : RecordsToRestore)
         {
-            if (!ActiveDragon)
+            if (!Record.bHasBondReceipt && Record.Role == EWyrmDragonRole::HostileBoss)
             {
-                FTransform SpawnTransform(SaveObj->DragonRecord.WorldRotation, SaveObj->DragonRecord.WorldLocation);
-                ActiveDragon = AWyrmDragonCharacter::SpawnWyrmDragon(WorldContext, SaveObj->DragonRecord.Role, SpawnTransform);
+                continue;
             }
-
-            if (ActiveDragon)
+            AWyrmDragonCharacter* Dragon = ExistingDragons.FindRef(Record.DragonId);
+            if (!Dragon)
             {
-                ActiveDragon->RestoreFromSaveRecord(SaveObj->DragonRecord, Character);
+                FTransform SpawnTransform(Record.WorldRotation, Record.WorldLocation);
+                Dragon = AWyrmDragonCharacter::SpawnWyrmDragon(WorldContext, Record.Role, SpawnTransform);
+                if (Dragon)
+                {
+                    Dragon->SetDragonId(Record.DragonId);
+                    ExistingDragons.Add(Record.DragonId, Dragon);
+                }
+            }
+            if (Dragon)
+            {
+                Dragon->RestoreFromSaveRecord(Record, Character);
             }
         }
 
@@ -459,6 +543,16 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (UWyrmRegion01Subsystem* Region01 = UWyrmRegion01Subsystem::GetRegion01Subsystem(WorldContext))
         {
             Region01->RestoreFromSaveRecord(SaveObj->Region01Record);
+        }
+
+        if (UWyrmJadePeaksSubsystem* JadePeaks = UWyrmJadePeaksSubsystem::GetJadePeaksSubsystem(WorldContext))
+        {
+            JadePeaks->RestoreFromSaveRecord(SaveObj->JadePeaksRecord);
+        }
+
+        if (UWyrmWorldTravelSubsystem* Travel = UWyrmWorldTravelSubsystem::GetWorldTravelSubsystem(WorldContext))
+        {
+            Travel->RestoreFromSaveRecord(SaveObj->WorldTravelRecord);
         }
 
         // Restore active Zenith Hovercar (VEH-07)

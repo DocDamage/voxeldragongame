@@ -7,7 +7,7 @@
 
 ## Start here
 
-Read [AGENTS.md](AGENTS.md), then the [document index](docs/DOCUMENT_INDEX.md), the [decisions and scope register](docs/DECISIONS_AND_SCOPE.md), and the [current handoff](docs/production/CURRENT_HANDOFF.md). For the first playable game, continue with [Region 01](docs/REGION_01.md) and the [vertical slice](docs/VERTICAL_SLICE.md).
+Read [AGENTS.md](AGENTS.md), then the [document index](docs/DOCUMENT_INDEX.md), the [decisions and scope register](docs/DECISIONS_AND_SCOPE.md), and the [v0.1 release handoff](docs/production/CURRENT_HANDOFF.md). Current runtime status lives in `Documentation/Current/STATUS.md` and `Documentation/Current/HANDOFF.md` in the project workspace. For the first playable game, continue with [Region 01](docs/REGION_01.md) and the [vertical slice](docs/VERTICAL_SLICE.md).
 
 The complete, unchanged [story/gameplay bible v0.3](references/originals/WYRMFALL_Project_Aligned_Story_Bible_v0_3.md) is included. Its Chapter 01 is the current narrative treatment. Earlier source files are archived for provenance, not competing instructions.
 

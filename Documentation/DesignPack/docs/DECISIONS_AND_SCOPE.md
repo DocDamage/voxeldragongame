@@ -65,6 +65,8 @@ This is a traceability list, not twenty-two new implementations. B03's drafted d
 | D-17 | Colony is a separate destination using an authored transition and return route | Preserves preferred dragon arrival without requiring a spaceflight simulator. |
 | D-18 | Epilogue preserves an explicit pre-departure adventure save branch | Does not delete the character for choosing home; final UI choice remains a production decision. |
 | D-19 | Prototype numeric targets live in one canonical section per system, not repeated balance tables | Change data and affected tests together; never present initial values as measured balance. |
+| D-20 | WP-23 is the rest-of-world umbrella, split into readiness, ten regional closure/production children, continuity integration, finale, and continued-play/release verification | September 19, 2026 user direction; prevents a single unbounded finale task or parallel region build. Child work remains asset- and evidence-gated. |
+| D-21 | Cross-region state extends one bounded travel owner and `UWyrmSaveSubsystem`; Schema 5 uses region-keyed terrain/camp records and accepts Schemas 1–4 | WP-23.2 real-PIE evidence; prevents parallel travel/save authorities while later regions are added. |
 
 These decisions are sufficiently specified to test. They are not disguised approvals of limits the user never selected.
 
@@ -72,7 +74,7 @@ These decisions are sufficiently specified to test. They are not disguised appro
 
 **Shared proofs:** G0 readiness, G1 editable world, G2 Mutable, G3 ARPG/save, G4 dragon control, G4-H forms, E1 reward system/first hunt, G5 connected Chapter 01. Development must prove optional activities and the optional cave/Echo branch, but the player may omit them and still complete the main chapter.
 
-**Later required design targets:** remaining dragon regions and both forms; remaining horror stories/Echoes; V1 pilotable car and Z1 playable city/colony connection. No complete later region is authorized before the first slice is stable. Later prototypes must reuse the shared state/control/save contracts.
+**Authorized rest-of-world target:** WP-23 covers remaining dragon regions and both forms; remaining horror stories/Echoes; the playable Zenith city/colony connection; cross-region continuity; the First Binder/Judge finale; and continued play. It is split into bounded child packets, executed one eligible region at a time, and must reuse the shared state/control/save contracts. Authorization does not clear missing real-content gates.
 
 **Not implicitly in scope:** multiplayer, infinite world, automatic global terrain regeneration, ten active dragons, hunger/sanity/fuel chores, universal destructibility of every authored mesh, seamless orbital physics, vehicle construction, aerial dogfighting, a separate farming economy, player-run settlement administration, procedural personalized horror, arbitrary skeletal compatibility, or replacement art production.
 
@@ -80,7 +82,7 @@ These decisions are sufficiently specified to test. They are not disguised appro
 
 VERIFY actual `.uproject` location, repository/default branch, installed engine patch, plugin builds, asset paths, skeletons, animation clips, legal distribution provenance, cooked-build behavior, and hardware measurements. A high-level ownership claim is not a discovered file. The registry contains requirements and source names with honest statuses, not fabricated content paths.
 
-OPEN launch-region count, release date, total campaign duration, final level cap, final numerical balance, names for unnamed characters, full regional traversal order and permission policy, expanded building support, and final performance budgets. Keep these limited decisions out of unrelated first-slice tasks.
+OPEN release date, total campaign duration, final level cap, final numerical balance, names for unnamed characters, exact regional traversal order, expanded building support, and final performance budgets. Full-world scope is assigned to WP-23; the delivery sequence and asset readiness of its children remain evidence-driven.
 
 ## 6. Change rule
 

@@ -1,4 +1,4 @@
-# WYRMFALL handoff — September 18, 2026
+# WYRMFALL handoff — September 19, 2026
 
 ## Resume here
 
@@ -8,7 +8,7 @@ handoff, and only the packet for the next bounded task.
 
 Repository: https://github.com/DocDamage/voxeldragongame
 
-Branch: `main` (resume at pushed checkpoint `a78aa6f`)
+Branch: `main` (checkpoint `cd6efd4`; WP-22/WP-23.2 work is currently uncommitted)
 
 Use `git -c safe.directory="G:/assets/voxel project" ...` for every Git command.
 Do not change global Git settings. Keep editor-generated AndroidFileServer
@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Selected scaffold native automation completed 53/53 tests: 43 Success, 10 SuccessWithWarnings, and 0 failures.
+- Selected scaffold native automation completed 54/54 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -43,6 +43,7 @@ settings out of commits.
 - WP-18 standalone packaging, cook validation, and packaged client execution passed cleanly.
 - WP-19 real PIE passed all 9 pilotable civilian hovercar acceptance cases (`VEH-01..09`).
 - WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`).
+- WP-23.2 real PIE passed all 8 Jade Peaks closure cases (`JC-01..08`): supplied Emperor Wei Longzhu art; diplomacy/living-defeat pact parity; trust/living-defeat disciple parity; permanent GAS Unseen Hand with 25 Focus/8s cooldown and fail-closed target policy; bounded Region01↔JadePeaks travel; Schema 5 region-keyed recovery; and WP-22 continuity. Focused manual frame review also passed Emperor grounding/scale and supplied spear placement. See `Documentation/Current/WP23_2_JADE_CLOSURE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -54,6 +55,7 @@ settings out of commits.
   - `JADE-04.MountAndFlight`: Humanoid mounting to back-ridge socket at `(0, 0, 140)`, 3D flight locomotion at 1350 cm/s, landing, and safe dismount.
   - `JADE-05.CombatAndDirectControl`: Direct control possession routing player controller to Jadefang pawn, primary GAS melee attack (24 damage), secondary area sweep (18 damage), and clean humanoid repossession.
   - `SAVE.MultiDragonPersistence`: Save Subsystem Schema 3 snapshot serialization of Jadefang record and clean restore into secondary dragon actor with profile and 38 follower meshes preserved.
+  - WP-22 real PIE passed all 6 Jade Peaks production-region cases (`JP-01..06`): distinct `L_JadePeaks`; finite editable GeoForge terrain and dynamic nav; supplied palace, guard/disciple, and Jadefang assets; six-landmark route; Jadefang bond/Heartfold/mount/flight/GAS combat/direct-control return; trust-based disciple resolution; GAS Mirror Step with sealed/occupied/water/range/void rejection; and Schema 4 restoration of Jade Peaks facts, route, cooldown, Verdance, and Jadefang. WP-22-QA1 then passed manual review of five deterministic captures, grounded all measured props, projected 6/6 landmarks, and returned 4/4 complete non-partial route paths.
   - `REG-12.CompactCave` ("A Smaller Kind of Strength" at `LM-COMPACTCAVE` `1300, -1500, 888`): humanoid staged safely outside cave entrance; player transfers direct control to compact Verdance; compact dragon navigates low crawlway tunnel beneath low ceiling obstacle (`StaticMeshActor` at `1500, -1500, 950`, scaled `2.0, 2.0, 0.5`); defeats cave crawler enemy with compact attacks (9 primary, 6 area sweep); growth check blocked under low crawlway ceiling (`can_change_form(TrueForm)` rejected); wide inner chamber growth check succeeds (`can_change_form(TrueForm)` succeeds); service cache interactable interacted with to commit `cache.recovered` and `cave.service_unlocked` in `UWyrmRegion01Subsystem`; control returned cleanly to staged humanoid waiting outside cave without teleporting through pet hole.
   - `REG-10.PersistentLocalRecovery`: unified save/load roundtrip via `UWyrmSaveSubsystem` (Schema 2) verifying persistence of homecoming, cache recovery, camp piece, wage recovery, and dragon companion state without duplicate rewards or world regeneration.
   - `REG-11.SkipPreparation`: verifies that main quest progression requires zero optional activity/cave facts.
@@ -293,6 +295,9 @@ Evidence:
 - Disablement occurs at 0 HP with full depot recovery (`RecoverToDepot`) restoring health, parking state, and staging companion safely at depot.
 - `UWyrmSaveSubsystem` (Schema 3) persists occupied/parked hovercar state, transform, health, and mecha circuit upgrades.
 - `AWyrmDragonCharacter` supports multi-dragon companion management with authoritative rig profiles (`FWyrmDragonRigProfile`). Jadefang utilizes genuine GLTF Chinese dragon assets with long-bodied modular anatomy (leader mesh `Hip-Local` and 38 follower meshes bound via `SetLeaderPoseComponent`), distinct Companion (30x35cm) vs TrueForm (110x150cm) envelopes, distinct ground/flight speeds (480/1700), back ridge mount socket `(0, 0, 140)`, 4s Heartfold cooldown with low-ceiling clearance check, and Schema 3 save persistence. DRG-15 fail-closed policy blocks unvalidated rig profiles from inheriting dragon values.
+- Current unified save schema is 5. It preserves earlier fields, accepts Schemas 1–4, and adds region-keyed terrain/camp records, bounded travel state, and Unseen Hand cooldown under the existing save coordinator.
+- `UWyrmJadePeaksSubsystem` is the narrow regional fact owner. It does not own inventory, combat, dragons, terrain, or save slots.
+- `UWyrmWorldTravelSubsystem` is the bounded travel owner for Region01↔JadePeaks only; it does not own save slots.
 
 ## Boundaries
 
@@ -305,11 +310,26 @@ Evidence:
 - WP-19 Pilotable Zenith Civilian Hovercar (`VEH-01..09`) is RESOLVED (PASS in live PIE).
 - WP-20 Heartfold Expansion & Jadefang Multi-Dragon Validation (`JADE-01..05`, `SAVE`) is RESOLVED (PASS in live PIE).
 - WP-21 Moonbound Transformation Proof (`ECHO-07..09`, `SAVE-11`) is RESOLVED (PASS in live PIE).
+- WP-22 scripted functional cases (`JP-01..06`) and WP-22-QA1 visual/editor
+  correction evidence pass; WP-22 is VERIFIED within that bounded slice.
+- WP-22-QA1 uses movable lighting, a dedicated low-frequency ground material,
+  grounded supplied props, separated route anchors, and an authored aerie court.
+  All 6 landmarks project to navigation and all 4 ordered route legs are
+  complete/non-partial. An interactive keyboard/gamepad walkthrough remains NOT
+  RUN because the editor-control runtime failed to initialize; this supplemental
+  boundary does not override the recorded deterministic PIE evidence. See
+  `Documentation/Current/WP22_VISUAL_QA.md`.
+- WP-23 is user-authorized as the rest-of-world umbrella and split into
+  WP-23.0–23.13. WP-23.0 and WP-23.2 are COMPLETE. All ten named dragon source
+  GLTFs are present, but only Verdance/Jadefang have validated rig and PIE
+  evidence. Archive presence does not imply any new-dragon implementation.
 
 ## Next bounded task
 
-With WP-21 Moonbound Transformation Proof verified cleanly across native tests, live PIE, and regression suites:
-Proceed to the next feature milestone in the implementation backlog:
-**WP-22 / Second Production Region & Expansion**.
-Continue building upon the established Region 01, multi-dragon Heartfold, horror Echoes, and unified save architecture.
-Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
+WP-23.2 is complete. The next bounded task is to author the WP-23.1 Verdant
+Reach closure packet using the verified Region 01/Verdance baseline and
+supplied forest/ranger content. Do not start a new-dragon child until its
+rig/profile and real-content fit are verified. Mutable remains creator, GAS
+remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence coordinator.
+See `Documentation/Current/WP23_READINESS.md` and
+`Documentation/Current/tasks/WP-23.md`.

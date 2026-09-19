@@ -1,7 +1,7 @@
 # Documentation Package Validation
 
 **Release:** WYRMFALL Documentation Pack v0.1  
-**Date:** September 14, 2026  
+**Date:** September 14, 2026; active scope amended September 19, 2026
 **Scope:** Documentation/package integrity only; no Unreal/runtime validation.
 
 ## Checks performed
@@ -13,7 +13,7 @@
 | Local original source preservation | PASS — five files compared byte-for-byte with the mounted originals. |
 | Ten-dragon coverage | PASS — all ten registry identities retained. |
 | Nightmare Echo catalogue | PASS — all twenty ECHO-01…ECHO-20 entries present. |
-| Ordered implementation work | PASS — 23 unique WP-00…WP-22 work packages. |
+| Ordered implementation work | PASS — 24 top-level WP-00…WP-23 packages; 14 bounded child work packages (WP-23.0…WP-23.13) are defined in the WP-23 task packet. |
 | Acceptance procedure IDs | PASS — 118 unique procedures; all explicitly NOT RUN. |
 | Requirements traceability | PASS — every REQ-01…REQ-22 appears in acceptance catalogue. |
 | Source/summary distinction | PASS — H01/C01 are labeled retrieved summaries, not reconstructed original files. |

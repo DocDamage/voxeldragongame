@@ -6,6 +6,7 @@
 #include "Player/WyrmControlTypes.h"
 #include "Dragon/WyrmDragonTypes.h"
 #include "Region/WyrmRegion01Types.h"
+#include "Region/WyrmJadePeaksTypes.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "WyrmSaveGame.generated.h"
 
@@ -115,6 +116,13 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FVector LastSafeHumanoidLocation = FVector::ZeroVector;
+
+    // --- Jade Peaks Echo State (WP-22 / JP-05) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float MirrorStepRemainingCooldown = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float UnseenHandRemainingCooldown = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -153,6 +161,41 @@ struct WYRMFALL_API FWyrmTerrainSaveRecord
     TArray<FGuid> ProcessedActionIds;
 };
 
+/** Schema 5 region-keyed mutable-world payload. Legacy singular fields remain readable. */
+USTRUCT(BlueprintType)
+struct WYRMFALL_API FWyrmRegionalWorldSaveRecord
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName RegionId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmTerrainSaveRecord TerrainRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmCampSaveRecord CampRecord;
+};
+
+/** Pending/last completed route only. UWyrmSaveSubsystem remains the slot owner. */
+USTRUCT(BlueprintType)
+struct WYRMFALL_API FWyrmWorldTravelSaveRecord
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName CurrentRegionId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName ArrivalLandmarkId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName ReturnRegionId = NAME_None;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FName ReturnLandmarkId = NAME_None;
+};
+
 // Authoritative single save container for WYRMFALL.
 UCLASS(BlueprintType)
 class WYRMFALL_API UWyrmSaveGame : public USaveGame
@@ -161,10 +204,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    // Schema 3 adds Zenith Hovercar state record (VEH-07). Version 1 and 2 are still
-    // accepted as an unspawned hovercar state by UWyrmSaveSubsystem.
+    // Schema 5 adds Jade closure, Unseen Hand, two-region travel, and
+    // region-keyed terrain/camp payloads. Schemas 1-4 remain readable.
     static const int32 MinimumSupportedSchemaVersion = 1;
-    static const int32 CurrentSchemaVersion = 3;
+    static const int32 CurrentSchemaVersion = 5;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;
@@ -191,10 +234,23 @@ public:
     FWyrmCampSaveRecord CampRecord;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    TArray<FWyrmRegionalWorldSaveRecord> RegionalWorldRecords;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmWorldTravelSaveRecord WorldTravelRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmDragonSaveRecord DragonRecord;
+
+    /** Schema 4 multi-dragon authority. DragonRecord remains the legacy first entry. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    TArray<FWyrmDragonSaveRecord> DragonRecords;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmRegion01SaveRecord Region01Record;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmJadePeaksSaveRecord JadePeaksRecord;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmHovercarSaveRecord HovercarRecord;

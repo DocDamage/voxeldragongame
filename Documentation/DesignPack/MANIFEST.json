@@ -18,13 +18,13 @@
     },
     {
       "path": "PACKAGE_VALIDATION.md",
-      "bytes": 3335,
-      "sha256": "c580158877ffe45dcd3b29924884c83fcd586ec68cf81c1fc2d7c47f9e428776"
+      "bytes": 3462,
+      "sha256": "a9e43c2e89623a3837e18ecca7d9db52da2e8ecf0073e67128d01281c91d19c9"
     },
     {
       "path": "README.md",
-      "bytes": 4335,
-      "sha256": "29e8ed80a2cdcecf1b84ab69b3bda3f5a17059f3838bd9292f519b05609c17c6"
+      "bytes": 4471,
+      "sha256": "624aa4f4a122b127660b479616be2a4af17d9b3b460791a6ec425c06bfd0563e"
     },
     {
       "path": "docs/ART_DIRECTION.md",
@@ -38,13 +38,13 @@
     },
     {
       "path": "docs/DECISIONS_AND_SCOPE.md",
-      "bytes": 10215,
-      "sha256": "d1926913965263fa7cf2d98ff104f9da698db47f93e50dabe5e7f4f488b1ca47"
+      "bytes": 10956,
+      "sha256": "41a37c70f1eedc94d3b6d0c1a9f09b029627f6b00414569716a2f1e0c0a263cb"
     },
     {
       "path": "docs/DOCUMENT_INDEX.md",
-      "bytes": 5430,
-      "sha256": "10c62f69a201fe8850fde3a92c8e0f1a1d6e9b3812080035036d50eeb6a63596"
+      "bytes": 5488,
+      "sha256": "559a9383b5be98782d2ad6242d4d1b55aea1a3e28322b9fe2e7b70057e26b41e"
     },
     {
       "path": "docs/GAME_DESIGN.md",
@@ -68,8 +68,8 @@
     },
     {
       "path": "docs/TECHNICAL_ARCHITECTURE.md",
-      "bytes": 10820,
-      "sha256": "2dfd43c3603343c63cda489aa75d334475608b643f40da7b26a9dff3c7a323d7"
+      "bytes": 10901,
+      "sha256": "91c5f77e67a87527a25b72ef6bfa417e955bb6a62596bbf62cd039235aebbb22"
     },
     {
       "path": "docs/UI_UX_CONTROLS.md",
@@ -88,13 +88,13 @@
     },
     {
       "path": "docs/production/CAMPAIGN_PROGRESSION.md",
-      "bytes": 9856,
-      "sha256": "c773d047a77e0705e285e65e85f0ca1c6f6f41262105da1b01e64019609c55e8"
+      "bytes": 10546,
+      "sha256": "a4ff7f2b68b0dde513631f910c228d9f2f2e7b550868b5f6e522a5d0add965ca"
     },
     {
       "path": "docs/production/CURRENT_HANDOFF.md",
-      "bytes": 4668,
-      "sha256": "5b7801d142728817b0089d81eb085f280e0346f83041df8443e4d0cdaf02a753"
+      "bytes": 5091,
+      "sha256": "804d191f83a25d03a0eba49e8862fd75d1e0f48a8075b06f2c2fc2a744bf7f23"
     },
     {
       "path": "docs/production/G0_G1_READINESS_AND_TERRAIN_PROOF.md",
@@ -103,8 +103,8 @@
     },
     {
       "path": "docs/production/IMPLEMENTATION_BACKLOG.md",
-      "bytes": 15939,
-      "sha256": "d5084dd054a6010252dd94072031c691f77ab10a987756ced0877ecc668aa4e6"
+      "bytes": 18173,
+      "sha256": "469945478c64d395f98b99b53218f43dfcfff061a889b7b47da6fbb8c272568a"
     },
     {
       "path": "docs/production/acceptance_catalogue.json",

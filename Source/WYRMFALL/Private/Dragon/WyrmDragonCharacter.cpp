@@ -15,6 +15,7 @@
 #include "NavigationSystem.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
+#include "Engine/OverlapResult.h"
 #include "Engine/DamageEvents.h"
 #include "Region/WyrmRegion01Subsystem.h"
 
@@ -272,16 +273,21 @@ bool AWyrmDragonCharacter::BondWithHumanoid(AWyrmCharacter* Humanoid)
         return false;
     }
 
-    // REG-07 Consent Sequence: In Region 01, claim must be broken before voluntary bond is permitted
-    if (UWorld* World = GetWorld())
+    // REG-07 Consent Sequence belongs to Verdance's Region 01 arc. Other
+    // named dragons use their own authored consent facts and must not inherit
+    // this unrelated regional prerequisite.
+    if (DragonId == FName(TEXT("Verdance")))
     {
-        if (UGameInstance* GI = World->GetGameInstance())
+        if (UWorld* World = GetWorld())
         {
-            if (UWyrmRegion01Subsystem* Region01 = GI->GetSubsystem<UWyrmRegion01Subsystem>())
+            if (UGameInstance* GI = World->GetGameInstance())
             {
-                if (!Region01->HasFact(FName(TEXT("verdance.claim_broken"))))
+                if (UWyrmRegion01Subsystem* Region01 = GI->GetSubsystem<UWyrmRegion01Subsystem>())
                 {
-                    return false;
+                    if (!Region01->HasFact(FName(TEXT("verdance.claim_broken"))))
+                    {
+                        return false;
+                    }
                 }
             }
         }

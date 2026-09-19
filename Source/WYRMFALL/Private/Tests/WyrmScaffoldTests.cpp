@@ -6,6 +6,7 @@
 #include "Combat/Abilities/WyrmGameplayAbility.h"
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Combat/Abilities/WyrmMoonboundFormAbility.h"
+#include "Combat/Abilities/WyrmMirrorStepAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
@@ -13,6 +14,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "MuCO/CustomizableSkeletalComponent.h"
 #include "GameplayTagsManager.h"
 #include "Inventory/WyrmInventoryTypes.h"
@@ -35,6 +37,7 @@
 #include "Dragon/WyrmDragonTypes.h"
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
+#include "Region/WyrmJadePeaksSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "Vehicles/WyrmHovercar.h"
@@ -3514,12 +3517,12 @@ bool FWyrmHovercarDamageAndDepotTest::RunTest(const FString& Parameters)
     return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema3Test, "WYRMFALL.Scaffold.HovercarSaveSchema3",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema5Test, "WYRMFALL.Scaffold.HovercarSaveSchema5",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-bool FWyrmHovercarSaveSchema3Test::RunTest(const FString& Parameters)
+bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
 {
     // Schema Version Contract (VEH-07)
-    TestEqual(TEXT("CurrentSchemaVersion is 3"), UWyrmSaveGame::CurrentSchemaVersion, 3);
+    TestEqual(TEXT("CurrentSchemaVersion is 5"), UWyrmSaveGame::CurrentSchemaVersion, 5);
     TestEqual(TEXT("MinimumSupportedSchemaVersion is 1"), UWyrmSaveGame::MinimumSupportedSchemaVersion, 1);
 
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
@@ -3544,15 +3547,18 @@ bool FWyrmHovercarSaveSchema3Test::RunTest(const FString& Parameters)
         TestNotNull(TEXT("Snapshot created"), SaveObj);
         if (SaveObj)
         {
-            TestEqual(TEXT("Schema version is 3"), SaveObj->SchemaVersion, 3);
+            TestEqual(TEXT("Schema version is 5"), SaveObj->SchemaVersion, 5);
             TestTrue(TEXT("Hovercar record marked spawned"), SaveObj->HovercarRecord.bHasBeenSpawned);
             TestEqual(TEXT("Saved health is 190"), SaveObj->HovercarRecord.Health, 190.f);
             TestTrue(TEXT("Saved Mecha circuit unlocked"), SaveObj->HovercarRecord.bMechaCircuitUnlocked);
             TestTrue(TEXT("Saved is occupied"), SaveObj->HovercarRecord.bIsOccupied);
             TestEqual(TEXT("Saved location matches"), SaveObj->HovercarRecord.WorldLocation, Hovercar->GetActorLocation());
 
-            // Backwards compatibility check: Schema 1 and 2 saves accepted
+            // Backwards compatibility check: legacy schemas remain accepted.
             UWyrmSaveGame* LegacySave = NewObject<UWyrmSaveGame>();
+            LegacySave->SchemaVersion = 4;
+            TestTrue(TEXT("Schema 4 legacy snapshot accepted"), UWyrmSaveSubsystem::ApplySnapshotObject(LegacySave, Character, nullptr, World));
+
             LegacySave->SchemaVersion = 2;
             LegacySave->HovercarRecord.bHasBeenSpawned = false;
             TestTrue(TEXT("Schema 2 legacy snapshot accepted"), UWyrmSaveSubsystem::ApplySnapshotObject(LegacySave, Character, nullptr, World));
@@ -3698,5 +3704,87 @@ bool FWyrmMoonboundScaffoldTest::RunTest(const FString& Parameters)
     World->DestroyWorld(false);
     return true;
 }
-#endif
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmJadePeaksSliceTest, "WYRMFALL.Scaffold.JadePeaksSlice",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmJadePeaksSliceTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmJadePeaksSubsystem* Region = NewObject<UWyrmJadePeaksSubsystem>(TestGI);
+    TestNotNull(TEXT("Jade Peaks fact owner created"), Region);
+    if (!Region)
+    {
+        return false;
+    }
+
+    Region->ResetJadePeaksState();
+    TestTrue(TEXT("JP-03 landmark graph is valid"), Region->HasValidLandmarkGraph());
+    TestEqual(TEXT("JP-03 has six bounded landmarks"), Region->GetLandmarkDefinitions().Num(), 6);
+    TestTrue(TEXT("JP-01 arrival visit commits"), Region->VisitLandmark(FName(TEXT("LM-JADE-ARRIVAL"))));
+    TestFalse(TEXT("Arrival cannot duplicate"), Region->VisitLandmark(FName(TEXT("LM-JADE-ARRIVAL"))));
+    TestTrue(TEXT("Jadefang continuity commits once"), Region->RecordJadefangArrival());
+    TestTrue(TEXT("Trust resolution commits"), Region->RecordDiscipleResolution(true));
+    TestTrue(TEXT("Mirror Step unlock commits"), Region->RecordMirrorStepUnlock());
+    TestTrue(TEXT("Return route requires and follows unlock"), Region->RecordReturnRouteReady());
+
+    FWyrmJadePeaksSaveRecord Record;
+    Region->BuildSaveRecord(Record);
+    TestTrue(TEXT("JP-06 save contains Mirror Step fact"), Record.KnownFacts.Contains(FName(TEXT("echo.mirror_step"))));
+    TestTrue(TEXT("JP-06 save contains arrival landmark"), Record.VisitedLandmarks.Contains(FName(TEXT("LM-JADE-ARRIVAL"))));
+
+    UGameInstance* RestoredGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmJadePeaksSubsystem* Restored = NewObject<UWyrmJadePeaksSubsystem>(RestoredGI);
+    Restored->RestoreFromSaveRecord(Record);
+    TestTrue(TEXT("JP-06 restored Mirror Step fact"), Restored->HasFact(FName(TEXT("echo.mirror_step"))));
+    TestTrue(TEXT("JP-06 restored arrival visit"), Restored->HasVisitedLandmark(FName(TEXT("LM-JADE-ARRIVAL"))));
+
+    UWyrmMirrorStepAbility* Ability = NewObject<UWyrmMirrorStepAbility>();
+    TestEqual(TEXT("JP-05 Mirror Step costs 20 Focus"), Ability->FocusCost, 20.f);
+    TestEqual(TEXT("JP-05 Mirror Step cooldown is 10 seconds"), Ability->CooldownDuration, 10.f);
+
+    UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+    if (!World)
+    {
+        return false;
+    }
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>();
+    AWyrmDragonCharacter* Verdance = World->SpawnActor<AWyrmDragonCharacter>();
+    AWyrmDragonCharacter* Jadefang = World->SpawnActor<AWyrmDragonCharacter>();
+    TestNotNull(TEXT("JP-04 player spawned"), Player);
+    TestNotNull(TEXT("JP-04 Verdance spawned"), Verdance);
+    TestNotNull(TEXT("JP-04 Jadefang spawned"), Jadefang);
+    if (Player && Verdance && Jadefang)
+    {
+        Verdance->SetDragonId(FName(TEXT("Verdance")));
+        Jadefang->SetDragonId(FName(TEXT("Jadefang")));
+        Verdance->BondWithHumanoid(Player);
+        Jadefang->BondWithHumanoid(Player);
+        UWyrmSaveGame* Save = UWyrmSaveSubsystem::CreateSnapshotObject(TEXT("JadePeaksSchema5"), Player, nullptr, World);
+        TestNotNull(TEXT("JP-06 unified snapshot created"), Save);
+        if (Save)
+        {
+            TestEqual(TEXT("JP-06 Schema 5"), Save->SchemaVersion, 5);
+            TestEqual(TEXT("JP-06 both dragon identities serialized"), Save->DragonRecords.Num(), 2);
+            TestTrue(TEXT("Verdance record present"), Save->DragonRecords.ContainsByPredicate([](const FWyrmDragonSaveRecord& Item)
+            {
+                return Item.DragonId == FName(TEXT("Verdance"));
+            }));
+            TestTrue(TEXT("Jadefang record present"), Save->DragonRecords.ContainsByPredicate([](const FWyrmDragonSaveRecord& Item)
+            {
+                return Item.DragonId == FName(TEXT("Jadefang"));
+            }));
+        }
+        Player->LearnEcho(FName(TEXT("MirrorStep")));
+        Player->EquipEcho(FName(TEXT("MirrorStep")));
+        Player->RestoreMirrorStepState(6.f);
+        TestTrue(TEXT("JP-05 Mirror Step learned"), Player->IsEchoUnlocked(FName(TEXT("MirrorStep"))));
+        TestEqual(TEXT("JP-06 Mirror Step cooldown restores"), Player->GetMirrorStepRemainingCooldown(), 6.f);
+    }
+
+    if (Jadefang) { Jadefang->Destroy(); }
+    if (Verdance) { Verdance->Destroy(); }
+    if (Player) { Player->Destroy(); }
+    World->DestroyWorld(false);
+    return true;
+}
+#endif

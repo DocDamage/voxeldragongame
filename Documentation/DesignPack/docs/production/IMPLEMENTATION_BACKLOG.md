@@ -9,7 +9,7 @@
 
 Select one eligible task. Inspect the actual project first, use the smallest competent model, and run only the relevant checks. Routing names follow H01 and are not claims that these models are available in every environment. Most tasks use one agent. Dependencies are product/integration ordering, not automatic Git branches or separate architecture stacks.
 
-All tasks start **NOT STARTED** because this deliverable is documentation. Status may become IN PROGRESS, BLOCKED, IMPLEMENTED / NOT VERIFIED, or VERIFIED only with real evidence. A missing asset blocks its dependent work, not every unrelated design task. No CI, issues, commits, pushes or production artwork is authorized by this backlog itself.
+All tasks originally started **NOT STARTED** because this deliverable was documentation; current statuses are reconciled only from recorded evidence. Status may become IN PROGRESS, BLOCKED, IMPLEMENTED / NOT VERIFIED, or VERIFIED only with real evidence. A missing asset blocks its dependent work, not every unrelated design task. No CI, issues, commits, pushes or production artwork is authorized by this backlog itself.
 
 ## Work queue
 
@@ -37,7 +37,8 @@ All tasks start **NOT STARTED** because this deliverable is documentation. Statu
 | WP-19 | Z1 playable colony travel and return | WP-18; actual city/colony and flight content | Sol | NOT STARTED |
 | WP-20 | Next regional dragon and selected Echo content | WP-16; explicit next-region scope | Terra/Sol by integration risk | NOT STARTED |
 | WP-21 | Moonbound transformation proof | WP-16; real Corvyn/beast assets | Sol | NOT STARTED |
-| WP-22 | Full-world finale and continued-play handling | Explicit campaign scope; necessary regional content | Sol | NOT STARTED |
+| WP-22 | Jade Peaks production-region slice | WP-20; supplied Jadefang and palace content | Sol | VERIFIED (JP-01–06 + WP-22-QA1) |
+| WP-23 | Rest-of-world production umbrella (WP-23.0–23.13) | WP-22 functional foundation; explicit September 19, 2026 user scope; child-specific real content | Sol | WP-23.0 + WP-23.2 COMPLETE / WP-23.1 NEXT |
 
 ## Task packets
 
@@ -261,15 +262,25 @@ All tasks start **NOT STARTED** because this deliverable is documentation. Statu
 
 **Boundary:** Do not expand into the next work package or unrelated refactors; record missing real inputs and preserve required scope.
 
-### WP-22 — Full-world finale and continued-play handling
+### WP-22 — Jade Peaks production-region slice
 
-**Dependencies:** Explicit campaign scope; necessary regional content. **Routing:** Sol. **Read:** Campaign; B03 ending; save/control.
+**Dependencies:** WP-20; supplied Jadefang and palace content. **Routing:** Sol. **Read:** Campaign map; combat/Echo specification; save/control; WP-22 current task packet.
 
-**Work:** Final Judge reward/Binder resolution with home/stay and preserved pre-departure adventure branch.
+**Work:** Author one bounded second production region around Jadefang: a playable Jade Peaks route, a palace conflict that preserves the duty/pact theme, one local disciple encounter, a validated Mirror Step interaction, and unified persistence. Reuse the proven Jadefang rig rather than creating another dragon owner.
 
-**Stop / evidence:** ECHO-10; END-01–02; not automatically authorized by the first slice.
+**Stop / evidence:** JP-01–06; real PIE in the Jade Peaks map; Region 01, Verdance, Moonbound, and multi-dragon save regressions remain clean.
 
-**Boundary:** Do not expand into the next work package or unrelated refactors; record missing real inputs and preserve required scope.
+**Boundary:** This is not the full Jade Peaks campaign, all later regions, or the finale. Use supplied real art, preserve GAS as combat authority and the unified save subsystem as persistence coordinator, and do not invent missing full-world completion.
+
+### WP-23 — Rest-of-world production umbrella
+
+**Dependencies:** Verified WP-22 bounded foundation; explicit September 19, 2026 user authorization for WP-23 to cover the rest of the world; child-specific real content. **Routing:** Sol. **Read:** Campaign; B03 ending; save/control; current WP-23 packet.
+
+**Work:** Execute the bounded child sequence in `Documentation/Current/tasks/WP-23.md`: readiness and asset ordering (WP-23.0); Verdant and Jade regional closure (WP-23.1–23.2); eight remaining dragon regions including the playable Zenith colony (WP-23.3–23.10); full-world continuity integration (WP-23.11); Judge/First Binder finale (WP-23.12); and continued-play plus release verification (WP-23.13).
+
+**Stop / evidence:** Each child stops at its own region/integration acceptance boundary. The finale retains ECHO-10 and END-01–02; every regional child adds focused travel, route, dragon, Echo, and save-recovery evidence before it can feed WP-23.11.
+
+**Boundary:** WP-23 is an umbrella, not one unbounded implementation pass. Work on one eligible child at a time. Missing art or rigs block only their dependent child; never substitute diagnostic primitives, create parallel owners, require optional Echoes, or claim the ten-region/finale state before integration evidence exists. WP-23.0 and WP-23.2 are complete: the Jade Peaks closure passed JC-01–08 with bounded Region01↔JadePeaks travel and Schema 5 recovery. WP-23.1 Verdant Reach closure is next, while every new-dragon child remains rig/content gated.
 
 ## Reporting and scope changes
 

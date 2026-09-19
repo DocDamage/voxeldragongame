@@ -7,7 +7,7 @@
 
 ## 1. Scope and authority
 
-B03 retains ten regions, ten rulers, ten dragons and the First Binder/Judge ending. The list below preserves all of them and maps their capabilities without turning the original reference order into a mandatory travel order. **Launch region count, campaign length, final level cap and release sequence remain OPEN.** One stable connected slice precedes production of the other regions.
+B03 retains ten regions, ten rulers, ten dragons and the First Binder/Judge ending. The list below preserves all of them and maps their capabilities without turning the original reference order into a mandatory travel order. On September 19, 2026 the user assigned WP-23 to production of the rest of this world; campaign duration, final level cap and exact release/travel sequence remain OPEN. The work is split into bounded regional and integration children rather than one parallel full-world pass.
 
 The campaign must not require every optional horror reward, fishing/cooking/camp activity or a particular starting build. Critical routes have a baseline humanoid/shared-dragon solution; optional powers create advantages or alternatives rather than hidden collection taxes. A dragon's combat identity and consent remain its primary reward, not farming chores.
 
@@ -32,7 +32,7 @@ Created outsider → Verdant Wilds / Verdance → local Hallowwood lead
 
 Exact travel branches between the nine later regions remain open. A milestone rule can deliver the repeated-mark revelation after sufficient meaningful regional evidence, regardless of whether a player visits the cathedral or harbor first. Do not demand nine collectible exposition fragments before the antagonist makes sense.
 
-**Draft full-world finale predicate:** all ten regional dragon bonds and the required central revelations, then the authored final Judge/First Binder sequence. This is a full-campaign direction, not a first-release commitment; a smaller launch needs an explicitly scoped ending/content plan instead of pretending the missing dragons exist.
+**Full-world finale predicate:** all ten regional dragon bonds and the required central revelations, then the authored final Judge/First Binder sequence. WP-23 now owns this full-campaign direction, but each missing region remains gated by suitable real content and its own acceptance evidence; authorization is not an implementation claim.
 
 ## 3. Region and dragon capability ledger
 
@@ -50,6 +50,13 @@ Exact travel branches between the nine later regions remain open. A milestone ru
 | Hallowwood | Osk Grownroot / **Grovemaw**, Wooden | Forced forest regrowth never lets it rest; defensive protector | Living-wood recipe/site benefits, not automatic harvested timber regeneration. |
 
 Every additional dragon requires compact/true form validation and direct-control proof. Suitable rider/flight support is verified per rig; a flight-capability requirement cannot be met with an animation-only travel shot. All inactive bonds preserve their identities/progression with one active dragon initially.
+
+**Implementation note (September 19, 2026):** WP-23.2 closes the Jade Peaks
+duty/pact and disciple outcomes in real PIE without adding a second Jadefang.
+Both authored resolution routes converge on the same regional closure, Unseen
+Hand remains an optional permanent Echo, and the bounded Region01↔JadePeaks
+travel/recovery contract uses the existing save coordinator's Schema 5. This is
+Jade Peaks closure evidence, not proof of the remaining regions or finale.
 
 ## 4. Horror placement and guaranteed rewards
 
@@ -79,12 +86,12 @@ The Judge appears at authored milestones with a recognizable behavior escalation
 
 Basic terrain excavation is available before first dragon. Heartfold enters the game with first bond; ordinary dungeons do not require leaving that dragon outside. Dragon flight and cars can bypass scenery/patrol routes but not magically grant uncollected evidence/outcome flags.
 
-Car acquisition is independent of enslaving/freeing the Mecha Dragon; advanced circuits can reward the bond. Colony travel has an authored entry/return route and normal playable arrival; no requirement to pilot a car through space. Optional Mirror Step/Unseen Hand/stealth powers cannot be the only way to complete a main rescue.
+Car acquisition is independent of enslaving/freeing the Mecha Dragon; advanced circuits can reward the bond. Colony travel has an authored entry/return route and normal playable arrival; no requirement to pilot a car through space. Optional Mirror Step/Unseen Hand/stealth powers cannot be the only way to complete a main rescue. WP-23.2 proves the first bounded two-map allowlist and backward-readable region-keyed save migration; later regions extend that owner instead of creating parallel travel/save systems.
 
 Every later regional spec must list: required capabilities, optional shortcuts, humanoid return path, companion compact clearance, true-form arenas, region travel conditions, one-time rewards and save recovery. This catches softlocks before content production.
 
 ## 7. Later release/content planning
 
-After G5, choose the next region based on actual content readiness and the most useful next gameplay risk; the Hallowwood story lead does not obligate nine parallel production tracks. Advance one additional dragon/form kit and relevant local story to playable acceptance, then expand. V1/Z1 can be bounded technical/content proofs without claiming the entire Zenith region complete.
+Under WP-23, choose the next region based on actual content readiness and the most useful next gameplay risk; the Hallowwood story lead does not obligate parallel production tracks. Advance one dragon/form kit and its local story to playable acceptance, then expand. The existing V1/Z1 proofs do not claim the entire Zenith region or colony complete.
 
-The home/stay ending preserves the same regions and player-built history. A pre-departure continuation branch keeps the game playable after home without silently deleting the character. Launch scope decisions must name which parts of this full-world graph are delivered and which remain later, never use “all planned” as “all implemented.”
+The home/stay ending preserves the same regions and player-built history. A pre-departure continuation branch keeps the game playable after home without silently deleting the character. WP-23.0–23.13 name the planned portions of the full-world graph; planning must never be reported as implementation.

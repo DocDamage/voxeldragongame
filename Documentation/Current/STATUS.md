@@ -1,20 +1,20 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-21
-Moonbound Transformation Proof (ECHO-07..09, SAVE-11)**
+**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.2**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
-Historical documents under `Documentation/DesignPack` remain unchanged.
+Preserved originals under `Documentation/DesignPack/references/originals` remain
+unchanged; active DesignPack guidance is amended when scope decisions change.
 
 ## Verified state
 
 | Area | Current status | Evidence and boundary |
 |---|---|---|
-| Repository | `main`; pushed checkpoint `a78aa6f` | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
+| Repository | `main`; current checkpoint `cd6efd4` plus uncommitted WP-22 work | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: selected 53/53** | 53 Success in `Saved/Automation/Scaffold/index.json`; all source-declared tests passing (43 Success, 10 SuccessWithWarnings, 0 Failures) |
+| Native automation | **PASS: selected 54/54** | All source-declared `WYRMFALL.Scaffold` tests passed; log `Saved/ScaffoldLogs/20260919T160136Z_70954ed478a0_ue-test.log` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -39,6 +39,9 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 | WP-19 Pilotable Zenith hovercar | **PASS in real PIE (VEH-01..09)** | Real civilian hovercar mesh/texture (`SM_ZenithHovercar`), entry, 3D flight/hover piloting in both cameras, swept obstacle collision & landing validation, in-flight exit rejection, compact dragon passenger boarding/staging, disablement (250 HP -> 0 HP) and depot recovery, Schema 3 save persistence, traffic layer separation, and Mecha progression boost hook (+500 cm/s); [receipt](../../Saved/Diagnostics/WP19_hovercar_proof.json), [report](WP19_HOVERCAR_PROOF.md) |
 | WP-20 Jadefang validation & Heartfold expansion | **PASS in real PIE (JADE-01..05, SAVE)** | Genuine GLTF asset intake (Hip-Local, skeleton, 38 follower meshes, 21 anims, 39 materials), C++ `FWyrmDragonRigProfile` with DRG-15 fail-closed policy, dynamic modular mesh assembly with leader pose component, Companion (30x35) & TrueForm (110x150) dimensions/speeds, back-ridge mount socket (0,0,140), 3D flight locomotion, GAS primary (24 dmg) and secondary (18 dmg) attacks, direct control possession, and Schema 3 multi-dragon save roundtrip; [report](WP20_JADEFANG_PROOF.md) |
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
+| WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
+| WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0 and WP-23.2 COMPLETE** | The Jade Peaks closure passed JC-01..08 with supplied Emperor art, route parity, permanent Unseen Hand, bounded Region01↔JadePeaks travel, and backward-readable Schema 5 recovery. Focused visual QA also passed grounded Emperor/prop placement. WP-23.1 is next; new-dragon children remain gated; [proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md), [packet](tasks/WP-23.md) |
 
 ## Important implementation facts
 
@@ -51,8 +54,10 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
 - `UWyrmInventoryComponent` remains the inventory/equipment owner.
   Cross-inventory transfers now preflight target capacity and roll back on an
   unexpected partial failure.
-- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 2 adds the
-  Region 01 fact record while accepting schema 1 as an empty Region 01 state;
+- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 5 adds
+  region-keyed terrain/camp records, travel state, and Unseen Hand cooldown to
+  the prior Jade Peaks, Region 01, character, dragon, vehicle, inventory, and
+  Echo fields. Schemas 1 through 5 remain loadable;
   it rejects unsupported schemas, wrong terrain owners, missing terrain
   payloads, and terrain apply failures before mutating the character.
 - WP-06 adds a ranged weapon family, GAS abilities, a physical projectile,
@@ -126,6 +131,21 @@ Historical documents under `Documentation/DesignPack` remain unchanged.
   with full depot recovery. `UWyrmSaveSubsystem` (Schema 3) persists occupied and parked hovercar state.
   All 9 WP-19 criteria passed in live PIE (`py -3.12 tools/run_wp19_hovercar_proof.py`).
 - WP-20 realizes the Jadefang validation & Heartfold expansion slice (`JADE-01..05`, `SAVE`). Genuine GLTF Chinese Dragon assets (leader mesh `Hip-Local`, 38 follower meshes, skeleton, 21 anims, 39 materials) were ingested into `/Game/WYRMFALL/Development/Intake/WP20/Jadefang/Chinese+Dragon/`. `FWyrmDragonRigProfile` defines authoritative rig parameters (Companion 30x35cm vs TrueForm 110x150cm, speeds 480/1700, back ridge mount socket `(0, 0, 140)`). `AWyrmDragonCharacter` dynamically binds 38 modular follower meshes via `SetLeaderPoseComponent(GetMesh())`. Heartfold transitions enforce 4s cooldown and fail-closed blocked growth under low ceiling. Back-ridge mounting, 3D flight locomotion, landing, dismount, direct control GAS combat (24 primary, 18 area), and Schema 3 multi-dragon save roundtrip passed in live PIE (`py -3.12 tools/run_wp20_jadefang_proof.py`).
+- WP-22 realizes one bounded Jade Peaks route in `L_JadePeaks`. `UWyrmJadePeaksSubsystem`
+  owns only its regional facts and landmark receipts; `AWyrmCharacter` and GAS own
+  Mirror Step; `AWyrmDragonCharacter` remains dragon authority; and
+  `UWyrmSaveSubsystem` remains the sole persistence coordinator. The palace-route
+  ground is deliberately level at 900 cm so the 400 cm displacement has stable
+  collision/navigation, while the authored palace, aerie, and open flight space carry
+  the regional vertical silhouette. WP-22-QA1 adds a dedicated low-frequency
+  ground material, movable regional lighting, grounded props, separated route
+  anchors, and a legible aerie court. All JP-01–06 cases passed in live PIE;
+  visual QA additionally recorded 6/6 navigable anchors and 4/4 complete route paths.
+- WP-23.0 verified the supplied ten-dragon source set without treating source
+  presence as rig readiness. Verdance and Jadefang remain the only validated
+  identities. WP-23.2 then added the minimal allowlisted Region01↔JadePeaks
+  travel owner and backward-readable Schema 5 region-keyed persistence under
+  `UWyrmSaveSubsystem`; JC-01..08 and the WP-22 regression passed in real PIE.
 
 ## Fresh verification commands
 
@@ -149,6 +169,9 @@ py -3.12 tools/run_wp17_creator_and_polish_proof.py
 py -3.12 tools/run_wp18_cook_and_package_proof.py
 py -3.12 tools/run_wp19_hovercar_proof.py
 py -3.12 tools/run_wp20_jadefang_proof.py
+py -3.12 tools/run_wp21_moonbound_proof.py
+py -3.12 tools/run_wp22_jade_peaks_proof.py
+py -3.12 tools/run_wp23_2_jade_closure_proof.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -185,13 +208,13 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Standalone packaging, cook validation, and packaged client execution are RESOLVED (PASS in WP-18).
 - Pilotable Zenith civilian hovercar slice acceptance cases `VEH-01` through `VEH-09` are RESOLVED (PASS in WP-19).
 - Heartfold expansion and Jadefang multi-dragon rig validation acceptance cases `JADE-01` through `JADE-05` and `SAVE` are RESOLVED (PASS in WP-20).
+- Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED (PASS in WP-23.2); later WP-23 children remain separate.
 
 ## Next bounded task
 
-With WP-20 Heartfold Expansion & Jadefang Validation verified cleanly across native tests, live PIE, and regression suites:
-Proceed to the next feature milestone in the implementation backlog:
-**WP-21 / Moonbound Transformation Proof (ECHO-07..09, SAVE-11)**.
-Implement actual beast kit and original-body restoration across interruption, save/load, and equipment, with equivalent cure unlock using real Corvyn/beast assets.
-Mutable remains creator, GAS remains combat authority, and each subsystem keeps one owner.
-Use the [current handoff](HANDOFF.md) for the exact continuation state.
-
+WP-23.2 is complete. The next bounded task is to author **WP-23.1 Verdant Reach
+closure** from the verified Region 01/Verdance baseline and supplied
+forest/ranger content. Every new-dragon region remains gated on its own
+rig/profile and real-content fit. See the
+[readiness ledger](WP23_READINESS.md), [WP-23 packet](tasks/WP-23.md), and
+[current handoff](HANDOFF.md).

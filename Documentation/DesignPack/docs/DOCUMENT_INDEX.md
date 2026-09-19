@@ -30,7 +30,7 @@
 | [Implementation backlog](production/IMPLEMENTATION_BACKLOG.md) | Ordered bounded work packages and dependencies | Selecting one next task |
 | [G0/G1 assignment](production/G0_G1_READINESS_AND_TERRAIN_PROOF.md) | First actual inspection and provider proof | Starting implementation |
 | [Acceptance tests](production/ACCEPTANCE_TESTS.md) | Focused procedures, expected outcomes, current NOT RUN state | Verifying a changed feature |
-| [Current handoff](production/CURRENT_HANDOFF.md) | Actual status and next bounded work | Starting or ending a session |
+| [DesignPack v0.1 handoff](production/CURRENT_HANDOFF.md) | Historical documentation-release status; points to current workspace status | Reviewing the original package handoff |
 | [Sources/evidence](SOURCES_AND_EVIDENCE.md) | Local source provenance and limited technical references | Checking a factual claim |
 
 ## Narrative authority
