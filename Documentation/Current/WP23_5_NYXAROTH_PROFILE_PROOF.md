@@ -1,8 +1,12 @@
 # WP-23.5 Nyxaroth rig/profile proof
 
 **Result:** PASS on September 19, 2026 for the bounded Nyxaroth profile gate.
-**Region status:** GATED. No Gloaming Marches map or encounter acceptance is
-claimed.
+**Profile-time region status:** GATED. No Gloaming Marches map or encounter
+acceptance was claimed here. The later
+[environment/navigation foundation](WP23_5_GLOAMING_FOUNDATION_PROOF.md) now
+passes, as does the bounded
+[Arrival-to-Ashgrave gameplay slice](WP23_5_ASHGRAVE_SLICE_PROOF.md); later
+encounter and regional-completion acceptance remain gated.
 
 ## Implemented profile
 

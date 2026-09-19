@@ -1,8 +1,11 @@
 # WP-23.5 Gloaming content-integration fixture
 
 **Result:** PASS on September 19, 2026 for the bounded editor fixture.
-**Region status:** GATED. No production Gloaming map, route, encounter, Echo,
-travel, navigation, or save acceptance is claimed.
+**Fixture-time region status:** GATED. No production Gloaming map, route,
+encounter, Echo, travel, navigation, or save acceptance was claimed here.
+The later [environment/navigation foundation](WP23_5_GLOAMING_FOUNDATION_PROOF.md)
+and [Arrival-to-Ashgrave gameplay slice](WP23_5_ASHGRAVE_SLICE_PROOF.md) now
+pass; this file remains evidence only for its scoped content fixture.
 
 ## Scope proved
 

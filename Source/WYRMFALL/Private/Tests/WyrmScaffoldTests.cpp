@@ -39,6 +39,7 @@
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
 #include "Region/WyrmJadePeaksSubsystem.h"
+#include "Region/WyrmGloamingSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "Vehicles/WyrmHovercar.h"
@@ -3801,6 +3802,37 @@ bool FWyrmJadePeaksSliceTest::RunTest(const FString& Parameters)
     if (Verdance) { Verdance->Destroy(); }
     if (Player) { Player->Destroy(); }
     World->DestroyWorld(false);
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmGloamingArrivalAshgraveTest, "WYRMFALL.Scaffold.GloamingArrivalAshgrave",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmGloamingArrivalAshgraveTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region)
+    {
+        return false;
+    }
+
+    Region->ResetGloamingState();
+    TestFalse(TEXT("Ashgrave seal rejects interaction before arrival"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("GLM-01 arrival commits"), Region->RecordArrival());
+    TestFalse(TEXT("Arrival cannot duplicate"), Region->RecordArrival());
+    TestTrue(TEXT("Arrival fact is authoritative"), Region->HasFact(FName(TEXT("gloaming.arrival"))));
+    TestTrue(TEXT("GLM-02 Ashgrave extraction seal resolves after arrival"), Region->ResolveAshgraveExtractionSeal());
+    TestFalse(TEXT("Ashgrave extraction seal cannot duplicate"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Ashgrave resolution receipt exists"),
+        Region->HasReceipt(FName(TEXT("gloaming.ashgrave_extraction_seal.resolved"))));
+    TestFalse(TEXT("Bounded slice does not grant a Gloaming Echo"),
+        Region->HasFact(FName(TEXT("echo.gloaming"))));
+    TestFalse(TEXT("Bounded slice does not claim regional completion"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    TestFalse(TEXT("Count Malvaine remains out of scope"),
+        Region->HasFact(FName(TEXT("gloaming.malvaine_resolved"))));
+    TestFalse(TEXT("Hollow Twins remain out of scope"),
+        Region->HasFact(FName(TEXT("gloaming.hollow_twins_resolved"))));
     return true;
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmVerdantReachClosureTest, "WYRMFALL.Scaffold.VerdantReachClosure",

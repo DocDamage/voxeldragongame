@@ -1,9 +1,13 @@
 # WP-23.5 Gloaming Marches readiness evidence
 
 **Result:** PASS for bounded import/content readiness on September 19, 2026.
-**Production status:** REGION GATED. This readiness command does not itself
-claim a Gloaming map or profile/gameplay acceptance; the later focused profile
-proof closes NYX-01..05.
+**Readiness-time production status:** REGION GATED. This readiness command did
+not itself claim a Gloaming map or profile/gameplay acceptance; the later
+focused profile proof closes NYX-01..05 and the still-later
+[environment/navigation foundation](WP23_5_GLOAMING_FOUNDATION_PROOF.md) now
+passes. The still-later
+[Arrival-to-Ashgrave gameplay slice](WP23_5_ASHGRAVE_SLICE_PROOF.md) also
+passes; later encounters and regional completion remain gated.
 
 ## Command and receipt
 
@@ -70,17 +74,20 @@ reduce direct naming overlap but do not by themselves establish permission.
 
 ## Unrun regional production gates
 
-- No Gloaming region map, navigation route, ruler encounter, Hollow Twin
-  encounter, optional Echo outcome, travel/return, or recovery case exists.
+- The Gloaming map/navigation foundation and bounded Arrival-to-Ashgrave route
+  now exist and pass. No ruler encounter, Hollow Twin encounter, optional Echo
+  outcome, travel/return, or recovery case exists.
 - The four selected Cathedral roles and representative Michael Mire assembly
-  passed the bounded content fixture; the environment and cemetery content has
-  not received route-scale, collision, navigation, or readability proof.
+  passed the bounded content fixture; the environment and cemetery content now
+  also pass route-scale, collision configuration, navigation, and rendered
+  readability proof.
 - The remaining required horror roster has not yet been assembled into authored
   actors or proven for animation, collision, scale, materials, or provenance.
 
 ## Decision
 
-The Nyxaroth profile and representative content-integration fixture pass.
-Continue with a bounded environment/navigation foundation using a selective
-Cathedral and cemetery/church subset. Prove production scale, materials,
-collision, navigation, and route readability before encounter authoring.
+The Nyxaroth profile, representative content fixture, environment/navigation
+foundation, and Arrival-to-Ashgrave gameplay slice pass. Continue with a
+bounded Count Malvaine encounter slice using the validated Priest presentation
+and existing Gloaming fact owner; keep Sanguine Strike and later closures
+separate.

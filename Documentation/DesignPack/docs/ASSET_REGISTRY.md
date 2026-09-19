@@ -44,7 +44,7 @@ All rows: real object path, rig, clips, rider socket, compact/true collision, im
 | DRG-WOOD | Wooden / Grovemaw | Bulky protector clearance, compact guard presentation | Later per-dragon proof |
 | DRG-LAVA | Lava / Pyraxis | Fire cues, attack muzzle/volume, legible compact VFX | Later per-dragon proof |
 | DRG-WHITE | White / Frostmane | Frost cues and supported ice locomotion | Later per-dragon proof |
-| DRG-DARK | Dark / Nyxaroth | UE 5.8.2 profile proof passed NYX-01..05: `Hip-Local` + 32 followers, one skeleton, distinct 28x34 / 115x155 envelopes, Heartfold, mount/flight, GAS combat/control, living bond, and save identity. The representative Cathedral/Michael Mire content fixture also passes; localized shadow effects and regional presentation remain open | Gloaming environment/navigation foundation before encounter production |
+| DRG-DARK | Dark / Nyxaroth | UE 5.8.2 profile proof passed NYX-01..05: `Hip-Local` + 32 followers, one skeleton, distinct 28x34 / 115x155 envelopes, Heartfold, mount/flight, GAS combat/control, living bond, and save identity. The Cathedral/Michael Mire fixture, `L_GloamingMarches` environment/navigation foundation, and bounded Arrival-to-Ashgrave gameplay route also pass; later encounters and localized shadow effects remain open | Count Malvaine encounter slice before later Echo/Twins/travel production |
 | DRG-ZOMBIE | Zombie / Rotwing | Undead visual preserved after bond; deformed anatomy collision | Later per-dragon proof |
 | DRG-SKULL | Skull / Ossuroth | Bone silhouette, heavy-impact reach, rider position | Later per-dragon proof |
 | DRG-JADE | Chinese Dragon asset / Jadefang | Long body, turn radius and aerial path; never assume Green skeleton | Later per-dragon proof |

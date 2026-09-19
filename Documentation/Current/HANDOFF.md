@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 55/55 tests with 0 failures.
+- Full scaffold native automation completed 56/56 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -45,6 +45,8 @@ settings out of commits.
 - WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`).
 - WP-23.2 real PIE passed all 8 Jade Peaks closure cases (`JC-01..08`): supplied Emperor Wei Longzhu art; diplomacy/living-defeat pact parity; trust/living-defeat disciple parity; permanent GAS Unseen Hand with 25 Focus/8s cooldown and fail-closed target policy; bounded Region01↔JadePeaks travel; Schema 5 region-keyed recovery; and WP-22 continuity. Focused manual frame review also passed Emperor grounding/scale and supplied spear placement. See `Documentation/Current/WP23_2_JADE_CLOSURE_PROOF.md`.
 - WP-23.1 real PIE passed all 8 Verdant Reach closure cases (`VR-01..08`): supplied Ranger character/environment presentation; evidence and authored-guard route parity without attacking Meridess; optional trust/living-defeat canopy hunter; permanent GAS Hunter's Veil; four live route navigation projections; Verdance continuity; and backward-readable Schema 6 recovery. Four rendered frames passed manual lighting, scale, grounding/collision, and route-readability review. WP-16 and WP-23.2 regressions remain green. See `Documentation/Current/WP23_1_VERDANT_REACH_PROOF.md`.
+- WP-23.5 environment/navigation foundation passed in `L_GloamingMarches`: finite GeoForge terrain, supplied Cathedral/cemetery composition, explicit supplied materials and `BlockAll` profiles, 4/4 navigable route anchors, 3/3 complete non-partial ordered paths, and accepted final rendered QA after correcting overexposure and off-center OBJ pivots. Encounters, travel/save recovery, and regional completion remain gated. See `Documentation/Current/WP23_5_GLOAMING_FOUNDATION_PROOF.md`.
+- WP-23.5 Arrival-to-Ashgrave gameplay passed in live PIE: `UWyrmGloamingSubsystem` owns the bounded fact/receipt state, the authored Arrival overlap commits once, the Ashgrave extraction seal rejects before Arrival and commits once afterward, and the live route is valid/non-partial. Malvaine, Twins, Echo, travel/save, and completion facts remain absent. See `Documentation/Current/WP23_5_ASHGRAVE_SLICE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -327,19 +329,18 @@ Evidence:
   `Documentation/Current/WP22_VISUAL_QA.md`.
 - WP-23 is user-authorized as the rest-of-world umbrella and split into
   WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. Nyxaroth's distinct
-  profile now passes NYX-01..05 in focused PIE, including Heartfold,
-  mount/flight, GAS combat/control, living bond, and save identity. The
-  The representative content fixture also passes: four supplied Cathedral
-  roles have distinct palettes/animations at 180 cm, and Michael Mire is a
-  coherent 17-part, 190 cm required-horror assembly with proven collision.
-  The broader roster, cemetery content, provenance, and region remain gated.
+  profile and the representative Cathedral/Michael Mire content fixture pass.
+  The Gloaming production environment/navigation foundation and bounded
+  Arrival-to-Ashgrave gameplay slice now also pass in real PIE. The broader
+  horror roster, provenance, later encounters, travel/save recovery, and region
+  completion remain gated.
 
 ## Next bounded task
 
-Build a bounded Gloaming environment/navigation foundation next: selectively
-import a small Cathedral plus cemetery/church subset, establish production
-scale/material/collision, create the route skeleton, and prove navigation and
-route readability. Do not implement encounters or claim regional completion.
-Mutable remains creator, GAS remains combat authority, and
+Build one bounded Count Malvaine encounter slice next in
+`L_GloamingMarches`, reusing the validated Priest presentation and
+`UWyrmGloamingSubsystem`. Preserve an ordinary non-Echo approach. Do not add
+Sanguine Strike, Hollow Twins, travel/save recovery, or regional completion in
+the same slice. Mutable remains creator, GAS remains combat authority, and
 `UWyrmSaveSubsystem` remains the sole persistence coordinator. See
 `Documentation/Current/tasks/WP-23.5.md`.
