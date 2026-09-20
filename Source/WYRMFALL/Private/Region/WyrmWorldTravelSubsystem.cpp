@@ -14,6 +14,7 @@ namespace
     const FName Region01Id(TEXT("Region01"));
     const FName JadePeaksId(TEXT("JadePeaks"));
     const FName GloamingMarchesId(TEXT("GloamingMarches"));
+    const FName CogspireHarborId(TEXT("CogspireHarbor"));
 }
 
 void UWyrmWorldTravelSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -37,6 +38,7 @@ FName UWyrmWorldTravelSubsystem::RegionIdForMapName(const FString& MapName)
 {
     if (MapName.Contains(TEXT("L_JadePeaks"))) return JadePeaksId;
     if (MapName.Contains(TEXT("L_GloamingMarches"))) return GloamingMarchesId;
+    if (MapName.Contains(TEXT("L_CogspireHarbor"))) return CogspireHarborId;
     if (MapName.Contains(TEXT("L_Region01"))) return Region01Id;
     return NAME_None;
 }
@@ -46,7 +48,9 @@ bool UWyrmWorldTravelSubsystem::IsAllowedRoute(FName FromRegionId, FName ToRegio
     return (FromRegionId == Region01Id && ToRegionId == JadePeaksId) ||
            (FromRegionId == JadePeaksId && ToRegionId == Region01Id) ||
            (FromRegionId == Region01Id && ToRegionId == GloamingMarchesId) ||
-           (FromRegionId == GloamingMarchesId && ToRegionId == Region01Id);
+           (FromRegionId == GloamingMarchesId && ToRegionId == Region01Id) ||
+           (FromRegionId == Region01Id && ToRegionId == CogspireHarborId) ||
+           (FromRegionId == CogspireHarborId && ToRegionId == Region01Id);
 }
 
 FName UWyrmWorldTravelSubsystem::DestinationMapForRegion(FName RegionId)
@@ -54,6 +58,7 @@ FName UWyrmWorldTravelSubsystem::DestinationMapForRegion(FName RegionId)
     if (RegionId == Region01Id) return FName(TEXT("/Game/WYRMFALL/World/Regions/L_Region01"));
     if (RegionId == JadePeaksId) return FName(TEXT("/Game/WYRMFALL/World/Regions/L_JadePeaks"));
     if (RegionId == GloamingMarchesId) return FName(TEXT("/Game/WYRMFALL/World/Regions/L_GloamingMarches"));
+    if (RegionId == CogspireHarborId) return FName(TEXT("/Game/WYRMFALL/World/Regions/L_CogspireHarbor"));
     return NAME_None;
 }
 
@@ -61,6 +66,7 @@ FName UWyrmWorldTravelSubsystem::DefaultArrivalForRegion(FName RegionId)
 {
     return RegionId == JadePeaksId ? FName(TEXT("LM-JADE-ARRIVAL")) :
            RegionId == GloamingMarchesId ? FName(TEXT("LM-GLOAMING-ARRIVAL")) :
+           RegionId == CogspireHarborId ? FName(TEXT("LM-COGSPIRE-ARRIVAL")) :
            RegionId == Region01Id ? FName(TEXT("LM-ARRIVAL")) : NAME_None;
 }
 
@@ -68,7 +74,9 @@ FName UWyrmWorldTravelSubsystem::ExpectedReturnLandmark(FName FromRegionId, FNam
 {
     if (FromRegionId == JadePeaksId && ToRegionId == Region01Id) return FName(TEXT("LM-JADE-RETURN"));
     if (FromRegionId == GloamingMarchesId && ToRegionId == Region01Id) return FName(TEXT("LM-GLOAMING-RETURN"));
-    if (FromRegionId == Region01Id && (ToRegionId == JadePeaksId || ToRegionId == GloamingMarchesId))
+    if (FromRegionId == CogspireHarborId && ToRegionId == Region01Id) return FName(TEXT("LM-COGSPIRE-RETURN"));
+    if (FromRegionId == Region01Id &&
+        (ToRegionId == JadePeaksId || ToRegionId == GloamingMarchesId || ToRegionId == CogspireHarborId))
         return FName(TEXT("LM-ARRIVAL"));
     return NAME_None;
 }

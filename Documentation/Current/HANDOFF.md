@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 70/70 tests with 0 failures.
+- Full scaffold native automation completed 71/71 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -375,8 +375,8 @@ Evidence:
 ## Next bounded task
 
 WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
-gate, the Harbor foundation gate, and the saved Harbor map now pass. Cogfang's distinct 34-part assembly and authority proof
-passed COG-01..05 in live PIE; the full native suite remains 70/70. Baron
+gate, the saved Harbor map, and bounded travel/recovery now pass. Cogfang's distinct 34-part assembly and authority proof
+passed COG-01..05 in live PIE; the full native suite is now 71/71. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
 scale, fixture collision, and accepted cameras. Stationary QA locks the source
@@ -387,13 +387,15 @@ policy. Two civic pumps remain separate actors more than 21 m from the
 coercion-engine fixture. The user explicitly confirms ownership/project
 authorization for all supplied assets.
 
-`L_CogspireHarbor` now contains that accepted supplied-art layout, one existing
-water owner, labeled arrival/return anchors, and a complete live-PIE route.
-Extend only the existing travel owner with the bounded Region01↔Cogspire route
-next. Do not add urban encounters, city-engine shutdown gameplay, regional
-completion, or a parallel save/travel authority. Mutable remains creator, GAS
+`L_CogspireHarbor` contains that accepted supplied-art layout, existing water
+and terrain owners, labeled arrival/return anchors, and a complete live-PIE
+route. The existing travel owner now passes bounded Region01↔Cogspire Schema 7
+recovery. Author the arrival-to-city-engine observation slice next. Stop before
+Cogfang combat, shutdown gameplay, regional completion, optional urban
+investigations, or a parallel authority. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
-coordinator. See `Documentation/Current/WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md`,
+coordinator. See `Documentation/Current/WP23_6_COGSPIRE_TRAVEL_PROOF.md`,
+`Documentation/Current/WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md`,
 `Documentation/Current/WP23_6_HARBOR_FOUNDATION_PROOF.md`,
 `Documentation/Current/WP23_6_CAST_VISUAL_QA.md`,
 `Documentation/Current/WP23_6_COGFANG_PROFILE_PROOF.md`,

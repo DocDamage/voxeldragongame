@@ -14,10 +14,13 @@ The map uses the existing `AWyrmWaterVolume` owner for its bounded Harbor
 water state. A visual-only water plane does not own water gameplay. Forty-one
 supplied jetty pieces form the quay and pier. A thin under-deck simple-collision
 substrate bridges Recast seams and introduces no navigation authority.
+The existing finite GeoForge terrain and `AWyrmGeoForgeAdapter` now sit below
+the Harbor bed to provide the normal regional terrain/save snapshot contract.
 
 The map includes the established labels `LM-COGSPIRE-ARRIVAL` and
-`LM-COGSPIRE-RETURN`, plus a `PlayerStart_CogspireArrival`. These are map
-anchors only: Cogspire is not yet added to the travel allowlist.
+`LM-COGSPIRE-RETURN`, plus a `PlayerStart_CogspireArrival`. Their later
+travel-owner acceptance is recorded separately in
+[the travel proof](WP23_6_COGSPIRE_TRAVEL_PROOF.md).
 
 ## Live PIE evidence
 
@@ -44,14 +47,13 @@ route, waterline, and separate civic/coercion machinery silhouettes.
 
 ## Not claimed
 
-- Region01-to-Cogspire travel allowlisting or recovery.
+- Actual cross-map `OpenLevel` transition during this map proof.
 - Urban encounters or city-engine shutdown behavior.
 - Cogspire regional facts, completion, or save-schema extension.
 - Interactive keyboard/gamepad walkthrough, cook, or packaged build.
 
 ## Next bounded task
 
-Extend the existing `UWyrmWorldTravelSubsystem` with only the
-Region01↔Cogspire route and prove arrival/return plus failure-safe recovery
-against the saved anchors. Do not introduce a parallel travel or save owner,
-regional gameplay, or encounter content in that packet.
+Author the bounded arrival-to-city-engine observation slice. Do not introduce
+Cogfang combat, shutdown behavior, regional completion, optional urban
+investigations, or a parallel authority in that packet.

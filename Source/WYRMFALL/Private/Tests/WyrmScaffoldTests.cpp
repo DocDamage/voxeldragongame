@@ -4073,6 +4073,50 @@ bool FWyrmGloamingTravelSaveRecoveryTest::RunTest(const FString& Parameters)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCogspireTravelRouteTest, "WYRMFALL.Scaffold.CogspireTravelRoute",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCogspireTravelRouteTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmWorldTravelSubsystem* Travel = NewObject<UWyrmWorldTravelSubsystem>(TestGI);
+    TestNotNull(TEXT("Existing travel owner created"), Travel);
+    if (!Travel) return false;
+
+    const FName Region01(TEXT("Region01"));
+    const FName Cogspire(TEXT("CogspireHarbor"));
+    TestEqual(TEXT("Cogspire map resolves to stable region id"),
+        UWyrmWorldTravelSubsystem::RegionIdForMapName(TEXT("UEDPIE_0_L_CogspireHarbor")), Cogspire);
+    TestTrue(TEXT("Region01 to Cogspire route is allowlisted"), Travel->IsAllowedRoute(Region01, Cogspire));
+    TestTrue(TEXT("Cogspire humanoid return is allowlisted"), Travel->IsAllowedRoute(Cogspire, Region01));
+    TestFalse(TEXT("Jade-to-Cogspire shortcut remains rejected"),
+        Travel->IsAllowedRoute(FName(TEXT("JadePeaks")), Cogspire));
+    TestFalse(TEXT("Gloaming-to-Cogspire shortcut remains rejected"),
+        Travel->IsAllowedRoute(FName(TEXT("GloamingMarches")), Cogspire));
+    TestFalse(TEXT("Wrong Cogspire return landmark is rejected"),
+        Travel->PrepareTravel(Cogspire, Region01, FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Authored Cogspire return landmark prepares"),
+        Travel->PrepareTravel(Cogspire, Region01, FName(TEXT("LM-COGSPIRE-RETURN"))));
+    TestTrue(TEXT("Region01 arrival validates"),
+        Travel->CompleteArrival(Region01, FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Authored Cogspire outward route prepares"),
+        Travel->PrepareTravel(Region01, Cogspire, FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Cogspire arrival validates"),
+        Travel->CompleteArrival(Cogspire, FName(TEXT("LM-COGSPIRE-ARRIVAL"))));
+    TestFalse(TEXT("Wrong Cogspire arrival remains rejected"),
+        Travel->CompleteArrival(Cogspire, FName(TEXT("LM-COGSPIRE-RETURN"))));
+
+    FWyrmWorldTravelSaveRecord Record;
+    Travel->BuildSaveRecord(Record);
+    UWyrmWorldTravelSubsystem* Restored = NewObject<UWyrmWorldTravelSubsystem>(TestGI);
+    Restored->RestoreFromSaveRecord(Record);
+    TestEqual(TEXT("Cogspire current region survives existing travel record"),
+        Restored->GetCurrentRegionId(), Cogspire);
+    TestEqual(TEXT("Cogspire arrival survives existing travel record"),
+        Restored->GetArrivalLandmarkId(), FName(TEXT("LM-COGSPIRE-ARRIVAL")));
+    TestEqual(TEXT("Travel extension does not bump save schema"), UWyrmSaveGame::CurrentSchemaVersion, 7);
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmMichaelMireEncounterTest, "WYRMFALL.Scaffold.GloamingMichaelMireEncounter",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FWyrmMichaelMireEncounterTest::RunTest(const FString& Parameters)

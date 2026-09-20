@@ -148,6 +148,49 @@ def main():
     water_owner.set_actor_scale3d(unreal.Vector(2.0, 3.0, 1.0))
     water_owner.set_editor_property("surface_elevation", WATER_Z)
 
+    terrain = actors.spawn_actor_from_class(
+        unreal.GeoForgeInfiniteTerrainActor, unreal.Vector(0, 0, -1500))
+    terrain.set_actor_label("COG_GeoForgeTerrain")
+    terrain_settings = {
+        "auto_rebuild_in_editor": False,
+        "auto_apply_preset_defaults": False,
+        "follow_editor_viewport_camera_for_streaming": False,
+        "world_shape": unreal.GeoForgeWorldShape.PLANAR_FINITE,
+        "horizontal_bounds_mode": unreal.GeoForgeHorizontalBoundsMode.FINITE_CENTERED,
+        "finite_bounds_half_extent_x_in_chunks": 3,
+        "finite_bounds_half_extent_y_in_chunks": 3,
+        "chunk_size_in_cells": 16,
+        "chunk_height_in_cells": 16,
+        "cell_size": 100.0,
+        "ground_level_in_cells": 8,
+        "max_mountain_height_in_cells": 0,
+        "water_level_in_cells": -100,
+        "river_depth_in_cells": 0,
+        "generate_caves": False,
+        "enable_built_in_cube_trees": False,
+        "generate_collision": True,
+        "persist_edited_cells_across_streaming": True,
+        "use_async_chunk_generation": False,
+        "max_queued_chunk_rebuilds_per_tick": 64,
+        "chunk_render_mode": unreal.GeoForgeChunkRenderMode.MARCHING_CUBES_SURFACE,
+        "world_seed": 2366,
+        "save_compatibility_id": "WYRMFALL.CogspireHarbor",
+        "streamed_terrain_affects_navigation": False,
+    }
+    for key, value in terrain_settings.items():
+        terrain.set_editor_property(key, value)
+    ground = load(
+        assets, "/Game/WYRMFALL/World/Regions/Materials/M_GloamingGround.M_GloamingGround",
+        unreal.MaterialInterface)
+    for key in ("terrain_material", "surface_material", "soil_material", "rock_material",
+                "deep_rock_material", "sand_material", "snow_material"):
+        terrain.set_editor_property(key, ground)
+    terrain.set_editor_property("use_general_biome_terrain_material", True)
+    terrain.set_editor_property("general_biome_terrain_material", ground)
+    adapter = actors.spawn_actor_from_class(unreal.WyrmGeoForgeAdapter, unreal.Vector())
+    adapter.set_actor_label("COG_GeoForgeAdapter")
+    adapter.bind_terrain_actor(terrain)
+
     jetty = DEST + "/Harbor/Jetty/jetty.jetty"
     for row, y in enumerate((-675, -450, -225, 0, 225, 450, 675), 1):
         for column, x in enumerate((-1700, -1350, -1000, -650, -300), 1):
@@ -199,6 +242,8 @@ def main():
         "scope": "saved environment/navigation foundation only",
         "arrival_anchor": "LM-COGSPIRE-ARRIVAL", "return_anchor": "LM-COGSPIRE-RETURN",
         "water_authority": water_owner.get_class().get_name(), "waterline_z_cm": WATER_Z,
+        "terrain_authority": adapter.get_class().get_name(),
+        "terrain_save_compatibility_id": "WYRMFALL.CogspireHarbor",
         "supplied_quay_and_jetty_piece_count": 41,
         "hidden_navigation_substrate": substrate.get_actor_label(),
         "not_claimed": ["travel allowlist", "regional subsystem", "encounters", "city-engine behavior", "save schema"],

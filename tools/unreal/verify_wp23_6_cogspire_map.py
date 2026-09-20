@@ -89,6 +89,7 @@ try:
         "LM-COGSPIRE-ARRIVAL", "LM-COGSPIRE-RETURN", "COG_ROUTE_ARRIVAL",
         "COG_ROUTE_JETTY_END", "PlayerStart_CogspireArrival", "COG_NavMeshBounds",
         "COG_WATER_HarborAuthority", "COG_NAV_HiddenDockSubstrate",
+        "COG_GeoForgeTerrain", "COG_GeoForgeAdapter",
         "COG_ENV_CivicWaterPumpA", "COG_ENV_CivicWaterPumpB", "COG_ENV_CoercionEnginePump",
     }
     missing = sorted(required.difference(labels))
@@ -96,12 +97,17 @@ try:
     if missing or len(supplied) < 50:
         raise RuntimeError(f"Saved map inventory failed: missing={missing}, supplied={len(supplied)}")
     water_count = sum(isinstance(actor, unreal.WyrmWaterVolume) for actor in labels.values())
-    if water_count != 1:
-        raise RuntimeError(f"Expected exactly one WyrmWaterVolume, found {water_count}")
+    terrain_count = sum(isinstance(actor, unreal.GeoForgeInfiniteTerrainActor) for actor in labels.values())
+    adapter_count = sum(isinstance(actor, unreal.WyrmGeoForgeAdapter) for actor in labels.values())
+    if water_count != 1 or terrain_count != 1 or adapter_count != 1:
+        raise RuntimeError(
+            f"Owner inventory mismatch: water={water_count}, terrain={terrain_count}, adapter={adapter_count}")
     REPORT["saved_map_inventory"] = {
         "required_labels_present": True,
         "supplied_environment_actor_count": len(supplied),
         "water_authority_count": water_count,
+        "terrain_authority_count": terrain_count,
+        "terrain_adapter_count": adapter_count,
         "arrival_anchor": "LM-COGSPIRE-ARRIVAL",
         "return_anchor": "LM-COGSPIRE-RETURN",
     }
@@ -159,6 +165,10 @@ try:
                             f"complete={complete} recast={recast_count}")
                     return
                 runtime_water = unreal.GameplayStatics.get_all_actors_of_class(game_world, unreal.WyrmWaterVolume)
+                runtime_terrain = unreal.GameplayStatics.get_all_actors_of_class(
+                    game_world, unreal.GeoForgeInfiniteTerrainActor)
+                runtime_adapters = unreal.GameplayStatics.get_all_actors_of_class(
+                    game_world, unreal.WyrmGeoForgeAdapter)
                 REPORT["live_pie"] = {
                     "arrival_projects": start_ok,
                     "jetty_end_projects": end_ok,
@@ -168,9 +178,12 @@ try:
                     "recast_count": recast_count,
                     "water_authority_count": len(runtime_water),
                     "water_surface_z_cm": runtime_water[0].get_editor_property("surface_elevation"),
+                    "terrain_authority_count": len(runtime_terrain),
+                    "terrain_adapter_count": len(runtime_adapters),
                 }
-                if len(runtime_water) != 1 or abs(REPORT["live_pie"]["water_surface_z_cm"] - 80.0) > 0.1:
-                    raise RuntimeError("Saved-map water authority mismatch")
+                if (len(runtime_water) != 1 or len(runtime_terrain) != 1 or len(runtime_adapters) != 1 or
+                        abs(REPORT["live_pie"]["water_surface_z_cm"] - 80.0) > 0.1):
+                    raise RuntimeError("Saved-map owner inventory mismatch")
                 REPORT["status"] = "WAITING_FOR_PIE_END"
                 write_report()
                 LEVELS.editor_request_end_play()
@@ -199,9 +212,10 @@ try:
                 "saved_map_exists": True,
                 "supplied_harbor_art": "PASS",
                 "existing_water_authority": "PASS",
+                "existing_terrain_authority": "PASS",
                 "arrival_return_anchors": "PASS_LABELS_ONLY",
                 "live_pie_navigation": "PASS",
-                "travel_allowlist_added": False,
+                "travel_allowlist_verified_by_this_packet": False,
                 "encounters_added": False,
             }
             write_report()
