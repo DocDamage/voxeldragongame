@@ -203,8 +203,8 @@ def tick(_delta):
             bounded = (not region.has_fact(unreal.Name("cogspire.region_complete")) and
                        not region.has_fact(unreal.Name("echo.deathmark")) and
                        not region.has_fact(unreal.Name("echo.carvers_precision")) and
-                       unreal.WyrmSaveSubsystem.is_schema_version_supported(7) and
-                       not unreal.WyrmSaveSubsystem.is_schema_version_supported(8))
+                       unreal.WyrmSaveSubsystem.is_schema_version_supported(8) and
+                       not unreal.WyrmSaveSubsystem.is_schema_version_supported(9))
 
             report["acceptance"] = {
                 "encounter_requires_baron_evidence_and_commits_once": bool(
@@ -216,7 +216,7 @@ def tick(_delta):
                 "coercion_off_while_civic_machinery_stays_operational": selective_state,
                 "both_civic_pump_actors_remain_unchanged": pumps_unchanged,
                 "supplied_34_part_cogfang_bonds_once": bool(bonded and bond_duplicate_rejected and identity),
-                "regional_completion_optional_echoes_and_schema8_absent": bounded,
+                "regional_completion_and_optional_echoes_absent_schema8_current": bounded,
             }
             report["measurements"] = {
                 "initial_cogfang_health": initial_health,

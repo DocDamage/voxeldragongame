@@ -154,3 +154,74 @@ bool UWyrmCogspireSubsystem::HasReceipt(FName ReceiptId) const
 {
     return FactReceipts.Contains(ReceiptId);
 }
+
+void UWyrmCogspireSubsystem::BuildSaveRecord(FWyrmCogspireSaveRecord& OutRecord) const
+{
+    OutRecord.KnownFacts = KnownFacts;
+    OutRecord.FactReceipts = FactReceipts;
+    OutRecord.bCoercionGovernorActive = bCoercionGovernorActive;
+    OutRecord.bCivicMachineryOperational = bCivicMachineryOperational;
+}
+
+void UWyrmCogspireSubsystem::RestoreFromSaveRecord(const FWyrmCogspireSaveRecord& InRecord)
+{
+    KnownFacts = InRecord.KnownFacts;
+    FactReceipts = InRecord.FactReceipts;
+    bCoercionGovernorActive = InRecord.bCoercionGovernorActive;
+    bCivicMachineryOperational = InRecord.bCivicMachineryOperational;
+    NormalizeRestoredState();
+}
+
+void UWyrmCogspireSubsystem::NormalizeRestoredState()
+{
+    TSet<FName> UniqueFacts;
+    KnownFacts.RemoveAll([&UniqueFacts](FName Fact)
+    {
+        return Fact.IsNone() || (!UniqueFacts.Contains(Fact) ? (UniqueFacts.Add(Fact), false) : true);
+    });
+
+    TSet<FName> UniqueReceipts;
+    FactReceipts.RemoveAll([&UniqueReceipts](FName Receipt)
+    {
+        return Receipt.IsNone() || (!UniqueReceipts.Contains(Receipt) ? (UniqueReceipts.Add(Receipt), false) : true);
+    });
+
+    const FName OrderedFacts[] = {
+        WyrmCogspireFacts::Arrival,
+        WyrmCogspireFacts::PublicMachinery,
+        WyrmCogspireFacts::CoercionDiversion,
+        WyrmCogspireFacts::BaronAcknowledgment,
+        WyrmCogspireFacts::CogfangEncounter,
+        WyrmCogspireFacts::CogfangDefeated,
+        WyrmCogspireFacts::CoercionShutdown,
+        WyrmCogspireFacts::CogfangBonded};
+    const FName OrderedReceipts[] = {
+        WyrmCogspireFacts::ArrivalReceipt,
+        WyrmCogspireFacts::PublicMachineryReceipt,
+        WyrmCogspireFacts::CoercionDiversionReceipt,
+        WyrmCogspireFacts::BaronAcknowledgmentReceipt,
+        WyrmCogspireFacts::CogfangEncounterReceipt,
+        WyrmCogspireFacts::CogfangDefeatedReceipt,
+        WyrmCogspireFacts::CoercionShutdownReceipt,
+        WyrmCogspireFacts::CogfangBondedReceipt};
+
+    bool bChainValid = true;
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(OrderedFacts); ++Index)
+    {
+        const bool bPairPresent = KnownFacts.Contains(OrderedFacts[Index]) &&
+            FactReceipts.Contains(OrderedReceipts[Index]);
+        bChainValid = bChainValid && bPairPresent;
+        if (!bChainValid)
+        {
+            KnownFacts.Remove(OrderedFacts[Index]);
+            FactReceipts.Remove(OrderedReceipts[Index]);
+        }
+    }
+
+    const bool bShutdownValid = KnownFacts.Contains(WyrmCogspireFacts::CoercionShutdown) &&
+        FactReceipts.Contains(WyrmCogspireFacts::CoercionShutdownReceipt);
+    bCoercionGovernorActive = !bShutdownValid;
+
+    // Civic infrastructure is never a valid casualty of this selective shutdown.
+    bCivicMachineryOperational = true;
+}

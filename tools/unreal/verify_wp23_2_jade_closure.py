@@ -212,7 +212,7 @@ def tick(_delta):
                 assert region.record_return_route_ready()
             assert region.is_regional_closure_complete()
             snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object("WP23_2_Memory", player, adapter, world)
-            assert snapshot and snapshot.schema_version == 7
+            assert snapshot and snapshot.schema_version == 8
             regional_ids = sorted(str(item.region_id) for item in snapshot.regional_world_records)
             assert "JadePeaks" in regional_ids
             saved_cooldown = player.get_unseen_hand_remaining_cooldown()
@@ -222,9 +222,9 @@ def tick(_delta):
             assert unreal.WyrmSaveSubsystem.apply_snapshot_object(snapshot, player, adapter, world)
             assert region.is_regional_closure_complete() and player.is_echo_unlocked("UnseenHand")
             assert player.get_unseen_hand_remaining_cooldown() > 0.0
-            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(version) for version in (1, 2, 3, 4, 5, 6, 7))
+            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(version) for version in (1, 2, 3, 4, 5, 6, 7, 8))
             assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(0)
-            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(8)
+            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(9)
             passed("JC-07", {"schema": 7, "regional_records": regional_ids,
                               "travel_region": str(snapshot.world_travel_record.current_region_id),
                               "saved_cooldown": saved_cooldown, "schema4_backward_read": True})

@@ -140,7 +140,7 @@ def tick(_delta):
             assert travel.prepare_travel_with_snapshot(
                 "CogspireHarbor", "Region01", "LM-COGSPIRE-RETURN", SLOT, player, adapter)
             snapshot = unreal.GameplayStatics.load_game_from_slot(SLOT, 0)
-            assert snapshot and snapshot.schema_version == 7
+            assert snapshot and snapshot.schema_version == 8
             region_ids = sorted(str(record.region_id) for record in snapshot.regional_world_records)
             assert "CogspireHarbor" in region_ids
             assert str(snapshot.world_travel_record.current_region_id) == "CogspireHarbor"
@@ -173,7 +173,7 @@ def tick(_delta):
 
             assert travel.begin_travel_recovery(SLOT)
             assert travel.complete_travel_recovery(player, adapter)
-            assert snapshot.schema_version == 7
+            assert snapshot.schema_version == 8
             report["acceptance"]["failure_safe_recovery_is_repeat_stable"] = True
             report["acceptance"]["schema_unchanged"] = True
             report["status"] = "PASS"

@@ -3570,7 +3570,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema5Test, "WYRMFALL.Scaffol
 bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
 {
     // Schema Version Contract (VEH-07)
-    TestEqual(TEXT("CurrentSchemaVersion is 7"), UWyrmSaveGame::CurrentSchemaVersion, 7);
+    TestEqual(TEXT("CurrentSchemaVersion is 8"), UWyrmSaveGame::CurrentSchemaVersion, 8);
     TestEqual(TEXT("MinimumSupportedSchemaVersion is 1"), UWyrmSaveGame::MinimumSupportedSchemaVersion, 1);
 
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
@@ -3595,7 +3595,7 @@ bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
         TestNotNull(TEXT("Snapshot created"), SaveObj);
         if (SaveObj)
         {
-            TestEqual(TEXT("Schema version is 7"), SaveObj->SchemaVersion, 7);
+            TestEqual(TEXT("Schema version is 8"), SaveObj->SchemaVersion, 8);
             TestTrue(TEXT("Hovercar record marked spawned"), SaveObj->HovercarRecord.bHasBeenSpawned);
             TestEqual(TEXT("Saved health is 190"), SaveObj->HovercarRecord.Health, 190.f);
             TestTrue(TEXT("Saved Mecha circuit unlocked"), SaveObj->HovercarRecord.bMechaCircuitUnlocked);
@@ -3930,7 +3930,7 @@ bool FWyrmVerdantReachClosureTest::RunTest(const FString& Parameters)
     UWyrmHuntersVeilAbility* Ability = NewObject<UWyrmHuntersVeilAbility>();
     TestEqual(TEXT("Hunter's Veil costs 25 Focus"), Ability->FocusCost, 25.f);
     TestEqual(TEXT("Hunter's Veil cooldown is 16 seconds"), Ability->CooldownDuration, 16.f);
-    TestEqual(TEXT("Schema 7 is current"), UWyrmSaveGame::CurrentSchemaVersion, 7);
+    TestEqual(TEXT("Schema 8 is current"), UWyrmSaveGame::CurrentSchemaVersion, 8);
     TestTrue(TEXT("Schema 5 remains supported"), UWyrmSaveSubsystem::IsSchemaVersionSupported(5));
     return true;
 }
@@ -4064,13 +4064,13 @@ bool FWyrmGloamingTravelSaveRecoveryTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Travel/save slice does not claim completion"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
 
-    TestEqual(TEXT("Schema 7 is current for Gloaming recovery"), UWyrmSaveGame::CurrentSchemaVersion, 7);
-    for (int32 Version = 1; Version <= 7; ++Version)
+    TestEqual(TEXT("Schema 8 is current while retaining Gloaming recovery"), UWyrmSaveGame::CurrentSchemaVersion, 8);
+    for (int32 Version = 1; Version <= 8; ++Version)
     {
         TestTrue(FString::Printf(TEXT("Schema %d remains readable"), Version),
             UWyrmSaveSubsystem::IsSchemaVersionSupported(Version));
     }
-    TestFalse(TEXT("Future Schema 8 is rejected"), UWyrmSaveSubsystem::IsSchemaVersionSupported(8));
+    TestFalse(TEXT("Future Schema 9 is rejected"), UWyrmSaveSubsystem::IsSchemaVersionSupported(9));
     return true;
 }
 
@@ -4114,7 +4114,7 @@ bool FWyrmCogspireTravelRouteTest::RunTest(const FString& Parameters)
         Restored->GetCurrentRegionId(), Cogspire);
     TestEqual(TEXT("Cogspire arrival survives existing travel record"),
         Restored->GetArrivalLandmarkId(), FName(TEXT("LM-COGSPIRE-ARRIVAL")));
-    TestEqual(TEXT("Travel extension does not bump save schema"), UWyrmSaveGame::CurrentSchemaVersion, 7);
+    TestEqual(TEXT("Travel extension remains readable under current save schema"), UWyrmSaveGame::CurrentSchemaVersion, 8);
     return true;
 }
 
@@ -4624,6 +4624,73 @@ bool FWyrmCogspireCogfangShutdownTest::RunTest(const FString& Parameters)
 
     Cogfang->Destroy();
     Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCogspireSchema8RecoveryTest,
+    "WYRMFALL.Scaffold.CogspireSchema8Recovery",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCogspireSchema8RecoveryTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCogspireSubsystem* Region = NewObject<UWyrmCogspireSubsystem>(TestGI);
+    TestNotNull(TEXT("Cogspire save owner created"), Region);
+    if (!Region) return false;
+
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Public machinery prerequisite"), Region->RecordPublicMachineryObserved());
+    TestTrue(TEXT("Diversion prerequisite"), Region->RecordCoercionDiversionObserved());
+    TestTrue(TEXT("Baron prerequisite"), Region->RecordBaronAcknowledgment());
+
+    FWyrmCogspireSaveRecord PartialRecord;
+    Region->BuildSaveRecord(PartialRecord);
+    const FName DuplicateFact = PartialRecord.KnownFacts[0];
+    const FName DuplicateReceipt = PartialRecord.FactReceipts[0];
+    PartialRecord.KnownFacts.Add(DuplicateFact);
+    PartialRecord.KnownFacts.Add(NAME_None);
+    PartialRecord.FactReceipts.Add(DuplicateReceipt);
+    PartialRecord.bCoercionGovernorActive = false;
+    PartialRecord.bCivicMachineryOperational = false;
+    Region->ResetCogspireState();
+    Region->RestoreFromSaveRecord(PartialRecord);
+    TestTrue(TEXT("Ordered facts restore"),
+        Region->HasFact(FName(TEXT("cogspire.baron_acknowledged_diversion"))));
+    TestTrue(TEXT("Governor stays active without a shutdown fact/receipt pair"),
+        Region->IsCoercionGovernorActive());
+    TestTrue(TEXT("Malformed save cannot disable civic machinery"),
+        Region->IsCivicMachineryOperational());
+
+    FWyrmCogspireSaveRecord MalformedFinalOnly;
+    MalformedFinalOnly.KnownFacts.Add(FName(TEXT("cogspire.cogfang_bonded")));
+    MalformedFinalOnly.FactReceipts.Add(FName(TEXT("cogspire.cogfang.voluntary_bond")));
+    MalformedFinalOnly.bCoercionGovernorActive = false;
+    MalformedFinalOnly.bCivicMachineryOperational = false;
+    Region->RestoreFromSaveRecord(MalformedFinalOnly);
+    TestFalse(TEXT("Final-only bond fact cannot bypass the ordered chain"),
+        Region->HasFact(FName(TEXT("cogspire.cogfang_bonded"))));
+    TestTrue(TEXT("Final-only state leaves the governor active"), Region->IsCoercionGovernorActive());
+    TestTrue(TEXT("Final-only state leaves civic machinery operational"),
+        Region->IsCivicMachineryOperational());
+
+    UWyrmSaveGame* DuplicateCogfangSave = NewObject<UWyrmSaveGame>();
+    DuplicateCogfangSave->CogspireRecord.KnownFacts.Add(FName(TEXT("cogspire.cogfang_bonded")));
+    DuplicateCogfangSave->CogspireRecord.FactReceipts.Add(FName(TEXT("cogspire.cogfang.voluntary_bond")));
+    FWyrmDragonSaveRecord CogfangRecord;
+    CogfangRecord.DragonId = FName(TEXT("Cogfang"));
+    CogfangRecord.Role = EWyrmDragonRole::AlliedCompanion;
+    CogfangRecord.bHasBondReceipt = true;
+    DuplicateCogfangSave->DragonRecords.Add(CogfangRecord);
+    DuplicateCogfangSave->DragonRecords.Add(CogfangRecord);
+    TestFalse(TEXT("Duplicate bonded Cogfang records fail closed before restore"),
+        UWyrmSaveSubsystem::ApplySnapshotObject(DuplicateCogfangSave, nullptr, nullptr, nullptr));
+
+    TestEqual(TEXT("Cogspire recovery uses Schema 8"), UWyrmSaveGame::CurrentSchemaVersion, 8);
+    for (int32 Version = 1; Version <= 8; ++Version)
+    {
+        TestTrue(FString::Printf(TEXT("Schema %d remains readable"), Version),
+            UWyrmSaveSubsystem::IsSchemaVersionSupported(Version));
+    }
+    TestFalse(TEXT("Future Schema 9 is rejected"), UWyrmSaveSubsystem::IsSchemaVersionSupported(9));
     return true;
 }
 #endif

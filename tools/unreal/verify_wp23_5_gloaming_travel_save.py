@@ -184,7 +184,7 @@ def tick(_delta):
             assert travel.prepare_travel_with_snapshot(
                 "GloamingMarches", "Region01", "LM-GLOAMING-RETURN", SLOT, player, adapter)
             snapshot = unreal.GameplayStatics.load_game_from_slot(SLOT, 0)
-            assert snapshot and snapshot.schema_version == 7
+            assert snapshot and snapshot.schema_version == 8
             regional_ids = sorted(str(item.region_id) for item in snapshot.regional_world_records)
             dragon_ids = sorted(str(item.dragon_id) for item in snapshot.dragon_records)
             assert "GloamingMarches" in regional_ids
@@ -232,8 +232,8 @@ def tick(_delta):
             assert len([d for d in actors(world, unreal.WyrmDragonCharacter)
                         if str(d.dragon_id) == "Nyxaroth"]) == 1
             assert not region.has_fact("gloaming.region_complete")
-            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(v) for v in range(1, 8))
-            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(8)
+            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(v) for v in range(1, 9))
+            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(9)
             report["acceptance"]["unified_recovery_restores_state_without_duplicates"] = True
             report["acceptance"]["schemas_1_through_6_remain_readable"] = True
             report["acceptance"]["regional_completion_absent"] = True

@@ -9,6 +9,7 @@
 #include "Region/WyrmRegion01Subsystem.h"
 #include "Region/WyrmJadePeaksSubsystem.h"
 #include "Region/WyrmGloamingSubsystem.h"
+#include "Region/WyrmCogspireSubsystem.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Vehicles/WyrmHovercar.h"
 #include "EngineUtils.h"
@@ -314,6 +315,11 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         Gloaming->BuildSaveRecord(SaveObj->GloamingRecord);
     }
 
+    if (UWyrmCogspireSubsystem* Cogspire = UWyrmCogspireSubsystem::GetCogspireSubsystem(WorldContext))
+    {
+        Cogspire->BuildSaveRecord(SaveObj->CogspireRecord);
+    }
+
     // Capture active Dragon Companion / Boss (DRG-01..04, SAVE-08)
     if (WorldContext)
     {
@@ -356,11 +362,49 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         return false;
     }
 
+    if (SaveObj->SchemaVersion >= 8)
+    {
+        const bool bBondLedgerPresent =
+            SaveObj->CogspireRecord.KnownFacts.Contains(FName(TEXT("cogspire.cogfang_bonded"))) &&
+            SaveObj->CogspireRecord.FactReceipts.Contains(FName(TEXT("cogspire.cogfang.voluntary_bond")));
+        int32 BondedCogfangRecords = 0;
+        for (const FWyrmDragonSaveRecord& Record : SaveObj->DragonRecords)
+        {
+            if (Record.DragonId == FName(TEXT("Cogfang")) && Record.bHasBondReceipt &&
+                Record.Role == EWyrmDragonRole::AlliedCompanion)
+            {
+                ++BondedCogfangRecords;
+            }
+        }
+        if (BondedCogfangRecords > 1 || (bBondLedgerPresent && BondedCogfangRecords != 1))
+        {
+            return false;
+        }
+    }
+
     // Restore placed camp pieces (ACT-10)
     if (!WorldContext)
     {
         if (Character) { WorldContext = Character->GetWorld(); }
         else if (TerrainProviderActor) { WorldContext = TerrainProviderActor->GetWorld(); }
+    }
+
+    if (SaveObj->SchemaVersion >= 8 && WorldContext &&
+        SaveObj->CogspireRecord.KnownFacts.Contains(FName(TEXT("cogspire.cogfang_bonded"))) &&
+        SaveObj->CogspireRecord.FactReceipts.Contains(FName(TEXT("cogspire.cogfang.voluntary_bond"))))
+    {
+        int32 ExistingCogfangCount = 0;
+        for (TActorIterator<AWyrmDragonCharacter> It(WorldContext); It; ++It)
+        {
+            if (*It && IsValid(*It) && (*It)->DragonId == FName(TEXT("Cogfang")))
+            {
+                ++ExistingCogfangCount;
+            }
+        }
+        if (ExistingCogfangCount > 1)
+        {
+            return false;
+        }
     }
 
     const FName CurrentRegionId = UWyrmWorldTravelSubsystem::RegionIdForMapName(
@@ -570,6 +614,18 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (UWyrmGloamingSubsystem* Gloaming = UWyrmGloamingSubsystem::GetGloamingSubsystem(WorldContext))
         {
             Gloaming->RestoreFromSaveRecord(SaveObj->GloamingRecord);
+        }
+
+        if (UWyrmCogspireSubsystem* Cogspire = UWyrmCogspireSubsystem::GetCogspireSubsystem(WorldContext))
+        {
+            if (SaveObj->SchemaVersion >= 8)
+            {
+                Cogspire->RestoreFromSaveRecord(SaveObj->CogspireRecord);
+            }
+            else
+            {
+                Cogspire->ResetCogspireState();
+            }
         }
 
         if (UWyrmWorldTravelSubsystem* Travel = UWyrmWorldTravelSubsystem::GetWorldTravelSubsystem(WorldContext))

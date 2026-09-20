@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 71/71 tests with 0 failures.
+- Full scaffold native automation completed 74/74 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -378,7 +378,7 @@ WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
 gate, the saved Harbor map, bounded travel/recovery, arrival observation, and
 selective Cogfang shutdown/bond now pass. Cogfang's distinct 34-part assembly
 and authority proof passed COG-01..05 in live PIE; the full native suite is now
-73/73. Baron
+74/74. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
 scale, fixture collision, and accepted cameras. Stationary QA locks the source
@@ -398,11 +398,14 @@ remain intact and the engine approach has a complete five-point live route.
 Cogfang now reaches a living 0 HP defeat through GAS, the coercion governor
 shuts down once, both civic pumps remain operational with unchanged runtime
 signatures, and the existing dragon owner commits one voluntary Cogfang bond.
-Extend the existing save owner to Schema 8 for Cogspire facts, selective-engine
-state, and exactly one bonded Cogfang next. Stop before regional completion,
-optional urban investigations, or a parallel authority. Mutable remains creator, GAS
+Schema 8 now restores the complete Cogspire ledger, selective-engine state, and
+exactly one bonded Cogfang across repeated apply while both civic pumps remain
+unchanged. Implement bounded regional completion next using the authored
+arrival, mainline ledger, bonded Cogfang, and safe Region01 return route; keep
+House Mark and Chef Aurelio optional. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
-coordinator. See `Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`,
+coordinator. See `Documentation/Current/WP23_6_COGSPIRE_SAVE_PROOF.md`,
+`Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_ARRIVAL_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_TRAVEL_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md`,

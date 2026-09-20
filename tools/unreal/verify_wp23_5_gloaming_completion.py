@@ -184,7 +184,7 @@ def tick(_delta):
 
         snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object(
             "WP23_5_GloamingCompletionMemory", player, adapter, world)
-        assert snapshot and snapshot.schema_version == 7
+        assert snapshot and snapshot.schema_version == 8
         snapshot_facts = [str(x) for x in snapshot.gloaming_record.known_facts]
         snapshot_receipts = [str(x) for x in snapshot.gloaming_record.fact_receipts]
         snapshot_dragons = [str(x.dragon_id) for x in snapshot.dragon_records]

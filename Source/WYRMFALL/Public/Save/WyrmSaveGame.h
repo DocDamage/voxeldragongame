@@ -8,6 +8,7 @@
 #include "Region/WyrmRegion01Types.h"
 #include "Region/WyrmJadePeaksTypes.h"
 #include "Region/WyrmGloamingTypes.h"
+#include "Region/WyrmCogspireTypes.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "WyrmSaveGame.generated.h"
 
@@ -222,10 +223,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    // Schema 7 adds Gloaming facts and Echo cooldowns while retaining
-    // Schemas 1-6 and the region-keyed Schema 5 world payload.
+    // Schema 8 adds Cogspire facts and selective-engine state while retaining
+    // Schemas 1-7 and the region-keyed Schema 5 world payload.
     static const int32 MinimumSupportedSchemaVersion = 1;
-    static const int32 CurrentSchemaVersion = 7;
+    static const int32 CurrentSchemaVersion = 8;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;
@@ -272,6 +273,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmGloamingSaveRecord GloamingRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmCogspireSaveRecord CogspireRecord;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmHovercarSaveRecord HovercarRecord;

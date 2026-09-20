@@ -1,13 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Region/WyrmCogspireTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "WyrmCogspireSubsystem.generated.h"
 
 class AWyrmCharacter;
 class AWyrmDragonCharacter;
 
-/** Bounded runtime-only Cogspire fact owner. Persistence is intentionally out of scope. */
+/** Bounded Cogspire fact owner. UWyrmSaveSubsystem remains the sole serializer and slot owner. */
 UCLASS(BlueprintType, Category="WYRMFALL|Cogspire")
 class WYRMFALL_API UWyrmCogspireSubsystem : public UGameInstanceSubsystem
 {
@@ -58,8 +59,12 @@ public:
     UFUNCTION(BlueprintPure, Category="Cogspire|Facts")
     bool HasReceipt(FName ReceiptId) const;
 
+    void BuildSaveRecord(FWyrmCogspireSaveRecord& OutRecord) const;
+    void RestoreFromSaveRecord(const FWyrmCogspireSaveRecord& InRecord);
+
 private:
     bool CommitFact(FName FactId, FName ReceiptId);
+    void NormalizeRestoredState();
 
     UPROPERTY(VisibleInstanceOnly, Category="Cogspire")
     TArray<FName> KnownFacts;

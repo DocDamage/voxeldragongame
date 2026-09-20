@@ -211,7 +211,7 @@ def tick(_delta):
         if stage == "persistence":
             player.restore_hunters_veil_state(True, 3.0, 14.0)
             snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object("WP23_1_Memory", player, adapters[0], world)
-            assert snapshot and snapshot.schema_version == 7
+            assert snapshot and snapshot.schema_version == 8
             # UE's Python reflection strips the native boolean `b` prefix.
             assert snapshot.character_record.hunters_veil_active
             region.reset_region01_state()
@@ -220,9 +220,9 @@ def tick(_delta):
             assert unreal.WyrmSaveSubsystem.apply_snapshot_object(snapshot, player, adapters[0], world)
             assert region.is_hunters_veil_unlocked() and player.is_echo_unlocked("HuntersVeil")
             assert player.is_hunters_veil_active() and player.get_hunters_veil_remaining_cooldown() > 0.0
-            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(v) for v in (1, 2, 3, 4, 5, 6, 7))
+            assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(v) for v in (1, 2, 3, 4, 5, 6, 7, 8))
             assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(0)
-            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(8)
+            assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(9)
             passed("VR-08", {"schema": 7, "schemas_1_to_6_readable": True,
                               "facts_restored": True, "echo_state_restored": True})
             report["status"] = "PASS"
