@@ -38,6 +38,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|MacheteMason")
     bool RecordMacheteMasonResolution();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Pleatherface")
+    bool RecordPleatherfaceResolution();
+
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
 

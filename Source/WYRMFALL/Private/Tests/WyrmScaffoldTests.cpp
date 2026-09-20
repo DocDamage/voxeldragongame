@@ -44,6 +44,7 @@
 #include "Region/WyrmGloamingSubsystem.h"
 #include "Region/WyrmMichaelMireCharacter.h"
 #include "Region/WyrmMacheteMasonCharacter.h"
+#include "Region/WyrmPleatherfaceCharacter.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
@@ -4096,6 +4097,32 @@ bool FWyrmMacheteMasonEncounterTest::RunTest(const FString& Parameters)
         Region->HasFact(FName(TEXT("gloaming.machete_mason_resolved"))));
     TestTrue(TEXT("Machete Mason disarmed-submission receipt recorded"),
         Region->HasReceipt(FName(TEXT("gloaming.machete_mason.disarmed_submission"))));
+    TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmPleatherfaceEncounterTest, "WYRMFALL.Scaffold.GloamingPleatherfaceEncounter",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmPleatherfaceEncounterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Pleatherface rejects before Machete Mason"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete prerequisite"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Pleatherface commits once"), Region->RecordPleatherfaceResolution());
+    TestFalse(TEXT("Pleatherface duplicate rejects"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Pleatherface fact recorded"), Region->HasFact(FName(TEXT("gloaming.pleatherface_resolved"))));
+    TestTrue(TEXT("Pleatherface receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.pleatherface.disarmed_submission"))));
     TestFalse(TEXT("Bounded horror slice does not complete region"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;

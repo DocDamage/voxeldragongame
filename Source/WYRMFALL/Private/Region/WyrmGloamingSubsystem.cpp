@@ -21,6 +21,8 @@ namespace WyrmGloamingFacts
     const FName MichaelMireResolvedReceipt(TEXT("gloaming.michael_mire.living_submission"));
     const FName MacheteMasonResolved(TEXT("gloaming.machete_mason_resolved"));
     const FName MacheteMasonResolvedReceipt(TEXT("gloaming.machete_mason.disarmed_submission"));
+    const FName PleatherfaceResolved(TEXT("gloaming.pleatherface_resolved"));
+    const FName PleatherfaceResolvedReceipt(TEXT("gloaming.pleatherface.disarmed_submission"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -138,6 +140,17 @@ bool UWyrmGloamingSubsystem::RecordMacheteMasonResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::MacheteMasonResolved, WyrmGloamingFacts::MacheteMasonResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordPleatherfaceResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::MacheteMasonResolved) ||
+        HasFact(WyrmGloamingFacts::PleatherfaceResolved) ||
+        HasReceipt(WyrmGloamingFacts::PleatherfaceResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::PleatherfaceResolved, WyrmGloamingFacts::PleatherfaceResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()

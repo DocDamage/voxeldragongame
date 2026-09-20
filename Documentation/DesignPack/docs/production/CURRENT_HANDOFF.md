@@ -19,7 +19,10 @@
 > no Echo/completion leakage. The broader required-horror roster and regional
 > completion remain gated. The supplied 17-part Machete Mason GAS
 > disarmed-submission encounter now also passes under the same supplied-art
-> authorization context; further roster identities remain bounded work. The remainder preserves the
+> authorization context. The supplied 17-part, sword-bearing Pleatherface GAS
+> disarmed-submission encounter now also passes with one-time Schema 7
+> restoration and no Echo/completion leakage; further roster identities remain
+> bounded work. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 
 ## Actual status
