@@ -22,7 +22,7 @@ source candidates and stay fail-closed under DRG-15.
 |---:|---|---|---|
 | 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under current Schema 7 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
 | 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed and were rerun under current Schema 7 with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, and rendered QA. |
-| 3 | WP-23.5 Gloaming Marches | **MICHAEL MIRE PASS / COMPLETION GATED** | Nyxaroth, content fixture, foundation, Arrival→Ashgrave, Count Malvaine, distinct Morrow/Mourn, optional Sanguine Strike/Second Turn, two-way Region01↔Gloaming recovery, and the 17-part Michael Mire living-submission encounter pass. Further required-horror gameplay breadth and completion remain gated. |
+| 3 | WP-23.5 Gloaming Marches | **MACHETE MASON PASS / COMPLETION GATED** | Verified through the supplied 17-part Machete Mason GAS disarmed-submission encounter with Schema 7 restoration and no Echo/completion leakage. Further required-horror identities and completion remain gated. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -83,7 +83,7 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Inspect and author one additional required-horror identity from the supplied
-roster, proceeding only after its production presentation and provenance gates
-clear. Keep regional completion outside that slice; see
+Inspect and author one additional supplied required-horror identity using the
+same established assembly and authorization context. Keep any new Echo and
+regional completion outside that slice; see
 [WP-23.5](tasks/WP-23.5.md).

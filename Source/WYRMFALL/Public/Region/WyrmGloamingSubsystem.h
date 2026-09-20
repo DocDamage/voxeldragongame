@@ -35,6 +35,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|MichaelMire")
     bool RecordMichaelMireResolution();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|MacheteMason")
+    bool RecordMacheteMasonResolution();
+
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
 

@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 60/60 tests with 0 failures.
+- Full scaffold native automation completed 61/61 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -53,6 +53,7 @@ settings out of commits.
 - WP-23.5 Second Turn passed in live PIE: either resolved Hollow Twins route can manifest the optional Echo once; GAS spends 25 Focus, snapshots the next eligible basic strike, and after 0.6 seconds repeats 50% of its pre-mitigation base against a still-valid hostile target. The 14-second cooldown survives unequip; the repeat applies mitigation once, cannot recurse, and cannot trigger Sanguine Strike or drain. See `Documentation/Current/WP23_5_SECOND_TURN_SLICE_PROOF.md`.
 - WP-23.5 Gloaming travel/save recovery passed in live PIE: authored arrival/return anchors project to navigation; Region01↔Gloaming is allowlisted without a Jade shortcut; unsafe Echo/dragon transient states are rejected; and Schema 7 restores Gloaming facts, both new Echo cooldowns, regional terrain/travel state, and exactly one bonded Nyxaroth across repeated recovery. Regional completion remains absent. See `Documentation/Current/WP23_5_GLOAMING_TRAVEL_SAVE_PROOF.md`.
 - WP-23.5 Michael Mire passed in live PIE: the supplied 17-part rigid assembly is complete at 190 cm with capsule-owned collision and bounded procedural-root idle; activation rejects before the Hollow Twins; six GAS hits reach the living-submission threshold at 130/520 HP; the one-time fact/receipt roundtrips through Schema 7; and no new Echo or regional completion leaks. Final rendered review passed grounding, shadow, scale, lighting, and nearby landmark context. See `Documentation/Current/WP23_5_MICHAEL_MIRE_SLICE_PROOF.md`.
+- WP-23.5 Machete Mason passed in live PIE: all 17 supplied static parts including the weapon form a distinct 188 cm presentation with capsule-owned collision and guard sway; activation rejects before Michael Mire; six GAS hits reach the disarmed-submission threshold at 140/560 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. Final rendered review passed mask/clothing/weapon readability, grounding, shadow, nearby grave/tree scale, Michael continuity, and cathedral context. See `Documentation/Current/WP23_5_MACHETE_MASON_SLICE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -343,15 +344,15 @@ Evidence:
   Second Turn now also pass in real PIE. Two-way Region01↔Gloaming travel,
   preflight snapshotting, and Schema 7 recovery also pass without duplicate
   Nyxaroth actors. The bounded 17-part Michael Mire living-submission encounter
-  now passes as the first required-horror gameplay assembly. The broader horror
-  roster, provenance, and region completion remain gated.
+  passes as the first required-horror gameplay assembly. The 17-part Machete
+  Mason GAS disarmed-submission encounter now also passes under the same
+  supplied-art authorization context. The broader roster and completion remain gated.
 
 ## Next bounded task
 
-Inspect and author one additional required-horror identity from the supplied
-roster, proceeding to gameplay only if presentation, animation strategy,
-collision, scale, materials, and permission/provenance can be evidenced. Do not
-add regional completion in the same slice.
+Inspect and author one additional supplied required-horror identity using the
+same established assembly and authorization context. Do not add a new Echo or
+regional completion in the same slice.
 Mutable remains creator, GAS remains combat authority, and
 `UWyrmSaveSubsystem` remains the sole persistence coordinator. See
 `Documentation/Current/tasks/WP-23.5.md`.

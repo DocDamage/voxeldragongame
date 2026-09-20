@@ -43,6 +43,7 @@
 #include "Region/WyrmJadePeaksSubsystem.h"
 #include "Region/WyrmGloamingSubsystem.h"
 #include "Region/WyrmMichaelMireCharacter.h"
+#include "Region/WyrmMacheteMasonCharacter.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
@@ -4068,6 +4069,33 @@ bool FWyrmMichaelMireEncounterTest::RunTest(const FString& Parameters)
         Region->HasFact(FName(TEXT("gloaming.michael_mire_resolved"))));
     TestTrue(TEXT("Michael Mire receipt recorded"),
         Region->HasReceipt(FName(TEXT("gloaming.michael_mire.living_submission"))));
+    TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmMacheteMasonEncounterTest, "WYRMFALL.Scaffold.GloamingMacheteMasonEncounter",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmMacheteMasonEncounterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Machete Mason rejects before Michael Mire"),
+        Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael Mire prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete Mason commits once"), Region->RecordMacheteMasonResolution());
+    TestFalse(TEXT("Machete Mason duplicate rejects"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Machete Mason fact recorded"),
+        Region->HasFact(FName(TEXT("gloaming.machete_mason_resolved"))));
+    TestTrue(TEXT("Machete Mason disarmed-submission receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.machete_mason.disarmed_submission"))));
     TestFalse(TEXT("Bounded horror slice does not complete region"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;

@@ -19,6 +19,8 @@ namespace WyrmGloamingFacts
     const FName SecondTurnUnlockReceipt(TEXT("gloaming.hollow_twins.second_turn_manifested"));
     const FName MichaelMireResolved(TEXT("gloaming.michael_mire_resolved"));
     const FName MichaelMireResolvedReceipt(TEXT("gloaming.michael_mire.living_submission"));
+    const FName MacheteMasonResolved(TEXT("gloaming.machete_mason_resolved"));
+    const FName MacheteMasonResolvedReceipt(TEXT("gloaming.machete_mason.disarmed_submission"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -125,6 +127,17 @@ bool UWyrmGloamingSubsystem::RecordMichaelMireResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::MichaelMireResolved, WyrmGloamingFacts::MichaelMireResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordMacheteMasonResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::MichaelMireResolved) ||
+        HasFact(WyrmGloamingFacts::MacheteMasonResolved) ||
+        HasReceipt(WyrmGloamingFacts::MacheteMasonResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::MacheteMasonResolved, WyrmGloamingFacts::MacheteMasonResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()
