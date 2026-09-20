@@ -50,6 +50,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|Scarrie")
     bool RecordScarrieResolution();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Chuckles")
+    bool RecordChucklesResolution();
+
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
 

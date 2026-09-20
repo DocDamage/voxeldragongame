@@ -29,6 +29,8 @@ namespace WyrmGloamingFacts
     const FName AnnieWailsResolvedReceipt(TEXT("gloaming.annie_wails.disarmed_surrender"));
     const FName ScarrieResolved(TEXT("gloaming.scarrie_resolved"));
     const FName ScarrieResolvedReceipt(TEXT("gloaming.scarrie.living_submission"));
+    const FName ChucklesResolved(TEXT("gloaming.chuckles_resolved"));
+    const FName ChucklesResolvedReceipt(TEXT("gloaming.chuckles.contained_submission"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -190,6 +192,17 @@ bool UWyrmGloamingSubsystem::RecordScarrieResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::ScarrieResolved, WyrmGloamingFacts::ScarrieResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordChucklesResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::ScarrieResolved) ||
+        HasFact(WyrmGloamingFacts::ChucklesResolved) ||
+        HasReceipt(WyrmGloamingFacts::ChucklesResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::ChucklesResolved, WyrmGloamingFacts::ChucklesResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()

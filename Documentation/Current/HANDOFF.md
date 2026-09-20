@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 65/65 tests with 0 failures.
+- Full scaffold native automation completed 66/66 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -58,6 +58,7 @@ settings out of commits.
 - WP-23.5 Wherewolf passed in live PIE: all 16 supplied `Werewolf` static parts form a broad 205 cm presentation with capsule-owned collision and bounded breathing/guard sway; activation rejects before Pleatherface; six GAS hits reach the calmed-submission threshold at 160/640 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The corrected rendered frame passed wolf/claw readability, grounding, shadow, scale, and local route context. See `Documentation/Current/WP23_5_WHEREWOLF_SLICE_PROOF.md`.
 - WP-23.5 Annie Wails passed in live PIE: all 17 supplied `AnnieWilkes` static parts including the source-labelled weapon form a distinct 176 cm presentation with capsule-owned collision and bounded vigilant sway; activation rejects before Wherewolf; six GAS hits reach the disarmed-surrender threshold at 170/680 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The corrected rendered frame passed identity/weapon readability, grounding, shadow, scale, and cathedral context. See `Documentation/Current/WP23_5_ANNIE_WAILS_SLICE_PROOF.md`.
 - WP-23.5 Scarrie passed in live PIE: all 16 supplied `Carrie` static parts form a distinct 174 cm presentation with capsule-owned collision and bounded distressed sway; activation rejects before Annie Wails; six GAS hits reach the living-submission threshold at 180/720 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The relit rendered frame passed identity silhouette, grounding, shadow, scale, and cathedral context. See `Documentation/Current/WP23_5_SCARRIE_SLICE_PROOF.md`.
+- WP-23.5 Chuckles passed in live PIE: all 16 supplied `Chucky` static parts form an intentionally small 110 cm doll-scale presentation with capsule-owned collision and bounded quick sway; activation rejects before Scarrie; six GAS hits reach the contained-submission threshold at 190/760 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The corrected close frame passed the supplied blocky silhouette, grounding, shadow, scale separation, and cathedral context. See `Documentation/Current/WP23_5_CHUCKLES_SLICE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -356,8 +357,9 @@ Evidence:
   encounter and one-time Schema 7 restoration. Annie Wails follows with a
   17-part, 176 cm GAS disarmed-surrender encounter and one-time Schema 7
   restoration. Scarrie follows with a 16-part, 174 cm GAS living-submission
-  encounter and one-time Schema 7 restoration. The broader roster and
-  completion remain gated.
+  encounter and one-time Schema 7 restoration. Chuckles follows with a
+  16-part, 110 cm GAS contained-submission encounter and one-time Schema 7
+  restoration. The broader roster and completion remain gated.
 
 ## Next bounded task
 
