@@ -49,6 +49,7 @@
 #include "Region/WyrmAnnieWailsCharacter.h"
 #include "Region/WyrmScarrieCharacter.h"
 #include "Region/WyrmChucklesCharacter.h"
+#include "Region/WyrmCountDripulaCharacter.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
@@ -4241,6 +4242,37 @@ bool FWyrmChucklesEncounterTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Chuckles fact recorded"), Region->HasFact(FName(TEXT("gloaming.chuckles_resolved"))));
     TestTrue(TEXT("Chuckles receipt recorded"),
         Region->HasReceipt(FName(TEXT("gloaming.chuckles.contained_submission"))));
+    TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCountDripulaEncounterTest, "WYRMFALL.Scaffold.GloamingCountDripulaEncounter",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCountDripulaEncounterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Count Dripula rejects before Chuckles"), Region->RecordCountDripulaResolution());
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete prerequisite"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Pleatherface prerequisite"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Wherewolf prerequisite"), Region->RecordWherewolfResolution());
+    TestTrue(TEXT("Annie Wails prerequisite"), Region->RecordAnnieWailsResolution());
+    TestTrue(TEXT("Scarrie prerequisite"), Region->RecordScarrieResolution());
+    TestTrue(TEXT("Chuckles prerequisite"), Region->RecordChucklesResolution());
+    TestTrue(TEXT("Count Dripula commits once"), Region->RecordCountDripulaResolution());
+    TestFalse(TEXT("Count Dripula duplicate rejects"), Region->RecordCountDripulaResolution());
+    TestTrue(TEXT("Count Dripula fact recorded"), Region->HasFact(FName(TEXT("gloaming.count_dripula_resolved"))));
+    TestTrue(TEXT("Count Dripula receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.count_dripula.bloodless_surrender"))));
     TestFalse(TEXT("Bounded horror slice does not complete region"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;

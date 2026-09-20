@@ -53,6 +53,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|Chuckles")
     bool RecordChucklesResolution();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|CountDripula")
+    bool RecordCountDripulaResolution();
+
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
 
