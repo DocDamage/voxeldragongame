@@ -38,7 +38,7 @@ public:
     UFUNCTION(BlueprintCallable, Category="Dragon")
     void SetDragonId(FName NewDragonId);
 
-    // Validates whether DragonId corresponds to an authoritative rig profile (Verdance, Jadefang, Nyxaroth)
+    // Validates whether DragonId corresponds to an authoritative rig profile (Verdance, Jadefang, Nyxaroth, Cogfang)
     UFUNCTION(BlueprintPure, Category="Dragon|Rig")
     bool HasSupportedRigProfile() const { return FWyrmDragonRigProfile::IsValidDragonRig(DragonId); }
 

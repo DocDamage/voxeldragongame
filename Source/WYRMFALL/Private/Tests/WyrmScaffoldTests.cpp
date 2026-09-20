@@ -3145,6 +3145,23 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Nyxaroth can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Nyxaroth can take off in True Form"), Dragon->CanTakeOff(Reason));
 
+    // WP-23.6: Cogfang has a heavier, slower authoritative profile backed by
+    // the supplied 35-part Steampunk Dragon rig (one leader + 34 followers).
+    Dragon->SetDragonId(FName(TEXT("Cogfang")));
+    TestTrue(TEXT("Cogfang has an authoritative validated rig profile (WP-23.6)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Cogfang binds exactly 34 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 34);
+    TestEqual(TEXT("Cogfang companion capsule is 32x38"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(32.f, 38.f));
+    TestEqual(TEXT("Cogfang true form capsule is 125x165"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(125.f, 165.f));
+    TestEqual(TEXT("Cogfang true form fly speed is 1500"), Dragon->GetActiveRigProfile().FlightSpeed, 1500.f);
+    TestEqual(TEXT("Cogfang mount socket offset is distinct (0, 0, 170)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 170.f));
+    TestTrue(TEXT("Cogfang can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Cogfang can take off in True Form"), Dragon->CanTakeOff(Reason));
+
     Dragon->Destroy();
     Player->Destroy();
     return true;

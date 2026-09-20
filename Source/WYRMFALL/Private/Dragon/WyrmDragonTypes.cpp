@@ -4,7 +4,8 @@ bool FWyrmDragonRigProfile::IsValidDragonRig(FName InDragonId)
 {
     return InDragonId == FName(TEXT("Verdance")) ||
         InDragonId == FName(TEXT("Jadefang")) ||
-        InDragonId == FName(TEXT("Nyxaroth"));
+        InDragonId == FName(TEXT("Nyxaroth")) ||
+        InDragonId == FName(TEXT("Cogfang"));
 }
 
 bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfile& OutProfile)
@@ -115,6 +116,42 @@ bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfil
             TEXT("RB_Foot-Local"), TEXT("RB_Leg1-Local"), TEXT("RB_Leg2-Local"), TEXT("RB_Thigh-Local"),
             TEXT("RF_Claw-Local"), TEXT("RF_Foot-Local"), TEXT("RF_Leg-Local"), TEXT("RF_Thigh-Local"),
             TEXT("R_Wing1-Local"), TEXT("R_Wing2-Local"), TEXT("R_Wing3-Local"),
+            TEXT("Tail_1-Local"), TEXT("Tail_2-Local"), TEXT("Tail_3-Local"), TEXT("Tail_4-Local"),
+            TEXT("ear_L-Local"), TEXT("ear_R-Local")
+        };
+        return true;
+    }
+    else if (InDragonId == FName(TEXT("Cogfang")))
+    {
+        OutProfile.DragonId = FName(TEXT("Cogfang"));
+        OutProfile.DisplayName = TEXT("Cogfang");
+        OutProfile.LeaderMeshPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_6/Cogfang/Steampunk_Dragon/SkeletalMeshes/Hip-Local.Hip-Local");
+        OutProfile.FollowerMeshBasePath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_6/Cogfang/Steampunk_Dragon/SkeletalMeshes");
+        OutProfile.SkeletonPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_6/Cogfang/Steampunk_Dragon/SkeletalMeshes/Hip-Local_Skeleton.Hip-Local_Skeleton");
+        OutProfile.IdleAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_6/Cogfang/Steampunk_Dragon/SkeletalMeshes/Steampunk_DragonIdle_01.Steampunk_DragonIdle_01");
+        OutProfile.FlightAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_6/Cogfang/Steampunk_Dragon/SkeletalMeshes/Steampunk_DragonFlying_01.Steampunk_DragonFlying_01");
+        OutProfile.CompanionMeshScale = 0.009f;
+        OutProfile.CompanionCapsuleRadius = 32.f;
+        OutProfile.CompanionCapsuleHalfHeight = 38.f;
+        OutProfile.CompanionGroundSpeed = 420.f;
+        OutProfile.TrueFormMeshScale = 0.036f;
+        OutProfile.TrueFormCapsuleRadius = 125.f;
+        OutProfile.TrueFormCapsuleHalfHeight = 165.f;
+        OutProfile.TrueFormGroundSpeed = 525.f;
+        OutProfile.FlightSpeed = 1500.f;
+        OutProfile.MountSocketOffset = FVector(0.f, 0.f, 170.f);
+        OutProfile.TakeoffClearanceHeight = 520.f;
+        OutProfile.WingSpanSweepRadius = 360.f;
+        OutProfile.LandingSearchDistance = 1200.f;
+        OutProfile.MaxLandingSlopeAngle = 42.f;
+        OutProfile.FollowerMeshNames = {
+            TEXT("Chest-Local"), TEXT("Claw-Local"), TEXT("Head-Local"), TEXT("Jaw-Local"),
+            TEXT("LB_Claw-Local"), TEXT("LB_Foot-Local"), TEXT("LB_Leg1-Local"), TEXT("LB_Leg2-Local"),
+            TEXT("LB_Thigh-Local"), TEXT("LF_Claw-Local"), TEXT("LF_Foot-Local"), TEXT("LF_Leg-Local"),
+            TEXT("LF_Thigh-Local"), TEXT("L_Wing1-Local"), TEXT("L_Wing2-Local"), TEXT("L_Wing3-Local"),
+            TEXT("Neck-Local"), TEXT("RB_Foot-Local"), TEXT("RB_Leg1-Local"), TEXT("RB_Leg2-Local"),
+            TEXT("RB_Thigh-Local"), TEXT("RF_Claw-Local"), TEXT("RF_Foot-Local"), TEXT("RF_Leg-Local"),
+            TEXT("RF_Thigh-Local"), TEXT("R_Wing1-Local"), TEXT("R_Wing2-Local"), TEXT("R_Wing3-Local"),
             TEXT("Tail_1-Local"), TEXT("Tail_2-Local"), TEXT("Tail_3-Local"), TEXT("Tail_4-Local"),
             TEXT("ear_L-Local"), TEXT("ear_R-Local")
         };

@@ -374,9 +374,23 @@ Evidence:
 
 ## Next bounded task
 
-Run the bounded WP-23.6 Cogspire Harbor readiness gate: validate the supplied
-Steampunk Dragon/Cogfang rig candidate and identify exact supplied ruler,
-harbor, city-engine, and urban-encounter content before gameplay authoring.
-Mutable remains creator, GAS remains combat authority, and
-`UWyrmSaveSubsystem` remains the sole persistence coordinator. See
+WP-23.6 bounded readiness, the focused Cogfang profile, and the visual/editor
+cast gate now pass. Cogfang's distinct 34-part assembly and authority proof
+passed COG-01..05 in live PIE; the full native suite remains 70/70. Baron
+Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
+matching 15-bone skeletons with readable supplied palettes, deliberate human
+scale, fixture collision, and accepted cameras. Stationary QA locks the source
+root tracks; production root-motion policy remains with the existing movement
+layer. Exact harbor and authored city-engine construction-set candidates remain
+identified, and the user explicitly confirms ownership/project authorization
+for all supplied assets.
+
+Author one bounded Cogspire Harbor foundation/layout proof next. Validate the
+supplied waterfront and city-engine construction assets for scale, waterline,
+walkable collision, navigation, and public-machinery readability before any
+regional encounter or completion authoring. Mutable remains creator, GAS
+remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
+coordinator. See `Documentation/Current/WP23_6_CAST_VISUAL_QA.md`,
+`Documentation/Current/WP23_6_COGFANG_PROFILE_PROOF.md`,
+`Documentation/Current/WP23_6_COGSPIRE_READINESS.md`, and
 `Documentation/Current/WP23_READINESS.md`.
