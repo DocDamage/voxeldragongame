@@ -375,7 +375,7 @@ Evidence:
 ## Next bounded task
 
 WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
-gate, and the Harbor foundation gate now pass. Cogfang's distinct 34-part assembly and authority proof
+gate, the Harbor foundation gate, and the saved Harbor map now pass. Cogfang's distinct 34-part assembly and authority proof
 passed COG-01..05 in live PIE; the full native suite remains 70/70. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
@@ -387,12 +387,14 @@ policy. Two civic pumps remain separate actors more than 21 m from the
 coercion-engine fixture. The user explicitly confirms ownership/project
 authorization for all supplied assets.
 
-Author the saved `L_CogspireHarbor` environment/navigation foundation next,
-using the accepted diagnostic layout and existing-authority arrival/return
-anchors only. Do not add urban encounters, city-engine shutdown gameplay,
-regional completion, or a save-schema extension. Mutable remains creator, GAS
+`L_CogspireHarbor` now contains that accepted supplied-art layout, one existing
+water owner, labeled arrival/return anchors, and a complete live-PIE route.
+Extend only the existing travel owner with the bounded Region01↔Cogspire route
+next. Do not add urban encounters, city-engine shutdown gameplay, regional
+completion, or a parallel save/travel authority. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
-coordinator. See `Documentation/Current/WP23_6_HARBOR_FOUNDATION_PROOF.md`,
+coordinator. See `Documentation/Current/WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md`,
+`Documentation/Current/WP23_6_HARBOR_FOUNDATION_PROOF.md`,
 `Documentation/Current/WP23_6_CAST_VISUAL_QA.md`,
 `Documentation/Current/WP23_6_COGFANG_PROFILE_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_READINESS.md`, and

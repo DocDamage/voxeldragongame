@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.6 Harbor foundation gate**
+**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.6 saved Harbor map foundation**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -43,7 +43,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, supplied Ranger art, and rendered QA. Verdant and Jade closure suites were rerun successfully under current Schema 7; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
-| WP-23.6 Cogspire / Cogfang | **PROFILE + CAST + HARBOR FOUNDATION PASS** | Cogfang and the selected urban cast pass. The supplied waterfront now also passes waterline, collision-policy, complete PIE dock navigation, and civic/coercion machinery separation in an unsaved UE 5.8.2 fixture. Saved environment map remains next; [harbor proof](WP23_6_HARBOR_FOUNDATION_PROOF.md), [cast proof](WP23_6_CAST_VISUAL_QA.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md) |
+| WP-23.6 Cogspire / Cogfang | **SAVED MAP FOUNDATION PASS** | `L_CogspireHarbor` now preserves the accepted supplied waterfront, established anchor labels, the existing water owner, and a complete arrival-to-jetty live-PIE route. Travel allowlisting and regional gameplay remain outside this boundary; [map proof](WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md), [harbor proof](WP23_6_HARBOR_FOUNDATION_PROOF.md), [cast proof](WP23_6_CAST_VISUAL_QA.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -238,12 +238,13 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-The WP-23.6 Cogfang profile, visual/editor cast, and Harbor foundation gates
-pass. The next bounded task is the saved `L_CogspireHarbor`
-environment/navigation foundation using the accepted layout and the existing
-travel authority for arrival/return anchors only. Do not add urban encounters,
-city-engine shutdown gameplay, regional completion, or a save-schema extension.
-See the [harbor foundation proof](WP23_6_HARBOR_FOUNDATION_PROOF.md),
+The WP-23.6 saved `L_CogspireHarbor` environment/navigation foundation passes.
+The next bounded task is a Region01↔Cogspire arrival/return proof extending
+only the existing travel owner against the saved anchor labels. Do not add
+urban encounters, city-engine shutdown gameplay, regional completion, or a
+parallel save/travel authority. See the
+[saved-map proof](WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md),
+[harbor foundation proof](WP23_6_HARBOR_FOUNDATION_PROOF.md),
 [cast QA proof](WP23_6_CAST_VISUAL_QA.md),
 [Cogfang profile proof](WP23_6_COGFANG_PROFILE_PROOF.md),
 [Cogspire readiness report](WP23_6_COGSPIRE_READINESS.md), and
