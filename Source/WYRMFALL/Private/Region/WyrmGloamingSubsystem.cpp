@@ -25,6 +25,8 @@ namespace WyrmGloamingFacts
     const FName PleatherfaceResolvedReceipt(TEXT("gloaming.pleatherface.disarmed_submission"));
     const FName WherewolfResolved(TEXT("gloaming.wherewolf_resolved"));
     const FName WherewolfResolvedReceipt(TEXT("gloaming.wherewolf.calmed_submission"));
+    const FName AnnieWailsResolved(TEXT("gloaming.annie_wails_resolved"));
+    const FName AnnieWailsResolvedReceipt(TEXT("gloaming.annie_wails.disarmed_surrender"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -164,6 +166,17 @@ bool UWyrmGloamingSubsystem::RecordWherewolfResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::WherewolfResolved, WyrmGloamingFacts::WherewolfResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordAnnieWailsResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::WherewolfResolved) ||
+        HasFact(WyrmGloamingFacts::AnnieWailsResolved) ||
+        HasReceipt(WyrmGloamingFacts::AnnieWailsResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::AnnieWailsResolved, WyrmGloamingFacts::AnnieWailsResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()
