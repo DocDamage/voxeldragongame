@@ -25,7 +25,9 @@
 > Wherewolf GAS calmed-submission encounter also passes with one-time Schema 7
 > restoration and no Echo/completion leakage. The supplied 17-part, 176 cm
 > Annie Wails GAS disarmed-surrender encounter also passes with one-time Schema
-> 7 restoration and no Echo/completion leakage; further roster identities
+> 7 restoration and no Echo/completion leakage. The supplied 16-part, 174 cm
+> Scarrie GAS living-submission encounter also passes with one-time Schema 7
+> restoration and no Echo/completion leakage; further roster identities
 > remain bounded work. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 
