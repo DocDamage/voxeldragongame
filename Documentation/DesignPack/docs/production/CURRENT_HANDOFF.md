@@ -7,13 +7,18 @@
 
 > **Current runtime authority:** See `Documentation/Current/HANDOFF.md` and
 > `Documentation/Current/STATUS.md` in the project workspace. As of September
-> 19, 2026, WP-23.0, WP-23.1, and WP-23.2 are complete; VR-01..08 and
-> JC-01..08 pass in real PIE under current Schema 6. WP-23.5 import/content
+> 20, 2026, WP-23.0, WP-23.1, and WP-23.2 are complete; VR-01..08 and
+> JC-01..08 pass in real PIE and remain readable under current Schema 7. WP-23.5 import/content
 > readiness, Nyxaroth NYX-01..05, the Cathedral/Michael Mire fixture, and the
 > `L_GloamingMarches` environment/navigation foundation, bounded
-> Arrival-to-Ashgrave route, and Count Malvaine encounter pass, but later
-> encounters and regional completion remain gated. The next bounded work is a
-> Hollow Twins encounter slice. The remainder preserves the
+> Arrival-to-Ashgrave route, Count Malvaine encounter, distinct Morrow/Mourn
+> Hollow Twins encounter, optional Sanguine Strike, and optional Second Turn
+> pass. Two-way Region01↔Gloaming travel and unified Schema 7 recovery now also
+> pass without duplicate dragon restoration. The 17-part, 190 cm Michael Mire
+> GAS living-submission encounter passes with one-time Schema 7 restoration and
+> no Echo/completion leakage. The broader required-horror roster and regional
+> completion remain gated; next is one additional identity after its production
+> presentation and provenance gates clear. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 
 ## Actual status

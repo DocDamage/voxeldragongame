@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 19, 2026 · starter v0.2 · evidence reconciled through WP-23.5 Count Malvaine gameplay**
+**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.5 Michael Mire encounter**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 56/56** | All source-declared `WYRMFALL.Scaffold` tests passed; report `Saved/Automation/Scaffold/index.json` |
+| Native automation | **PASS: 60/60** | All source-declared `WYRMFALL.Scaffold` tests passed; report `Saved/Automation/Scaffold/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -41,8 +41,8 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
-| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, Schema 6 recovery, supplied Ranger art, and rendered QA. Jade Peaks JC-01..08 was rerun successfully under Schema 6; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
-| WP-23.5 Gloaming / Nyxaroth | **MALVAINE ENCOUNTER PASS / LATER GAMEPLAY GATED** | NYX-01..05, content fixture, foundation, Arrival→Ashgrave, and Count Malvaine pass. PIE proves parley and GAS-driven living submission parity, one-time facts/receipts, supplied Priest presentation at 179.34 cm, and no Sanguine Strike/Twins/completion leakage. Hollow Twins, Echoes, travel/save recovery, and completion remain open; [Malvaine proof](WP23_5_MALVAINE_SLICE_PROOF.md), [Ashgrave proof](WP23_5_ASHGRAVE_SLICE_PROOF.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, supplied Ranger art, and rendered QA. Verdant and Jade closure suites were rerun successfully under current Schema 7; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
+| WP-23.5 Gloaming / Nyxaroth | **MICHAEL MIRE PASS / COMPLETION GATED** | NYX-01..05, foundation, Arrival→Ashgrave, Count Malvaine, Hollow Twins, Sanguine Strike, Second Turn, two-way travel/save recovery, and the supplied 17-part Michael Mire living-submission encounter pass. Schema 7 restores Michael's one-time fact/receipt without granting a new Echo or completion. The remaining required-horror roster and regional completion stay gated; [Michael proof](WP23_5_MICHAEL_MIRE_SLICE_PROOF.md), [travel/save proof](WP23_5_GLOAMING_TRAVEL_SAVE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -55,10 +55,11 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 - `UWyrmInventoryComponent` remains the inventory/equipment owner.
   Cross-inventory transfers now preflight target capacity and roll back on an
   unexpected partial failure.
-- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 6 adds
-  Hunter's Veil active/duration/cooldown state to the Schema 5 region-keyed
-  terrain/camp records, travel state, Unseen Hand cooldown, and prior character,
-  dragon, vehicle, inventory, and Echo fields. Schemas 1 through 6 remain loadable;
+- `UWyrmSaveSubsystem` remains the save coordinator. Current schema 7 adds
+  Gloaming facts/receipts plus Sanguine Strike and Second Turn cooldowns to the
+  Schema 6 record, which already contains region-keyed terrain/camp records,
+  travel state, earlier Echo state, and prior character, dragon, vehicle, and
+  inventory fields. Schemas 1 through 7 remain loadable;
   it rejects unsupported schemas, wrong terrain owners, missing terrain
   payloads, and terrain apply failures before mutating the character.
 - WP-06 adds a ranged weapon family, GAS abilities, a physical projectile,
@@ -147,7 +148,8 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
   identities. WP-23.2 added the minimal allowlisted Region01↔JadePeaks travel
   owner and Schema 5 region-keyed persistence. WP-23.1 extends the same save
   owner to backward-readable Schema 6 for Hunter's Veil and closes Verdant Reach
-  without adding a dragon or travel owner.
+  without adding a dragon or travel owner. WP-23.5 extends those owners to the
+  two-way Gloaming route and backward-readable Schema 7 recovery.
 
 ## Fresh verification commands
 
@@ -176,6 +178,11 @@ py -3.12 tools/run_wp22_jade_peaks_proof.py
 py -3.12 tools/run_wp23_2_jade_closure_proof.py
 py -3.12 tools/run_wp23_1_verdant_closure_proof.py
 py -3.12 tools/run_wp23_1_visual_qa.py
+py -3.12 tools/run_wp23_5_hollow_twins_slice.py
+py -3.12 tools/run_wp23_5_sanguine_strike_slice.py
+py -3.12 tools/run_wp23_5_second_turn_slice.py
+py -3.12 tools/run_wp23_5_gloaming_travel_save.py
+py -3.12 tools/run_wp23_5_michael_mire_slice.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -212,19 +219,21 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 - Standalone packaging, cook validation, and packaged client execution are RESOLVED (PASS in WP-18).
 - Pilotable Zenith civilian hovercar slice acceptance cases `VEH-01` through `VEH-09` are RESOLVED (PASS in WP-19).
 - Heartfold expansion and Jadefang multi-dragon rig validation acceptance cases `JADE-01` through `JADE-05` and `SAVE` are RESOLVED (PASS in WP-20).
-- Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED and rerun under Schema 6.
+- Jade Peaks closure cases `JC-01` through `JC-08` are RESOLVED and rerun under Schema 7.
 - Verdant Reach closure cases `VR-01` through `VR-08` are RESOLVED (PASS in WP-23.1); later WP-23 children remain separate.
 - Nyxaroth profile cases `NYX-01` through `NYX-05`, the representative content
   fixture, the Gloaming environment/navigation foundation, the bounded
-  Arrival-to-Ashgrave gameplay slice, and the Count Malvaine encounter are
-  RESOLVED. Later encounters,
-  travel/save recovery, and regional completion remain open.
+  Arrival-to-Ashgrave gameplay slice, Count Malvaine, the Hollow Twins
+  encounter, Sanguine Strike, Second Turn, travel/save recovery, and the
+  bounded Michael Mire living-submission encounter are RESOLVED. The remaining
+  required-horror roster and regional completion remain open.
 
 ## Next bounded task
 
-The Count Malvaine encounter slice passes. The next bounded task is a
-**Hollow Twins encounter slice** in `L_GloamingMarches`, using two distinct
-authored identities and `UWyrmGloamingSubsystem`. Keep Second Turn,
-travel/save recovery, and regional completion outside that slice. See the
-[Malvaine proof](WP23_5_MALVAINE_SLICE_PROOF.md),
+The Michael Mire slice passes. The next bounded task is to inspect and author
+one additional required-horror identity from the supplied roster, proceeding
+to gameplay only after its presentation, animation strategy, collision, scale,
+materials, and permission/provenance gate clear. Keep regional completion
+outside that slice. See the
+[Michael Mire proof](WP23_5_MICHAEL_MIRE_SLICE_PROOF.md),
 [WP-23.5 packet](tasks/WP-23.5.md), and [current handoff](HANDOFF.md).

@@ -52,11 +52,12 @@ void AWyrmProjectile::BeginPlay()
     CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWyrmProjectile::OnProjectileOverlap);
 }
 
-void AWyrmProjectile::InitializeProjectile(AActor* InInstigator, UAbilitySystemComponent* InSourceASC, float InRawDamage, const FVector& ShootDirection)
+void AWyrmProjectile::InitializeProjectile(AActor* InInstigator, UAbilitySystemComponent* InSourceASC, float InRawDamage, const FVector& ShootDirection, bool bInEligibleBasicWeaponHit)
 {
     SourceInstigator = InInstigator;
     SourceASC = InSourceASC;
     RawDamage = InRawDamage;
+    bEligibleBasicWeaponHit = bInEligibleBasicWeaponHit;
 
     if (CollisionComp && InInstigator)
     {
@@ -102,7 +103,14 @@ void AWyrmProjectile::ProcessImpact(AActor* HitActor)
             return;
         }
 
-        UWyrmMeleeAttackAbility::ApplyDamageEffect(SourceASC.Get(), TargetASC, RawDamage);
+        if (bEligibleBasicWeaponHit)
+        {
+            UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(SourceASC.Get(), TargetASC, RawDamage);
+        }
+        else
+        {
+            UWyrmMeleeAttackAbility::ApplyDamageEffect(SourceASC.Get(), TargetASC, RawDamage);
+        }
     }
 
     Destroy();

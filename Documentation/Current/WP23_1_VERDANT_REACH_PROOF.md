@@ -15,7 +15,7 @@ map-travel owner, save owner, or mandatory boss was added.
 | VR-05 | PASS | The optional hunter resolved through trust in the focused run, rejected duplicate rewards, granted Hunter's Veil once, and was not required for regional closure. Native coverage also exercises the living-defeat route. |
 | VR-06 | PASS | GAS committed 25 Focus, up to 5 seconds active duration, and 16 seconds cooldown. Ordinary enemies could not acquire the veiled player, bosses retained counterplay, and attack or direct damage broke the veil. |
 | VR-07 | PASS | Exactly one Verdance remained available through the established Region 01 owner and existing homecoming/bond state. |
-| VR-08 | PASS | Schema 6 restored Verdant facts, Hunter's Veil unlock, active duration, and cooldown. Schemas 1–5 remained readable; Schema 7 was rejected. |
+| VR-08 | PASS | Current Schema 7 restored Verdant facts, Hunter's Veil unlock, active duration, and cooldown. Schemas 1–6 remained readable; Schema 8 was rejected. |
 
 ## Content and presentation
 
@@ -40,7 +40,7 @@ keyboard/gamepad walkthrough was not run and is not claimed.
 - Full native automation: 55/55 completed, 0 failed, 0 not run.
 - Focused live PIE: VR-01..08 PASS.
 - WP-16 connected Region 01 regression: ALL_PASSED.
-- WP-23.2 Jade closure regression: PASS under current Schema 6.
+- WP-23.2 Jade closure regression: PASS under current Schema 7.
 - Portable `wyrm.py verify` and `wyrm.py test`: see the final workspace check
   recorded with this change.
 

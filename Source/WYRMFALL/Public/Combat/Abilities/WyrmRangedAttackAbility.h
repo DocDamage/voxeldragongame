@@ -24,6 +24,9 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Combat")
     float SpawnForwardOffset = 80.f;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Combat")
+    bool bIsSecondary = false;
+
     virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
     AWyrmProjectile* SpawnProjectile(AActor* Avatar, UAbilitySystemComponent* SourceASC, float InRawDamage);

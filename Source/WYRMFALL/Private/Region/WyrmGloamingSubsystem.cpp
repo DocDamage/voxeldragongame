@@ -11,6 +11,14 @@ namespace WyrmGloamingFacts
     const FName AshgraveSealReceipt(TEXT("gloaming.ashgrave_extraction_seal.resolved"));
     const FName MalvaineResolved(TEXT("gloaming.malvaine_encounter_resolved"));
     const FName MalvaineResolvedReceipt(TEXT("gloaming.malvaine.encounter_resolved"));
+    const FName HollowTwinsResolved(TEXT("gloaming.hollow_twins_resolved"));
+    const FName HollowTwinsResolvedReceipt(TEXT("gloaming.hollow_twins.encounter_resolved"));
+    const FName SanguineStrikeUnlocked(TEXT("echo.sanguine_strike"));
+    const FName SanguineStrikeUnlockReceipt(TEXT("gloaming.malvaine.sanguine_strike_manifested"));
+    const FName SecondTurnUnlocked(TEXT("echo.second_turn"));
+    const FName SecondTurnUnlockReceipt(TEXT("gloaming.hollow_twins.second_turn_manifested"));
+    const FName MichaelMireResolved(TEXT("gloaming.michael_mire_resolved"));
+    const FName MichaelMireResolvedReceipt(TEXT("gloaming.michael_mire.living_submission"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -76,6 +84,60 @@ bool UWyrmGloamingSubsystem::RecordMalvaineResolution(bool bParley)
     return CommitFact(WyrmGloamingFacts::MalvaineResolved, WyrmGloamingFacts::MalvaineResolvedReceipt);
 }
 
+bool UWyrmGloamingSubsystem::RecordHollowTwinsResolution(bool bReleased)
+{
+    if (!HasFact(WyrmGloamingFacts::MalvaineResolved) ||
+        HasFact(WyrmGloamingFacts::HollowTwinsResolved) ||
+        HasReceipt(WyrmGloamingFacts::HollowTwinsResolvedReceipt))
+    {
+        return false;
+    }
+    const FName RouteFact = bReleased
+        ? FName(TEXT("gloaming.hollow_twins_released"))
+        : FName(TEXT("gloaming.hollow_twins_living_submission"));
+    const FName RouteReceipt = bReleased
+        ? FName(TEXT("gloaming.hollow_twins.released"))
+        : FName(TEXT("gloaming.hollow_twins.living_submission"));
+    if (HasReceipt(RouteReceipt) || !CommitFact(RouteFact, RouteReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::HollowTwinsResolved, WyrmGloamingFacts::HollowTwinsResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordSanguineStrikeUnlock()
+{
+    if (!HasFact(WyrmGloamingFacts::MalvaineResolved) ||
+        HasFact(WyrmGloamingFacts::SanguineStrikeUnlocked) ||
+        HasReceipt(WyrmGloamingFacts::SanguineStrikeUnlockReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::SanguineStrikeUnlocked, WyrmGloamingFacts::SanguineStrikeUnlockReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordMichaelMireResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::HollowTwinsResolved) ||
+        HasFact(WyrmGloamingFacts::MichaelMireResolved) ||
+        HasReceipt(WyrmGloamingFacts::MichaelMireResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::MichaelMireResolved, WyrmGloamingFacts::MichaelMireResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()
+{
+    if (!HasFact(WyrmGloamingFacts::HollowTwinsResolved) ||
+        HasFact(WyrmGloamingFacts::SecondTurnUnlocked) ||
+        HasReceipt(WyrmGloamingFacts::SecondTurnUnlockReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::SecondTurnUnlocked, WyrmGloamingFacts::SecondTurnUnlockReceipt);
+}
+
 bool UWyrmGloamingSubsystem::CommitFact(FName FactId, FName ReceiptId)
 {
     if (FactId.IsNone() || ReceiptId.IsNone() || HasReceipt(ReceiptId))
@@ -95,4 +157,32 @@ bool UWyrmGloamingSubsystem::HasFact(FName FactId) const
 bool UWyrmGloamingSubsystem::HasReceipt(FName ReceiptId) const
 {
     return FactReceipts.Contains(ReceiptId);
+}
+
+void UWyrmGloamingSubsystem::BuildSaveRecord(FWyrmGloamingSaveRecord& OutRecord) const
+{
+    OutRecord.KnownFacts = KnownFacts;
+    OutRecord.FactReceipts = FactReceipts;
+}
+
+void UWyrmGloamingSubsystem::RestoreFromSaveRecord(const FWyrmGloamingSaveRecord& InRecord)
+{
+    KnownFacts = InRecord.KnownFacts;
+    FactReceipts = InRecord.FactReceipts;
+    NormalizeRestoredState();
+}
+
+void UWyrmGloamingSubsystem::NormalizeRestoredState()
+{
+    TSet<FName> UniqueFacts;
+    KnownFacts.RemoveAll([&UniqueFacts](FName Fact)
+    {
+        return Fact.IsNone() || (!UniqueFacts.Contains(Fact) ? (UniqueFacts.Add(Fact), false) : true);
+    });
+
+    TSet<FName> UniqueReceipts;
+    FactReceipts.RemoveAll([&UniqueReceipts](FName Receipt)
+    {
+        return Receipt.IsNone() || (!UniqueReceipts.Contains(Receipt) ? (UniqueReceipts.Add(Receipt), false) : true);
+    });
 }

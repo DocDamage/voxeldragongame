@@ -33,7 +33,7 @@ public:
     FGameplayTag SourceTeamTag;
 
     UFUNCTION(BlueprintCallable, Category="Combat")
-    void InitializeProjectile(AActor* InInstigator, UAbilitySystemComponent* InSourceASC, float InRawDamage, const FVector& ShootDirection);
+    void InitializeProjectile(AActor* InInstigator, UAbilitySystemComponent* InSourceASC, float InRawDamage, const FVector& ShootDirection, bool bInEligibleBasicWeaponHit = false);
 
     UFUNCTION()
     void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -53,4 +53,5 @@ private:
     TWeakObjectPtr<UAbilitySystemComponent> SourceASC;
 
     bool bHasImpacted = false;
+    bool bEligibleBasicWeaponHit = false;
 };

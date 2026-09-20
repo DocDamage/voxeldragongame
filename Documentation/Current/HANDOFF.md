@@ -1,4 +1,4 @@
-# WYRMFALL handoff — September 19, 2026
+# WYRMFALL handoff — September 20, 2026
 
 ## Resume here
 
@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 56/56 tests with 0 failures.
+- Full scaffold native automation completed 60/60 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -44,10 +44,15 @@ settings out of commits.
 - WP-19 real PIE passed all 9 pilotable civilian hovercar acceptance cases (`VEH-01..09`).
 - WP-20 real PIE passed all 6 Heartfold expansion & Jadefang validation cases (`JADE-01..05`, `SAVE.MultiDragonPersistence`).
 - WP-23.2 real PIE passed all 8 Jade Peaks closure cases (`JC-01..08`): supplied Emperor Wei Longzhu art; diplomacy/living-defeat pact parity; trust/living-defeat disciple parity; permanent GAS Unseen Hand with 25 Focus/8s cooldown and fail-closed target policy; bounded Region01↔JadePeaks travel; Schema 5 region-keyed recovery; and WP-22 continuity. Focused manual frame review also passed Emperor grounding/scale and supplied spear placement. See `Documentation/Current/WP23_2_JADE_CLOSURE_PROOF.md`.
-- WP-23.1 real PIE passed all 8 Verdant Reach closure cases (`VR-01..08`): supplied Ranger character/environment presentation; evidence and authored-guard route parity without attacking Meridess; optional trust/living-defeat canopy hunter; permanent GAS Hunter's Veil; four live route navigation projections; Verdance continuity; and backward-readable Schema 6 recovery. Four rendered frames passed manual lighting, scale, grounding/collision, and route-readability review. WP-16 and WP-23.2 regressions remain green. See `Documentation/Current/WP23_1_VERDANT_REACH_PROOF.md`.
-- WP-23.5 environment/navigation foundation passed in `L_GloamingMarches`: finite GeoForge terrain, supplied Cathedral/cemetery composition, explicit supplied materials and `BlockAll` profiles, 4/4 navigable route anchors, 3/3 complete non-partial ordered paths, and accepted final rendered QA after correcting overexposure and off-center OBJ pivots. Encounters, travel/save recovery, and regional completion remain gated. See `Documentation/Current/WP23_5_GLOAMING_FOUNDATION_PROOF.md`.
+- WP-23.1 real PIE passed all 8 Verdant Reach closure cases (`VR-01..08`): supplied Ranger character/environment presentation; evidence and authored-guard route parity without attacking Meridess; optional trust/living-defeat canopy hunter; permanent GAS Hunter's Veil; four live navigation projections; Verdance continuity; and backward-readable recovery. Four rendered frames passed manual lighting, scale, grounding/collision, and route-readability review. The Verdant and WP-23.2 suites were rerun green under current Schema 7. See `Documentation/Current/WP23_1_VERDANT_REACH_PROOF.md`.
+- WP-23.5 environment/navigation foundation passed in `L_GloamingMarches`: finite GeoForge terrain, supplied Cathedral/cemetery composition, explicit supplied materials and `BlockAll` profiles, 4/4 navigable route anchors, 3/3 complete non-partial ordered paths, and accepted final rendered QA after correcting overexposure and off-center OBJ pivots. See `Documentation/Current/WP23_5_GLOAMING_FOUNDATION_PROOF.md`.
 - WP-23.5 Arrival-to-Ashgrave gameplay passed in live PIE: `UWyrmGloamingSubsystem` owns the bounded fact/receipt state, the authored Arrival overlap commits once, the Ashgrave extraction seal rejects before Arrival and commits once afterward, and the live route is valid/non-partial. Malvaine, Twins, Echo, travel/save, and completion facts remain absent. See `Documentation/Current/WP23_5_ASHGRAVE_SLICE_PROOF.md`.
 - WP-23.5 Count Malvaine gameplay passed in live PIE: the supplied Priest is grounded at 179.34 cm; ordinary parley and GAS-driven living submission (700→100 HP) commit distinct route receipts plus one shared resolution exactly once. Sanguine Strike, Twins, travel/save, and completion remain absent. See `Documentation/Current/WP23_5_MALVAINE_SLICE_PROOF.md`.
+- WP-23.5 Hollow Twins gameplay passed in live PIE: Morrow and Mourn use distinct supplied-Nun presentations; compassionate release and coordinated GAS-driven living submission commit exactly once without Second Turn/completion leakage. See `Documentation/Current/WP23_5_HOLLOW_TWINS_SLICE_PROOF.md`.
+- WP-23.5 Sanguine Strike passed in live PIE: either resolved Malvaine route can manifest the optional Echo once; GAS spends 25 Focus, primes the next basic weapon hit for 4 seconds, applies `0.5P` bonus damage, heals 25% of actual health damage capped at 12% max HP, and retains its 12-second cooldown across unequip. Generic secondary/reflected paths do not consume or heal. See `Documentation/Current/WP23_5_SANGUINE_STRIKE_SLICE_PROOF.md`.
+- WP-23.5 Second Turn passed in live PIE: either resolved Hollow Twins route can manifest the optional Echo once; GAS spends 25 Focus, snapshots the next eligible basic strike, and after 0.6 seconds repeats 50% of its pre-mitigation base against a still-valid hostile target. The 14-second cooldown survives unequip; the repeat applies mitigation once, cannot recurse, and cannot trigger Sanguine Strike or drain. See `Documentation/Current/WP23_5_SECOND_TURN_SLICE_PROOF.md`.
+- WP-23.5 Gloaming travel/save recovery passed in live PIE: authored arrival/return anchors project to navigation; Region01↔Gloaming is allowlisted without a Jade shortcut; unsafe Echo/dragon transient states are rejected; and Schema 7 restores Gloaming facts, both new Echo cooldowns, regional terrain/travel state, and exactly one bonded Nyxaroth across repeated recovery. Regional completion remains absent. See `Documentation/Current/WP23_5_GLOAMING_TRAVEL_SAVE_PROOF.md`.
+- WP-23.5 Michael Mire passed in live PIE: the supplied 17-part rigid assembly is complete at 190 cm with capsule-owned collision and bounded procedural-root idle; activation rejects before the Hollow Twins; six GAS hits reach the living-submission threshold at 130/520 HP; the one-time fact/receipt roundtrips through Schema 7; and no new Echo or regional completion leaks. Final rendered review passed grounding, shadow, scale, lighting, and nearby landmark context. See `Documentation/Current/WP23_5_MICHAEL_MIRE_SLICE_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -304,9 +309,10 @@ Evidence:
   speeds, 1650cm/s flight, and a `(0,0,150)` mount offset. NYX-01..05 passed
   living bond, Heartfold/clearance, mount/flight, GAS control/combat, and save
   identity in focused real PIE.
-- Current unified save schema is 6. It preserves Schema 5 region-keyed terrain/camp records, bounded travel state, and Unseen Hand cooldown; adds Hunter's Veil active/duration/cooldown state; and accepts Schemas 1–5 under the existing save coordinator.
+- Current unified save schema is 7. It preserves Schema 6 region-keyed terrain/camp records, bounded travel state, and earlier Echo state; adds Gloaming facts/receipts plus Sanguine Strike and Second Turn cooldowns; and accepts Schemas 1–6 under the existing save coordinator.
 - `UWyrmJadePeaksSubsystem` is the narrow regional fact owner. It does not own inventory, combat, dragons, terrain, or save slots.
-- `UWyrmWorldTravelSubsystem` is the bounded travel owner for Region01↔JadePeaks only; it does not own save slots.
+- `UWyrmWorldTravelSubsystem` is the bounded travel owner for the allowlisted
+  Region01↔JadePeaks and Region01↔Gloaming routes; it does not own save slots.
 
 ## Boundaries
 
@@ -332,16 +338,20 @@ Evidence:
   WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. Nyxaroth's distinct
   profile and the representative Cathedral/Michael Mire content fixture pass.
   The Gloaming production environment/navigation foundation and bounded
-  Arrival-to-Ashgrave gameplay slice and Count Malvaine encounter now also pass
-  in real PIE. The broader
-  horror roster, provenance, later encounters, travel/save recovery, and region
-  completion remain gated.
+  Arrival-to-Ashgrave gameplay slice, Count Malvaine encounter, and distinct
+  Morrow/Mourn Hollow Twins encounter, optional Sanguine Strike, and optional
+  Second Turn now also pass in real PIE. Two-way Region01↔Gloaming travel,
+  preflight snapshotting, and Schema 7 recovery also pass without duplicate
+  Nyxaroth actors. The bounded 17-part Michael Mire living-submission encounter
+  now passes as the first required-horror gameplay assembly. The broader horror
+  roster, provenance, and region completion remain gated.
 
 ## Next bounded task
 
-Build one bounded Hollow Twins encounter slice next in `L_GloamingMarches`,
-using two distinct authored identities and `UWyrmGloamingSubsystem`. Do not add
-Second Turn, travel/save recovery, or regional completion in the same slice.
+Inspect and author one additional required-horror identity from the supplied
+roster, proceeding to gameplay only if presentation, animation strategy,
+collision, scale, materials, and permission/provenance can be evidenced. Do not
+add regional completion in the same slice.
 Mutable remains creator, GAS remains combat authority, and
 `UWyrmSaveSubsystem` remains the sole persistence coordinator. See
 `Documentation/Current/tasks/WP-23.5.md`.

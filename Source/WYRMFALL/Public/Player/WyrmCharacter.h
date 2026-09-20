@@ -141,6 +141,62 @@ public:
     UFUNCTION(BlueprintPure, Category="Combat|Echo")
     bool CanActivateRelentlessAdvance(FString& OutFailureReason) const;
 
+    // --- Sanguine Strike (WP-23.5 / ECHO-01) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateSanguineStrike(FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateSanguineStrike();
+
+    /** Called only by UWyrmSanguineStrikeAbility after GAS commits cost/cooldown. */
+    bool CommitSanguineStrike();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsSanguineStrikePrimed() const { return bSanguineStrikePrimed; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetSanguineStrikeRemainingWindow() const { return SanguineStrikeWindowTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetSanguineStrikeRemainingCooldown() const { return SanguineStrikeCooldownTimer; }
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreSanguineStrikeState(float RemainingCooldown);
+
+    /** Returns the pending bonus without consuming it; eligible direct-hit paths consume after damage lands. */
+    float GetSanguineStrikeBonusDamage() const;
+    bool ConsumeSanguineStrike(float ActualDamage);
+
+    // --- Second Turn (WP-23.5 / ECHO-02) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateSecondTurn(FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateSecondTurn();
+
+    /** Called only by UWyrmSecondTurnAbility after GAS commits cost/cooldown. */
+    bool CommitSecondTurn();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool IsSecondTurnPrimed() const { return bSecondTurnPrimed; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool HasPendingSecondTurnRepeat() const { return PendingSecondTurnTarget.IsValid(); }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetSecondTurnRemainingDelay() const { return SecondTurnRepeatTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetSecondTurnRemainingCooldown() const { return SecondTurnCooldownTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetPendingSecondTurnRawDamage() const { return PendingSecondTurnRawDamage; }
+
+    bool QueueSecondTurnRepeat(UAbilitySystemComponent* TargetASC, float SnapshottedBaseRawDamage);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreSecondTurnState(float RemainingCooldown);
+
     // --- Moonbound Form (WP-21 / ECHO-08, ECHO-09) ---
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void ActivateMoonboundForm(float Duration);
@@ -399,6 +455,8 @@ private:
     FGameplayAbilitySpecHandle MirrorStepHandle;
     FGameplayAbilitySpecHandle UnseenHandHandle;
     FGameplayAbilitySpecHandle HuntersVeilHandle;
+    FGameplayAbilitySpecHandle SanguineStrikeHandle;
+    FGameplayAbilitySpecHandle SecondTurnHandle;
     FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
     FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
@@ -431,6 +489,16 @@ private:
     bool bHuntersVeilActive = false;
     float HuntersVeilRemainingTimer = 0.f;
     float HuntersVeilCooldownTimer = 0.f;
+
+    bool bSanguineStrikePrimed = false;
+    float SanguineStrikeWindowTimer = 0.f;
+    float SanguineStrikeCooldownTimer = 0.f;
+
+    bool bSecondTurnPrimed = false;
+    float SecondTurnCooldownTimer = 0.f;
+    float SecondTurnRepeatTimer = 0.f;
+    float PendingSecondTurnRawDamage = 0.f;
+    TWeakObjectPtr<UAbilitySystemComponent> PendingSecondTurnTarget;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

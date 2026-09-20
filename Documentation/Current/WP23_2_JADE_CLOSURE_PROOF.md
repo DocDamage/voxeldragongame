@@ -1,9 +1,9 @@
 # WP-23.2 Jade Peaks campaign closure proof
 
 > Current regression note (September 19, 2026): JC-01..08 was rerun after
-> WP-23.1 advanced the unified save format to Schema 6. The proof remains PASS;
-> Schemas 1–5 are readable and Jade closure/cooldown state restores under
-> Schema 6. References below to Schema 5 describe the original WP-23.2 boundary.
+> WP-23.5 advanced the unified save format to Schema 7. The proof remains PASS;
+> Schemas 1–6 are readable and Jade closure/cooldown state restores under
+> Schema 7. References below to Schema 5 describe the original WP-23.2 boundary.
 
 **Result:** PASS in real PIE on September 19, 2026.
 **Boundary:** JC-01..08 only; no WP-23.1 or new-dragon work is included.

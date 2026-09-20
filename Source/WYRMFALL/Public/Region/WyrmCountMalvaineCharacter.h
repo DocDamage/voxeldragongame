@@ -15,7 +15,7 @@ enum class EWyrmMalvaineResolution : uint8
     LivingDefeat
 };
 
-/** Bounded Count Malvaine encounter; Echo rewards are intentionally out of scope. */
+/** Bounded Count Malvaine encounter and its optional Sanguine Strike manifestation. */
 UCLASS(BlueprintType, Blueprintable, Category="WYRMFALL|Gloaming")
 class WYRMFALL_API AWyrmCountMalvaineCharacter : public AWyrmEnemyCharacter
 {
@@ -38,6 +38,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|Malvaine")
     bool ResolveAfterLivingDefeat(AWyrmCharacter* PlayerCharacter);
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Malvaine")
+    bool ManifestSanguineStrike(AWyrmCharacter* PlayerCharacter);
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|Malvaine")
     void ResetEncounter();

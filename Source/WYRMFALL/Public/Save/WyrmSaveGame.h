@@ -7,6 +7,7 @@
 #include "Dragon/WyrmDragonTypes.h"
 #include "Region/WyrmRegion01Types.h"
 #include "Region/WyrmJadePeaksTypes.h"
+#include "Region/WyrmGloamingTypes.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "WyrmSaveGame.generated.h"
 
@@ -133,6 +134,13 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float HuntersVeilRemainingCooldown = 0.f;
+
+    // --- Gloaming Marches Echo State (WP-23.5 / Schema 7) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float SanguineStrikeRemainingCooldown = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float SecondTurnRemainingCooldown = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -214,10 +222,10 @@ class WYRMFALL_API UWyrmSaveGame : public USaveGame
 public:
     UWyrmSaveGame();
 
-    // Schema 6 adds Verdant Reach closure and Hunter's Veil state while
-    // retaining Schemas 1-5 and the region-keyed Schema 5 world payload.
+    // Schema 7 adds Gloaming facts and Echo cooldowns while retaining
+    // Schemas 1-6 and the region-keyed Schema 5 world payload.
     static const int32 MinimumSupportedSchemaVersion = 1;
-    static const int32 CurrentSchemaVersion = 6;
+    static const int32 CurrentSchemaVersion = 7;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Save")
     int32 SchemaVersion = CurrentSchemaVersion;
@@ -261,6 +269,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmJadePeaksSaveRecord JadePeaksRecord;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    FWyrmGloamingSaveRecord GloamingRecord;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     FWyrmHovercarSaveRecord HovercarRecord;

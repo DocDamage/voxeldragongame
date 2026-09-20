@@ -1,5 +1,6 @@
 #include "Player/WyrmCharacter.h"
 #include "AbilitySystemComponent.h"
+#include "GameplayEffect.h"
 #include "Combat/WyrmAttributeSet.h"
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Combat/Abilities/WyrmRangedAttackAbility.h"
@@ -9,6 +10,8 @@
 #include "Combat/Abilities/WyrmMirrorStepAbility.h"
 #include "Combat/Abilities/WyrmUnseenHandAbility.h"
 #include "Combat/Abilities/WyrmHuntersVeilAbility.h"
+#include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
+#include "Combat/Abilities/WyrmSecondTurnAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Combat/WyrmUnseenHandTarget.h"
@@ -370,6 +373,81 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
                 AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
                 FGameplayTagContainer CooldownTags(CooldownTag);
                 AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+
+    if (bSanguineStrikePrimed)
+    {
+        SanguineStrikeWindowTimer = FMath::Max(0.f, SanguineStrikeWindowTimer - DeltaSeconds);
+        if (SanguineStrikeWindowTimer <= 0.f)
+        {
+            bSanguineStrikePrimed = false;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SanguineStrikePrimed")), false);
+                if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+            }
+        }
+    }
+
+    if (SanguineStrikeCooldownTimer > 0.f)
+    {
+        SanguineStrikeCooldownTimer = FMath::Max(0.f, SanguineStrikeCooldownTimer - DeltaSeconds);
+        if (SanguineStrikeCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.SanguineStrike")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+
+    if (SecondTurnCooldownTimer > 0.f)
+    {
+        SecondTurnCooldownTimer = FMath::Max(0.f, SecondTurnCooldownTimer - DeltaSeconds);
+        if (SecondTurnCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.SecondTurn")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+
+    if (SecondTurnRepeatTimer > 0.f)
+    {
+        SecondTurnRepeatTimer = FMath::Max(0.f, SecondTurnRepeatTimer - DeltaSeconds);
+        if (SecondTurnRepeatTimer <= 0.f)
+        {
+            UAbilitySystemComponent* RepeatTarget = PendingSecondTurnTarget.Get();
+            const float RepeatDamage = PendingSecondTurnRawDamage;
+            PendingSecondTurnTarget.Reset();
+            PendingSecondTurnRawDamage = 0.f;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag PendingTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPending")), false);
+                if (PendingTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PendingTag);
+            }
+            const UWyrmAttributeSet* TargetAttributes = RepeatTarget
+                ? Cast<UWyrmAttributeSet>(RepeatTarget->GetAttributeSet(UWyrmAttributeSet::StaticClass()))
+                : nullptr;
+            static const FGameplayTag PlayerTeamTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Combat.Team.Player")), false);
+            const bool bIsNowFriendly = PlayerTeamTag.IsValid() && AbilitySystem && RepeatTarget &&
+                AbilitySystem->HasMatchingGameplayTag(PlayerTeamTag) &&
+                RepeatTarget->HasMatchingGameplayTag(PlayerTeamTag);
+            if (AbilitySystem && Attributes && Attributes->GetHealth() > 0.f &&
+                RepeatTarget && TargetAttributes && TargetAttributes->GetHealth() > 0.f && !bIsNowFriendly)
+            {
+                // The generic GAS path is deliberate: the spectral repeat is
+                // noncritical and cannot recurse or trigger any Echo proc.
+                UWyrmMeleeAttackAbility::ApplyDamageEffect(AbilitySystem, RepeatTarget, RepeatDamage);
             }
         }
     }
@@ -1229,6 +1307,32 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             }
         }
     }
+    else if (EchoId == FName(TEXT("SanguineStrike")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.SanguineStrike")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!SanguineStrikeHandle.IsValid())
+            {
+                SanguineStrikeHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmSanguineStrikeAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
+    else if (EchoId == FName(TEXT("SecondTurn")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.SecondTurn")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!SecondTurnHandle.IsValid())
+            {
+                SecondTurnHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmSecondTurnAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
 
     // Auto-equip if first echo and none equipped
     if (EquippedEcho.IsNone())
@@ -1350,8 +1454,189 @@ bool AWyrmCharacter::ActivateEquippedEcho()
     {
         return ActivateHuntersVeil();
     }
+    else if (EquippedEcho == FName(TEXT("SanguineStrike")))
+    {
+        return ActivateSanguineStrike();
+    }
+    else if (EquippedEcho == FName(TEXT("SecondTurn")))
+    {
+        return ActivateSecondTurn();
+    }
 
     return false;
+}
+
+bool AWyrmCharacter::CanActivateSanguineStrike(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("SanguineStrike")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("SanguineStrike"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (bSanguineStrikePrimed) { OutFailureReason = TEXT("AlreadyPrimed"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (SanguineStrikeCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.SanguineStrike"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 25.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    OutFailureReason.Reset();
+    return true;
+}
+
+bool AWyrmCharacter::ActivateSanguineStrike()
+{
+    FString Reason;
+    return CanActivateSanguineStrike(Reason) && AbilitySystem && SanguineStrikeHandle.IsValid() &&
+        AbilitySystem->TryActivateAbility(SanguineStrikeHandle);
+}
+
+bool AWyrmCharacter::CommitSanguineStrike()
+{
+    if (bSanguineStrikePrimed)
+    {
+        return false;
+    }
+    bSanguineStrikePrimed = true;
+    SanguineStrikeWindowTimer = 4.f;
+    SanguineStrikeCooldownTimer = 12.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SanguineStrikePrimed")), false);
+        if (PrimedTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PrimedTag)) AbilitySystem->AddLooseGameplayTag(PrimedTag);
+    }
+    return true;
+}
+
+float AWyrmCharacter::GetSanguineStrikeBonusDamage() const
+{
+    return bSanguineStrikePrimed && SanguineStrikeWindowTimer > 0.f && Attributes
+        ? FMath::Max(0.f, Attributes->GetPower() * 0.5f)
+        : 0.f;
+}
+
+bool AWyrmCharacter::ConsumeSanguineStrike(float ActualDamage)
+{
+    if (!bSanguineStrikePrimed || !AbilitySystem || !Attributes)
+    {
+        return false;
+    }
+
+    bSanguineStrikePrimed = false;
+    SanguineStrikeWindowTimer = 0.f;
+    static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SanguineStrikePrimed")), false);
+    if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+
+    const float HealAmount = FMath::Min(ActualDamage * 0.25f, Attributes->GetMaxHealth() * 0.12f);
+    if (HealAmount > 0.f)
+    {
+        UGameplayEffect* HealingGE = NewObject<UGameplayEffect>();
+        HealingGE->DurationPolicy = EGameplayEffectDurationType::Instant;
+        FGameplayModifierInfo ModInfo;
+        ModInfo.Attribute = UWyrmAttributeSet::GetIncomingHealingAttribute();
+        ModInfo.ModifierOp = EGameplayModOp::Additive;
+        ModInfo.ModifierMagnitude = FGameplayEffectModifierMagnitude(FScalableFloat(HealAmount));
+        HealingGE->Modifiers.Add(ModInfo);
+        AbilitySystem->ApplyGameplayEffectToSelf(HealingGE, 1.f, AbilitySystem->MakeEffectContext());
+    }
+    return true;
+}
+
+void AWyrmCharacter::RestoreSanguineStrikeState(float RemainingCooldown)
+{
+    bSanguineStrikePrimed = false;
+    SanguineStrikeWindowTimer = 0.f;
+    SanguineStrikeCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+
+    static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SanguineStrikePrimed")), false);
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.SanguineStrike")), false);
+    if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+    if (CooldownTag.IsValid())
+    {
+        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+        FGameplayTagContainer CooldownTags(CooldownTag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        if (SanguineStrikeCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+    }
+}
+
+bool AWyrmCharacter::CanActivateSecondTurn(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("SecondTurn")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("SecondTurn"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (bSecondTurnPrimed || PendingSecondTurnTarget.IsValid()) { OutFailureReason = TEXT("AlreadyPending"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (SecondTurnCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.SecondTurn"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 25.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    OutFailureReason.Reset();
+    return true;
+}
+
+bool AWyrmCharacter::ActivateSecondTurn()
+{
+    FString Reason;
+    return CanActivateSecondTurn(Reason) && AbilitySystem && SecondTurnHandle.IsValid() &&
+        AbilitySystem->TryActivateAbility(SecondTurnHandle);
+}
+
+bool AWyrmCharacter::CommitSecondTurn()
+{
+    if (bSecondTurnPrimed || PendingSecondTurnTarget.IsValid())
+    {
+        return false;
+    }
+    bSecondTurnPrimed = true;
+    SecondTurnCooldownTimer = 14.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPrimed")), false);
+        if (PrimedTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PrimedTag)) AbilitySystem->AddLooseGameplayTag(PrimedTag);
+    }
+    return true;
+}
+
+bool AWyrmCharacter::QueueSecondTurnRepeat(UAbilitySystemComponent* TargetASC, float SnapshottedBaseRawDamage)
+{
+    if (!bSecondTurnPrimed || PendingSecondTurnTarget.IsValid() || !TargetASC || SnapshottedBaseRawDamage <= 0.f)
+    {
+        return false;
+    }
+    bSecondTurnPrimed = false;
+    PendingSecondTurnTarget = TargetASC;
+    PendingSecondTurnRawDamage = SnapshottedBaseRawDamage * 0.5f;
+    SecondTurnRepeatTimer = 0.6f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPrimed")), false);
+        static const FGameplayTag PendingTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPending")), false);
+        if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+        if (PendingTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PendingTag)) AbilitySystem->AddLooseGameplayTag(PendingTag);
+    }
+    return true;
+}
+
+void AWyrmCharacter::RestoreSecondTurnState(float RemainingCooldown)
+{
+    bSecondTurnPrimed = false;
+    PendingSecondTurnTarget.Reset();
+    PendingSecondTurnRawDamage = 0.f;
+    SecondTurnRepeatTimer = 0.f;
+    SecondTurnCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+
+    static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPrimed")), false);
+    static const FGameplayTag PendingTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.SecondTurnPending")), false);
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.SecondTurn")), false);
+    if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+    if (PendingTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PendingTag);
+    if (CooldownTag.IsValid())
+    {
+        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+        FGameplayTagContainer CooldownTags(CooldownTag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        if (SecondTurnCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+    }
 }
 
 bool AWyrmCharacter::CanActivateMirrorStep(const FVector& Destination, FString& OutFailureReason) const
@@ -1780,6 +2065,32 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
                 {
                     HuntersVeilHandle = AbilitySystem->GiveAbility(
                         FGameplayAbilitySpec(UWyrmHuntersVeilAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("SanguineStrike")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.SanguineStrike")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!SanguineStrikeHandle.IsValid())
+                {
+                    SanguineStrikeHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmSanguineStrikeAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("SecondTurn")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.SecondTurn")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!SecondTurnHandle.IsValid())
+                {
+                    SecondTurnHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmSecondTurnAbility::StaticClass(), 1, INDEX_NONE, this));
                 }
             }
         }

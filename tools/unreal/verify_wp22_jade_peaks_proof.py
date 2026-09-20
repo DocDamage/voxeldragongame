@@ -398,7 +398,7 @@ def pie_tick(_delta):
             verdance.set_dragon_id("Verdance")
             data["verdance"] = verdance
             snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object(SLOT, player, adapter, world)
-            assert snapshot and snapshot.schema_version == 6
+            assert snapshot and snapshot.schema_version == 7
             regional_ids = sorted(str(item.region_id) for item in snapshot.regional_world_records)
             assert "JadePeaks" in regional_ids, regional_ids
             assert unreal.WyrmSaveSubsystem.is_schema_version_supported(4), "schema 4 backward read must remain supported"

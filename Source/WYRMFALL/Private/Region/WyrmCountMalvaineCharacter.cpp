@@ -105,6 +105,20 @@ bool AWyrmCountMalvaineCharacter::ResolveAfterLivingDefeat(AWyrmCharacter* Playe
     return ResolveInternal(PlayerCharacter, false);
 }
 
+bool AWyrmCountMalvaineCharacter::ManifestSanguineStrike(AWyrmCharacter* PlayerCharacter)
+{
+    if (!PlayerCharacter || Resolution == EWyrmMalvaineResolution::Unresolved)
+    {
+        return false;
+    }
+    UWyrmGloamingSubsystem* Region = UWyrmGloamingSubsystem::GetGloamingSubsystem(this);
+    if (!Region || !Region->RecordSanguineStrikeUnlock())
+    {
+        return false;
+    }
+    return PlayerCharacter->LearnEcho(FName(TEXT("SanguineStrike")));
+}
+
 bool AWyrmCountMalvaineCharacter::ResolveInternal(AWyrmCharacter* PlayerCharacter, bool bParley)
 {
     if (!PlayerCharacter || !bEncounterActive || Resolution != EWyrmMalvaineResolution::Unresolved)

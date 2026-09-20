@@ -1,5 +1,6 @@
 #include "Combat/Abilities/WyrmMeleeAttackAbility.h"
 #include "Combat/WyrmAttributeSet.h"
+#include "Player/WyrmCharacter.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
@@ -31,6 +32,44 @@ bool UWyrmMeleeAttackAbility::ApplyDamageEffect(UAbilitySystemComponent* SourceA
     Context.AddInstigator(SourceASC->GetAvatarActor(), SourceASC->GetAvatarActor());
 
     SourceASC->ApplyGameplayEffectToTarget(DamageGE, TargetASC, 1.f, Context);
+    return true;
+}
+
+bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage)
+{
+    if (!SourceASC || !TargetASC || InRawDamage <= 0.f)
+    {
+        return false;
+    }
+
+    AWyrmCharacter* SourceCharacter = Cast<AWyrmCharacter>(SourceASC->GetAvatarActor());
+    const UWyrmAttributeSet* TargetAttributes = Cast<UWyrmAttributeSet>(
+        TargetASC->GetAttributeSet(UWyrmAttributeSet::StaticClass()));
+    const float BonusDamage = SourceCharacter ? SourceCharacter->GetSanguineStrikeBonusDamage() : 0.f;
+    const float HealthBefore = TargetAttributes ? TargetAttributes->GetCurrentHealth() : 0.f;
+    const float ShieldBefore = TargetAttributes ? TargetAttributes->GetCurrentShield() : 0.f;
+    if (!ApplyDamageEffect(SourceASC, TargetASC, InRawDamage + BonusDamage))
+    {
+        return false;
+    }
+
+    if (SourceCharacter && TargetAttributes)
+    {
+        const float ActualHealthDamage = FMath::Max(0.f, HealthBefore - TargetAttributes->GetCurrentHealth());
+        const float ActualShieldDamage = FMath::Max(0.f, ShieldBefore - TargetAttributes->GetCurrentShield());
+        if (ActualHealthDamage + ActualShieldDamage > 0.f)
+        {
+            // Snapshot only the basic strike's pre-mitigation base. The delayed
+            // repeat excludes Sanguine and every other proc contribution.
+            SourceCharacter->QueueSecondTurnRepeat(TargetASC, InRawDamage);
+            if (BonusDamage > 0.f)
+            {
+                // The strike is consumed by a shielded hit, but only damage
+                // that reached Health can contribute to its healing.
+                SourceCharacter->ConsumeSanguineStrike(ActualHealthDamage);
+            }
+        }
+    }
     return true;
 }
 
@@ -115,7 +154,14 @@ void UWyrmMeleeAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
                     continue;
                 }
 
-                ApplyDamageEffect(SourceASC, TargetASC, RawDamage);
+                if (bIsSecondary)
+                {
+                    ApplyDamageEffect(SourceASC, TargetASC, RawDamage);
+                }
+                else
+                {
+                    ApplyEligibleWeaponDamageEffect(SourceASC, TargetASC, RawDamage);
+                }
             }
         }
     }
@@ -143,4 +189,3 @@ UWyrmSecondaryMeleeAbility::UWyrmSecondaryMeleeAbility()
     AbilityTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Melee.Secondary")), false);
     bIsSecondary = true;
 }
-

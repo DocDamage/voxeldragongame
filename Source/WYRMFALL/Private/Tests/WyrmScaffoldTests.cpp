@@ -8,6 +8,8 @@
 #include "Combat/Abilities/WyrmMoonboundFormAbility.h"
 #include "Combat/Abilities/WyrmMirrorStepAbility.h"
 #include "Combat/Abilities/WyrmHuntersVeilAbility.h"
+#include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
+#include "Combat/Abilities/WyrmSecondTurnAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
@@ -40,6 +42,8 @@
 #include "Region/WyrmRegion01Subsystem.h"
 #include "Region/WyrmJadePeaksSubsystem.h"
 #include "Region/WyrmGloamingSubsystem.h"
+#include "Region/WyrmMichaelMireCharacter.h"
+#include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
 #include "Vehicles/WyrmHovercar.h"
@@ -3539,7 +3543,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHovercarSaveSchema5Test, "WYRMFALL.Scaffol
 bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
 {
     // Schema Version Contract (VEH-07)
-    TestEqual(TEXT("CurrentSchemaVersion is 6"), UWyrmSaveGame::CurrentSchemaVersion, 6);
+    TestEqual(TEXT("CurrentSchemaVersion is 7"), UWyrmSaveGame::CurrentSchemaVersion, 7);
     TestEqual(TEXT("MinimumSupportedSchemaVersion is 1"), UWyrmSaveGame::MinimumSupportedSchemaVersion, 1);
 
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
@@ -3564,7 +3568,7 @@ bool FWyrmHovercarSaveSchema5Test::RunTest(const FString& Parameters)
         TestNotNull(TEXT("Snapshot created"), SaveObj);
         if (SaveObj)
         {
-            TestEqual(TEXT("Schema version is 6"), SaveObj->SchemaVersion, 6);
+            TestEqual(TEXT("Schema version is 7"), SaveObj->SchemaVersion, 7);
             TestTrue(TEXT("Hovercar record marked spawned"), SaveObj->HovercarRecord.bHasBeenSpawned);
             TestEqual(TEXT("Saved health is 190"), SaveObj->HovercarRecord.Health, 190.f);
             TestTrue(TEXT("Saved Mecha circuit unlocked"), SaveObj->HovercarRecord.bMechaCircuitUnlocked);
@@ -3847,6 +3851,24 @@ bool FWyrmGloamingArrivalAshgraveTest::RunTest(const FString& Parameters)
         Region->RecordMalvaineResolution(false));
     TestFalse(TEXT("Malvaine slice does not grant Sanguine Strike"),
         Region->HasFact(FName(TEXT("echo.sanguine_strike"))));
+
+    Region->ResetGloamingState();
+    TestFalse(TEXT("Hollow Twins cannot resolve before Malvaine"),
+        Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Twins route arrival commits"), Region->RecordArrival());
+    TestTrue(TEXT("Twins route Ashgrave commits"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Twins route Malvaine commits"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Compassionate release commits"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Hollow Twins common resolution fact commits"),
+        Region->HasFact(FName(TEXT("gloaming.hollow_twins_resolved"))));
+    TestTrue(TEXT("Hollow Twins release receipt commits"),
+        Region->HasReceipt(FName(TEXT("gloaming.hollow_twins.released"))));
+    TestFalse(TEXT("Hollow Twins resolution cannot duplicate through submission"),
+        Region->RecordHollowTwinsResolution(false));
+    TestFalse(TEXT("Hollow Twins slice does not grant Second Turn"),
+        Region->HasFact(FName(TEXT("echo.second_turn"))));
+    TestFalse(TEXT("Hollow Twins slice does not claim regional completion"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;
 }
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmVerdantReachClosureTest, "WYRMFALL.Scaffold.VerdantReachClosure",
@@ -3881,8 +3903,173 @@ bool FWyrmVerdantReachClosureTest::RunTest(const FString& Parameters)
     UWyrmHuntersVeilAbility* Ability = NewObject<UWyrmHuntersVeilAbility>();
     TestEqual(TEXT("Hunter's Veil costs 25 Focus"), Ability->FocusCost, 25.f);
     TestEqual(TEXT("Hunter's Veil cooldown is 16 seconds"), Ability->CooldownDuration, 16.f);
-    TestEqual(TEXT("Schema 6 is current"), UWyrmSaveGame::CurrentSchemaVersion, 6);
+    TestEqual(TEXT("Schema 7 is current"), UWyrmSaveGame::CurrentSchemaVersion, 7);
     TestTrue(TEXT("Schema 5 remains supported"), UWyrmSaveSubsystem::IsSchemaVersionSupported(5));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmSanguineStrikeContractTest, "WYRMFALL.Scaffold.SanguineStrikeContract",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmSanguineStrikeContractTest::RunTest(const FString& Parameters)
+{
+    UWyrmSanguineStrikeAbility* Ability = NewObject<UWyrmSanguineStrikeAbility>();
+    TestNotNull(TEXT("Sanguine Strike ability exists"), Ability);
+    TestEqual(TEXT("Sanguine Strike costs 25 Focus"), Ability->FocusCost, 25.f);
+    TestEqual(TEXT("Sanguine Strike cooldown is 12 seconds"), Ability->CooldownDuration, 12.f);
+    TestEqual(TEXT("Sanguine Strike ability tag"), Ability->AbilityTag.GetTagName(), FName(TEXT("Ability.Echo.SanguineStrike")));
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region)
+    {
+        return false;
+    }
+
+    Region->ResetGloamingState();
+    TestFalse(TEXT("Echo cannot manifest before Malvaine resolves"), Region->RecordSanguineStrikeUnlock());
+    TestTrue(TEXT("Parley route arrival"), Region->RecordArrival());
+    TestTrue(TEXT("Parley route Ashgrave seal"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Parley route Malvaine resolution"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Parley route can manifest Sanguine Strike"), Region->RecordSanguineStrikeUnlock());
+    TestTrue(TEXT("Permanent Echo fact commits"), Region->HasFact(FName(TEXT("echo.sanguine_strike"))));
+    TestTrue(TEXT("One-time manifestation receipt commits"),
+        Region->HasReceipt(FName(TEXT("gloaming.malvaine.sanguine_strike_manifested"))));
+    TestFalse(TEXT("Manifestation cannot duplicate"), Region->RecordSanguineStrikeUnlock());
+
+    Region->ResetGloamingState();
+    TestTrue(TEXT("Combat route arrival"), Region->RecordArrival());
+    TestTrue(TEXT("Combat route Ashgrave seal"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Living-defeat route Malvaine resolution"), Region->RecordMalvaineResolution(false));
+    TestTrue(TEXT("Living-defeat route has equal Echo eligibility"), Region->RecordSanguineStrikeUnlock());
+    TestFalse(TEXT("Sanguine slice does not grant Second Turn"), Region->HasFact(FName(TEXT("echo.second_turn"))));
+    TestFalse(TEXT("Sanguine slice does not claim regional completion"), Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmSecondTurnContractTest, "WYRMFALL.Scaffold.SecondTurnContract",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmSecondTurnContractTest::RunTest(const FString& Parameters)
+{
+    UWyrmSecondTurnAbility* Ability = NewObject<UWyrmSecondTurnAbility>();
+    TestNotNull(TEXT("Second Turn ability exists"), Ability);
+    TestEqual(TEXT("Second Turn costs 25 Focus"), Ability->FocusCost, 25.f);
+    TestEqual(TEXT("Second Turn cooldown is 14 seconds"), Ability->CooldownDuration, 14.f);
+    TestEqual(TEXT("Second Turn ability tag"), Ability->AbilityTag.GetTagName(), FName(TEXT("Ability.Echo.SecondTurn")));
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region)
+    {
+        return false;
+    }
+
+    Region->ResetGloamingState();
+    TestFalse(TEXT("Second Turn cannot manifest before the Twins resolve"), Region->RecordSecondTurnUnlock());
+    TestTrue(TEXT("Release route arrival"), Region->RecordArrival());
+    TestTrue(TEXT("Release route Ashgrave seal"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Release route Malvaine"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Compassionate-release route Twins"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Release route can manifest Second Turn"), Region->RecordSecondTurnUnlock());
+    TestTrue(TEXT("Permanent Second Turn fact commits"), Region->HasFact(FName(TEXT("echo.second_turn"))));
+    TestTrue(TEXT("One-time Second Turn receipt commits"),
+        Region->HasReceipt(FName(TEXT("gloaming.hollow_twins.second_turn_manifested"))));
+    TestFalse(TEXT("Second Turn manifestation cannot duplicate"), Region->RecordSecondTurnUnlock());
+
+    Region->ResetGloamingState();
+    TestTrue(TEXT("Submission route arrival"), Region->RecordArrival());
+    TestTrue(TEXT("Submission route Ashgrave seal"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Submission route Malvaine"), Region->RecordMalvaineResolution(false));
+    TestTrue(TEXT("Living-submission route Twins"), Region->RecordHollowTwinsResolution(false));
+    TestTrue(TEXT("Living-submission route has equal Echo eligibility"), Region->RecordSecondTurnUnlock());
+    TestFalse(TEXT("Second Turn slice does not claim regional completion"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmGloamingTravelSaveRecoveryTest, "WYRMFALL.Scaffold.GloamingTravelSaveRecovery",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmGloamingTravelSaveRecoveryTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmWorldTravelSubsystem* Travel = NewObject<UWyrmWorldTravelSubsystem>(TestGI);
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Existing travel owner created"), Travel);
+    TestNotNull(TEXT("Gloaming owner created"), Region);
+    if (!Travel || !Region) return false;
+
+    TestEqual(TEXT("Gloaming map resolves to stable region id"),
+        UWyrmWorldTravelSubsystem::RegionIdForMapName(TEXT("UEDPIE_0_L_GloamingMarches")),
+        FName(TEXT("GloamingMarches")));
+    TestTrue(TEXT("Region01 to Gloaming route is allowlisted"),
+        Travel->IsAllowedRoute(FName(TEXT("Region01")), FName(TEXT("GloamingMarches"))));
+    TestTrue(TEXT("Gloaming humanoid return is allowlisted"),
+        Travel->IsAllowedRoute(FName(TEXT("GloamingMarches")), FName(TEXT("Region01"))));
+    TestFalse(TEXT("Arbitrary Jade-to-Gloaming shortcut is rejected"),
+        Travel->IsAllowedRoute(FName(TEXT("JadePeaks")), FName(TEXT("GloamingMarches"))));
+    TestFalse(TEXT("Wrong Gloaming return landmark is rejected"),
+        Travel->PrepareTravel(FName(TEXT("GloamingMarches")), FName(TEXT("Region01")), FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Authored Gloaming return landmark prepares"),
+        Travel->PrepareTravel(FName(TEXT("GloamingMarches")), FName(TEXT("Region01")), FName(TEXT("LM-GLOAMING-RETURN"))));
+    TestTrue(TEXT("Region01 arrival validates"),
+        Travel->CompleteArrival(FName(TEXT("Region01")), FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Authored outward route prepares"),
+        Travel->PrepareTravel(FName(TEXT("Region01")), FName(TEXT("GloamingMarches")), FName(TEXT("LM-ARRIVAL"))));
+    TestTrue(TEXT("Gloaming arrival validates"),
+        Travel->CompleteArrival(FName(TEXT("GloamingMarches")), FName(TEXT("LM-GLOAMING-ARRIVAL"))));
+
+    TestTrue(TEXT("Save route arrival"), Region->RecordArrival());
+    TestTrue(TEXT("Save route Ashgrave"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Save route Malvaine"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Save route Sanguine"), Region->RecordSanguineStrikeUnlock());
+    TestTrue(TEXT("Save route Twins"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Save route Second Turn"), Region->RecordSecondTurnUnlock());
+    FWyrmGloamingSaveRecord Record;
+    Region->BuildSaveRecord(Record);
+    Record.KnownFacts.Add(FName(TEXT("echo.second_turn")));
+    Record.KnownFacts.Add(NAME_None);
+    Record.FactReceipts.Add(FName(TEXT("gloaming.hollow_twins.second_turn_manifested")));
+    Region->ResetGloamingState();
+    Region->RestoreFromSaveRecord(Record);
+    TestTrue(TEXT("Sanguine fact restores"), Region->HasFact(FName(TEXT("echo.sanguine_strike"))));
+    TestTrue(TEXT("Second Turn fact restores"), Region->HasFact(FName(TEXT("echo.second_turn"))));
+    TestFalse(TEXT("Travel/save slice does not claim completion"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+
+    TestEqual(TEXT("Schema 7 is current for Gloaming recovery"), UWyrmSaveGame::CurrentSchemaVersion, 7);
+    for (int32 Version = 1; Version <= 7; ++Version)
+    {
+        TestTrue(FString::Printf(TEXT("Schema %d remains readable"), Version),
+            UWyrmSaveSubsystem::IsSchemaVersionSupported(Version));
+    }
+    TestFalse(TEXT("Future Schema 8 is rejected"), UWyrmSaveSubsystem::IsSchemaVersionSupported(8));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmMichaelMireEncounterTest, "WYRMFALL.Scaffold.GloamingMichaelMireEncounter",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmMichaelMireEncounterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Michael Mire resolution rejects before Hollow Twins"),
+        Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael Mire commits once"), Region->RecordMichaelMireResolution());
+    TestFalse(TEXT("Michael Mire duplicate rejects"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Michael Mire fact recorded"),
+        Region->HasFact(FName(TEXT("gloaming.michael_mire_resolved"))));
+    TestTrue(TEXT("Michael Mire receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.michael_mire.living_submission"))));
+    TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;
 }
 #endif

@@ -8,6 +8,7 @@
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Region/WyrmRegion01Subsystem.h"
 #include "Region/WyrmJadePeaksSubsystem.h"
+#include "Region/WyrmGloamingSubsystem.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Vehicles/WyrmHovercar.h"
 #include "EngineUtils.h"
@@ -194,6 +195,8 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.bHuntersVeilActive = Character->IsHuntersVeilActive();
         SaveObj->CharacterRecord.HuntersVeilRemainingDuration = Character->GetHuntersVeilRemainingDuration();
         SaveObj->CharacterRecord.HuntersVeilRemainingCooldown = Character->GetHuntersVeilRemainingCooldown();
+        SaveObj->CharacterRecord.SanguineStrikeRemainingCooldown = Character->GetSanguineStrikeRemainingCooldown();
+        SaveObj->CharacterRecord.SecondTurnRemainingCooldown = Character->GetSecondTurnRemainingCooldown();
 
         if (Inv)
         {
@@ -304,6 +307,11 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
     if (UWyrmJadePeaksSubsystem* JadePeaks = UWyrmJadePeaksSubsystem::GetJadePeaksSubsystem(WorldContext))
     {
         JadePeaks->BuildSaveRecord(SaveObj->JadePeaksRecord);
+    }
+
+    if (UWyrmGloamingSubsystem* Gloaming = UWyrmGloamingSubsystem::GetGloamingSubsystem(WorldContext))
+    {
+        Gloaming->BuildSaveRecord(SaveObj->GloamingRecord);
     }
 
     // Capture active Dragon Companion / Boss (DRG-01..04, SAVE-08)
@@ -501,6 +509,8 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             SaveObj->CharacterRecord.bHuntersVeilActive,
             SaveObj->CharacterRecord.HuntersVeilRemainingDuration,
             SaveObj->CharacterRecord.HuntersVeilRemainingCooldown);
+        Character->RestoreSanguineStrikeState(SaveObj->CharacterRecord.SanguineStrikeRemainingCooldown);
+        Character->RestoreSecondTurnState(SaveObj->CharacterRecord.SecondTurnRemainingCooldown);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)
@@ -555,6 +565,11 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
         if (UWyrmJadePeaksSubsystem* JadePeaks = UWyrmJadePeaksSubsystem::GetJadePeaksSubsystem(WorldContext))
         {
             JadePeaks->RestoreFromSaveRecord(SaveObj->JadePeaksRecord);
+        }
+
+        if (UWyrmGloamingSubsystem* Gloaming = UWyrmGloamingSubsystem::GetGloamingSubsystem(WorldContext))
+        {
+            Gloaming->RestoreFromSaveRecord(SaveObj->GloamingRecord);
         }
 
         if (UWyrmWorldTravelSubsystem* Travel = UWyrmWorldTravelSubsystem::GetWorldTravelSubsystem(WorldContext))

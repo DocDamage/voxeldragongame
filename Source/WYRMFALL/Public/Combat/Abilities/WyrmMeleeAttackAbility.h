@@ -33,6 +33,10 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Combat")
     static bool ApplyDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage);
+
+    /** Basic weapon-hit path that alone may consume a primed Sanguine Strike. */
+    UFUNCTION(BlueprintCallable, Category="Combat")
+    static bool ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage);
 };
 
 // Light basic melee attack (0 Focus cost, 0 cooldown)

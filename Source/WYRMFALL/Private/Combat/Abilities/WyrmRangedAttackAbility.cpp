@@ -29,7 +29,7 @@ AWyrmProjectile* UWyrmRangedAttackAbility::SpawnProjectile(AActor* Avatar, UAbil
     AWyrmProjectile* Proj = World->SpawnActor<AWyrmProjectile>(ProjectileClass, SpawnLoc, SpawnRot, SpawnParams);
     if (Proj)
     {
-        Proj->InitializeProjectile(Avatar, SourceASC, InRawDamage, Forward);
+        Proj->InitializeProjectile(Avatar, SourceASC, InRawDamage, Forward, !bIsSecondary);
     }
     return Proj;
 }
@@ -69,6 +69,7 @@ UWyrmPrimaryRangedAbility::UWyrmPrimaryRangedAbility()
     FocusCost = 0.f;
     CooldownDuration = 0.f;
     AbilityTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Ranged.Basic")), false);
+    bIsSecondary = false;
 }
 
 UWyrmSecondaryRangedAbility::UWyrmSecondaryRangedAbility()
@@ -79,4 +80,5 @@ UWyrmSecondaryRangedAbility::UWyrmSecondaryRangedAbility()
     CooldownDuration = 5.0f; // 5-second cooldown
     CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Ranged.Secondary")), false);
     AbilityTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Ability.Ranged.Secondary")), false);
+    bIsSecondary = true;
 }

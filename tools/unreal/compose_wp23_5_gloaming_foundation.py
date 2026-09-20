@@ -175,6 +175,12 @@ def main():
     for label, location in route:
         anchor = actors.spawn_actor_from_class(unreal.TargetPoint, unreal.Vector(*location))
         anchor.set_actor_label(label)
+    for label, location in (
+        ("LM-GLOAMING-ARRIVAL", (-5000, -3400, SURFACE_Z)),
+        ("LM-GLOAMING-RETURN", (-4550, -3050, SURFACE_Z)),
+    ):
+        travel_anchor = actors.spawn_actor_from_class(unreal.TargetPoint, unreal.Vector(*location))
+        travel_anchor.set_actor_label(label)
     actors.spawn_actor_from_class(unreal.PlayerStart, unreal.Vector(-5000, -3400, SURFACE_Z + 96)).set_actor_label("PlayerStart_GloamingArrival")
     arrival_trigger = actors.spawn_actor_from_class(
         unreal.WyrmGloamingArrivalTrigger, unreal.Vector(-5000, -3400, SURFACE_Z + 100))
@@ -208,6 +214,16 @@ def main():
     malvaine = actors.spawn_actor_from_class(
         unreal.WyrmCountMalvaineCharacter, unreal.Vector(650, -250, SURFACE_Z + 90), unreal.Rotator(0, 0, 180))
     malvaine.set_actor_label("GLM_ENCOUNTER_CountMalvaine")
+    morrow = actors.spawn_actor_from_class(
+        unreal.WyrmHollowTwinCharacter, unreal.Vector(3600, 2050, SURFACE_Z + 90), unreal.Rotator(0, 0, 150))
+    morrow.set_actor_label("GLM_ENCOUNTER_HollowTwinMorrow")
+    morrow.set_editor_property("twin_identity", unreal.WyrmHollowTwinIdentity.MORROW)
+    mourn = actors.spawn_actor_from_class(
+        unreal.WyrmHollowTwinCharacter, unreal.Vector(4200, 2050, SURFACE_Z + 90), unreal.Rotator(0, 0, -150))
+    mourn.set_actor_label("GLM_ENCOUNTER_HollowTwinMourn")
+    mourn.set_editor_property("twin_identity", unreal.WyrmHollowTwinIdentity.MOURN)
+    morrow.set_editor_property("partner", mourn)
+    mourn.set_editor_property("partner", morrow)
 
     # Cool pools preserve the horror palette while making the critical route silhouettes readable.
     for label, location, color, intensity, radius in (
@@ -232,7 +248,8 @@ def main():
         "terrain_material": ground.get_path_name(), "surface_z": SURFACE_Z,
         "route_anchors": [label for label, _ in route], "supplied_placements": placed,
         "gameplay_actors": [
-            arrival_trigger.get_actor_label(), ashgrave_seal.get_actor_label(), malvaine.get_actor_label()],
+            arrival_trigger.get_actor_label(), ashgrave_seal.get_actor_label(), malvaine.get_actor_label(),
+            morrow.get_actor_label(), mourn.get_actor_label()],
         "nav_bounds_extent_cm": list(nav_extent.to_tuple()),
         "not_claimed": ["encounters", "region completion", "interactive walkthrough"],
     }, indent=2) + "\n", encoding="utf-8")

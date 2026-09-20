@@ -20,9 +20,9 @@ source candidates and stay fail-closed under DRG-15.
 
 | Order | Child | Evidence-backed state | Exact gate |
 |---:|---|---|---|
-| 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under Schema 6 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
-| 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, rendered QA, and Schema 6 recovery. |
-| 3 | WP-23.5 Gloaming Marches | **MALVAINE ENCOUNTER PASS / LATER GAMEPLAY GATED** | Nyxaroth, content fixture, foundation, Arrival→Ashgrave, and Count Malvaine pass. Parley and GAS-driven living submission commit distinct one-time routes with shared resolution and no Echo leakage. Hollow Twins, Echoes, travel/save recovery, and completion remain gated. |
+| 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under current Schema 7 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
+| 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed and were rerun under current Schema 7 with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, and rendered QA. |
+| 3 | WP-23.5 Gloaming Marches | **MICHAEL MIRE PASS / COMPLETION GATED** | Nyxaroth, content fixture, foundation, Arrival→Ashgrave, Count Malvaine, distinct Morrow/Mourn, optional Sanguine Strike/Second Turn, two-way Region01↔Gloaming recovery, and the 17-part Michael Mire living-submission encounter pass. Further required-horror gameplay breadth and completion remain gated. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -38,7 +38,8 @@ ordering may change when a blocker is cleared by real evidence.
 ## Travel/save contract for regional children
 
 WP-23.2 introduced the bounded `UWyrmWorldTravelSubsystem` owner with only the
-Region01↔JadePeaks routes. `UWyrmSaveSubsystem` Schema 6 remains the sole save
+Region01↔JadePeaks and Region01↔GloamingMarches routes. `UWyrmSaveSubsystem`
+Schema 7 remains the sole save
 coordinator and now owns region-keyed terrain/camp records, current travel
 region/arrival data, the existing character/inventory/dragon/vehicle records,
 and both regional fact records. Later work extends these owners rather than
@@ -62,9 +63,10 @@ contract:
 5. Regional facts and one-time rewards commit only after successful arrival or
    the authored interaction—not when travel is requested. Duplicate travel and
    reload cannot duplicate a dragon, reward, camp piece, or hovercar.
-6. Full-world persistence uses the Schema 6 record, retaining the Schema 5
-   region-keyed terrain/camp array plus current region and arrival/return
-   identifiers and adding Hunter's Veil state. Schemas 1–5 remain accepted;
+6. Full-world persistence uses the Schema 7 record, retaining the Schema 6
+   region-keyed terrain/camp array, current region and arrival/return identifiers,
+   and earlier Echo state while adding Gloaming facts/receipts plus Sanguine
+   Strike and Second Turn cooldowns. Schemas 1–6 remain accepted;
    later regions must extend this contract without another save owner.
 7. Inactive dragons remain saved by stable `DragonId`; destination restoration
    may spawn only a known validated profile. DRG-15 remains fail-closed.
@@ -81,7 +83,7 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Build a bounded **Hollow Twins encounter slice** described in
-[WP-23.5](tasks/WP-23.5.md), using two distinct authored identities and the
-existing Gloaming fact owner. Keep Second Turn, travel/save recovery, and
-regional completion outside that slice.
+Inspect and author one additional required-horror identity from the supplied
+roster, proceeding only after its production presentation and provenance gates
+clear. Keep regional completion outside that slice; see
+[WP-23.5](tasks/WP-23.5.md).

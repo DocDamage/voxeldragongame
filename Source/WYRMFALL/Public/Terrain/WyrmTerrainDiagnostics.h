@@ -20,6 +20,10 @@ public:
     UFUNCTION(BlueprintCallable, Category="WYRMFALL|Development", meta=(DevelopmentOnly))
     static bool ProjectNavigationPoint(AActor* WorldActor, FVector Point, FVector QueryExtent, FVector& Projected);
 
+    // Avoid Python's class-default-object access on NavigationSystemV1 (Within=World).
+    UFUNCTION(BlueprintCallable, Category="WYRMFALL|Development", meta=(DevelopmentOnly))
+    static int32 FindCompleteNavigationPathPointCount(AActor* WorldActor, FVector Start, FVector End);
+
     UFUNCTION(BlueprintCallable, Category="WYRMFALL|Development", meta=(DevelopmentOnly))
     static bool IsNavigationBuildPending(AActor* WorldActor);
 };

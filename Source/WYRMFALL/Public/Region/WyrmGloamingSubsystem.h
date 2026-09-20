@@ -2,9 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Region/WyrmGloamingTypes.h"
 #include "WyrmGloamingSubsystem.generated.h"
 
-/** Bounded Gloaming Marches fact owner; persistence remains out of scope for this slice. */
+/** Bounded Gloaming Marches fact owner; UWyrmSaveSubsystem owns persistence. */
 UCLASS(BlueprintType, Category="WYRMFALL|Gloaming")
 class WYRMFALL_API UWyrmGloamingSubsystem : public UGameInstanceSubsystem
 {
@@ -28,14 +29,30 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|Malvaine")
     bool RecordMalvaineResolution(bool bParley);
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|HollowTwins")
+    bool RecordHollowTwinsResolution(bool bReleased);
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|MichaelMire")
+    bool RecordMichaelMireResolution();
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
+    bool RecordSanguineStrikeUnlock();
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
+    bool RecordSecondTurnUnlock();
+
     UFUNCTION(BlueprintPure, Category="Gloaming|Facts")
     bool HasFact(FName FactId) const;
 
     UFUNCTION(BlueprintPure, Category="Gloaming|Facts")
     bool HasReceipt(FName ReceiptId) const;
 
+    void BuildSaveRecord(FWyrmGloamingSaveRecord& OutRecord) const;
+    void RestoreFromSaveRecord(const FWyrmGloamingSaveRecord& InRecord);
+
 private:
     bool CommitFact(FName FactId, FName ReceiptId);
+    void NormalizeRestoredState();
 
     UPROPERTY(VisibleInstanceOnly, Category="Gloaming")
     TArray<FName> KnownFacts;
