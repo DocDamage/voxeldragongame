@@ -41,6 +41,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Gloaming|Pleatherface")
     bool RecordPleatherfaceResolution();
 
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Wherewolf")
+    bool RecordWherewolfResolution();
+
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
 

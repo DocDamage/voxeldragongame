@@ -45,6 +45,7 @@
 #include "Region/WyrmMichaelMireCharacter.h"
 #include "Region/WyrmMacheteMasonCharacter.h"
 #include "Region/WyrmPleatherfaceCharacter.h"
+#include "Region/WyrmWherewolfCharacter.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
@@ -4123,6 +4124,33 @@ bool FWyrmPleatherfaceEncounterTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Pleatherface fact recorded"), Region->HasFact(FName(TEXT("gloaming.pleatherface_resolved"))));
     TestTrue(TEXT("Pleatherface receipt recorded"),
         Region->HasReceipt(FName(TEXT("gloaming.pleatherface.disarmed_submission"))));
+    TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmWherewolfEncounterTest, "WYRMFALL.Scaffold.GloamingWherewolfEncounter",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmWherewolfEncounterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Wherewolf rejects before Pleatherface"), Region->RecordWherewolfResolution());
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete prerequisite"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Pleatherface prerequisite"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Wherewolf commits once"), Region->RecordWherewolfResolution());
+    TestFalse(TEXT("Wherewolf duplicate rejects"), Region->RecordWherewolfResolution());
+    TestTrue(TEXT("Wherewolf fact recorded"), Region->HasFact(FName(TEXT("gloaming.wherewolf_resolved"))));
+    TestTrue(TEXT("Wherewolf receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.wherewolf.calmed_submission"))));
     TestFalse(TEXT("Bounded horror slice does not complete region"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;
