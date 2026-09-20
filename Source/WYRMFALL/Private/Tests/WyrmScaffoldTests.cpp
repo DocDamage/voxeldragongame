@@ -4371,4 +4371,88 @@ bool FWyrmRequiredHorrorRosterTest::RunTest(const FString& Parameters)
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmGloamingRegionalCompletionTest, "WYRMFALL.Scaffold.GloamingRegionalCompletion",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmGloamingRegionalCompletionTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    UWyrmWorldTravelSubsystem* Travel = NewObject<UWyrmWorldTravelSubsystem>(TestGI);
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 6500.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Nyxaroth = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 6500.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Regional closure dependencies created"), Region && Travel && Player && Nyxaroth ? Region : nullptr);
+    if (!Region || !Travel || !Player || !Nyxaroth) return false;
+
+    FWyrmWorldTravelSaveRecord TravelRecord;
+    TravelRecord.CurrentRegionId = FName(TEXT("GloamingMarches"));
+    TravelRecord.ArrivalLandmarkId = FName(TEXT("LM-GLOAMING-ARRIVAL"));
+    Travel->RestoreFromSaveRecord(TravelRecord);
+    Nyxaroth->SetDragonId(FName(TEXT("Nyxaroth")));
+
+    TestFalse(TEXT("Closure rejects before roster and bond"), Region->RecordRegionalCompletion(Nyxaroth, Travel));
+    FWyrmGloamingSaveRecord MalformedFinalOnly;
+    MalformedFinalOnly.KnownFacts.Add(FName(TEXT("gloaming.pyre_midhead_resolved")));
+    Region->RestoreFromSaveRecord(MalformedFinalOnly);
+    TestFalse(TEXT("Final fact alone cannot bypass the complete roster"),
+        Region->RecordRegionalCompletion(Nyxaroth, Travel));
+    Region->ResetGloamingState();
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete prerequisite"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Pleatherface prerequisite"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Wherewolf prerequisite"), Region->RecordWherewolfResolution());
+    TestTrue(TEXT("Annie Wails prerequisite"), Region->RecordAnnieWailsResolution());
+    TestTrue(TEXT("Scarrie prerequisite"), Region->RecordScarrieResolution());
+    TestTrue(TEXT("Chuckles prerequisite"), Region->RecordChucklesResolution());
+    TestTrue(TEXT("Count Dripula prerequisite"), Region->RecordCountDripulaResolution());
+    TestTrue(TEXT("Frank N. Shrine prerequisite"), Region->RecordFrankNShrineResolution());
+    const EWyrmRequiredHorrorIdentity Identities[] = {
+        EWyrmRequiredHorrorIdentity::AilYen, EWyrmRequiredHorrorIdentity::Bellraiser,
+        EWyrmRequiredHorrorIdentity::SadEcho, EWyrmRequiredHorrorIdentity::Dreadator,
+        EWyrmRequiredHorrorIdentity::Roastface, EWyrmRequiredHorrorIdentity::GravyDaughters,
+        EWyrmRequiredHorrorIdentity::Knit, EWyrmRequiredHorrorIdentity::Canniball,
+        EWyrmRequiredHorrorIdentity::MumsTheWyrd, EWyrmRequiredHorrorIdentity::DreadyFreddie,
+        EWyrmRequiredHorrorIdentity::PyreMidhead};
+    for (EWyrmRequiredHorrorIdentity Identity : Identities)
+    {
+        TestTrue(TEXT("Required horror prerequisite"), Region->RecordRequiredHorrorResolution(Identity));
+    }
+    TestFalse(TEXT("Roster alone cannot complete without bond"), Region->RecordRegionalCompletion(Nyxaroth, Travel));
+    TestTrue(TEXT("Nyxaroth living defeat"), Nyxaroth->PerformBossDefeat());
+    TestTrue(TEXT("Nyxaroth voluntary bond"), Nyxaroth->BondWithHumanoid(Player));
+    TestTrue(TEXT("Completion does not require optional Echo unlocks"),
+        !Region->HasFact(FName(TEXT("echo.sanguine_strike"))) && !Region->HasFact(FName(TEXT("echo.second_turn"))));
+    TestTrue(TEXT("Regional completion commits once"), Region->RecordRegionalCompletion(Nyxaroth, Travel));
+    TestFalse(TEXT("Regional completion duplicate rejects"), Region->RecordRegionalCompletion(Nyxaroth, Travel));
+    TestTrue(TEXT("Regional completion fact recorded"), Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    TestTrue(TEXT("Regional completion receipt recorded"),
+        Region->HasReceipt(FName(TEXT("gloaming.region.completion_committed"))));
+
+    Nyxaroth->Destroy();
+    Player->Destroy();
+    return true;
+}
 #endif

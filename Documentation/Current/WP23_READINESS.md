@@ -22,7 +22,7 @@ source candidates and stay fail-closed under DRG-15.
 |---:|---|---|---|
 | 1 | WP-23.2 Jade Peaks closure | **COMPLETE** | JC-01..08 passed and were rerun under current Schema 7 with supplied King art, pact/disciple route parity, Unseen Hand, and two-route travel. |
 | 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed and were rerun under current Schema 7 with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, and rendered QA. |
-| 3 | WP-23.5 Gloaming Marches | **REQUIRED-HORROR ROSTER COMPLETE / REGIONAL COMPLETION GATED** | All 20 supplied identities have runtime encounters; the remaining eleven-identity proof passed 183 unique parts, eleven navigable legs, GAS living submissions, Schema 7 restoration, and no new Echo/completion leakage. Regional completion remains a separate closure task. |
+| 3 | WP-23.5 Gloaming Marches | **COMPLETE** | All 20 supplied identities, optional Echo paths, validated bonded Nyxaroth, navigation, two-way travel, and Schema 7 recovery passed. Completion commits once after the full roster and safe-return context, without taxing either optional Echo. |
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
@@ -83,6 +83,6 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Author the bounded Gloaming regional-completion closure with full prerequisite,
-Nyxaroth, navigation, travel/return, and Schema 7 recovery evidence; see
-[WP-23.5](tasks/WP-23.5.md).
+Run a bounded WP-23.6 readiness pass for Cogspire Harbor: validate the supplied
+Steampunk Dragon/Cogfang rig candidate and identify exact supplied content for
+the ruler, harbor, city-engine, and urban encounters before gameplay work.

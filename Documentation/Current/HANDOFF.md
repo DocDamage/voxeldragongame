@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 69/69 tests with 0 failures.
+- Full scaffold native automation completed 70/70 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -62,6 +62,7 @@ settings out of commits.
 - WP-23.5 Count Dripula passed in live PIE: all 16 supplied `Dracula` static parts form a distinct 184 cm presentation with capsule-owned collision and bounded courtly sway; activation rejects before Chuckles; six GAS hits reach the bloodless-surrender threshold at 200/800 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The rendered frame passed purple/black identity silhouette, grounding, shadow, scale contrast, and cathedral context. See `Documentation/Current/WP23_5_COUNT_DRIPULA_SLICE_PROOF.md`.
 - WP-23.5 Frank N. Shrine passed in live PIE: all 16 supplied `Frankenstein` static parts form a distinct 202 cm large-bodied presentation with capsule-owned collision and bounded slow, heavy sway; activation rejects before Count Dripula; six GAS hits reach the grounded-submission threshold at 210/840 HP; the one-time fact/receipt restores through Schema 7; and no Echo or completion leaks. The rendered frame passed supplied identity silhouette, grounding, shadow, scale, and cathedral context. See `Documentation/Current/WP23_5_FRANK_N_SHRINE_SLICE_PROOF.md`.
 - WP-23.5 required-horror roster is complete: Ail-Yen, Bellraiser, Sad Echo, Dreadator, Roastface, the separately staged Gravy Daughters, Knit, Canniball, Mum's the Wyrd, Dready Freddie, and Pyre-Midhead add all 183 remaining unique supplied parts across distinct 148–220 cm presentations. Live PIE passed eleven ordered navigable legs, six GAS applications per identity to living submission, duplicate rejection, all eleven Schema 7 restores, and no new Echo/completion leakage. All 20 supplied source identities now have accepted runtime encounters. See `Documentation/Current/WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md`.
+- WP-23.5 Gloaming regional completion passed in live PIE: the full encounter ledger, validated bonded Nyxaroth, authored Gloaming arrival, and allowlisted Region01 return route are mandatory; optional Sanguine Strike and Second Turn are not. The fact/receipt commits once, the final encounter-to-return path is navigable, Region01 return/re-entry remains valid, and Schema 7 restores the completion state with exactly one bonded Nyxaroth. WP-23.5 is COMPLETE. See `Documentation/Current/WP23_5_GLOAMING_COMPLETION_PROOF.md`.
 - WP-21 real PIE passed all 4 Moonbound transformation proof cases (`ECHO-07..09`, `SAVE-11`):
   - `ECHO-07.MercyParity`: Ser Corvyn encounter resolution via both hostile defeat path and authored cure/mercy path yielding identical capabilities (`Unlock.Echo.MoonboundForm`, `echo.moonbound_form` fact) and ordinary loot (`Item_CorvynRelic`) with zero penalty for mercy, full-bag safety, and strict idempotency.
   - `ECHO-08.ActualBeast`: Genuine wolf mesh presentation (`wolf1`), 700 cm/s speed, passive stats retained, active weapon attacks suppressed, authoritative beast kit (Claw 25 dmg, Pounce 35 dmg), and clean restoration of original created humanoid.
@@ -344,7 +345,7 @@ Evidence:
   boundary does not override the recorded deterministic PIE evidence. See
   `Documentation/Current/WP22_VISUAL_QA.md`.
 - WP-23 is user-authorized as the rest-of-world umbrella and split into
-  WP-23.0–23.13. WP-23.0, WP-23.1, and WP-23.2 are COMPLETE. Nyxaroth's distinct
+  WP-23.0–23.13. WP-23.0, WP-23.1, WP-23.2, and WP-23.5 are COMPLETE. Nyxaroth's distinct
   profile and the representative Cathedral/Michael Mire content fixture pass.
   The Gloaming production environment/navigation foundation and bounded
   Arrival-to-Ashgrave gameplay slice, Count Malvaine encounter, and distinct
@@ -367,14 +368,15 @@ Evidence:
   Shrine follows with a 16-part, 202 cm GAS grounded-submission encounter and
   one-time Schema 7 restoration. The remaining eleven supplied identities then
   close the required-horror roster with 183 unique parts, ordered GAS living
-  submissions, and one-time Schema 7 restoration. Regional completion remains
-  a separate closure task.
+  submissions, and one-time Schema 7 restoration. The regional completion
+  closure now also passes with bonded-Nyxaroth, safe-return, optional-Echo, and
+  duplicate-recovery gates intact.
 
 ## Next bounded task
 
-Author the bounded Gloaming regional-completion closure now that the supplied
-required-horror roster is complete. Prove all prerequisites, Nyxaroth
-continuity, navigation, travel/return, and Schema 7 recovery.
+Run the bounded WP-23.6 Cogspire Harbor readiness gate: validate the supplied
+Steampunk Dragon/Cogfang rig candidate and identify exact supplied ruler,
+harbor, city-engine, and urban-encounter content before gameplay authoring.
 Mutable remains creator, GAS remains combat authority, and
 `UWyrmSaveSubsystem` remains the sole persistence coordinator. See
-`Documentation/Current/tasks/WP-23.5.md`.
+`Documentation/Current/WP23_READINESS.md`.

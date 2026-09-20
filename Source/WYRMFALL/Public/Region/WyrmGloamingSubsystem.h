@@ -5,6 +5,9 @@
 #include "Region/WyrmGloamingTypes.h"
 #include "WyrmGloamingSubsystem.generated.h"
 
+class AWyrmDragonCharacter;
+class UWyrmWorldTravelSubsystem;
+
 UENUM(BlueprintType)
 enum class EWyrmRequiredHorrorIdentity : uint8
 {
@@ -80,6 +83,13 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|RequiredHorror")
     bool RecordRequiredHorrorResolution(EWyrmRequiredHorrorIdentity Identity);
+
+    /** Commits the one-time regional closure only after the roster, bonded Nyxaroth, and safe return route are present. */
+    UFUNCTION(BlueprintPure, Category="Gloaming|Completion")
+    bool CanCompleteRegion(const AWyrmDragonCharacter* Nyxaroth, const UWyrmWorldTravelSubsystem* Travel) const;
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|Completion")
+    bool RecordRegionalCompletion(AWyrmDragonCharacter* Nyxaroth, UWyrmWorldTravelSubsystem* Travel);
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();

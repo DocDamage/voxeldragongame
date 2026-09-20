@@ -2,6 +2,9 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "Dragon/WyrmDragonCharacter.h"
+#include "Region/WyrmWorldTravelSubsystem.h"
+#include "Algo/AllOf.h"
 
 namespace WyrmGloamingFacts
 {
@@ -35,6 +38,9 @@ namespace WyrmGloamingFacts
     const FName CountDripulaResolvedReceipt(TEXT("gloaming.count_dripula.bloodless_surrender"));
     const FName FrankNShrineResolved(TEXT("gloaming.frank_n_shrine_resolved"));
     const FName FrankNShrineResolvedReceipt(TEXT("gloaming.frank_n_shrine.grounded_submission"));
+    const FName FinalRequiredHorrorResolved(TEXT("gloaming.pyre_midhead_resolved"));
+    const FName RegionComplete(TEXT("gloaming.region_complete"));
+    const FName RegionCompleteReceipt(TEXT("gloaming.region.completion_committed"));
 
     struct FRequiredHorrorFact
     {
@@ -271,6 +277,44 @@ bool UWyrmGloamingSubsystem::RecordRequiredHorrorResolution(EWyrmRequiredHorrorI
     }
     const WyrmGloamingFacts::FRequiredHorrorFact* Fact = WyrmGloamingFacts::GetRequiredHorrorFact(Identity);
     return Fact && CommitFact(Fact->Resolved, Fact->Receipt);
+}
+
+bool UWyrmGloamingSubsystem::CanCompleteRegion(
+    const AWyrmDragonCharacter* Nyxaroth, const UWyrmWorldTravelSubsystem* Travel) const
+{
+    static const FName GloamingMarches(TEXT("GloamingMarches"));
+    static const FName Region01(TEXT("Region01"));
+    static const FName GloamingArrival(TEXT("LM-GLOAMING-ARRIVAL"));
+    static const FName RequiredFacts[] = {
+        WyrmGloamingFacts::MichaelMireResolved, WyrmGloamingFacts::MacheteMasonResolved,
+        WyrmGloamingFacts::PleatherfaceResolved, WyrmGloamingFacts::WherewolfResolved,
+        WyrmGloamingFacts::AnnieWailsResolved, WyrmGloamingFacts::ScarrieResolved,
+        WyrmGloamingFacts::ChucklesResolved, WyrmGloamingFacts::CountDripulaResolved,
+        WyrmGloamingFacts::FrankNShrineResolved,
+        FName(TEXT("gloaming.ail_yen_resolved")), FName(TEXT("gloaming.bellraiser_resolved")),
+        FName(TEXT("gloaming.sad_echo_resolved")), FName(TEXT("gloaming.dreadator_resolved")),
+        FName(TEXT("gloaming.roastface_resolved")), FName(TEXT("gloaming.gravy_daughters_resolved")),
+        FName(TEXT("gloaming.knit_resolved")), FName(TEXT("gloaming.canniball_resolved")),
+        FName(TEXT("gloaming.mums_the_wyrd_resolved")), FName(TEXT("gloaming.dready_freddie_resolved")),
+        WyrmGloamingFacts::FinalRequiredHorrorResolved};
+    const bool bHasEveryRequiredHorror = Algo::AllOf(RequiredFacts,
+        [this](FName Fact) { return HasFact(Fact); });
+    return bHasEveryRequiredHorror &&
+        !HasFact(WyrmGloamingFacts::RegionComplete) &&
+        !HasReceipt(WyrmGloamingFacts::RegionCompleteReceipt) &&
+        Nyxaroth && Nyxaroth->DragonId == FName(TEXT("Nyxaroth")) &&
+        Nyxaroth->HasSupportedRigProfile() && Nyxaroth->HasBondReceipt() &&
+        Nyxaroth->GetDragonRole() == EWyrmDragonRole::AlliedCompanion &&
+        Travel && Travel->GetCurrentRegionId() == GloamingMarches &&
+        Travel->GetArrivalLandmarkId() == GloamingArrival &&
+        Travel->IsAllowedRoute(GloamingMarches, Region01);
+}
+
+bool UWyrmGloamingSubsystem::RecordRegionalCompletion(
+    AWyrmDragonCharacter* Nyxaroth, UWyrmWorldTravelSubsystem* Travel)
+{
+    return CanCompleteRegion(Nyxaroth, Travel) &&
+        CommitFact(WyrmGloamingFacts::RegionComplete, WyrmGloamingFacts::RegionCompleteReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()
