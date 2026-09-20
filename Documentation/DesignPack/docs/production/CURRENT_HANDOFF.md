@@ -31,7 +31,9 @@
 > Chuckles GAS contained-submission encounter also passes with one-time Schema
 > 7 restoration and no Echo/completion leakage. The supplied 16-part, 184 cm
 > Count Dripula GAS bloodless-surrender encounter also passes with one-time
-> Schema 7 restoration and no Echo/completion leakage; further roster identities
+> Schema 7 restoration and no Echo/completion leakage. The supplied 16-part,
+> 202 cm Frank N. Shrine GAS grounded-submission encounter also passes with
+> one-time Schema 7 restoration and no Echo/completion leakage; further roster identities
 > remain bounded work. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 

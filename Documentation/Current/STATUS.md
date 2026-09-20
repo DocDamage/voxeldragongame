@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.5 Count Dripula encounter**
+**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.5 Frank N. Shrine encounter**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 67/67** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/WP23_5_CountDripula/index.json` |
+| Native automation | **PASS: 68/68** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/WP23_5_FrankNShrine/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -42,7 +42,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, supplied Ranger art, and rendered QA. Verdant and Jade closure suites were rerun successfully under current Schema 7; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
-| WP-23.5 Gloaming / Nyxaroth | **COUNT DRIPULA PASS / COMPLETION GATED** | Verified through the supplied 16-part Count Dripula encounter: distinct 184 cm presentation, Chuckles prerequisite, GAS-driven bloodless surrender at 200/800 HP, one-time Schema 7 fact/receipt restore, and no Echo/completion leakage. Further required-horror identities and regional completion stay gated; [Count Dripula proof](WP23_5_COUNT_DRIPULA_SLICE_PROOF.md), [Chuckles proof](WP23_5_CHUCKLES_SLICE_PROOF.md) |
+| WP-23.5 Gloaming / Nyxaroth | **FRANK N. SHRINE PASS / COMPLETION GATED** | Verified through the supplied 16-part Frank N. Shrine encounter: distinct 202 cm presentation, Count Dripula prerequisite, GAS-driven grounded submission at 210/840 HP, one-time Schema 7 fact/receipt restore, and no Echo/completion leakage. Further required-horror identities and regional completion stay gated; [Frank N. Shrine proof](WP23_5_FRANK_N_SHRINE_SLICE_PROOF.md), [Count Dripula proof](WP23_5_COUNT_DRIPULA_SLICE_PROOF.md) |
 
 ## Important implementation facts
 

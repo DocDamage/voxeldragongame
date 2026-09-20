@@ -33,6 +33,8 @@ namespace WyrmGloamingFacts
     const FName ChucklesResolvedReceipt(TEXT("gloaming.chuckles.contained_submission"));
     const FName CountDripulaResolved(TEXT("gloaming.count_dripula_resolved"));
     const FName CountDripulaResolvedReceipt(TEXT("gloaming.count_dripula.bloodless_surrender"));
+    const FName FrankNShrineResolved(TEXT("gloaming.frank_n_shrine_resolved"));
+    const FName FrankNShrineResolvedReceipt(TEXT("gloaming.frank_n_shrine.grounded_submission"));
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -216,6 +218,17 @@ bool UWyrmGloamingSubsystem::RecordCountDripulaResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::CountDripulaResolved, WyrmGloamingFacts::CountDripulaResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordFrankNShrineResolution()
+{
+    if (!HasFact(WyrmGloamingFacts::CountDripulaResolved) ||
+        HasFact(WyrmGloamingFacts::FrankNShrineResolved) ||
+        HasReceipt(WyrmGloamingFacts::FrankNShrineResolvedReceipt))
+    {
+        return false;
+    }
+    return CommitFact(WyrmGloamingFacts::FrankNShrineResolved, WyrmGloamingFacts::FrankNShrineResolvedReceipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()
