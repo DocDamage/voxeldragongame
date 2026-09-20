@@ -83,8 +83,8 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-The arrival-to-city-engine observation slice passes in live PIE; see
-`Documentation/Current/WP23_6_COGSPIRE_ARRIVAL_PROOF.md`. Next, author the
-captive-Cogfang encounter and selective city-engine shutdown. Keep regional
-completion, optional urban investigations, save-schema work, and parallel
-authority outside that packet.
+The captive-Cogfang encounter and selective shutdown pass in live PIE; see
+`Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`. Next, extend the
+existing save owner to Schema 8 for Cogspire facts, selective-engine state, and
+exactly one bonded Cogfang. Keep regional completion, optional urban
+investigations, and parallel authority outside that packet.

@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 20, 2026 · starter v0.2 · evidence reconciled through WP-23.6 Cogspire arrival observation**
+**September 20, 2026 · starter v0.2 · evidence reconciled through WP-23.6 Cogfang selective shutdown**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 72/72** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/Scaffold/index.json` |
+| Native automation | **PASS: 73/73** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/Scaffold/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -43,7 +43,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, supplied Ranger art, and rendered QA. Verdant and Jade closure suites were rerun successfully under current Schema 7; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
-| WP-23.6 Cogspire / Cogfang | **ARRIVAL OBSERVATION PASS** | `L_CogspireHarbor` preserves the supplied waterfront and existing owners, accepts only authored Cogspire arrival context, and orders public-machinery, coercion-diversion, and Baron Cogwell observations once. The two civic pumps remain intact and the engine approach has a complete route; [arrival proof](WP23_6_COGSPIRE_ARRIVAL_PROOF.md), [travel proof](WP23_6_COGSPIRE_TRAVEL_PROOF.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md) |
+| WP-23.6 Cogspire / Cogfang | **SELECTIVE SHUTDOWN/BOND PASS** | The supplied 34-part Cogfang reaches living defeat through GAS, the coercion governor shuts down only after that defeat, both civic pumps remain operational with unchanged runtime signatures, and Cogfang bonds once through the existing dragon owner; [shutdown proof](WP23_6_COGFANG_SHUTDOWN_PROOF.md), [arrival proof](WP23_6_COGSPIRE_ARRIVAL_PROOF.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -238,11 +238,11 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-The WP-23.6 arrival-to-city-engine observation slice now passes. The next
-bounded task is the captive-Cogfang encounter and selective city-engine
-shutdown, proving the coercion branch stops while both ordinary civic pumps
-remain operational. Stop before regional completion, optional urban
-investigations, or a save-schema extension. See the
+The WP-23.6 captive-Cogfang encounter and selective shutdown now pass. The next
+bounded task is Schema 8 recovery for Cogspire facts, the selective-engine
+state, and exactly one bonded Cogfang. Stop before regional completion or
+optional urban investigations. See the
+[shutdown proof](WP23_6_COGFANG_SHUTDOWN_PROOF.md),
 [arrival proof](WP23_6_COGSPIRE_ARRIVAL_PROOF.md),
 [travel proof](WP23_6_COGSPIRE_TRAVEL_PROOF.md),
 [saved-map proof](WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md),

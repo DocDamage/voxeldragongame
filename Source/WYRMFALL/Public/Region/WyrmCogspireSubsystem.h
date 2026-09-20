@@ -4,6 +4,9 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "WyrmCogspireSubsystem.generated.h"
 
+class AWyrmCharacter;
+class AWyrmDragonCharacter;
+
 /** Bounded runtime-only Cogspire fact owner. Persistence is intentionally out of scope. */
 UCLASS(BlueprintType, Category="WYRMFALL|Cogspire")
 class WYRMFALL_API UWyrmCogspireSubsystem : public UGameInstanceSubsystem
@@ -31,6 +34,24 @@ public:
     UFUNCTION(BlueprintCallable, Category="Cogspire|Baron")
     bool RecordBaronAcknowledgment();
 
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Cogfang")
+    bool RecordCogfangEncounterStarted(AWyrmDragonCharacter* Cogfang);
+
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Cogfang")
+    bool RecordCogfangLivingDefeat(AWyrmDragonCharacter* Cogfang);
+
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Engine")
+    bool ShutdownCoercionGovernor(AWyrmDragonCharacter* Cogfang);
+
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Cogfang")
+    bool BondCogfang(AWyrmDragonCharacter* Cogfang, AWyrmCharacter* Humanoid);
+
+    UFUNCTION(BlueprintPure, Category="Cogspire|Engine")
+    bool IsCoercionGovernorActive() const { return bCoercionGovernorActive; }
+
+    UFUNCTION(BlueprintPure, Category="Cogspire|Engine")
+    bool IsCivicMachineryOperational() const { return bCivicMachineryOperational; }
+
     UFUNCTION(BlueprintPure, Category="Cogspire|Facts")
     bool HasFact(FName FactId) const;
 
@@ -45,4 +66,10 @@ private:
 
     UPROPERTY(VisibleInstanceOnly, Category="Cogspire")
     TArray<FName> FactReceipts;
+
+    UPROPERTY(VisibleInstanceOnly, Category="Cogspire|Engine")
+    bool bCoercionGovernorActive = true;
+
+    UPROPERTY(VisibleInstanceOnly, Category="Cogspire|Engine")
+    bool bCivicMachineryOperational = true;
 };

@@ -4554,4 +4554,76 @@ bool FWyrmCogspireArrivalObservationTest::RunTest(const FString& Parameters)
         Region->HasFact(FName(TEXT("cogspire.region_complete"))));
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCogspireCogfangShutdownTest,
+    "WYRMFALL.Scaffold.CogspireCogfangShutdown",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCogspireCogfangShutdownTest::RunTest(const FString& Parameters)
+{
+    UWorld* World = nullptr;
+    if (GEngine)
+    {
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (Context.WorldType == EWorldType::Editor || Context.WorldType == EWorldType::PIE)
+            {
+                World = Context.World();
+                break;
+            }
+        }
+    }
+    if (!World) World = GWorld;
+    if (!World) return true;
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCogspireSubsystem* Region = NewObject<UWyrmCogspireSubsystem>(TestGI);
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AWyrmCharacter* Player = World->SpawnActor<AWyrmCharacter>(
+        AWyrmCharacter::StaticClass(), FVector(0.f, 8000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    AWyrmDragonCharacter* Cogfang = World->SpawnActor<AWyrmDragonCharacter>(
+        AWyrmDragonCharacter::StaticClass(), FVector(500.f, 8000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
+    TestNotNull(TEXT("Cogspire shutdown dependencies created"),
+        Region && Player && Cogfang ? Region : nullptr);
+    if (!Region || !Player || !Cogfang) return false;
+
+    TestTrue(TEXT("Coercion governor starts active"), Region->IsCoercionGovernorActive());
+    TestTrue(TEXT("Civic machinery starts operational"), Region->IsCivicMachineryOperational());
+    TestFalse(TEXT("Wrong dragon identity cannot start Cogfang encounter"),
+        Region->RecordCogfangEncounterStarted(Cogfang));
+    Cogfang->SetDragonId(FName(TEXT("Cogfang")));
+    Cogfang->SetDragonRole(EWyrmDragonRole::HostileBoss);
+    TestFalse(TEXT("Cogfang encounter rejects before Baron evidence"),
+        Region->RecordCogfangEncounterStarted(Cogfang));
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Public machinery prerequisite"), Region->RecordPublicMachineryObserved());
+    TestTrue(TEXT("Diversion prerequisite"), Region->RecordCoercionDiversionObserved());
+    TestTrue(TEXT("Baron acknowledgment prerequisite"), Region->RecordBaronAcknowledgment());
+    TestTrue(TEXT("Cogfang encounter starts once"), Region->RecordCogfangEncounterStarted(Cogfang));
+    TestFalse(TEXT("Coercion shutdown rejects before living defeat"),
+        Region->ShutdownCoercionGovernor(Cogfang));
+    TestFalse(TEXT("Bond rejects before shutdown"), Region->BondCogfang(Cogfang, Player));
+    TestTrue(TEXT("Cogfang living defeat uses dragon owner"), Cogfang->PerformBossDefeat());
+    TestTrue(TEXT("Cogfang living defeat records once"), Region->RecordCogfangLivingDefeat(Cogfang));
+    TestTrue(TEXT("Selective coercion governor shutdown commits once"),
+        Region->ShutdownCoercionGovernor(Cogfang));
+    TestFalse(TEXT("Coercion governor is inactive"), Region->IsCoercionGovernorActive());
+    TestTrue(TEXT("Civic machinery remains operational"), Region->IsCivicMachineryOperational());
+    TestFalse(TEXT("Selective shutdown duplicate rejects"), Region->ShutdownCoercionGovernor(Cogfang));
+    TestTrue(TEXT("Cogfang voluntary bond commits once"), Region->BondCogfang(Cogfang, Player));
+    TestFalse(TEXT("Cogfang duplicate bond rejects"), Region->BondCogfang(Cogfang, Player));
+    TestTrue(TEXT("Cogfang is exactly the allied companion identity"),
+        Cogfang->DragonId == FName(TEXT("Cogfang")) && Cogfang->HasBondReceipt() &&
+        Cogfang->GetDragonRole() == EWyrmDragonRole::AlliedCompanion);
+    TestTrue(TEXT("Shutdown receipt recorded"),
+        Region->HasReceipt(FName(TEXT("cogspire.engine.coercion_governor_shutdown"))));
+    TestTrue(TEXT("Bond receipt recorded"),
+        Region->HasReceipt(FName(TEXT("cogspire.cogfang.voluntary_bond"))));
+    TestFalse(TEXT("Bounded shutdown slice does not complete region"),
+        Region->HasFact(FName(TEXT("cogspire.region_complete"))));
+
+    Cogfang->Destroy();
+    Player->Destroy();
+    return true;
+}
 #endif

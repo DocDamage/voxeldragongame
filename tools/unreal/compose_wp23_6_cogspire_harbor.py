@@ -235,6 +235,16 @@ def main():
         site.set_actor_label("COG_OBSERVE_" + label)
         site.set_editor_property("observation_type", observation_type)
 
+    cogfang = actors.spawn_actor_from_class(
+        unreal.WyrmDragonCharacter, unreal.Vector(-150, 1250, WALK_Z + 165))
+    cogfang.set_actor_label("COG_DRAGON_CogfangCaptive")
+    cogfang.set_dragon_id(unreal.Name("Cogfang"))
+    cogfang.set_dragon_role(unreal.WyrmDragonRole.HOSTILE_BOSS)
+    encounter = actors.spawn_actor_from_class(
+        unreal.WyrmCogspireCogfangEncounter, unreal.Vector(-150, 650, WALK_Z))
+    encounter.set_actor_label("COG_ENCOUNTER_CogfangGovernor")
+    encounter.set_editor_property("cogfang", cogfang)
+
     for label, location in (
         ("COG_ROUTE_ARRIVAL", (-1400, 0, WALK_Z)),
         ("COG_ROUTE_JETTY_END", (1650, 0, WALK_Z)),
@@ -270,7 +280,9 @@ def main():
         "hidden_navigation_substrate": substrate.get_actor_label(),
         "observation_sites": [row[0] for row in observation_specs],
         "supplied_baron_actor": "COG_ENV_BaronFeistCogwell",
-        "not_claimed": ["Cogfang combat", "engine shutdown", "regional completion", "optional investigations", "save schema extension"],
+        "cogfang_actor": "COG_DRAGON_CogfangCaptive",
+        "coercion_governor_encounter": "COG_ENCOUNTER_CogfangGovernor",
+        "not_claimed": ["regional completion", "optional investigations", "save schema extension"],
     }, indent=2) + "\n", encoding="utf-8")
     print("WP-23.6 Cogspire Harbor map composition: PASS")
 
