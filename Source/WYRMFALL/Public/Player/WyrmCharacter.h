@@ -197,6 +197,34 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void RestoreSecondTurnState(float RemainingCooldown);
 
+    // --- Deathmark (WP-23.6 / ECHO-04) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    bool CanActivateDeathmark(AActor* Target, FString& OutFailureReason) const;
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    bool ActivateDeathmark(AActor* Target);
+
+    /** Called only by UWyrmDeathmarkAbility after GAS commits cost/cooldown. */
+    bool CommitDeathmark();
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    AActor* GetPendingDeathmarkTarget() const { return PendingDeathmarkTarget.Get(); }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    AActor* GetMarkedDeathmarkTarget() const { return MarkedDeathmarkTarget.Get(); }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetDeathmarkRemainingDuration() const { return DeathmarkRemainingTimer; }
+
+    UFUNCTION(BlueprintPure, Category="Combat|Echo")
+    float GetDeathmarkRemainingCooldown() const { return DeathmarkCooldownTimer; }
+
+    float GetDeathmarkBonusDamage(const UAbilitySystemComponent* TargetASC) const;
+    bool ConsumeDeathmark(UAbilitySystemComponent* TargetASC);
+
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo")
+    void RestoreDeathmarkState(float RemainingCooldown);
+
     // --- Moonbound Form (WP-21 / ECHO-08, ECHO-09) ---
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void ActivateMoonboundForm(float Duration);
@@ -457,6 +485,7 @@ private:
     FGameplayAbilitySpecHandle HuntersVeilHandle;
     FGameplayAbilitySpecHandle SanguineStrikeHandle;
     FGameplayAbilitySpecHandle SecondTurnHandle;
+    FGameplayAbilitySpecHandle DeathmarkHandle;
     FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
     FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
@@ -499,6 +528,11 @@ private:
     float SecondTurnRepeatTimer = 0.f;
     float PendingSecondTurnRawDamage = 0.f;
     TWeakObjectPtr<UAbilitySystemComponent> PendingSecondTurnTarget;
+
+    float DeathmarkRemainingTimer = 0.f;
+    float DeathmarkCooldownTimer = 0.f;
+    TWeakObjectPtr<AActor> PendingDeathmarkTarget;
+    TWeakObjectPtr<AActor> MarkedDeathmarkTarget;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

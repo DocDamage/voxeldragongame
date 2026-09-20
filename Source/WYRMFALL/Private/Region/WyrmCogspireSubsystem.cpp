@@ -26,6 +26,18 @@ namespace WyrmCogspireFacts
     const FName CogfangBondedReceipt(TEXT("cogspire.cogfang.voluntary_bond"));
     const FName RegionComplete(TEXT("cogspire.region_complete"));
     const FName RegionCompleteReceipt(TEXT("cogspire.region.completion_committed"));
+    const FName HouseMarkVictim(TEXT("cogspire.house_mark.victim_examined"));
+    const FName HouseMarkVictimReceipt(TEXT("cogspire.house_mark.victim_evidence_recorded"));
+    const FName HouseMarkRelic(TEXT("cogspire.house_mark.relic_trade_traced"));
+    const FName HouseMarkRelicReceipt(TEXT("cogspire.house_mark.relic_trade_evidence_recorded"));
+    const FName HouseMarkIdentity(TEXT("cogspire.house_mark.identified"));
+    const FName HouseMarkIdentityReceipt(TEXT("cogspire.house_mark.identity_confirmed"));
+    const FName HouseMarkConfrontation(TEXT("cogspire.house_mark.confrontation_started"));
+    const FName HouseMarkConfrontationReceipt(TEXT("cogspire.house_mark.confrontation_committed"));
+    const FName HouseMarkDefeated(TEXT("cogspire.house_mark.defeated"));
+    const FName HouseMarkDefeatedReceipt(TEXT("cogspire.house_mark.defeat_committed"));
+    const FName Deathmark(TEXT("echo.deathmark"));
+    const FName DeathmarkReceipt(TEXT("cogspire.house_mark.deathmark_manifested"));
 }
 
 void UWyrmCogspireSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -163,6 +175,42 @@ bool UWyrmCogspireSubsystem::RecordRegionalCompletion(
         CommitFact(WyrmCogspireFacts::RegionComplete, WyrmCogspireFacts::RegionCompleteReceipt);
 }
 
+bool UWyrmCogspireSubsystem::RecordHouseMarkVictimEvidence()
+{
+    return HasFact(WyrmCogspireFacts::Arrival) &&
+        CommitFact(WyrmCogspireFacts::HouseMarkVictim, WyrmCogspireFacts::HouseMarkVictimReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordHouseMarkRelicEvidence()
+{
+    return HasFact(WyrmCogspireFacts::HouseMarkVictim) &&
+        CommitFact(WyrmCogspireFacts::HouseMarkRelic, WyrmCogspireFacts::HouseMarkRelicReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordHouseMarkIdentity()
+{
+    return HasFact(WyrmCogspireFacts::HouseMarkRelic) &&
+        CommitFact(WyrmCogspireFacts::HouseMarkIdentity, WyrmCogspireFacts::HouseMarkIdentityReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordHouseMarkConfrontation()
+{
+    return HasFact(WyrmCogspireFacts::HouseMarkIdentity) &&
+        CommitFact(WyrmCogspireFacts::HouseMarkConfrontation, WyrmCogspireFacts::HouseMarkConfrontationReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordHouseMarkDefeat()
+{
+    return HasFact(WyrmCogspireFacts::HouseMarkConfrontation) &&
+        CommitFact(WyrmCogspireFacts::HouseMarkDefeated, WyrmCogspireFacts::HouseMarkDefeatedReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordDeathmarkUnlock()
+{
+    return HasFact(WyrmCogspireFacts::HouseMarkDefeated) &&
+        CommitFact(WyrmCogspireFacts::Deathmark, WyrmCogspireFacts::DeathmarkReceipt);
+}
+
 bool UWyrmCogspireSubsystem::CommitFact(FName FactId, FName ReceiptId)
 {
     if (FactId.IsNone() || ReceiptId.IsNone() || HasFact(FactId) || HasReceipt(ReceiptId))
@@ -255,4 +303,32 @@ void UWyrmCogspireSubsystem::NormalizeRestoredState()
 
     // Civic infrastructure is never a valid casualty of this selective shutdown.
     bCivicMachineryOperational = true;
+
+    const FName OptionalFacts[] = {
+        WyrmCogspireFacts::HouseMarkVictim,
+        WyrmCogspireFacts::HouseMarkRelic,
+        WyrmCogspireFacts::HouseMarkIdentity,
+        WyrmCogspireFacts::HouseMarkConfrontation,
+        WyrmCogspireFacts::HouseMarkDefeated,
+        WyrmCogspireFacts::Deathmark};
+    const FName OptionalReceipts[] = {
+        WyrmCogspireFacts::HouseMarkVictimReceipt,
+        WyrmCogspireFacts::HouseMarkRelicReceipt,
+        WyrmCogspireFacts::HouseMarkIdentityReceipt,
+        WyrmCogspireFacts::HouseMarkConfrontationReceipt,
+        WyrmCogspireFacts::HouseMarkDefeatedReceipt,
+        WyrmCogspireFacts::DeathmarkReceipt};
+    bool bOptionalChainValid = KnownFacts.Contains(WyrmCogspireFacts::Arrival) &&
+        FactReceipts.Contains(WyrmCogspireFacts::ArrivalReceipt);
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(OptionalFacts); ++Index)
+    {
+        const bool bPairPresent = KnownFacts.Contains(OptionalFacts[Index]) &&
+            FactReceipts.Contains(OptionalReceipts[Index]);
+        bOptionalChainValid = bOptionalChainValid && bPairPresent;
+        if (!bOptionalChainValid)
+        {
+            KnownFacts.Remove(OptionalFacts[Index]);
+            FactReceipts.Remove(OptionalReceipts[Index]);
+        }
+    }
 }

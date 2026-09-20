@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 74/74 tests with 0 failures.
+- Full scaffold native automation completed 75/75 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -375,10 +375,10 @@ Evidence:
 ## Next bounded task
 
 WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
-gate, the saved Harbor map, bounded travel/recovery, arrival observation, and
-selective Cogfang shutdown/bond now pass. Cogfang's distinct 34-part assembly
-and authority proof passed COG-01..05 in live PIE; the full native suite is now
-74/74. Baron
+gate, the saved Harbor map, bounded travel/recovery, arrival observation,
+selective Cogfang shutdown/bond, and the optional House Mark / Deathmark packet
+now pass. Cogfang's distinct 34-part assembly and authority proof passed
+COG-01..05 in live PIE; the full native suite is now 75/75. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
 scale, fixture collision, and accepted cameras. Stationary QA locks the source
@@ -402,11 +402,17 @@ Schema 8 now restores the complete Cogspire ledger, selective-engine state, and
 exactly one bonded Cogfang across repeated apply while both civic pumps remain
 unchanged. Regional completion now requires the authored arrival, mainline
 ledger, bonded Cogfang, and safe Region01 return route, commits once, and
-restores through Schema 8 with exactly one Cogfang. House Mark and Chef Aurelio
-remain optional. Implement the House Mark/Deathmark packet next without making
-it a completion tax. Mutable remains creator, GAS
+restores through Schema 8 with exactly one Cogfang. The optional supplied-art
+House Mark investigation now commits its evidence, identity, GAS confrontation,
+and Deathmark manifestation once. Deathmark is permanently usable, marks one
+visible hostile for six seconds, adds `1.0 x Power` to the next eligible direct
+basic hit on that target, and retains its 12-second cooldown through Schema 8
+recovery. It remains absent from regional completion requirements. Chef Aurelio
+remains optional and open; implement that investigation and Carver's Precision
+next without making it a completion tax. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
 coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
+`Documentation/Current/WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_SAVE_PROOF.md`,
 `Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_ARRIVAL_PROOF.md`,

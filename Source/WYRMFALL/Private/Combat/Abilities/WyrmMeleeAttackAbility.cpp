@@ -45,10 +45,11 @@ bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComp
     AWyrmCharacter* SourceCharacter = Cast<AWyrmCharacter>(SourceASC->GetAvatarActor());
     const UWyrmAttributeSet* TargetAttributes = Cast<UWyrmAttributeSet>(
         TargetASC->GetAttributeSet(UWyrmAttributeSet::StaticClass()));
-    const float BonusDamage = SourceCharacter ? SourceCharacter->GetSanguineStrikeBonusDamage() : 0.f;
+    const float SanguineBonusDamage = SourceCharacter ? SourceCharacter->GetSanguineStrikeBonusDamage() : 0.f;
+    const float DeathmarkBonusDamage = SourceCharacter ? SourceCharacter->GetDeathmarkBonusDamage(TargetASC) : 0.f;
     const float HealthBefore = TargetAttributes ? TargetAttributes->GetCurrentHealth() : 0.f;
     const float ShieldBefore = TargetAttributes ? TargetAttributes->GetCurrentShield() : 0.f;
-    if (!ApplyDamageEffect(SourceASC, TargetASC, InRawDamage + BonusDamage))
+    if (!ApplyDamageEffect(SourceASC, TargetASC, InRawDamage + SanguineBonusDamage + DeathmarkBonusDamage))
     {
         return false;
     }
@@ -62,11 +63,15 @@ bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComp
             // Snapshot only the basic strike's pre-mitigation base. The delayed
             // repeat excludes Sanguine and every other proc contribution.
             SourceCharacter->QueueSecondTurnRepeat(TargetASC, InRawDamage);
-            if (BonusDamage > 0.f)
+            if (SanguineBonusDamage > 0.f)
             {
                 // The strike is consumed by a shielded hit, but only damage
                 // that reached Health can contribute to its healing.
                 SourceCharacter->ConsumeSanguineStrike(ActualHealthDamage);
+            }
+            if (DeathmarkBonusDamage > 0.f)
+            {
+                SourceCharacter->ConsumeDeathmark(TargetASC);
             }
         }
     }

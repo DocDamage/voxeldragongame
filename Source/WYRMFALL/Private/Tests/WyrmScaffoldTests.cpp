@@ -10,6 +10,7 @@
 #include "Combat/Abilities/WyrmHuntersVeilAbility.h"
 #include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
 #include "Combat/Abilities/WyrmSecondTurnAbility.h"
+#include "Combat/Abilities/WyrmDeathmarkAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
@@ -4709,6 +4710,53 @@ bool FWyrmCogspireSchema8RecoveryTest::RunTest(const FString& Parameters)
             UWyrmSaveSubsystem::IsSchemaVersionSupported(Version));
     }
     TestFalse(TEXT("Future Schema 9 is rejected"), UWyrmSaveSubsystem::IsSchemaVersionSupported(9));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmHouseMarkDeathmarkContractTest,
+    "WYRMFALL.Scaffold.HouseMarkDeathmarkContract",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmHouseMarkDeathmarkContractTest::RunTest(const FString& Parameters)
+{
+    UWyrmDeathmarkAbility* Ability = NewObject<UWyrmDeathmarkAbility>();
+    TestNotNull(TEXT("Deathmark GAS ability exists"), Ability);
+    if (!Ability) return false;
+    TestEqual(TEXT("Deathmark costs 20 Focus"), Ability->FocusCost, 20.f);
+    TestEqual(TEXT("Deathmark cooldown is 12 seconds"), Ability->CooldownDuration, 12.f);
+    TestEqual(TEXT("Deathmark ability tag"), Ability->AbilityTag.GetTagName(), FName(TEXT("Ability.Echo.Deathmark")));
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCogspireSubsystem* Region = NewObject<UWyrmCogspireSubsystem>(TestGI);
+    TestNotNull(TEXT("Cogspire owner exists"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Investigation rejects before Cogspire arrival"), Region->RecordHouseMarkVictimEvidence());
+    TestTrue(TEXT("Arrival starts optional route eligibility"), Region->RecordArrival());
+    TestFalse(TEXT("Relic evidence rejects before victim evidence"), Region->RecordHouseMarkRelicEvidence());
+    TestTrue(TEXT("Victim evidence commits once"), Region->RecordHouseMarkVictimEvidence());
+    TestTrue(TEXT("Relic trade evidence commits once"), Region->RecordHouseMarkRelicEvidence());
+    TestTrue(TEXT("Named House Mark identity commits once"), Region->RecordHouseMarkIdentity());
+    TestTrue(TEXT("Confrontation commits once"), Region->RecordHouseMarkConfrontation());
+    TestTrue(TEXT("GAS combat resolution fact commits once"), Region->RecordHouseMarkDefeat());
+    TestTrue(TEXT("Deathmark unlock commits once"), Region->RecordDeathmarkUnlock());
+    TestFalse(TEXT("Deathmark unlock cannot duplicate"), Region->RecordDeathmarkUnlock());
+    TestTrue(TEXT("Permanent Deathmark fact exists"), Region->HasFact(FName(TEXT("echo.deathmark"))));
+    TestFalse(TEXT("Optional investigation does not complete Cogspire"),
+        Region->HasFact(FName(TEXT("cogspire.region_complete"))));
+
+    FWyrmCogspireSaveRecord Record;
+    Region->BuildSaveRecord(Record);
+    Region->ResetCogspireState();
+    Region->RestoreFromSaveRecord(Record);
+    TestTrue(TEXT("Schema 8 record restores the complete optional fact chain"),
+        Region->HasFact(FName(TEXT("echo.deathmark"))) &&
+        Region->HasReceipt(FName(TEXT("cogspire.house_mark.deathmark_manifested"))));
+
+    FWyrmCogspireSaveRecord Malformed;
+    Malformed.KnownFacts.Add(FName(TEXT("echo.deathmark")));
+    Malformed.FactReceipts.Add(FName(TEXT("cogspire.house_mark.deathmark_manifested")));
+    Region->RestoreFromSaveRecord(Malformed);
+    TestFalse(TEXT("Final-only optional state fails closed"), Region->HasFact(FName(TEXT("echo.deathmark"))));
     return true;
 }
 #endif

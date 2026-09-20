@@ -12,6 +12,7 @@
 #include "Combat/Abilities/WyrmHuntersVeilAbility.h"
 #include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
 #include "Combat/Abilities/WyrmSecondTurnAbility.h"
+#include "Combat/Abilities/WyrmDeathmarkAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Combat/WyrmUnseenHandTarget.h"
@@ -448,6 +449,34 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
                 // The generic GAS path is deliberate: the spectral repeat is
                 // noncritical and cannot recurse or trigger any Echo proc.
                 UWyrmMeleeAttackAbility::ApplyDamageEffect(AbilitySystem, RepeatTarget, RepeatDamage);
+            }
+        }
+    }
+
+    if (DeathmarkRemainingTimer > 0.f)
+    {
+        DeathmarkRemainingTimer = FMath::Max(0.f, DeathmarkRemainingTimer - DeltaSeconds);
+        if (DeathmarkRemainingTimer <= 0.f || !MarkedDeathmarkTarget.IsValid())
+        {
+            MarkedDeathmarkTarget.Reset();
+            if (AbilitySystem)
+            {
+                static const FGameplayTag MarkedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.DeathmarkActive")), false);
+                if (MarkedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(MarkedTag);
+            }
+        }
+    }
+    if (DeathmarkCooldownTimer > 0.f)
+    {
+        DeathmarkCooldownTimer = FMath::Max(0.f, DeathmarkCooldownTimer - DeltaSeconds);
+        if (DeathmarkCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.Deathmark")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
             }
         }
     }
@@ -1333,6 +1362,19 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             }
         }
     }
+    else if (EchoId == FName(TEXT("Deathmark")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.Deathmark")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!DeathmarkHandle.IsValid())
+            {
+                DeathmarkHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmDeathmarkAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
 
     // Auto-equip if first echo and none equipped
     if (EquippedEcho.IsNone())
@@ -1636,6 +1678,129 @@ void AWyrmCharacter::RestoreSecondTurnState(float RemainingCooldown)
         FGameplayTagContainer CooldownTags(CooldownTag);
         AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
         if (SecondTurnCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+    }
+}
+
+bool AWyrmCharacter::CanActivateDeathmark(AActor* Target, FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("Deathmark")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("Deathmark"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Target || Target == this) { OutFailureReason = TEXT("InvalidTarget"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (DeathmarkRemainingTimer > 0.f || MarkedDeathmarkTarget.IsValid()) { OutFailureReason = TEXT("AlreadyMarked"); return false; }
+    if (DeathmarkCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.Deathmark"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 20.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    if (FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) > FMath::Square(1200.f))
+    { OutFailureReason = TEXT("OutOfRange"); return false; }
+
+    const IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Target);
+    const UAbilitySystemComponent* TargetASC = TargetASI ? TargetASI->GetAbilitySystemComponent() : nullptr;
+    static const FGameplayTag HostileTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Combat.Team.Hostile")), false);
+    static const FGameplayTag DeadTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Dead")), false);
+    if (!TargetASC || !HostileTag.IsValid() || !TargetASC->HasMatchingGameplayTag(HostileTag) ||
+        (DeadTag.IsValid() && TargetASC->HasMatchingGameplayTag(DeadTag)))
+    { OutFailureReason = TEXT("NotHostile"); return false; }
+
+    if (GetWorld())
+    {
+        FHitResult Hit;
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(DeathmarkLineOfSight), false, this);
+        const FVector Start = GetActorLocation() + FVector(0.f, 0.f, 50.f);
+        const FVector End = Target->GetActorLocation() + FVector(0.f, 0.f, 50.f);
+        if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params) && Hit.GetActor() != Target)
+        { OutFailureReason = TEXT("NoLineOfSight"); return false; }
+    }
+    OutFailureReason.Reset();
+    return true;
+}
+
+bool AWyrmCharacter::ActivateDeathmark(AActor* Target)
+{
+    FString Reason;
+    if (!CanActivateDeathmark(Target, Reason) || !AbilitySystem || !DeathmarkHandle.IsValid()) return false;
+    PendingDeathmarkTarget = Target;
+    const bool bActivated = AbilitySystem->TryActivateAbility(DeathmarkHandle);
+    if (!bActivated) PendingDeathmarkTarget.Reset();
+    return bActivated;
+}
+
+bool AWyrmCharacter::CommitDeathmark()
+{
+    AActor* Target = PendingDeathmarkTarget.Get();
+    const IAbilitySystemInterface* TargetASI = Cast<IAbilitySystemInterface>(Target);
+    const UAbilitySystemComponent* TargetASC = TargetASI ? TargetASI->GetAbilitySystemComponent() : nullptr;
+    static const FGameplayTag HostileTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Combat.Team.Hostile")), false);
+    static const FGameplayTag DeadTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Dead")), false);
+    bool bValidTarget = Target && Target != this && TargetASC && HostileTag.IsValid() &&
+        TargetASC->HasMatchingGameplayTag(HostileTag) &&
+        (!DeadTag.IsValid() || !TargetASC->HasMatchingGameplayTag(DeadTag)) &&
+        FVector::DistSquared(GetActorLocation(), Target->GetActorLocation()) <= FMath::Square(1200.f);
+    if (bValidTarget && GetWorld())
+    {
+        FHitResult Hit;
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(DeathmarkCommitLineOfSight), false, this);
+        const FVector Start = GetActorLocation() + FVector(0.f, 0.f, 50.f);
+        const FVector End = Target->GetActorLocation() + FVector(0.f, 0.f, 50.f);
+        bValidTarget = !GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params) ||
+            Hit.GetActor() == Target;
+    }
+    if (!bValidTarget)
+    {
+        PendingDeathmarkTarget.Reset();
+        return false;
+    }
+    MarkedDeathmarkTarget = Target;
+    PendingDeathmarkTarget.Reset();
+    DeathmarkRemainingTimer = 6.f;
+    DeathmarkCooldownTimer = 12.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag ActiveTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.DeathmarkActive")), false);
+        if (ActiveTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(ActiveTag)) AbilitySystem->AddLooseGameplayTag(ActiveTag);
+    }
+    return true;
+}
+
+float AWyrmCharacter::GetDeathmarkBonusDamage(const UAbilitySystemComponent* TargetASC) const
+{
+    const IAbilitySystemInterface* MarkedASI = Cast<IAbilitySystemInterface>(MarkedDeathmarkTarget.Get());
+    return DeathmarkRemainingTimer > 0.f && TargetASC && MarkedASI &&
+        MarkedASI->GetAbilitySystemComponent() == TargetASC && Attributes
+        ? FMath::Max(0.f, Attributes->GetPower()) : 0.f;
+}
+
+bool AWyrmCharacter::ConsumeDeathmark(UAbilitySystemComponent* TargetASC)
+{
+    if (GetDeathmarkBonusDamage(TargetASC) <= 0.f) return false;
+    MarkedDeathmarkTarget.Reset();
+    DeathmarkRemainingTimer = 0.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag ActiveTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.DeathmarkActive")), false);
+        if (ActiveTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(ActiveTag);
+    }
+    return true;
+}
+
+void AWyrmCharacter::RestoreDeathmarkState(float RemainingCooldown)
+{
+    PendingDeathmarkTarget.Reset();
+    MarkedDeathmarkTarget.Reset();
+    DeathmarkRemainingTimer = 0.f;
+    DeathmarkCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+    static const FGameplayTag ActiveTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.DeathmarkActive")), false);
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.Deathmark")), false);
+    if (ActiveTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(ActiveTag);
+    if (CooldownTag.IsValid())
+    {
+        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+        FGameplayTagContainer CooldownTags(CooldownTag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        if (DeathmarkCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
     }
 }
 
@@ -2091,6 +2256,19 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
                 {
                     SecondTurnHandle = AbilitySystem->GiveAbility(
                         FGameplayAbilitySpec(UWyrmSecondTurnAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("Deathmark")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.Deathmark")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!DeathmarkHandle.IsValid())
+                {
+                    DeathmarkHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmDeathmarkAbility::StaticClass(), 1, INDEX_NONE, this));
                 }
             }
         }

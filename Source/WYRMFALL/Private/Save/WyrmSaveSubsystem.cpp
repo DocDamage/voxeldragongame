@@ -198,6 +198,7 @@ UWyrmSaveGame* UWyrmSaveSubsystem::CreateSnapshotObject(const FString& SlotName,
         SaveObj->CharacterRecord.HuntersVeilRemainingCooldown = Character->GetHuntersVeilRemainingCooldown();
         SaveObj->CharacterRecord.SanguineStrikeRemainingCooldown = Character->GetSanguineStrikeRemainingCooldown();
         SaveObj->CharacterRecord.SecondTurnRemainingCooldown = Character->GetSecondTurnRemainingCooldown();
+        SaveObj->CharacterRecord.DeathmarkRemainingCooldown = Character->GetDeathmarkRemainingCooldown();
 
         if (Inv)
         {
@@ -555,6 +556,7 @@ bool UWyrmSaveSubsystem::ApplySnapshotObject(const UWyrmSaveGame* SaveObj, AWyrm
             SaveObj->CharacterRecord.HuntersVeilRemainingCooldown);
         Character->RestoreSanguineStrikeState(SaveObj->CharacterRecord.SanguineStrikeRemainingCooldown);
         Character->RestoreSecondTurnState(SaveObj->CharacterRecord.SecondTurnRemainingCooldown);
+        Character->RestoreDeathmarkState(SaveObj->CharacterRecord.DeathmarkRemainingCooldown);
     }
 
     // Restore active Dragon Companion / Boss (SAVE-08)

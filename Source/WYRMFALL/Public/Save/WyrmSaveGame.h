@@ -142,6 +142,10 @@ struct WYRMFALL_API FWyrmCharacterSaveRecord
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
     float SecondTurnRemainingCooldown = 0.f;
+
+    // --- Cogspire Echo State (WP-23.6 / Schema 8) ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Save")
+    float DeathmarkRemainingCooldown = 0.f;
 };
 
 USTRUCT(BlueprintType)

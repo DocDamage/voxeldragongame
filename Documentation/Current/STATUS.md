@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 20, 2026 · starter v0.2 · evidence reconciled through WP-23.6 regional completion**
+**September 20, 2026 · starter v0.2 · evidence reconciled through WP-23.6 House Mark / Deathmark**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 74/74** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/WP23_6_CogspireCompletion/index.json` |
+| Native automation | **PASS: 75/75** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/Scaffold/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -43,7 +43,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
 | WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, and WP-23.2 COMPLETE** | Verdant Reach passed VR-01..08 in the existing `L_Region01`: nonlethal Meridess route parity, optional canopy hunter, permanent Hunter's Veil, four live navigation projections, supplied Ranger art, and rendered QA. Verdant and Jade closure suites were rerun successfully under current Schema 7; new-dragon children remain gated; [Verdant proof](WP23_1_VERDANT_REACH_PROOF.md), [Jade proof](WP23_2_JADE_CLOSURE_PROOF.md), [ledger](WP23_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
-| WP-23.6 Cogspire / Cogfang | **MAINLINE COMPLETE in real PIE** | Completion requires the full mainline ledger, selective shutdown, validated bonded Cogfang, authored arrival, and safe Region01 return; it commits once and restores through Schema 8 with exactly one Cogfang while both optional investigations remain absent; [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md), [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md), [shutdown proof](WP23_6_COGFANG_SHUTDOWN_PROOF.md) |
+| WP-23.6 Cogspire / Cogfang | **MAINLINE + HOUSE MARK COMPLETE in real PIE** | Mainline completion remains unchanged and optional: the supplied-art House Mark investigation now grants permanent usable Deathmark through GAS and restores through Schema 8 without becoming a completion tax; Chef Aurelio remains open; [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md), [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md) |
 
 ## Important implementation facts
 
@@ -158,6 +158,12 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
   mount/flight, combat/direct-control, and identity restoration. Schema 8
   persists the Cogspire ledger and selective-engine state through the existing
   coordinator and restores exactly one bonded Cogfang across repeated apply.
+- The optional House Mark route extends the same Cogspire fact/save owners with
+  a separate ordered investigation chain. The supplied Champion presentation
+  resolves through GAS and grants Deathmark once. Deathmark marks one visible
+  hostile for 6 seconds at 20 Focus and a 12-second cooldown; the next eligible
+  direct basic hit on that target gains `1.0 x Power`. Schema 8 restores its
+  permanent unlock, fact/receipt chain, and remaining cooldown.
 
 ## Fresh verification commands
 
@@ -193,6 +199,7 @@ py -3.12 tools/run_wp23_5_gloaming_travel_save.py
 py -3.12 tools/run_wp23_5_michael_mire_slice.py
 py -3.12 tools/run_wp23_5_gloaming_completion.py
 py -3.12 tools/run_wp23_6_cogspire_save.py
+py -3.12 tools/run_wp23_6_house_mark_deathmark.py
 ```
 
 The WP-05 commandlet also passed, but it is editor-world evidence:
@@ -241,9 +248,9 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-WP-23.6 mainline regional completion now passes and restores through Schema 8
-with exactly one bonded Cogfang. The next bounded task is the optional House
-Mark investigation and Deathmark Echo; it must not become a completion tax.
+WP-23.6 mainline and the optional House Mark / Deathmark packet now pass and
+restore through Schema 8. The next bounded task is the optional Chef Aurelio
+investigation and Carver's Precision Echo; it must not become a completion tax.
 See the
 [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md),
 [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md),

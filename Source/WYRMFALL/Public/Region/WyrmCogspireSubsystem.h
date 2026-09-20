@@ -54,6 +54,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Cogspire|Completion")
     bool RecordRegionalCompletion(AWyrmDragonCharacter* Cogfang, UWyrmWorldTravelSubsystem* Travel);
 
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkVictimEvidence();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkRelicEvidence();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkIdentity();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkConfrontation();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkDefeat();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordDeathmarkUnlock();
+
     UFUNCTION(BlueprintPure, Category="Cogspire|Engine")
     bool IsCoercionGovernorActive() const { return bCoercionGovernorActive; }
 
