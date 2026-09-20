@@ -429,7 +429,24 @@ coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_READINESS.md`, and
 `Documentation/Current/WP23_READINESS.md`.
 
-The next bounded task is to refresh the blocked WP-23 regional readiness
-evidence and select one child whose real dragon, ruler, environment, and
-encounter-content gate can be cleared. Do not begin regional gameplay from
-source-archive presence alone.
+The refreshed readiness evidence selects WP-23.3 Hallowwood for bounded work,
+not regional gameplay. UE 5.8.2 imported Wooden Dragon as one leader plus 34
+followers with 20 animations and rendered its complete living-wood assembly.
+The supplied Master Wizard is selected over the bright-hatted Old Man as Osk's
+base presentation, and the forest source passed rendered intake. The rendered
+playground set does not read as an abandoned traveling carnival and was
+rejected for that gate. Generic bat and wolf models do not clear Hollow
+Harvestman, carnival presence, or unfinished puppet; those named presentation
+gates remain blocked. Grovemaw's distinct profile subsequently passed 5/5 live
+PIE groups: assembly/living bond, Heartfold/blocked growth, mount/flight, GAS
+combat/direct control, and stable-identity recovery. The full native suite
+remains 76/76. See
+`Documentation/Current/WP23_3_HALLOWWOOD_READINESS.md` and
+`Documentation/Current/WP23_3_GROVEMAW_PROFILE_PROOF.md` and
+`Documentation/Current/tasks/WP-23.3.md`.
+
+The next bounded task is a supplied-content audit for an exact abandoned
+traveling-carnival fit plus Hollow Harvestman, carnival presence, and unfinished
+puppet presentations. Stop before a production map, facts, travel, Echo, or
+regional gameplay, and do not relabel generic monsters or the rejected
+playground set.

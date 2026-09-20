@@ -32,14 +32,20 @@ REGIONS = [
     },
     {
         "child": "WP-23.3", "region": "Hallowwood", "dragon": "Wooden Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
             "voxel/Low_poly_voxel_forest-c8c1e081.zip",
             "voxel/trees.zip",
+            "voxel/playground park.zip",
+            "voxel/characters/villagers.zip",
+            "voxel/characters/wizards.zip",
             "voxel/characters/voxel_monsters.zip",
         ],
-        "readiness": "BLOCKED_ON_RIG_AND_CONTENT_FIT",
-        "blockers": ["Grovemaw rig/profile/animation proof", "ruler and three horror encounter fits"],
+        "readiness": "PROFILE_COMPLETE_REGION_BLOCKED",
+        "blockers": [
+            "exact abandoned traveling-carnival content fit",
+            "Hollow Harvestman, carnival presence, and unfinished-puppet presentation fits",
+        ],
     },
     {
         "child": "WP-23.4", "region": "Frosthold", "dragon": "White Dragon",
@@ -50,25 +56,25 @@ REGIONS = [
     },
     {
         "child": "WP-23.5", "region": "Gloaming Marches", "dragon": "Dark Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
             "voxel/characters/Voxel Cathedral.zip",
             "voxel/cemetary and church voxel set.zip",
             "voxel/characters/horror characters.fbx",
         ],
-        "readiness": "BLOCKED_ON_RIG_AND_CONTENT_FIT",
-        "blockers": ["Nyxaroth rig/profile/animation proof", "Ashgrave and optional-horror character fit"],
+        "readiness": "COMPLETE",
+        "blockers": [],
     },
     {
         "child": "WP-23.6", "region": "Cogspire Harbor", "dragon": "Steampunk Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
             "voxel/medievil buildings.zip",
             "voxel/modular robots.zip",
             "voxel/Voxel_Water___Aquatic_Pack_-_115_Assets__Static___Animated_-8b7379eb.zip",
         ],
-        "readiness": "BLOCKED_ON_RIG_AND_CONTENT_FIT",
-        "blockers": ["Cogfang rig/profile/animation proof", "harbor/city/ruler content fit"],
+        "readiness": "COMPLETE",
+        "blockers": [],
     },
     {
         "child": "WP-23.7", "region": "Cinderreach", "dragon": "Lava Dragon",
@@ -146,13 +152,18 @@ def main() -> None:
             "bytes": DRAGON_PACK.stat().st_size,
             "sha256": digest(DRAGON_PACK),
         },
-        "validated_dragon_ids": ["Verdance", "Jadefang"],
+        "validated_dragon_ids": ["Verdance", "Jadefang", "Nyxaroth", "Cogfang", "Grovemaw"],
         "regions": REGIONS,
         "recommended_order": [
-            "WP-23.2", "WP-23.1", "WP-23.5", "WP-23.8", "WP-23.9",
-            "WP-23.3", "WP-23.6", "WP-23.4", "WP-23.7", "WP-23.10",
+            "WP-23.1", "WP-23.2", "WP-23.5", "WP-23.6", "WP-23.3",
+            "WP-23.8", "WP-23.9", "WP-23.4", "WP-23.7", "WP-23.10",
         ],
-        "first_eligible_child": "WP-23.2",
+        "first_eligible_child": None,
+        "next_focused_readiness_child": None,
+        "next_focused_readiness_scope": (
+            "Audit supplied content for an exact abandoned traveling-carnival and the three distinct "
+            "Hallowwood horror presentations; do not start regional gameplay from generic substitutes"
+        ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

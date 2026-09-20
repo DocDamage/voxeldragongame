@@ -3165,6 +3165,23 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Cogfang can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Cogfang can take off in True Form"), Dragon->CanTakeOff(Reason));
 
+    // WP-23.3: Grovemaw uses the accepted 35-part Wooden Dragon intake and a
+    // distinct living-wood profile rather than inheriting another dragon.
+    Dragon->SetDragonId(FName(TEXT("Grovemaw")));
+    TestTrue(TEXT("Grovemaw has an authoritative validated rig profile (WP-23.3)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Grovemaw binds exactly 34 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 34);
+    TestEqual(TEXT("Grovemaw companion capsule is 29x35"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(29.f, 35.f));
+    TestEqual(TEXT("Grovemaw true form capsule is 118x158"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(118.f, 158.f));
+    TestEqual(TEXT("Grovemaw true form fly speed is 1550"), Dragon->GetActiveRigProfile().FlightSpeed, 1550.f);
+    TestEqual(TEXT("Grovemaw mount socket offset is distinct (0, 0, 155)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 155.f));
+    TestTrue(TEXT("Grovemaw can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Grovemaw can take off in True Form"), Dragon->CanTakeOff(Reason));
+
     Dragon->Destroy();
     Player->Destroy();
     return true;
