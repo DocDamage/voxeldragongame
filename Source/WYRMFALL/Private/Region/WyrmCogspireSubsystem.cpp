@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "Dragon/WyrmDragonCharacter.h"
 #include "Player/WyrmCharacter.h"
+#include "Region/WyrmWorldTravelSubsystem.h"
 
 namespace WyrmCogspireFacts
 {
@@ -23,6 +24,8 @@ namespace WyrmCogspireFacts
     const FName CoercionShutdownReceipt(TEXT("cogspire.engine.coercion_governor_shutdown"));
     const FName CogfangBonded(TEXT("cogspire.cogfang_bonded"));
     const FName CogfangBondedReceipt(TEXT("cogspire.cogfang.voluntary_bond"));
+    const FName RegionComplete(TEXT("cogspire.region_complete"));
+    const FName RegionCompleteReceipt(TEXT("cogspire.region.completion_committed"));
 }
 
 void UWyrmCogspireSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -134,6 +137,32 @@ bool UWyrmCogspireSubsystem::BondCogfang(AWyrmDragonCharacter* Cogfang, AWyrmCha
         CommitFact(WyrmCogspireFacts::CogfangBonded, WyrmCogspireFacts::CogfangBondedReceipt);
 }
 
+bool UWyrmCogspireSubsystem::CanCompleteRegion(
+    const AWyrmDragonCharacter* Cogfang, const UWyrmWorldTravelSubsystem* Travel) const
+{
+    static const FName CogspireHarbor(TEXT("CogspireHarbor"));
+    static const FName Region01(TEXT("Region01"));
+    static const FName CogspireArrival(TEXT("LM-COGSPIRE-ARRIVAL"));
+    return HasFact(WyrmCogspireFacts::CogfangBonded) &&
+        HasReceipt(WyrmCogspireFacts::CogfangBondedReceipt) &&
+        !HasFact(WyrmCogspireFacts::RegionComplete) &&
+        !HasReceipt(WyrmCogspireFacts::RegionCompleteReceipt) &&
+        !bCoercionGovernorActive && bCivicMachineryOperational &&
+        Cogfang && Cogfang->DragonId == FName(TEXT("Cogfang")) &&
+        Cogfang->HasSupportedRigProfile() && Cogfang->HasBondReceipt() &&
+        Cogfang->GetDragonRole() == EWyrmDragonRole::AlliedCompanion &&
+        Travel && Travel->GetCurrentRegionId() == CogspireHarbor &&
+        Travel->GetArrivalLandmarkId() == CogspireArrival &&
+        Travel->IsAllowedRoute(CogspireHarbor, Region01);
+}
+
+bool UWyrmCogspireSubsystem::RecordRegionalCompletion(
+    AWyrmDragonCharacter* Cogfang, UWyrmWorldTravelSubsystem* Travel)
+{
+    return CanCompleteRegion(Cogfang, Travel) &&
+        CommitFact(WyrmCogspireFacts::RegionComplete, WyrmCogspireFacts::RegionCompleteReceipt);
+}
+
 bool UWyrmCogspireSubsystem::CommitFact(FName FactId, FName ReceiptId)
 {
     if (FactId.IsNone() || ReceiptId.IsNone() || HasFact(FactId) || HasReceipt(ReceiptId))
@@ -194,7 +223,8 @@ void UWyrmCogspireSubsystem::NormalizeRestoredState()
         WyrmCogspireFacts::CogfangEncounter,
         WyrmCogspireFacts::CogfangDefeated,
         WyrmCogspireFacts::CoercionShutdown,
-        WyrmCogspireFacts::CogfangBonded};
+        WyrmCogspireFacts::CogfangBonded,
+        WyrmCogspireFacts::RegionComplete};
     const FName OrderedReceipts[] = {
         WyrmCogspireFacts::ArrivalReceipt,
         WyrmCogspireFacts::PublicMachineryReceipt,
@@ -203,7 +233,8 @@ void UWyrmCogspireSubsystem::NormalizeRestoredState()
         WyrmCogspireFacts::CogfangEncounterReceipt,
         WyrmCogspireFacts::CogfangDefeatedReceipt,
         WyrmCogspireFacts::CoercionShutdownReceipt,
-        WyrmCogspireFacts::CogfangBondedReceipt};
+        WyrmCogspireFacts::CogfangBondedReceipt,
+        WyrmCogspireFacts::RegionCompleteReceipt};
 
     bool bChainValid = true;
     for (int32 Index = 0; Index < UE_ARRAY_COUNT(OrderedFacts); ++Index)

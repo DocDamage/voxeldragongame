@@ -4622,6 +4622,24 @@ bool FWyrmCogspireCogfangShutdownTest::RunTest(const FString& Parameters)
     TestFalse(TEXT("Bounded shutdown slice does not complete region"),
         Region->HasFact(FName(TEXT("cogspire.region_complete"))));
 
+    UWyrmWorldTravelSubsystem* Travel = NewObject<UWyrmWorldTravelSubsystem>(TestGI);
+    FWyrmWorldTravelSaveRecord TravelRecord;
+    TravelRecord.CurrentRegionId = FName(TEXT("CogspireHarbor"));
+    TravelRecord.ArrivalLandmarkId = FName(TEXT("LM-COGSPIRE-ARRIVAL"));
+    Travel->RestoreFromSaveRecord(TravelRecord);
+    TestTrue(TEXT("Mainline ledger and safe-return context permit completion"),
+        Region->CanCompleteRegion(Cogfang, Travel));
+    TestTrue(TEXT("Regional completion commits once"), Region->RecordRegionalCompletion(Cogfang, Travel));
+    TestFalse(TEXT("Regional completion duplicate rejects"), Region->RecordRegionalCompletion(Cogfang, Travel));
+    TestTrue(TEXT("Completion fact recorded"),
+        Region->HasFact(FName(TEXT("cogspire.region_complete"))));
+    TestTrue(TEXT("Completion receipt recorded"),
+        Region->HasReceipt(FName(TEXT("cogspire.region.completion_committed"))));
+    TestFalse(TEXT("Optional House Mark investigation is not a completion tax"),
+        Region->HasFact(FName(TEXT("echo.deathmark"))));
+    TestFalse(TEXT("Optional Chef Aurelio investigation is not a completion tax"),
+        Region->HasFact(FName(TEXT("echo.carvers_precision"))));
+
     Cogfang->Destroy();
     Player->Destroy();
     return true;

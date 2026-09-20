@@ -7,6 +7,7 @@
 
 class AWyrmCharacter;
 class AWyrmDragonCharacter;
+class UWyrmWorldTravelSubsystem;
 
 /** Bounded Cogspire fact owner. UWyrmSaveSubsystem remains the sole serializer and slot owner. */
 UCLASS(BlueprintType, Category="WYRMFALL|Cogspire")
@@ -46,6 +47,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Cogspire|Cogfang")
     bool BondCogfang(AWyrmDragonCharacter* Cogfang, AWyrmCharacter* Humanoid);
+
+    UFUNCTION(BlueprintPure, Category="Cogspire|Completion")
+    bool CanCompleteRegion(const AWyrmDragonCharacter* Cogfang, const UWyrmWorldTravelSubsystem* Travel) const;
+
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Completion")
+    bool RecordRegionalCompletion(AWyrmDragonCharacter* Cogfang, UWyrmWorldTravelSubsystem* Travel);
 
     UFUNCTION(BlueprintPure, Category="Cogspire|Engine")
     bool IsCoercionGovernorActive() const { return bCoercionGovernorActive; }

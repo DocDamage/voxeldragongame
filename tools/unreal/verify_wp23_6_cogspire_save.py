@@ -1,4 +1,4 @@
-"""Exercise Schema 8 Cogspire recovery and repeat-stable bonded Cogfang restoration in live PIE."""
+"""Exercise Schema 8 Cogspire recovery and bounded regional closure in live PIE."""
 
 import json
 from pathlib import Path
@@ -30,14 +30,14 @@ camera.set_actor_label("DIAG_WP23_6_CogspireSave_Camera")
 OUT.mkdir(parents=True, exist_ok=True)
 
 report = {
-    "kind": "wp23_6_cogspire_schema8_recovery",
+    "kind": "wp23_6_cogspire_schema8_recovery_and_closure",
     "engine": unreal.SystemLibrary.get_engine_version(),
     "map": MAP,
     "status": "RUNNING",
     "acceptance": {},
     "measurements": {},
     "not_claimed": [
-        "Cogspire regional completion", "House Mark investigation", "Chef Aurelio investigation",
+        "House Mark investigation", "Chef Aurelio investigation",
         "new Echo rewards", "interactive keyboard or gamepad walkthrough", "new packaged build",
     ],
 }
@@ -180,10 +180,36 @@ def tick(_delta):
             assert len(restored_again) == 1 and restored_again[0].has_bond_receipt()
             assert state["pump_before"] == {
                 label: pump_signature(labels[label]) for label in required_pumps}
+
+            travel = unreal.WyrmWorldTravelSubsystem.get_world_travel_subsystem(world)
+            assert travel and travel.complete_arrival("CogspireHarbor", "LM-COGSPIRE-ARRIVAL")
+            assert travel.is_allowed_route("CogspireHarbor", "Region01")
+            assert region.can_complete_region(restored_again[0], travel)
+            assert region.record_regional_completion(restored_again[0], travel)
+            assert not region.record_regional_completion(restored_again[0], travel)
+            assert region.has_fact("cogspire.region_complete")
+            assert region.has_receipt("cogspire.region.completion_committed")
+            closure_snapshot = unreal.WyrmSaveSubsystem.create_snapshot_object(
+                "WP23_6_CogspireClosureMemory", player, adapter, world)
+            assert closure_snapshot and closure_snapshot.schema_version == 8
+            closure_facts = [str(item) for item in closure_snapshot.cogspire_record.known_facts]
+            assert "cogspire.region_complete" in closure_facts
+            region.reset_cogspire_state()
+            assert unreal.WyrmSaveSubsystem.apply_snapshot_object(
+                closure_snapshot, player, adapter, world)
+            closure_cogfangs = [actor for actor in actors(world, unreal.WyrmDragonCharacter)
+                                if str(actor.dragon_id) == "Cogfang" and actor.has_bond_receipt()]
+            assert len(closure_cogfangs) == 1
+            assert region.has_fact("cogspire.region_complete")
+            assert region.has_receipt("cogspire.region.completion_committed")
+            assert not region.record_regional_completion(closure_cogfangs[0], travel)
+            assert travel.prepare_travel("CogspireHarbor", "Region01", "LM-COGSPIRE-RETURN")
+            assert travel.complete_arrival("Region01", "LM-ARRIVAL")
+            assert travel.prepare_travel("Region01", "CogspireHarbor", "LM-ARRIVAL")
+            assert travel.complete_arrival("CogspireHarbor", "LM-COGSPIRE-ARRIVAL")
             assert all(unreal.WyrmSaveSubsystem.is_schema_version_supported(v) for v in range(1, 9))
             assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(0)
             assert not unreal.WyrmSaveSubsystem.is_schema_version_supported(9)
-            assert not region.has_fact("cogspire.region_complete")
             assert not region.has_fact("echo.deathmark")
             assert not region.has_fact("echo.carvers_precision")
 
@@ -194,14 +220,19 @@ def tick(_delta):
                 "repeated_apply_does_not_duplicate_cogfang": True,
                 "civic_pump_actors_remain_unchanged": True,
                 "schemas1_through8_read_and_schema9_rejects": True,
-                "optional_investigations_echoes_and_completion_absent": True,
+                "regional_completion_requires_mainline_bond_and_safe_return": True,
+                "regional_completion_commits_once_and_restores": True,
+                "region01_return_and_cogspire_reentry_remain_valid": True,
+                "optional_investigations_and_echoes_absent": True,
             }
             report["measurements"] = {
                 "schema": snapshot.schema_version,
-                "fact_count": len(facts),
+                "fact_count_before_completion": len(facts),
+                "fact_count_after_completion": len(closure_facts),
                 "receipt_count": len(receipts),
                 "snapshot_bonded_cogfang_count": len(snapshot_cogfangs),
                 "restored_bonded_cogfang_count": len(restored_again),
+                "closure_bonded_cogfang_count": len(closure_cogfangs),
                 "gas_damage_applications": strikes,
                 "coercion_governor_active": region.is_coercion_governor_active(),
                 "civic_machinery_operational": region.is_civic_machinery_operational(),

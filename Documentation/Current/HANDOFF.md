@@ -400,11 +400,14 @@ shuts down once, both civic pumps remain operational with unchanged runtime
 signatures, and the existing dragon owner commits one voluntary Cogfang bond.
 Schema 8 now restores the complete Cogspire ledger, selective-engine state, and
 exactly one bonded Cogfang across repeated apply while both civic pumps remain
-unchanged. Implement bounded regional completion next using the authored
-arrival, mainline ledger, bonded Cogfang, and safe Region01 return route; keep
-House Mark and Chef Aurelio optional. Mutable remains creator, GAS
+unchanged. Regional completion now requires the authored arrival, mainline
+ledger, bonded Cogfang, and safe Region01 return route, commits once, and
+restores through Schema 8 with exactly one Cogfang. House Mark and Chef Aurelio
+remain optional. Implement the House Mark/Deathmark packet next without making
+it a completion tax. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
-coordinator. See `Documentation/Current/WP23_6_COGSPIRE_SAVE_PROOF.md`,
+coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
+`Documentation/Current/WP23_6_COGSPIRE_SAVE_PROOF.md`,
 `Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_ARRIVAL_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_TRAVEL_PROOF.md`,
