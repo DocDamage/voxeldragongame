@@ -13,6 +13,7 @@
 #include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
 #include "Combat/Abilities/WyrmSecondTurnAbility.h"
 #include "Combat/Abilities/WyrmDeathmarkAbility.h"
+#include "Combat/Abilities/WyrmCarversPrecisionAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Combat/WyrmUnseenHandTarget.h"
@@ -472,6 +473,33 @@ void AWyrmCharacter::Tick(float DeltaSeconds)
         if (DeathmarkCooldownTimer <= 0.f && AbilitySystem)
         {
             static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.Deathmark")), false);
+            if (CooldownTag.IsValid())
+            {
+                AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+                FGameplayTagContainer CooldownTags(CooldownTag);
+                AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+            }
+        }
+    }
+    if (bCarversPrecisionPrimed)
+    {
+        CarversPrecisionWindowTimer = FMath::Max(0.f, CarversPrecisionWindowTimer - DeltaSeconds);
+        if (CarversPrecisionWindowTimer <= 0.f)
+        {
+            bCarversPrecisionPrimed = false;
+            if (AbilitySystem)
+            {
+                static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.CarversPrecisionPrimed")), false);
+                if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+            }
+        }
+    }
+    if (CarversPrecisionCooldownTimer > 0.f)
+    {
+        CarversPrecisionCooldownTimer = FMath::Max(0.f, CarversPrecisionCooldownTimer - DeltaSeconds);
+        if (CarversPrecisionCooldownTimer <= 0.f && AbilitySystem)
+        {
+            static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.CarversPrecision")), false);
             if (CooldownTag.IsValid())
             {
                 AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
@@ -1375,6 +1403,19 @@ bool AWyrmCharacter::LearnEcho(FName EchoId)
             }
         }
     }
+    else if (EchoId == FName(TEXT("CarversPrecision")))
+    {
+        if (AbilitySystem)
+        {
+            static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.CarversPrecision")), false);
+            if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+            if (!CarversPrecisionHandle.IsValid())
+            {
+                CarversPrecisionHandle = AbilitySystem->GiveAbility(
+                    FGameplayAbilitySpec(UWyrmCarversPrecisionAbility::StaticClass(), 1, INDEX_NONE, this));
+            }
+        }
+    }
 
     // Auto-equip if first echo and none equipped
     if (EquippedEcho.IsNone())
@@ -1503,6 +1544,10 @@ bool AWyrmCharacter::ActivateEquippedEcho()
     else if (EquippedEcho == FName(TEXT("SecondTurn")))
     {
         return ActivateSecondTurn();
+    }
+    else if (EquippedEcho == FName(TEXT("CarversPrecision")))
+    {
+        return ActivateCarversPrecision();
     }
 
     return false;
@@ -1801,6 +1846,79 @@ void AWyrmCharacter::RestoreDeathmarkState(float RemainingCooldown)
         FGameplayTagContainer CooldownTags(CooldownTag);
         AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
         if (DeathmarkCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
+    }
+}
+
+bool AWyrmCharacter::CanActivateCarversPrecision(FString& OutFailureReason) const
+{
+    if (!LearnedEchoes.Contains(FName(TEXT("CarversPrecision")))) { OutFailureReason = TEXT("NotUnlocked"); return false; }
+    if (EquippedEcho != FName(TEXT("CarversPrecision"))) { OutFailureReason = TEXT("NotEquipped"); return false; }
+    if (!Attributes || Attributes->GetHealth() <= 0.f) { OutFailureReason = TEXT("Dead"); return false; }
+    if (bCarversPrecisionPrimed) { OutFailureReason = TEXT("AlreadyPrimed"); return false; }
+    if (HasMatchingGameplayTag(FName(TEXT("State.Combat.Stun"))) || HasMatchingGameplayTag(FName(TEXT("State.Control.Transition"))))
+    { OutFailureReason = TEXT("ControlBlocked"); return false; }
+    if (CarversPrecisionCooldownTimer > 0.f || HasMatchingGameplayTag(FName(TEXT("Cooldown.Echo.CarversPrecision"))))
+    { OutFailureReason = TEXT("OnCooldown"); return false; }
+    if (Attributes->GetFocus() < 25.f) { OutFailureReason = TEXT("InsufficientFocus"); return false; }
+    OutFailureReason.Reset();
+    return true;
+}
+
+bool AWyrmCharacter::ActivateCarversPrecision()
+{
+    FString Reason;
+    return CanActivateCarversPrecision(Reason) && AbilitySystem && CarversPrecisionHandle.IsValid() &&
+        AbilitySystem->TryActivateAbility(CarversPrecisionHandle);
+}
+
+bool AWyrmCharacter::CommitCarversPrecision()
+{
+    if (bCarversPrecisionPrimed) return false;
+    bCarversPrecisionPrimed = true;
+    CarversPrecisionWindowTimer = 4.f;
+    CarversPrecisionCooldownTimer = 12.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.CarversPrecisionPrimed")), false);
+        if (PrimedTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(PrimedTag)) AbilitySystem->AddLooseGameplayTag(PrimedTag);
+    }
+    return true;
+}
+
+float AWyrmCharacter::GetCarversPrecisionWoundDamage() const
+{
+    return bCarversPrecisionPrimed && CarversPrecisionWindowTimer > 0.f && Attributes
+        ? FMath::Max(0.f, Attributes->GetPower() * 0.6f) : 0.f;
+}
+
+bool AWyrmCharacter::ConsumeCarversPrecision()
+{
+    if (!bCarversPrecisionPrimed) return false;
+    bCarversPrecisionPrimed = false;
+    CarversPrecisionWindowTimer = 0.f;
+    if (AbilitySystem)
+    {
+        static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.CarversPrecisionPrimed")), false);
+        if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+    }
+    return true;
+}
+
+void AWyrmCharacter::RestoreCarversPrecisionState(float RemainingCooldown)
+{
+    bCarversPrecisionPrimed = false;
+    CarversPrecisionWindowTimer = 0.f;
+    CarversPrecisionCooldownTimer = FMath::Max(0.f, RemainingCooldown);
+    if (!AbilitySystem) return;
+    static const FGameplayTag PrimedTag = FGameplayTag::RequestGameplayTag(FName(TEXT("State.Combat.CarversPrecisionPrimed")), false);
+    static const FGameplayTag CooldownTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Cooldown.Echo.CarversPrecision")), false);
+    if (PrimedTag.IsValid()) AbilitySystem->RemoveLooseGameplayTag(PrimedTag);
+    if (CooldownTag.IsValid())
+    {
+        AbilitySystem->RemoveLooseGameplayTag(CooldownTag);
+        FGameplayTagContainer CooldownTags(CooldownTag);
+        AbilitySystem->RemoveActiveEffectsWithGrantedTags(CooldownTags);
+        if (CarversPrecisionCooldownTimer > 0.f) AbilitySystem->AddLooseGameplayTag(CooldownTag);
     }
 }
 
@@ -2269,6 +2387,19 @@ void AWyrmCharacter::RestoreEchoState(const TArray<FName>& InLearnedEchoes, FNam
                 {
                     DeathmarkHandle = AbilitySystem->GiveAbility(
                         FGameplayAbilitySpec(UWyrmDeathmarkAbility::StaticClass(), 1, INDEX_NONE, this));
+                }
+            }
+        }
+        else if (EchoId == FName(TEXT("CarversPrecision")))
+        {
+            if (AbilitySystem)
+            {
+                static const FGameplayTag UnlockTag = FGameplayTag::RequestGameplayTag(FName(TEXT("Unlock.Echo.CarversPrecision")), false);
+                if (UnlockTag.IsValid() && !AbilitySystem->HasMatchingGameplayTag(UnlockTag)) AbilitySystem->AddLooseGameplayTag(UnlockTag);
+                if (!CarversPrecisionHandle.IsValid())
+                {
+                    CarversPrecisionHandle = AbilitySystem->GiveAbility(
+                        FGameplayAbilitySpec(UWyrmCarversPrecisionAbility::StaticClass(), 1, INDEX_NONE, this));
                 }
             }
         }

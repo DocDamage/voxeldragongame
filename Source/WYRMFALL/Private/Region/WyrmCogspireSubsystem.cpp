@@ -38,6 +38,18 @@ namespace WyrmCogspireFacts
     const FName HouseMarkDefeatedReceipt(TEXT("cogspire.house_mark.defeat_committed"));
     const FName Deathmark(TEXT("echo.deathmark"));
     const FName DeathmarkReceipt(TEXT("cogspire.house_mark.deathmark_manifested"));
+    const FName ChefPatron(TEXT("cogspire.chef_aurelio.patron_testimony"));
+    const FName ChefPatronReceipt(TEXT("cogspire.chef_aurelio.patron_testimony_recorded"));
+    const FName ChefKitchen(TEXT("cogspire.chef_aurelio.kitchen_evidence"));
+    const FName ChefKitchenReceipt(TEXT("cogspire.chef_aurelio.kitchen_evidence_recorded"));
+    const FName ChefSource(TEXT("cogspire.chef_aurelio.ingredient_source_traced"));
+    const FName ChefSourceReceipt(TEXT("cogspire.chef_aurelio.ingredient_source_recorded"));
+    const FName ChefConfrontation(TEXT("cogspire.chef_aurelio.confrontation_started"));
+    const FName ChefConfrontationReceipt(TEXT("cogspire.chef_aurelio.confrontation_committed"));
+    const FName ChefDefeated(TEXT("cogspire.chef_aurelio.defeated"));
+    const FName ChefDefeatedReceipt(TEXT("cogspire.chef_aurelio.defeat_committed"));
+    const FName CarversPrecision(TEXT("echo.carvers_precision"));
+    const FName CarversPrecisionReceipt(TEXT("cogspire.chef_aurelio.carvers_precision_manifested"));
 }
 
 void UWyrmCogspireSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -211,6 +223,42 @@ bool UWyrmCogspireSubsystem::RecordDeathmarkUnlock()
         CommitFact(WyrmCogspireFacts::Deathmark, WyrmCogspireFacts::DeathmarkReceipt);
 }
 
+bool UWyrmCogspireSubsystem::RecordChefPatronTestimony()
+{
+    return HasFact(WyrmCogspireFacts::Arrival) &&
+        CommitFact(WyrmCogspireFacts::ChefPatron, WyrmCogspireFacts::ChefPatronReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordChefKitchenEvidence()
+{
+    return HasFact(WyrmCogspireFacts::ChefPatron) &&
+        CommitFact(WyrmCogspireFacts::ChefKitchen, WyrmCogspireFacts::ChefKitchenReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordChefIngredientSource()
+{
+    return HasFact(WyrmCogspireFacts::ChefKitchen) &&
+        CommitFact(WyrmCogspireFacts::ChefSource, WyrmCogspireFacts::ChefSourceReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordChefConfrontation()
+{
+    return HasFact(WyrmCogspireFacts::ChefSource) &&
+        CommitFact(WyrmCogspireFacts::ChefConfrontation, WyrmCogspireFacts::ChefConfrontationReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordChefDefeat()
+{
+    return HasFact(WyrmCogspireFacts::ChefConfrontation) &&
+        CommitFact(WyrmCogspireFacts::ChefDefeated, WyrmCogspireFacts::ChefDefeatedReceipt);
+}
+
+bool UWyrmCogspireSubsystem::RecordCarversPrecisionUnlock()
+{
+    return HasFact(WyrmCogspireFacts::ChefDefeated) &&
+        CommitFact(WyrmCogspireFacts::CarversPrecision, WyrmCogspireFacts::CarversPrecisionReceipt);
+}
+
 bool UWyrmCogspireSubsystem::CommitFact(FName FactId, FName ReceiptId)
 {
     if (FactId.IsNone() || ReceiptId.IsNone() || HasFact(FactId) || HasReceipt(ReceiptId))
@@ -329,6 +377,34 @@ void UWyrmCogspireSubsystem::NormalizeRestoredState()
         {
             KnownFacts.Remove(OptionalFacts[Index]);
             FactReceipts.Remove(OptionalReceipts[Index]);
+        }
+    }
+
+    const FName ChefFacts[] = {
+        WyrmCogspireFacts::ChefPatron,
+        WyrmCogspireFacts::ChefKitchen,
+        WyrmCogspireFacts::ChefSource,
+        WyrmCogspireFacts::ChefConfrontation,
+        WyrmCogspireFacts::ChefDefeated,
+        WyrmCogspireFacts::CarversPrecision};
+    const FName ChefReceipts[] = {
+        WyrmCogspireFacts::ChefPatronReceipt,
+        WyrmCogspireFacts::ChefKitchenReceipt,
+        WyrmCogspireFacts::ChefSourceReceipt,
+        WyrmCogspireFacts::ChefConfrontationReceipt,
+        WyrmCogspireFacts::ChefDefeatedReceipt,
+        WyrmCogspireFacts::CarversPrecisionReceipt};
+    bool bChefChainValid = KnownFacts.Contains(WyrmCogspireFacts::Arrival) &&
+        FactReceipts.Contains(WyrmCogspireFacts::ArrivalReceipt);
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(ChefFacts); ++Index)
+    {
+        const bool bPairPresent = KnownFacts.Contains(ChefFacts[Index]) &&
+            FactReceipts.Contains(ChefReceipts[Index]);
+        bChefChainValid = bChefChainValid && bPairPresent;
+        if (!bChefChainValid)
+        {
+            KnownFacts.Remove(ChefFacts[Index]);
+            FactReceipts.Remove(ChefReceipts[Index]);
         }
     }
 }

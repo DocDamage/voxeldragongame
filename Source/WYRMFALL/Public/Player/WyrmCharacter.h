@@ -225,6 +225,17 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void RestoreDeathmarkState(float RemainingCooldown);
 
+    // --- Carver's Precision (WP-23.6 / ECHO-05) ---
+    UFUNCTION(BlueprintPure, Category="Combat|Echo") bool CanActivateCarversPrecision(FString& OutFailureReason) const;
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo") bool ActivateCarversPrecision();
+    bool CommitCarversPrecision();
+    UFUNCTION(BlueprintPure, Category="Combat|Echo") bool IsCarversPrecisionPrimed() const { return bCarversPrecisionPrimed; }
+    UFUNCTION(BlueprintPure, Category="Combat|Echo") float GetCarversPrecisionRemainingWindow() const { return CarversPrecisionWindowTimer; }
+    UFUNCTION(BlueprintPure, Category="Combat|Echo") float GetCarversPrecisionRemainingCooldown() const { return CarversPrecisionCooldownTimer; }
+    float GetCarversPrecisionWoundDamage() const;
+    bool ConsumeCarversPrecision();
+    UFUNCTION(BlueprintCallable, Category="Combat|Echo") void RestoreCarversPrecisionState(float RemainingCooldown);
+
     // --- Moonbound Form (WP-21 / ECHO-08, ECHO-09) ---
     UFUNCTION(BlueprintCallable, Category="Combat|Echo")
     void ActivateMoonboundForm(float Duration);
@@ -486,6 +497,7 @@ private:
     FGameplayAbilitySpecHandle SanguineStrikeHandle;
     FGameplayAbilitySpecHandle SecondTurnHandle;
     FGameplayAbilitySpecHandle DeathmarkHandle;
+    FGameplayAbilitySpecHandle CarversPrecisionHandle;
     FGameplayAbilitySpecHandle PrimaryBeastClawHandle;
     FGameplayAbilitySpecHandle SecondaryBeastPounceHandle;
 
@@ -533,6 +545,10 @@ private:
     float DeathmarkCooldownTimer = 0.f;
     TWeakObjectPtr<AActor> PendingDeathmarkTarget;
     TWeakObjectPtr<AActor> MarkedDeathmarkTarget;
+
+    bool bCarversPrecisionPrimed = false;
+    float CarversPrecisionWindowTimer = 0.f;
+    float CarversPrecisionCooldownTimer = 0.f;
 
     TArray<FName> LearnedEchoes;
     FName EquippedEcho = NAME_None;

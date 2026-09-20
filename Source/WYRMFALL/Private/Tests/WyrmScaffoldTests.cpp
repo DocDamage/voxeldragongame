@@ -11,6 +11,7 @@
 #include "Combat/Abilities/WyrmSanguineStrikeAbility.h"
 #include "Combat/Abilities/WyrmSecondTurnAbility.h"
 #include "Combat/Abilities/WyrmDeathmarkAbility.h"
+#include "Combat/Abilities/WyrmCarversPrecisionAbility.h"
 #include "Combat/Abilities/WyrmBeastAttackAbilities.h"
 #include "Combat/WyrmEnemyCharacter.h"
 #include "Player/WyrmCharacter.h"
@@ -4757,6 +4758,63 @@ bool FWyrmHouseMarkDeathmarkContractTest::RunTest(const FString& Parameters)
     Malformed.FactReceipts.Add(FName(TEXT("cogspire.house_mark.deathmark_manifested")));
     Region->RestoreFromSaveRecord(Malformed);
     TestFalse(TEXT("Final-only optional state fails closed"), Region->HasFact(FName(TEXT("echo.deathmark"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmChefAurelioCarversPrecisionContractTest,
+    "WYRMFALL.Scaffold.ChefAurelioCarversPrecisionContract",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmChefAurelioCarversPrecisionContractTest::RunTest(const FString& Parameters)
+{
+    UWyrmCarversPrecisionAbility* Ability = NewObject<UWyrmCarversPrecisionAbility>();
+    TestNotNull(TEXT("Carver's Precision GAS ability exists"), Ability);
+    if (!Ability) return false;
+    TestEqual(TEXT("Carver's Precision costs 25 Focus"), Ability->FocusCost, 25.f);
+    TestEqual(TEXT("Carver's Precision cooldown is 12 seconds"), Ability->CooldownDuration, 12.f);
+    TestEqual(TEXT("Carver's Precision ability tag"), Ability->AbilityTag.GetTagName(),
+        FName(TEXT("Ability.Echo.CarversPrecision")));
+
+    const float FullArmorDamage = UWyrmAttributeSet::CalculateMitigatedDamage(100.f, 40.f, 1.f);
+    const float PenetratedDamage = UWyrmAttributeSet::CalculateMitigatedDamage(100.f, 28.f, 1.f);
+    TestTrue(TEXT("Thirty percent armor ignore increases the direct hit"), PenetratedDamage > FullArmorDamage);
+    TestTrue(TEXT("Thirty percent armor ignore keeps canonical mitigation"),
+        FMath::IsNearlyEqual(PenetratedDamage, 68.1818f, 0.01f));
+
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCogspireSubsystem* Region = NewObject<UWyrmCogspireSubsystem>(TestGI);
+    TestNotNull(TEXT("Cogspire owner exists"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Chef investigation rejects before Cogspire arrival"), Region->RecordChefPatronTestimony());
+    TestTrue(TEXT("Arrival starts optional Chef route eligibility"), Region->RecordArrival());
+    TestFalse(TEXT("Kitchen evidence rejects before patron testimony"), Region->RecordChefKitchenEvidence());
+    TestTrue(TEXT("Patron testimony commits once"), Region->RecordChefPatronTestimony());
+    TestTrue(TEXT("Kitchen evidence commits once"), Region->RecordChefKitchenEvidence());
+    TestTrue(TEXT("Ingredient source commits once"), Region->RecordChefIngredientSource());
+    TestTrue(TEXT("Chef confrontation commits once"), Region->RecordChefConfrontation());
+    TestTrue(TEXT("GAS combat resolution fact commits once"), Region->RecordChefDefeat());
+    TestTrue(TEXT("Carver's Precision unlock commits once"), Region->RecordCarversPrecisionUnlock());
+    TestFalse(TEXT("Carver's Precision unlock cannot duplicate"), Region->RecordCarversPrecisionUnlock());
+    TestTrue(TEXT("Permanent Carver's Precision fact exists"),
+        Region->HasFact(FName(TEXT("echo.carvers_precision"))));
+    TestFalse(TEXT("Optional investigation does not complete Cogspire"),
+        Region->HasFact(FName(TEXT("cogspire.region_complete"))));
+
+    FWyrmCogspireSaveRecord Record;
+    Region->BuildSaveRecord(Record);
+    Region->ResetCogspireState();
+    Region->RestoreFromSaveRecord(Record);
+    TestTrue(TEXT("Schema 8 record restores the complete Chef fact chain"),
+        Region->HasFact(FName(TEXT("echo.carvers_precision"))) &&
+        Region->HasReceipt(FName(TEXT("cogspire.chef_aurelio.carvers_precision_manifested"))));
+
+    FWyrmCogspireSaveRecord Malformed;
+    Malformed.KnownFacts.Add(FName(TEXT("echo.carvers_precision")));
+    Malformed.FactReceipts.Add(FName(TEXT("cogspire.chef_aurelio.carvers_precision_manifested")));
+    Region->RestoreFromSaveRecord(Malformed);
+    TestFalse(TEXT("Final-only optional Chef state fails closed"),
+        Region->HasFact(FName(TEXT("echo.carvers_precision"))));
+    TestEqual(TEXT("Cogspire optional recovery remains Schema 8"), UWyrmSaveGame::CurrentSchemaVersion, 8);
     return true;
 }
 #endif

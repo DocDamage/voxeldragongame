@@ -35,7 +35,61 @@ bool UWyrmMeleeAttackAbility::ApplyDamageEffect(UAbilitySystemComponent* SourceA
     return true;
 }
 
-bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage)
+bool UWyrmMeleeAttackAbility::ApplyDamageEffectWithArmorPenetration(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage, float ArmorIgnoreFraction)
+{
+    if (!SourceASC || !TargetASC || InRawDamage <= 0.f)
+    {
+        return false;
+    }
+
+    const UWyrmAttributeSet* SourceAttributes = Cast<UWyrmAttributeSet>(
+        SourceASC->GetAttributeSet(UWyrmAttributeSet::StaticClass()));
+    const UWyrmAttributeSet* TargetAttributes = Cast<UWyrmAttributeSet>(
+        TargetASC->GetAttributeSet(UWyrmAttributeSet::StaticClass()));
+    if (!TargetAttributes)
+    {
+        return ApplyDamageEffect(SourceASC, TargetASC, InRawDamage);
+    }
+
+    const float SafeIgnore = FMath::Clamp(ArmorIgnoreFraction, 0.f, 1.f);
+    const float AttackerLevel = SourceAttributes ? SourceAttributes->GetCharacterLevel() : 1.f;
+    const float FullArmor = TargetAttributes->GetArmor();
+    const float DesiredDamage = UWyrmAttributeSet::CalculateMitigatedDamage(
+        InRawDamage, FullArmor * (1.f - SafeIgnore), AttackerLevel);
+    const float FullArmorMultiplier = 1.f - UWyrmAttributeSet::CalculatePhysicalMitigation(FullArmor, AttackerLevel);
+    const float AdjustedRawDamage = FullArmorMultiplier > KINDA_SMALL_NUMBER
+        ? DesiredDamage / FullArmorMultiplier
+        : InRawDamage;
+    return ApplyDamageEffect(SourceASC, TargetASC, AdjustedRawDamage);
+}
+
+bool UWyrmMeleeAttackAbility::ApplyPeriodicDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float TotalRawDamage, float Duration, float Period)
+{
+    if (!SourceASC || !TargetASC || TotalRawDamage <= 0.f || Duration <= 0.f || Period <= 0.f)
+    {
+        return false;
+    }
+
+    const int32 TickCount = FMath::Max(1, FMath::RoundToInt(Duration / Period));
+    UGameplayEffect* DamageGE = NewObject<UGameplayEffect>();
+    DamageGE->DurationPolicy = EGameplayEffectDurationType::HasDuration;
+    DamageGE->DurationMagnitude = FGameplayEffectModifierMagnitude(FScalableFloat(Duration));
+    DamageGE->Period = FScalableFloat(Period);
+    DamageGE->bExecutePeriodicEffectOnApplication = false;
+
+    FGameplayModifierInfo ModInfo;
+    ModInfo.Attribute = UWyrmAttributeSet::GetIncomingDamageAttribute();
+    ModInfo.ModifierOp = EGameplayModOp::Additive;
+    ModInfo.ModifierMagnitude = FGameplayEffectModifierMagnitude(FScalableFloat(TotalRawDamage / static_cast<float>(TickCount)));
+    DamageGE->Modifiers.Add(ModInfo);
+
+    FGameplayEffectContextHandle Context = SourceASC->MakeEffectContext();
+    Context.AddInstigator(SourceASC->GetAvatarActor(), SourceASC->GetAvatarActor());
+    SourceASC->ApplyGameplayEffectToTarget(DamageGE, TargetASC, 1.f, Context);
+    return true;
+}
+
+bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage, bool bIsMeleeHit)
 {
     if (!SourceASC || !TargetASC || InRawDamage <= 0.f)
     {
@@ -47,9 +101,17 @@ bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComp
         TargetASC->GetAttributeSet(UWyrmAttributeSet::StaticClass()));
     const float SanguineBonusDamage = SourceCharacter ? SourceCharacter->GetSanguineStrikeBonusDamage() : 0.f;
     const float DeathmarkBonusDamage = SourceCharacter ? SourceCharacter->GetDeathmarkBonusDamage(TargetASC) : 0.f;
+    const float CarversPrecisionWoundDamage = SourceCharacter && bIsMeleeHit
+        ? SourceCharacter->GetCarversPrecisionWoundDamage()
+        : 0.f;
+    const bool bUseCarversPrecision = CarversPrecisionWoundDamage > 0.f;
     const float HealthBefore = TargetAttributes ? TargetAttributes->GetCurrentHealth() : 0.f;
     const float ShieldBefore = TargetAttributes ? TargetAttributes->GetCurrentShield() : 0.f;
-    if (!ApplyDamageEffect(SourceASC, TargetASC, InRawDamage + SanguineBonusDamage + DeathmarkBonusDamage))
+    const float DirectRawDamage = InRawDamage + SanguineBonusDamage + DeathmarkBonusDamage;
+    const bool bAppliedDirectDamage = bUseCarversPrecision
+        ? ApplyDamageEffectWithArmorPenetration(SourceASC, TargetASC, DirectRawDamage, 0.30f)
+        : ApplyDamageEffect(SourceASC, TargetASC, DirectRawDamage);
+    if (!bAppliedDirectDamage)
     {
         return false;
     }
@@ -72,6 +134,10 @@ bool UWyrmMeleeAttackAbility::ApplyEligibleWeaponDamageEffect(UAbilitySystemComp
             if (DeathmarkBonusDamage > 0.f)
             {
                 SourceCharacter->ConsumeDeathmark(TargetASC);
+            }
+            if (bUseCarversPrecision && SourceCharacter->ConsumeCarversPrecision())
+            {
+                ApplyPeriodicDamageEffect(SourceASC, TargetASC, CarversPrecisionWoundDamage, 3.f, 1.f);
             }
         }
     }
@@ -165,7 +231,7 @@ void UWyrmMeleeAttackAbility::ActivateAbility(const FGameplayAbilitySpecHandle H
                 }
                 else
                 {
-                    ApplyEligibleWeaponDamageEffect(SourceASC, TargetASC, RawDamage);
+                    ApplyEligibleWeaponDamageEffect(SourceASC, TargetASC, RawDamage, true);
                 }
             }
         }

@@ -34,9 +34,17 @@ public:
     UFUNCTION(BlueprintCallable, Category="Combat")
     static bool ApplyDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage);
 
-    /** Basic weapon-hit path that alone may consume a primed Sanguine Strike. */
+    /** Routes a direct hit through IncomingDamage while producing the result of partially ignored armor. */
     UFUNCTION(BlueprintCallable, Category="Combat")
-    static bool ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage);
+    static bool ApplyDamageEffectWithArmorPenetration(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage, float ArmorIgnoreFraction);
+
+    /** Applies a GAS-owned periodic IncomingDamage effect without entering weapon-proc evaluation. */
+    UFUNCTION(BlueprintCallable, Category="Combat")
+    static bool ApplyPeriodicDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float TotalRawDamage, float Duration, float Period);
+
+    /** Basic weapon-hit path that alone may consume eligible primed Echoes. */
+    UFUNCTION(BlueprintCallable, Category="Combat")
+    static bool ApplyEligibleWeaponDamageEffect(UAbilitySystemComponent* SourceASC, UAbilitySystemComponent* TargetASC, float InRawDamage, bool bIsMeleeHit = false);
 };
 
 // Light basic melee attack (0 Focus cost, 0 cooldown)

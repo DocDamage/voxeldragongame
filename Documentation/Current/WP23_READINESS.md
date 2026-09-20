@@ -26,7 +26,7 @@ source candidates and stay fail-closed under DRG-15.
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
-| 7 | WP-23.6 Cogspire Harbor | **MAINLINE + HOUSE MARK COMPLETE** | Mainline completion remains stable; the optional House Mark investigation and permanent usable Deathmark now pass and restore through Schema 8 without becoming a completion tax. Chef Aurelio remains open; [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md). |
+| 7 | WP-23.6 Cogspire Harbor | **COMPLETE** | Mainline completion remains stable; both optional supplied-art investigations and permanent usable GAS Echoes pass and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md). |
 | 8 | WP-23.4 Frosthold | BLOCKED | Validate Frostmane/White Dragon rig and locate suitable snow/ice region and ruler content. |
 | 9 | WP-23.7 Cinderreach | BLOCKED | Validate Pyraxis/Lava Dragon rig and locate suitable volcanic trial/forge/ruler content. |
 | 10 | WP-23.10 Zenith Spire | BLOCKED | Validate the unnamed Mecha Dragon rig and locate a playable city/colony plus ruler content. Robot and tiny-car archives alone do not satisfy Z1. |
@@ -84,7 +84,8 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Cogspire mainline completion passes in live PIE and restores through Schema 8
-with exactly one bonded Cogfang; see
-`Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`. Next, implement the
-optional Chef Aurelio / Carver's Precision packet without making it a completion tax.
+Cogspire mainline and both optional investigation/Echo routes pass in live PIE
+and restore through Schema 8; see
+`Documentation/Current/WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md`. Next,
+refresh the blocked regional readiness evidence and choose one child whose real
+dragon, ruler, environment, and encounter-content gate can be cleared.

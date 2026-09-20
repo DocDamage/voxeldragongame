@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 75/75 tests with 0 failures.
+- Full scaffold native automation completed 76/76 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -376,9 +376,9 @@ Evidence:
 
 WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
 gate, the saved Harbor map, bounded travel/recovery, arrival observation,
-selective Cogfang shutdown/bond, and the optional House Mark / Deathmark packet
-now pass. Cogfang's distinct 34-part assembly and authority proof passed
-COG-01..05 in live PIE; the full native suite is now 75/75. Baron
+selective Cogfang shutdown/bond, and both optional urban investigation/Echo
+packets now pass. Cogfang's distinct 34-part assembly and authority proof passed
+COG-01..05 in live PIE; the full native suite is now 76/76. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
 scale, fixture collision, and accepted cameras. Stationary QA locks the source
@@ -408,10 +408,15 @@ and Deathmark manifestation once. Deathmark is permanently usable, marks one
 visible hostile for six seconds, adds `1.0 x Power` to the next eligible direct
 basic hit on that target, and retains its 12-second cooldown through Schema 8
 recovery. It remains absent from regional completion requirements. Chef Aurelio
-remains optional and open; implement that investigation and Carver's Precision
-next without making it a completion tax. Mutable remains creator, GAS
+now also resolves through an ordered optional investigation and GAS fight using
+the supplied Chef/tavern presentation. Carver's Precision permanently unlocks,
+costs 25 Focus, primes the next melee hit for four seconds, ignores 30% of armor
+on that impact, applies a non-recursive `0.6 x Power` wound over three seconds,
+and retains its 12-second cooldown through Schema 8 recovery. It also remains
+absent from regional completion requirements. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
 coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
+`Documentation/Current/WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md`,
 `Documentation/Current/WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_SAVE_PROOF.md`,
 `Documentation/Current/WP23_6_COGFANG_SHUTDOWN_PROOF.md`,
@@ -423,3 +428,8 @@ coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
 `Documentation/Current/WP23_6_COGFANG_PROFILE_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_READINESS.md`, and
 `Documentation/Current/WP23_READINESS.md`.
+
+The next bounded task is to refresh the blocked WP-23 regional readiness
+evidence and select one child whose real dragon, ruler, environment, and
+encounter-content gate can be cleared. Do not begin regional gameplay from
+source-archive presence alone.

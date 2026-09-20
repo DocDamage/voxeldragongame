@@ -61,6 +61,13 @@ public:
     UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordHouseMarkDefeat();
     UFUNCTION(BlueprintCallable, Category="Cogspire|House Mark") bool RecordDeathmarkUnlock();
 
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordChefPatronTestimony();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordChefKitchenEvidence();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordChefIngredientSource();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordChefConfrontation();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordChefDefeat();
+    UFUNCTION(BlueprintCallable, Category="Cogspire|Chef Aurelio") bool RecordCarversPrecisionUnlock();
+
     UFUNCTION(BlueprintPure, Category="Cogspire|Engine")
     bool IsCoercionGovernorActive() const { return bCoercionGovernorActive; }
 
