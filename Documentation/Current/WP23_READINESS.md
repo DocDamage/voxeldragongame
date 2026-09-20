@@ -26,7 +26,7 @@ source candidates and stay fail-closed under DRG-15.
 | 4 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
 | 5 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 6 | WP-23.3 Hallowwood | BLOCKED | Validate Grovemaw/Wooden Dragon rig; establish ruler and three distinct horror encounter fits. |
-| 7 | WP-23.6 Cogspire Harbor | COGFANG PROFILE + CAST QA PASS; HARBOR FOUNDATION NEXT | Cogfang's distinct 34-part profile passes in real PIE. Baron Cogwell, House Mark Champion, and Chef Aurelio now pass supplied-animation, palette, scale, collision, and camera QA; [cast proof](WP23_6_CAST_VISUAL_QA.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md), [readiness](WP23_6_COGSPIRE_READINESS.md). |
+| 7 | WP-23.6 Cogspire Harbor | PROFILE + CAST + HARBOR FOUNDATION PASS; SAVED MAP NEXT | Cogfang and the selected cast pass. The supplied waterfront now has accepted scale, waterline, collision policy, complete PIE dock navigation, and separated civic/coercion machinery; [harbor proof](WP23_6_HARBOR_FOUNDATION_PROOF.md), [cast proof](WP23_6_CAST_VISUAL_QA.md), [profile proof](WP23_6_COGFANG_PROFILE_PROOF.md). |
 | 8 | WP-23.4 Frosthold | BLOCKED | Validate Frostmane/White Dragon rig and locate suitable snow/ice region and ruler content. |
 | 9 | WP-23.7 Cinderreach | BLOCKED | Validate Pyraxis/Lava Dragon rig and locate suitable volcanic trial/forge/ruler content. |
 | 10 | WP-23.10 Zenith Spire | BLOCKED | Validate the unnamed Mecha Dragon rig and locate a playable city/colony plus ruler content. Robot and tiny-car archives alone do not satisfy Z1. |
@@ -83,8 +83,7 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Author one bounded Cogspire Harbor foundation/layout proof from the identified
-supplied waterfront and city-engine construction assets. Validate scale,
-waterline, walkable collision, navigation, and public-machinery readability.
-Keep regional encounters, travel, save-schema extension, and completion logic
-outside that packet.
+Author the saved `L_CogspireHarbor` environment/navigation foundation from the
+accepted diagnostic layout. Add only the established arrival and return
+anchors. Keep urban encounters, city-engine shutdown gameplay, regional
+completion, and save-schema extension outside that packet.
