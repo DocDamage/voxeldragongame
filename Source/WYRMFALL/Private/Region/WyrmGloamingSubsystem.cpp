@@ -35,6 +35,32 @@ namespace WyrmGloamingFacts
     const FName CountDripulaResolvedReceipt(TEXT("gloaming.count_dripula.bloodless_surrender"));
     const FName FrankNShrineResolved(TEXT("gloaming.frank_n_shrine_resolved"));
     const FName FrankNShrineResolvedReceipt(TEXT("gloaming.frank_n_shrine.grounded_submission"));
+
+    struct FRequiredHorrorFact
+    {
+        FName Prerequisite;
+        FName Resolved;
+        FName Receipt;
+    };
+
+    const FRequiredHorrorFact* GetRequiredHorrorFact(EWyrmRequiredHorrorIdentity Identity)
+    {
+        static const FRequiredHorrorFact Facts[] = {
+            {FrankNShrineResolved, FName(TEXT("gloaming.ail_yen_resolved")), FName(TEXT("gloaming.ail_yen.living_submission"))},
+            {FName(TEXT("gloaming.ail_yen_resolved")), FName(TEXT("gloaming.bellraiser_resolved")), FName(TEXT("gloaming.bellraiser.living_submission"))},
+            {FName(TEXT("gloaming.bellraiser_resolved")), FName(TEXT("gloaming.sad_echo_resolved")), FName(TEXT("gloaming.sad_echo.living_submission"))},
+            {FName(TEXT("gloaming.sad_echo_resolved")), FName(TEXT("gloaming.dreadator_resolved")), FName(TEXT("gloaming.dreadator.living_submission"))},
+            {FName(TEXT("gloaming.dreadator_resolved")), FName(TEXT("gloaming.roastface_resolved")), FName(TEXT("gloaming.roastface.disarmed_submission"))},
+            {FName(TEXT("gloaming.roastface_resolved")), FName(TEXT("gloaming.gravy_daughters_resolved")), FName(TEXT("gloaming.gravy_daughters.paired_submission"))},
+            {FName(TEXT("gloaming.gravy_daughters_resolved")), FName(TEXT("gloaming.knit_resolved")), FName(TEXT("gloaming.knit.balloon_surrender"))},
+            {FName(TEXT("gloaming.knit_resolved")), FName(TEXT("gloaming.canniball_resolved")), FName(TEXT("gloaming.canniball.restrained_submission"))},
+            {FName(TEXT("gloaming.canniball_resolved")), FName(TEXT("gloaming.mums_the_wyrd_resolved")), FName(TEXT("gloaming.mums_the_wyrd.unbound_submission"))},
+            {FName(TEXT("gloaming.mums_the_wyrd_resolved")), FName(TEXT("gloaming.dready_freddie_resolved")), FName(TEXT("gloaming.dready_freddie.waking_submission"))},
+            {FName(TEXT("gloaming.dready_freddie_resolved")), FName(TEXT("gloaming.pyre_midhead_resolved")), FName(TEXT("gloaming.pyre_midhead.disarmed_submission"))},
+        };
+        const uint8 Index = static_cast<uint8>(Identity);
+        return Index < UE_ARRAY_COUNT(Facts) ? &Facts[Index] : nullptr;
+    }
 }
 
 void UWyrmGloamingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -229,6 +255,22 @@ bool UWyrmGloamingSubsystem::RecordFrankNShrineResolution()
         return false;
     }
     return CommitFact(WyrmGloamingFacts::FrankNShrineResolved, WyrmGloamingFacts::FrankNShrineResolvedReceipt);
+}
+
+bool UWyrmGloamingSubsystem::CanResolveRequiredHorror(EWyrmRequiredHorrorIdentity Identity) const
+{
+    const WyrmGloamingFacts::FRequiredHorrorFact* Fact = WyrmGloamingFacts::GetRequiredHorrorFact(Identity);
+    return Fact && HasFact(Fact->Prerequisite) && !HasFact(Fact->Resolved) && !HasReceipt(Fact->Receipt);
+}
+
+bool UWyrmGloamingSubsystem::RecordRequiredHorrorResolution(EWyrmRequiredHorrorIdentity Identity)
+{
+    if (!CanResolveRequiredHorror(Identity))
+    {
+        return false;
+    }
+    const WyrmGloamingFacts::FRequiredHorrorFact* Fact = WyrmGloamingFacts::GetRequiredHorrorFact(Identity);
+    return Fact && CommitFact(Fact->Resolved, Fact->Receipt);
 }
 
 bool UWyrmGloamingSubsystem::RecordSecondTurnUnlock()

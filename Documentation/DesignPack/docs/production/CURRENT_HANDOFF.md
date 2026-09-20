@@ -16,8 +16,7 @@
 > pass. Two-way Region01↔Gloaming travel and unified Schema 7 recovery now also
 > pass without duplicate dragon restoration. The 17-part, 190 cm Michael Mire
 > GAS living-submission encounter passes with one-time Schema 7 restoration and
-> no Echo/completion leakage. The broader required-horror roster and regional
-> completion remain gated. The supplied 17-part Machete Mason GAS
+> no Echo/completion leakage. The supplied 17-part Machete Mason GAS
 > disarmed-submission encounter now also passes under the same supplied-art
 > authorization context. The supplied 17-part, sword-bearing Pleatherface GAS
 > disarmed-submission encounter now also passes with one-time Schema 7
@@ -33,8 +32,11 @@
 > Count Dripula GAS bloodless-surrender encounter also passes with one-time
 > Schema 7 restoration and no Echo/completion leakage. The supplied 16-part,
 > 202 cm Frank N. Shrine GAS grounded-submission encounter also passes with
-> one-time Schema 7 restoration and no Echo/completion leakage; further roster identities
-> remain bounded work. The remainder preserves the
+> one-time Schema 7 restoration and no Echo/completion leakage. The remaining
+> eleven supplied identities also pass as an ordered roster with 183 unique
+> parts, eleven navigable legs, GAS living submissions, and Schema 7 recovery.
+> All 20 supplied required-horror identities now have accepted encounters;
+> regional completion remains separate. The remainder preserves the
 > v0.1 documentation-release handoff and must not be read as current runtime state.
 
 ## Actual status

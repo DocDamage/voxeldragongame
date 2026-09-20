@@ -51,6 +51,7 @@
 #include "Region/WyrmChucklesCharacter.h"
 #include "Region/WyrmCountDripulaCharacter.h"
 #include "Region/WyrmFrankNShrineCharacter.h"
+#include "Region/WyrmRequiredHorrorCharacter.h"
 #include "Region/WyrmWorldTravelSubsystem.h"
 #include "Customization/WyrmCreatorSubsystem.h"
 #include "Vehicles/WyrmVehicleTypes.h"
@@ -4307,6 +4308,66 @@ bool FWyrmFrankNShrineEncounterTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Frank N. Shrine receipt recorded"),
         Region->HasReceipt(FName(TEXT("gloaming.frank_n_shrine.grounded_submission"))));
     TestFalse(TEXT("Bounded horror slice does not complete region"),
+        Region->HasFact(FName(TEXT("gloaming.region_complete"))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmRequiredHorrorRosterTest, "WYRMFALL.Scaffold.GloamingRequiredHorrorRoster",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmRequiredHorrorRosterTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmGloamingSubsystem* Region = NewObject<UWyrmGloamingSubsystem>(TestGI);
+    TestNotNull(TEXT("Gloaming fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Ail-Yen rejects before Frank N. Shrine"),
+        Region->RecordRequiredHorrorResolution(EWyrmRequiredHorrorIdentity::AilYen));
+    TestTrue(TEXT("Arrival prerequisite"), Region->RecordArrival());
+    TestTrue(TEXT("Ashgrave prerequisite"), Region->ResolveAshgraveExtractionSeal());
+    TestTrue(TEXT("Malvaine prerequisite"), Region->RecordMalvaineResolution(true));
+    TestTrue(TEXT("Hollow Twins prerequisite"), Region->RecordHollowTwinsResolution(true));
+    TestTrue(TEXT("Michael prerequisite"), Region->RecordMichaelMireResolution());
+    TestTrue(TEXT("Machete prerequisite"), Region->RecordMacheteMasonResolution());
+    TestTrue(TEXT("Pleatherface prerequisite"), Region->RecordPleatherfaceResolution());
+    TestTrue(TEXT("Wherewolf prerequisite"), Region->RecordWherewolfResolution());
+    TestTrue(TEXT("Annie Wails prerequisite"), Region->RecordAnnieWailsResolution());
+    TestTrue(TEXT("Scarrie prerequisite"), Region->RecordScarrieResolution());
+    TestTrue(TEXT("Chuckles prerequisite"), Region->RecordChucklesResolution());
+    TestTrue(TEXT("Count Dripula prerequisite"), Region->RecordCountDripulaResolution());
+    TestTrue(TEXT("Frank N. Shrine prerequisite"), Region->RecordFrankNShrineResolution());
+
+    const EWyrmRequiredHorrorIdentity Identities[] = {
+        EWyrmRequiredHorrorIdentity::AilYen, EWyrmRequiredHorrorIdentity::Bellraiser,
+        EWyrmRequiredHorrorIdentity::SadEcho, EWyrmRequiredHorrorIdentity::Dreadator,
+        EWyrmRequiredHorrorIdentity::Roastface, EWyrmRequiredHorrorIdentity::GravyDaughters,
+        EWyrmRequiredHorrorIdentity::Knit, EWyrmRequiredHorrorIdentity::Canniball,
+        EWyrmRequiredHorrorIdentity::MumsTheWyrd, EWyrmRequiredHorrorIdentity::DreadyFreddie,
+        EWyrmRequiredHorrorIdentity::PyreMidhead};
+    const TCHAR* Facts[] = {
+        TEXT("gloaming.ail_yen_resolved"), TEXT("gloaming.bellraiser_resolved"),
+        TEXT("gloaming.sad_echo_resolved"), TEXT("gloaming.dreadator_resolved"),
+        TEXT("gloaming.roastface_resolved"), TEXT("gloaming.gravy_daughters_resolved"),
+        TEXT("gloaming.knit_resolved"), TEXT("gloaming.canniball_resolved"),
+        TEXT("gloaming.mums_the_wyrd_resolved"), TEXT("gloaming.dready_freddie_resolved"),
+        TEXT("gloaming.pyre_midhead_resolved")};
+    const TCHAR* Receipts[] = {
+        TEXT("gloaming.ail_yen.living_submission"), TEXT("gloaming.bellraiser.living_submission"),
+        TEXT("gloaming.sad_echo.living_submission"), TEXT("gloaming.dreadator.living_submission"),
+        TEXT("gloaming.roastface.disarmed_submission"), TEXT("gloaming.gravy_daughters.paired_submission"),
+        TEXT("gloaming.knit.balloon_surrender"), TEXT("gloaming.canniball.restrained_submission"),
+        TEXT("gloaming.mums_the_wyrd.unbound_submission"), TEXT("gloaming.dready_freddie.waking_submission"),
+        TEXT("gloaming.pyre_midhead.disarmed_submission")};
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(Identities); ++Index)
+    {
+        TestTrue(FString::Printf(TEXT("Required horror %d commits"), Index),
+            Region->RecordRequiredHorrorResolution(Identities[Index]));
+        TestTrue(FString::Printf(TEXT("Required horror %d fact recorded"), Index), Region->HasFact(FName(Facts[Index])));
+        TestTrue(FString::Printf(TEXT("Required horror %d receipt recorded"), Index), Region->HasReceipt(FName(Receipts[Index])));
+    }
+    TestFalse(TEXT("Final required horror duplicate rejects"),
+        Region->RecordRequiredHorrorResolution(EWyrmRequiredHorrorIdentity::PyreMidhead));
+    TestFalse(TEXT("Roster completion does not silently complete region"),
         Region->HasFact(FName(TEXT("gloaming.region_complete"))));
     return true;
 }

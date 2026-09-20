@@ -5,6 +5,22 @@
 #include "Region/WyrmGloamingTypes.h"
 #include "WyrmGloamingSubsystem.generated.h"
 
+UENUM(BlueprintType)
+enum class EWyrmRequiredHorrorIdentity : uint8
+{
+    AilYen,
+    Bellraiser,
+    SadEcho,
+    Dreadator,
+    Roastface,
+    GravyDaughters,
+    Knit,
+    Canniball,
+    MumsTheWyrd,
+    DreadyFreddie,
+    PyreMidhead
+};
+
 /** Bounded Gloaming Marches fact owner; UWyrmSaveSubsystem owns persistence. */
 UCLASS(BlueprintType, Category="WYRMFALL|Gloaming")
 class WYRMFALL_API UWyrmGloamingSubsystem : public UGameInstanceSubsystem
@@ -58,6 +74,12 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|FrankNShrine")
     bool RecordFrankNShrineResolution();
+
+    UFUNCTION(BlueprintPure, Category="Gloaming|RequiredHorror")
+    bool CanResolveRequiredHorror(EWyrmRequiredHorrorIdentity Identity) const;
+
+    UFUNCTION(BlueprintCallable, Category="Gloaming|RequiredHorror")
+    bool RecordRequiredHorrorResolution(EWyrmRequiredHorrorIdentity Identity);
 
     UFUNCTION(BlueprintCallable, Category="Gloaming|Echo")
     bool RecordSanguineStrikeUnlock();
