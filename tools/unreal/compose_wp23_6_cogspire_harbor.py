@@ -82,7 +82,7 @@ def spawn_hidden_substrate(actors, assets):
     cube = load(assets, "/Engine/BasicShapes/Cube.Cube", unreal.StaticMesh)
     actor = actors.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(-50, 0, 190))
     actor.set_actor_label("COG_NAV_HiddenDockSubstrate")
-    actor.set_actor_scale3d(unreal.Vector(35.5, 8.0, 0.1))
+    actor.set_actor_scale3d(unreal.Vector(35.5, 20.0, 0.1))
     component = actor.get_component_by_class(unreal.StaticMeshComponent)
     component.set_static_mesh(cube)
     component.set_material(0, load(
@@ -213,10 +213,32 @@ def main():
     spawn_asset(actors, assets, "CoercionEnginePump", pump, (-150, 900, 200), 7.0)
     spawn_asset(actors, assets, "CoercionSteamA", steam, (-360, 900, 200), 4.0)
     spawn_asset(actors, assets, "CoercionSteamB", steam, (60, 900, 200), 4.0, (0, 0, 180))
+    spawn_asset(
+        actors, assets, "BaronFeistCogwell",
+        DEST + "/Roles/BaronFeistCogwell_Captain/TVS_VoxelKnights_Captain.TVS_VoxelKnights_Captain",
+        (350, 650, 200), 0.475, (0, 0, -135))
+
+    arrival_trigger = actors.spawn_actor_from_class(
+        unreal.WyrmCogspireArrivalTrigger, unreal.Vector(-1400, 0, WALK_Z))
+    arrival_trigger.set_actor_label("COG_TRIGGER_Arrival")
+    observation_specs = (
+        ("PublicMachinery", unreal.WyrmCogspireObservationType.PUBLIC_MACHINERY,
+         (-1300, -450, WALK_Z)),
+        ("CoercionDiversion", unreal.WyrmCogspireObservationType.COERCION_DIVERSION,
+         (-150, 650, WALK_Z)),
+        ("BaronAcknowledgment", unreal.WyrmCogspireObservationType.BARON_ACKNOWLEDGMENT,
+         (350, 650, WALK_Z)),
+    )
+    for label, observation_type, location in observation_specs:
+        site = actors.spawn_actor_from_class(
+            unreal.WyrmCogspireObservationSite, unreal.Vector(*location))
+        site.set_actor_label("COG_OBSERVE_" + label)
+        site.set_editor_property("observation_type", observation_type)
 
     for label, location in (
         ("COG_ROUTE_ARRIVAL", (-1400, 0, WALK_Z)),
         ("COG_ROUTE_JETTY_END", (1650, 0, WALK_Z)),
+        ("COG_ROUTE_CITY_ENGINE", (-150, 0, WALK_Z)),
         ("LM-COGSPIRE-ARRIVAL", (-1400, 0, WALK_Z)),
         ("LM-COGSPIRE-RETURN", (-1100, -400, WALK_Z)),
     ):
@@ -239,14 +261,16 @@ def main():
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps({
         "status": "PASS", "engine": unreal.SystemLibrary.get_engine_version(), "map": MAP,
-        "scope": "saved environment/navigation foundation only",
+        "scope": "saved environment/navigation foundation plus arrival-to-city-engine observation sites",
         "arrival_anchor": "LM-COGSPIRE-ARRIVAL", "return_anchor": "LM-COGSPIRE-RETURN",
         "water_authority": water_owner.get_class().get_name(), "waterline_z_cm": WATER_Z,
         "terrain_authority": adapter.get_class().get_name(),
         "terrain_save_compatibility_id": "WYRMFALL.CogspireHarbor",
         "supplied_quay_and_jetty_piece_count": 41,
         "hidden_navigation_substrate": substrate.get_actor_label(),
-        "not_claimed": ["travel allowlist", "regional subsystem", "encounters", "city-engine behavior", "save schema"],
+        "observation_sites": [row[0] for row in observation_specs],
+        "supplied_baron_actor": "COG_ENV_BaronFeistCogwell",
+        "not_claimed": ["Cogfang combat", "engine shutdown", "regional completion", "optional investigations", "save schema extension"],
     }, indent=2) + "\n", encoding="utf-8")
     print("WP-23.6 Cogspire Harbor map composition: PASS")
 

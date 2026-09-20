@@ -42,6 +42,7 @@
 #include "Region/WyrmRegion01Subsystem.h"
 #include "Region/WyrmJadePeaksSubsystem.h"
 #include "Region/WyrmGloamingSubsystem.h"
+#include "Region/WyrmCogspireSubsystem.h"
 #include "Region/WyrmMichaelMireCharacter.h"
 #include "Region/WyrmMacheteMasonCharacter.h"
 #include "Region/WyrmPleatherfaceCharacter.h"
@@ -4514,6 +4515,43 @@ bool FWyrmGloamingRegionalCompletionTest::RunTest(const FString& Parameters)
 
     Nyxaroth->Destroy();
     Player->Destroy();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FWyrmCogspireArrivalObservationTest,
+    "WYRMFALL.Scaffold.CogspireArrivalObservation",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FWyrmCogspireArrivalObservationTest::RunTest(const FString& Parameters)
+{
+    UGameInstance* TestGI = NewObject<UGameInstance>(GetTransientPackage());
+    UWyrmCogspireSubsystem* Region = NewObject<UWyrmCogspireSubsystem>(TestGI);
+    TestNotNull(TEXT("Cogspire fact owner created"), Region);
+    if (!Region) return false;
+
+    TestFalse(TEXT("Public machinery rejects before arrival"), Region->RecordPublicMachineryObserved());
+    TestFalse(TEXT("Coercion diversion rejects before public machinery"), Region->RecordCoercionDiversionObserved());
+    TestFalse(TEXT("Baron rejects before diversion evidence"), Region->RecordBaronAcknowledgment());
+    TestTrue(TEXT("Arrival commits once"), Region->RecordArrival());
+    TestFalse(TEXT("Arrival duplicate rejects"), Region->RecordArrival());
+    TestTrue(TEXT("Public machinery commits once"), Region->RecordPublicMachineryObserved());
+    TestFalse(TEXT("Public machinery duplicate rejects"), Region->RecordPublicMachineryObserved());
+    TestTrue(TEXT("Coercion diversion commits once"), Region->RecordCoercionDiversionObserved());
+    TestFalse(TEXT("Coercion diversion duplicate rejects"), Region->RecordCoercionDiversionObserved());
+    TestTrue(TEXT("Baron acknowledgment commits once"), Region->RecordBaronAcknowledgment());
+    TestFalse(TEXT("Baron acknowledgment duplicate rejects"), Region->RecordBaronAcknowledgment());
+
+    TestTrue(TEXT("Arrival receipt recorded"),
+        Region->HasReceipt(FName(TEXT("cogspire.arrival.recorded"))));
+    TestTrue(TEXT("Public machinery fact recorded"),
+        Region->HasFact(FName(TEXT("cogspire.public_machinery_observed"))));
+    TestTrue(TEXT("Coercion diversion fact recorded"),
+        Region->HasFact(FName(TEXT("cogspire.coercion_diversion_observed"))));
+    TestTrue(TEXT("Baron receipt recorded"),
+        Region->HasReceipt(FName(TEXT("cogspire.baron.diversion_acknowledged"))));
+    TestFalse(TEXT("Observation slice does not shut down city engine"),
+        Region->HasFact(FName(TEXT("cogspire.engine_shutdown"))));
+    TestFalse(TEXT("Observation slice does not complete region"),
+        Region->HasFact(FName(TEXT("cogspire.region_complete"))));
     return true;
 }
 #endif

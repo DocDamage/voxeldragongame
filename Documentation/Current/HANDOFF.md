@@ -375,8 +375,9 @@ Evidence:
 ## Next bounded task
 
 WP-23.6 bounded readiness, the focused Cogfang profile, the visual/editor cast
-gate, the saved Harbor map, and bounded travel/recovery now pass. Cogfang's distinct 34-part assembly and authority proof
-passed COG-01..05 in live PIE; the full native suite is now 71/71. Baron
+gate, the saved Harbor map, bounded travel/recovery, and the arrival observation
+slice now pass. Cogfang's distinct 34-part assembly and authority proof
+passed COG-01..05 in live PIE; the full native suite is now 72/72. Baron
 Cogwell, House Mark Champion, and Chef Aurelio play their supplied clips on
 matching 15-bone skeletons with readable supplied palettes, deliberate human
 scale, fixture collision, and accepted cameras. Stationary QA locks the source
@@ -389,12 +390,16 @@ authorization for all supplied assets.
 
 `L_CogspireHarbor` contains that accepted supplied-art layout, existing water
 and terrain owners, labeled arrival/return anchors, and a complete live-PIE
-route. The existing travel owner now passes bounded Region01↔Cogspire Schema 7
-recovery. Author the arrival-to-city-engine observation slice next. Stop before
-Cogfang combat, shutdown gameplay, regional completion, optional urban
-investigations, or a parallel authority. Mutable remains creator, GAS
+route. The existing travel owner passes bounded Region01↔Cogspire Schema 7
+recovery. Strict arrival, public-machinery observation, coercion-diversion
+evidence, and Baron acknowledgment now commit once in order; both civic pumps
+remain intact and the engine approach has a complete five-point live route.
+Author the captive-Cogfang encounter and selective city-engine shutdown next.
+Stop before regional completion, optional urban investigations, save-schema
+work, or a parallel authority. Mutable remains creator, GAS
 remains combat authority, and `UWyrmSaveSubsystem` remains the sole persistence
-coordinator. See `Documentation/Current/WP23_6_COGSPIRE_TRAVEL_PROOF.md`,
+coordinator. See `Documentation/Current/WP23_6_COGSPIRE_ARRIVAL_PROOF.md`,
+`Documentation/Current/WP23_6_COGSPIRE_TRAVEL_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_MAP_FOUNDATION_PROOF.md`,
 `Documentation/Current/WP23_6_HARBOR_FOUNDATION_PROOF.md`,
 `Documentation/Current/WP23_6_CAST_VISUAL_QA.md`,
