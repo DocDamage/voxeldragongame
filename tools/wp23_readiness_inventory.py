@@ -104,9 +104,10 @@ REGIONS = [
             "voxel/characters/horror characters.fbx",
             "voxel/characters/Voxel Cathedral.zip",
             "voxel/characters/knights.zip",
+            "voxel/characters/villagers.zip",
         ],
         "readiness": "DRAGON_VALIDATED_REGION_BLOCKED_ON_CAST_FIT",
-        "blockers": ["palette-bound Kael selection", "wrapped guardian presentation", "Skinning Man presentation"],
+        "blockers": ["wrapped guardian presentation", "distinct Skinning Man presentation"],
     },
     {
         "child": "WP-23.10", "region": "Zenith Spire", "dragon": "Mecha Dragon",
@@ -162,10 +163,10 @@ def main() -> None:
             "WP-23.8", "WP-23.9", "WP-23.4", "WP-23.7", "WP-23.10",
         ],
         "first_eligible_child": None,
-        "next_focused_readiness_child": "WP-23.9",
+        "next_focused_readiness_child": "WP-23.4",
         "next_focused_readiness_scope": (
-            "Bind supplied Kael candidate palettes and audit distinct wrapped-guardian and Skinning Man "
-            "presentation fits; do not start Bonelands gameplay from generic substitutes"
+            "Validate the supplied White Dragon as Frostmane and audit exact snow/ice region and ruler "
+            "content; do not start Frosthold gameplay from archive presence"
         ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)

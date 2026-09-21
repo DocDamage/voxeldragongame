@@ -14,9 +14,13 @@ OUT = ROOT / "Saved/Diagnostics/WP23_9_BonelandsVisualQA"
 REPORT_PATH = ROOT / "Saved/Diagnostics/WP23_9_bonelands_visual_qa.json"
 DEST = "/Game/WYRMFALL/Development/Intake/WP23_9"
 DRAGON_BASE = DEST + "/Ossuroth/Skull_Dragon/SkeletalMeshes"
+SOURCE = ROOT / "Saved/Diagnostics/WP23_9_Source"
+QA_TEXTURES = DEST + "/VisualQA/Textures"
+QA_MATERIALS = DEST + "/VisualQA/Materials"
 
 ASSETS = unreal.get_editor_subsystem(unreal.EditorAssetSubsystem)
 ACTORS = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
 REPORT = {
     "kind": "wp23_9_bonelands_visual_qa",
     "engine": unreal.SystemLibrary.get_engine_version(),
@@ -24,6 +28,7 @@ REPORT = {
     "capture_status": "INITIALIZING",
     "qa_status": "UNASSESSED",
     "kael_candidates": [],
+    "skinning_man_candidates": [],
     "ossuroth": {},
     "environment": [],
     "captures": [],
@@ -57,6 +62,53 @@ def material_paths(component):
     ]
 
 
+def import_texture(label, source):
+    object_path = f"{QA_TEXTURES}/T_{label}"
+    existing = ASSETS.load_asset(object_path) if ASSETS.does_asset_exist(object_path) else None
+    if existing is not None:
+        return existing
+    if not source.is_file():
+        raise RuntimeError("Missing supplied Kael palette: " + source.as_posix())
+    task = unreal.AssetImportTask()
+    task.filename = source.as_posix()
+    task.destination_path = QA_TEXTURES
+    task.destination_name = "T_" + label
+    task.automated = True
+    task.save = True
+    task.replace_existing = True
+    task.async_ = False
+    task.factory = unreal.TextureFactory()
+    TOOLS.import_asset_tasks([task])
+    texture = load(object_path, unreal.Texture2D)
+    texture.set_editor_property("mip_gen_settings", unreal.TextureMipGenSettings.TMGS_NO_MIPMAPS)
+    texture.set_editor_property("filter", unreal.TextureFilter.TF_NEAREST)
+    ASSETS.save_loaded_asset(texture)
+    return texture
+
+
+def qa_material(label, texture):
+    object_path = f"{QA_MATERIALS}/M_{label}_SuppliedPaletteQA"
+    existing = ASSETS.load_asset(object_path) if ASSETS.does_asset_exist(object_path) else None
+    if existing is not None:
+        return existing
+    material = TOOLS.create_asset(
+        "M_" + label + "_SuppliedPaletteQA", QA_MATERIALS,
+        unreal.Material, unreal.MaterialFactoryNew())
+    material.set_editor_property("two_sided", True)
+    sample = unreal.MaterialEditingLibrary.create_material_expression(
+        material, unreal.MaterialExpressionTextureSample, -260, 0)
+    sample.set_editor_property("texture", texture)
+    unreal.MaterialEditingLibrary.connect_material_property(sample, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
+    unreal.MaterialEditingLibrary.connect_material_property(sample, "RGB", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    roughness = unreal.MaterialEditingLibrary.create_material_expression(
+        material, unreal.MaterialExpressionConstant, -260, 180)
+    roughness.set_editor_property("r", 0.9)
+    unreal.MaterialEditingLibrary.connect_material_property(roughness, "", unreal.MaterialProperty.MP_ROUGHNESS)
+    unreal.MaterialEditingLibrary.recompile_material(material)
+    ASSETS.save_loaded_asset(material)
+    return material
+
+
 def ground_actor(actor, x, y, scale):
     actor.set_actor_scale3d(unreal.Vector(scale, scale, scale))
     origin, extent = actor.get_actor_bounds(False)
@@ -72,12 +124,15 @@ def ground_actor(actor, x, y, scale):
     }
 
 
-def spawn_skeletal(label, path, x, y, scale, category):
+def spawn_skeletal(label, path, x, y, scale, category, texture_source):
     mesh = load(path, unreal.SkeletalMesh)
     actor = ACTORS.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector())
     actor.set_actor_label("WP23_9_QA_" + label)
     component = actor.get_component_by_class(unreal.SkeletalMeshComponent)
     component.set_skinned_asset_and_update(mesh)
+    material = qa_material(label, import_texture(label, texture_source))
+    for index in range(component.get_num_materials()):
+        component.set_material(index, material)
     bounds = ground_actor(actor, x, y, scale)
     REPORT[category].append({
         "label": label,
@@ -85,6 +140,8 @@ def spawn_skeletal(label, path, x, y, scale, category):
         "materials": material_paths(component),
         "scale": scale,
         "bounds": bounds,
+        "palette_binding": "SUPPLIED_TEXTURE_QA_MATERIAL",
+        "supplied_palette_texture": texture_source.as_posix(),
     })
 
 
@@ -143,9 +200,8 @@ def add_lighting_and_floor():
     sky = ACTORS.spawn_actor_from_class(unreal.SkyLight, unreal.Vector(0.0, 0.0, 700.0))
     component = sky.get_component_by_class(unreal.SkyLightComponent)
     component.set_mobility(unreal.ComponentMobility.MOVABLE)
-    component.set_editor_property("source_type", unreal.SkyLightSourceType.SLS_SPECIFIED_CUBEMAP)
-    component.set_cubemap(load("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap", unreal.TextureCube))
-    component.set_intensity(2.0)
+    component.set_editor_property("source_type", unreal.SkyLightSourceType.SLS_CAPTURED_SCENE)
+    component.set_intensity(1.5)
 
 
 def make_capture():
@@ -174,9 +230,10 @@ try:
     OUT.mkdir(parents=True, exist_ok=True)
     unreal.EditorLoadingAndSavingUtils.new_blank_map(False)
     add_lighting_and_floor()
-    spawn_static("Kael_Commander", DEST + "/Kael/Static/TVS_VoxelKnights_Commander/TVS_VoxelKnights_Commander.TVS_VoxelKnights_Commander", -350.0, 0.0, 45.0, "kael_candidates", (90.0, 0.0, 0.0))
-    spawn_static("Kael_Champion", DEST + "/Kael/Static/TVS_VoxelKnights_Champion/TVS_VoxelKnights_Champion.TVS_VoxelKnights_Champion", -50.0, 0.0, 45.0, "kael_candidates", (90.0, 0.0, 0.0))
-    spawn_static("Kael_Crusader", DEST + "/Kael/Static/TVS_VoxelCathedral_Crusader/TVS_VoxelCathedral_Crusader.TVS_VoxelCathedral_Crusader", 250.0, 0.0, 45.0, "kael_candidates", (90.0, 0.0, 0.0))
+    spawn_skeletal("Kael_Commander", DEST + "/Kael/TVS_VoxelKnights_Commander/TVS_VoxelKnights_Commander.TVS_VoxelKnights_Commander", -250.0, 0.0, 0.45, "kael_candidates", SOURCE / "Kael/TVS_VoxelKnights_Commander_Texture.png")
+    spawn_skeletal("Kael_Champion", DEST + "/Kael/TVS_VoxelKnights_Champion/TVS_VoxelKnights_Champion.TVS_VoxelKnights_Champion", 0.0, 0.0, 0.45, "kael_candidates", SOURCE / "Kael/TVS_VoxelKnights_Champion_Texture.png")
+    spawn_skeletal("Kael_Crusader", DEST + "/Kael/TVS_VoxelCathedral_Crusader/TVS_VoxelCathedral_Crusader.TVS_VoxelCathedral_Crusader", 250.0, 0.0, 0.50, "kael_candidates", SOURCE / "Cathedral/TVS_VoxelCathedral_Crusader_Texture.png")
+    spawn_skeletal("SkinningMan_Butcher", DEST + "/SkinningMan/TVS_VoxelVillage_Butcher/TVS_VoxelVillage_Butcher.TVS_VoxelVillage_Butcher", 600.0, -650.0, 0.50, "skinning_man_candidates", SOURCE / "SkinningMan/TVS_VoxelVillage_Butcher_Texture.png")
     spawn_ossuroth()
     spawn_static("Cathedral", DEST + "/Environment/Cathedral/TVS_VoxelCathedral_Cathedral/TVS_VoxelCathedral_Cathedral.TVS_VoxelCathedral_Cathedral", 2300.0, 800.0, 0.35)
     spawn_static("CrossGrave", DEST + "/Environment/Cathedral/TVS_VoxelCathedral_CrossGrave/TVS_VoxelCathedral_CrossGrave.TVS_VoxelCathedral_CrossGrave", 1600.0, 450.0, 1.5)
@@ -197,9 +254,10 @@ try:
     start = time.monotonic()
     stage = 0
     views = [
-        ("01_kael_candidates.png", (0.0, -1200.0, 260.0), (-50.0, 0.0, 100.0)),
+        ("01_kael_candidates.png", (0.0, -1050.0, 220.0), (0.0, 0.0, 95.0)),
         ("02_ossuroth_assembly.png", (2600.0, -3200.0, 1700.0), (700.0, 0.0, 650.0)),
         ("03_bonelands_tomb_trace.png", (2600.0, -1300.0, 850.0), (2200.0, 850.0, 250.0)),
+        ("04_skinning_man_butcher_candidate.png", (600.0, -1200.0, 210.0), (600.0, -650.0, 85.0)),
     ]
 
     def tick(_delta):

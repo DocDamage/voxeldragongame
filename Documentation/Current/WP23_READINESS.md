@@ -27,7 +27,7 @@ fail-closed under DRG-15.
 | 4 | WP-23.6 Cogspire Harbor | **COMPLETE** | Mainline completion remains stable; both optional supplied-art investigations and permanent usable GAS Echoes pass and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md). |
 | 5 | WP-23.3 Hallowwood | **GROVEMAW COMPLETE; AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Grovemaw profile passed all five live-PIE groups and stable-identity recovery. Master Wizard and forest passed intake. An exhaustive 64-ZIP/10-RAR audit found supporting trace props but no exact authored carnival kit or valid non-franchise named-horror fits. See [profile proof](WP23_3_GROVEMAW_PROFILE_PROOF.md) and [focused readiness](WP23_3_HALLOWWOOD_READINESS.md). |
 | 6 | WP-23.8 Ashen Wastes | **ROTWING/AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Rotwing profile passed all five live-PIE groups and stable-identity recovery. Zombie is the selected Rotking base; ash/ruin and bunker props passed focused intake. An exhaustive 64-ZIP/10-RAR audit found no exact laboratory, Doctor Hollowmend, or false-rescuer model-name fit. See [profile proof](WP23_8_ROTWING_PROFILE_PROOF.md) and [focused readiness](WP23_8_ASHEN_WASTES_READINESS.md). |
-| 7 | WP-23.9 Bonelands | **OSSUROTH COMPLETE; REGION BLOCKED** | The distinct 39-part Ossuroth profile passed all five live-PIE groups and stable-identity recovery. Tomb/cathedral assets passed focused intake. Kael palette-bound selection, wrapped guardian, and Skinning Man remain blocked. See [profile proof](WP23_9_OSSUROTH_PROFILE_PROOF.md) and [focused readiness](WP23_9_BONELANDS_READINESS.md). |
+| 7 | WP-23.9 Bonelands | **OSSUROTH/CAST AUDIT COMPLETE; REGION BLOCKED** | The distinct 39-part Ossuroth profile passed all five live-PIE groups and stable-identity recovery. Tomb/cathedral assets passed intake and palette-bound review selected Commander as Kael's base. The exhaustive 64-ZIP/10-RAR audit found no wrapped guardian; the rendered generic Butcher does not clear Skinning Man. See [profile proof](WP23_9_OSSUROTH_PROFILE_PROOF.md) and [focused readiness](WP23_9_BONELANDS_READINESS.md). |
 | 8 | WP-23.4 Frosthold | BLOCKED | Validate Frostmane/White Dragon rig and locate suitable snow/ice region and ruler content. |
 | 9 | WP-23.7 Cinderreach | BLOCKED | Validate Pyraxis/Lava Dragon rig and locate suitable volcanic trial/forge/ruler content. |
 | 10 | WP-23.10 Zenith Spire | BLOCKED | Validate the unnamed Mecha Dragon rig and locate a playable city/colony plus ruler content. Robot and tiny-car archives alone do not satisfy Z1. |
@@ -35,8 +35,9 @@ fail-closed under DRG-15.
 Completed children are listed first. Hallowwood's bounded source-fit audit is
 finished and does not clear its regional entry gate. WP-23.8's bounded intake
 and exhaustive audit are also finished without clearing its regional entry
-gate. WP-23.9 Bonelands remains the selected bounded target for its unresolved
-cast-presentation audit; its dragon profile and environment intake are complete.
+gate. WP-23.9's bounded intake and cast audit are finished without clearing its
+two horror-presentation gates. WP-23.4 Frosthold is the next focused readiness
+target.
 Blocked regions are not built in parallel, and later ordering may change when
 a blocker is cleared by real evidence.
 
@@ -89,6 +90,6 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Bind the supplied palettes for the Kael candidates and exhaustively audit
-distinct non-franchise wrapped-guardian and Skinning Man presentation fits. Do
-not start a production map or regional gameplay from generic substitutes.
+Validate the supplied White Dragon as Frostmane and audit exact snow/ice region
+and ruler content for WP-23.4. Do not start a production map or regional
+gameplay from archive presence.

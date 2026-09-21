@@ -16,6 +16,7 @@ DRAGON_PACK = SOURCE / "Voxel+Dragons+Pack+Upload.zip"
 CEMETERY_PACK = SOURCE / "voxel/cemetary and church voxel set.zip"
 CATHEDRAL_PACK = SOURCE / "voxel/characters/Voxel Cathedral.zip"
 KNIGHTS_PACK = SOURCE / "voxel/characters/knights.zip"
+VILLAGERS_PACK = SOURCE / "voxel/characters/villagers.zip"
 EXTRACTED = ROOT / "Saved/Diagnostics/WP23_9_Source"
 REPORT_PATH = ROOT / "Saved/Diagnostics/WP23_9_bonelands_unreal_intake.json"
 DEST = "/Game/WYRMFALL/Development/Intake/WP23_9"
@@ -140,7 +141,7 @@ def main():
         "status": "ERROR",
     }
     try:
-        required = (DRAGON_PACK, CEMETERY_PACK, CATHEDRAL_PACK, KNIGHTS_PACK)
+        required = (DRAGON_PACK, CEMETERY_PACK, CATHEDRAL_PACK, KNIGHTS_PACK, VILLAGERS_PACK)
         missing = [str(path) for path in required if not path.is_file()]
         if missing:
             raise RuntimeError(f"Missing Bonelands candidate sources: {missing}")
@@ -171,6 +172,10 @@ def main():
             "Voxel Cathedral/Textures/Environment/TVS_VoxelCathedral_CrossGrave_Texture.png",
             "Voxel Cathedral/Textures/Environment/TVS_VoxelCathedral_Statues_Texture.png",
         ])
+        butcher_files = extract_named(VILLAGERS_PACK, EXTRACTED / "SkinningMan", [
+            "Voxel Village/FBX/Characters/TVS_VoxelVillage_Butcher.fbx",
+            "Voxel Village/Textures/Characters/TVS_VoxelVillage_Butcher_Texture.png",
+        ])
         cemetery_files = extract_cemetery(EXTRACTED / "Cemetery")
 
         imports = {"ossuroth": import_asset(dragon_path, DEST + "/Ossuroth")}
@@ -188,6 +193,9 @@ def main():
         for source in cemetery_files:
             if source.suffix.casefold() == ".obj":
                 imports["cemetery_" + source.stem] = import_asset(source, DEST + "/Environment/Cemetery/" + source.stem)
+        for source in butcher_files:
+            if source.suffix.casefold() == ".fbx":
+                imports["skinning_man_" + source.stem] = import_asset(source, DEST + "/SkinningMan/" + source.stem)
 
         asset_subsystem = unreal.get_editor_subsystem(unreal.EditorAssetSubsystem)
         dragon_assets = summarize_assets(asset_subsystem, DEST + "/Ossuroth")
@@ -202,6 +210,7 @@ def main():
         rig_ready = bool(leader and dragon_assets.get("Skeleton") and len(skeletal) >= 35 and len(animations) >= 15 and all(motion_hits.values()))
         kael_assets = summarize_assets(asset_subsystem, DEST + "/Kael")
         environment_assets = summarize_assets(asset_subsystem, DEST + "/Environment")
+        skinning_man_assets = summarize_assets(asset_subsystem, DEST + "/SkinningMan")
         kael_ready = len(kael_assets.get("StaticMesh", [])) + len(kael_assets.get("SkeletalMesh", [])) >= 3
         environment_ready = len(environment_assets.get("StaticMesh", [])) >= len(CEMETERY_STEMS) + 3
 
@@ -212,6 +221,7 @@ def main():
                 "cemetery_pack_sha256": sha256(CEMETERY_PACK),
                 "cathedral_pack_sha256": sha256(CATHEDRAL_PACK),
                 "knights_pack_sha256": sha256(KNIGHTS_PACK),
+                "villagers_pack_sha256": sha256(VILLAGERS_PACK),
             },
             "ossuroth": {
                 "source": "assets and old docs/Voxel+Dragons+Pack+Upload.zip::GLTF/Skull Dragon.gltf",
@@ -229,6 +239,12 @@ def main():
                 "profile_validation": "NOT_RUN; DRG-15 remains fail-closed",
             },
             "kael_candidates": {"assets": kael_assets, "candidate_ready": kael_ready, "visual_selection": "NOT_RUN"},
+            "skinning_man_candidate": {
+                "source": "assets and old docs/voxel/characters/villagers.zip::Voxel Village/FBX/Characters/TVS_VoxelVillage_Butcher.fbx",
+                "assets": skinning_man_assets,
+                "candidate_ready": bool(skinning_man_assets.get("SkeletalMesh")),
+                "visual_selection": "NOT_RUN",
+            },
             "environment_candidates": {
                 "assets": environment_assets,
                 "candidate_ready": environment_ready,

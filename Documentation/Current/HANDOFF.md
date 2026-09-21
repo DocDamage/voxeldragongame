@@ -486,13 +486,18 @@ bond, Heartfold/blocked growth, mount/flight, GAS combat/direct control, and
 stable-identity recovery. The focused native policy test and the full 76/76
 currently source-declared scaffold suite passed after a clean UE 5.8.2 editor
 compile. Representative crypt, coffin, skull, skeleton, gargoyle, grave,
-statue, and cathedral assets passed focused intake. Commander, Champion, and
-Crusader remain Kael candidates because the comparison fixture did not bind
-their supplied palettes. Recognizable `TheMummy` and `Leatherface` source parts
-remain excluded and do not clear the wrapped guardian or Skinning Man. See
+statue, and cathedral assets passed focused intake. The corrected comparison
+binds the supplied palettes and selects the pale-armored Commander as Kael
+Marrow's base over the ceremonial Champion and ecclesiastical Crusader. An
+exhaustive follow-up scanned all 64 ZIP archives, one nested ZIP layer, all 10
+RAR archives, and loose model filenames. It found no wrapped-guardian model.
+The only Skinning Man discovery candidate was the duplicated Village Butcher;
+its clean render reads as an ordinary civilian butcher and is rejected for the
+distinct horror identity. Recognizable `TheMummy` and `Leatherface` source
+parts remain excluded. See
 `Documentation/Current/WP23_9_BONELANDS_READINESS.md`,
 `Documentation/Current/WP23_9_OSSUROTH_PROFILE_PROOF.md`, and
-`Documentation/Current/tasks/WP-23.9.md`. The next bounded task is a
-palette-bound Kael comparison plus exhaustive supplied-content audit for the
-two distinct non-franchise horror presentations; do not start Bonelands
-regional gameplay from generic substitutes.
+`Documentation/Current/tasks/WP-23.9.md`. Bonelands remains blocked on the two
+distinct non-franchise horror presentations. The next bounded task is WP-23.4
+Frosthold White Dragon/source-fit readiness; do not start regional gameplay
+from archive presence.

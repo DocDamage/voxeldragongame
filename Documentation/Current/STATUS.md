@@ -41,7 +41,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
-| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; WP-23.3, WP-23.8, and WP-23.9 REGION BLOCKED** | Seven dragon identities now have live proof. Ossuroth passed supplied 39-part assembly, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and stable-identity recovery. Bonelands tomb/cathedral assets passed focused intake; Kael palette-bound selection, wrapped guardian, and Skinning Man remain blocked; [Ossuroth proof](WP23_9_OSSUROTH_PROFILE_PROOF.md), [Bonelands readiness](WP23_9_BONELANDS_READINESS.md), [ledger](WP23_READINESS.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; WP-23.3, WP-23.8, and WP-23.9 REGION BLOCKED** | Seven dragon identities now have live proof. Ossuroth passed supplied 39-part assembly, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and stable-identity recovery. Bonelands tomb/cathedral assets passed focused intake and Commander is the palette-bound Kael base; exhaustive audit still blocks wrapped guardian and Skinning Man; [Ossuroth proof](WP23_9_OSSUROTH_PROFILE_PROOF.md), [Bonelands readiness](WP23_9_BONELANDS_READINESS.md), [ledger](WP23_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
 | WP-23.6 Cogspire / Cogfang | **COMPLETE in real PIE** | Mainline completion remains unchanged. Both supplied-art optional investigations now grant permanent usable GAS Echoes—Deathmark and Carver's Precision—and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md), [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md) |
 
@@ -255,14 +255,13 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-WP-23.9 Ossuroth passes its distinct DRG-15 profile and all five focused
-live-PIE groups. Skull Dragon imported as one leader plus 38 followers with 20
-animations; the corrected runtime capture shows the complete blue-and-bone
-silhouette. Cemetery/cathedral assets pass focused tomb-environment intake.
-The region remains blocked on a palette-bound Kael selection and distinct
-non-franchise wrapped-guardian and Skinning Man presentations. That corrected
-comparison and exhaustive cast audit are the next bounded task; no production
-map or regional gameplay is authorized.
+WP-23.9's bounded intake is complete. Ossuroth passes its distinct DRG-15
+profile and all five focused live-PIE groups; cemetery/cathedral assets pass;
+and palette-bound rendered comparison selects the supplied Commander as Kael's
+base. The exhaustive 64-ZIP/10-RAR audit found no wrapped guardian, and the
+rendered Village Butcher is too generic to clear Skinning Man. Bonelands stays
+gated. The next bounded task is WP-23.4 Frosthold White Dragon/source-fit
+readiness; no production map or regional gameplay is authorized.
 See the
 [Ossuroth profile proof](WP23_9_OSSUROTH_PROFILE_PROOF.md),
 [Bonelands readiness report](WP23_9_BONELANDS_READINESS.md),

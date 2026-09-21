@@ -1,8 +1,8 @@
 # WP-23.9 Bonelands focused readiness
 
-**Result:** PASS FOCUSED UE INTAKE AND OSSUROTH PROFILE WITH RULER, GUARDIAN,
-AND OPTIONAL-HORROR BLOCKERS on September 21, 2026. Regional gameplay is not
-authorized.
+**Result:** PASS FOCUSED UE INTAKE, OSSUROTH PROFILE, PALETTE-BOUND KAEL
+SELECTION, AND EXHAUSTIVE CAST AUDIT WITH GUARDIAN AND OPTIONAL-HORROR
+BLOCKERS on September 21, 2026. Regional gameplay is not authorized.
 
 ## Source evidence
 
@@ -22,6 +22,14 @@ authorized.
   `Documentation/DesignPack/docs/ART_DIRECTION.md:51`; they cannot clear the
   wrapped guardian or Skinning Man gates.
 
+`py -3.12 tools/wp23_9_bonelands_content_audit.py` then scanned all 64
+supplied ZIP archives, one nested ZIP layer, all 10 RAR archives through
+7-Zip, and loose model filenames. It found no wrapped, mummy, bandaged,
+embalmed, pharaoh, Anubis, sarcophagus, or guardian character-model hit. The
+only Skinning Man discovery candidate was the same Village Butcher and knife
+duplicated by the standalone and aggregate character archives. The receipt is
+`Saved/Diagnostics/WP23_9_bonelands_content_audit.json`.
+
 Archive paths and hashes are recorded in the receipt. This is source inventory,
 not Unreal, rig, map, combat, Echo, travel, or persistence acceptance.
 
@@ -33,18 +41,28 @@ not Unreal, rig, map, combat, Echo, travel, or persistence acceptance.
 - Skull Dragon imported on one shared skeleton as one leader plus 38 followers,
   with 20 animations and populated materials.
 - Commander, Champion, and Crusader candidates imported in skeletal and static
-  forms. The static silhouettes rendered coherently, but their palette binding
-  was not established in the QA fixture; no Kael selection is claimed.
+  forms. The corrected fixture binds each supplied palette through a QA-only
+  nearest-filtered BaseColor/emissive material. Manual review selects the
+  pale-armored Commander as Kael Marrow's base: it reads as martial ruler,
+  while Champion reads ceremonial and Crusader reads ecclesiastical.
 - Ten cemetery pieces and three cathedral pieces imported as collision-ready
   static meshes. Crypt, coffin, skull wall, skeleton, gargoyle, grave, statue,
   and cathedral forms support the required tomb/ossuary visual language.
 
-The corrected runtime fixture produced three captures and
+The corrected runtime fixture produced four captures and
 `Saved/Diagnostics/WP23_9_bonelands_visual_qa.json`. Manual review accepts the
-complete Ossuroth silhouette and the tomb-environment direction. Earlier raw
-component captures were rejected because they did not reproduce runtime leader
-pose and correct OBJ orientation; they were overwritten by the corrected
-runtime capture.
+complete Ossuroth silhouette, the Commander selection, and the tomb-environment
+direction. The supplied Village Butcher renders coherently but remains an
+ordinary blue-and-white civilian butcher; it lacks the distinct horror read
+needed for Skinning Man and is rejected for that identity. Earlier raw
+component and unbound-palette captures were rejected and overwritten.
+
+Captures:
+
+- `Saved/Diagnostics/WP23_9_BonelandsVisualQA/01_kael_candidates.png`
+- `Saved/Diagnostics/WP23_9_BonelandsVisualQA/02_ossuroth_assembly.png`
+- `Saved/Diagnostics/WP23_9_BonelandsVisualQA/03_bonelands_tomb_trace.png`
+- `Saved/Diagnostics/WP23_9_BonelandsVisualQA/04_skinning_man_butcher_candidate.png`
 
 Ossuroth subsequently passed all five focused live-PIE profile groups. See
 [WP23_9_OSSUROTH_PROFILE_PROOF.md](WP23_9_OSSUROTH_PROFILE_PROOF.md).
@@ -54,13 +72,14 @@ Ossuroth subsequently passed all five focused live-PIE profile groups. See
 | Capability | State | Required next evidence |
 |---|---|---|
 | Ossuroth | **PASS LIVE PIE** | Exact 38-follower profile, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and save identity passed |
-| Kael Marrow | CANDIDATES ONLY | Bind supplied palettes and rerun rendered comparison before selecting Commander, Champion, or Crusader |
+| Kael Marrow | **COMMANDER BASE SELECTED** | Palette-bound rendered comparison selects the supplied pale-armored Commander; gameplay presentation remains later |
 | Tomb/ossuary environment | PASS FOCUSED INTAKE | Representative crypt/cemetery/cathedral meshes imported and rendered; production layout remains later |
 | Wrapped guardian | BLOCKED | Distinct non-franchise wrapped presentation |
-| Skinning Man | BLOCKED | Distinct non-franchise optional-horror presentation |
+| Skinning Man | BLOCKED | The rendered Village Butcher is a generic civilian fit, not a distinct horror presentation |
 
 ## Next bounded task
 
-Keep Bonelands regional gameplay gated. The next bounded task is a corrected
-palette-bound Kael comparison plus exhaustive supplied-content audit for the
-wrapped guardian and Skinning Man. Do not substitute excluded likenesses.
+Keep Bonelands regional gameplay gated until approved distinct non-franchise
+wrapped-guardian and Skinning Man presentations are supplied. The readiness
+queue can advance to WP-23.4 Frosthold; do not substitute excluded likenesses
+or the rejected generic Butcher.
