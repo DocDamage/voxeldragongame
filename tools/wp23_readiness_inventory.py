@@ -98,14 +98,15 @@ REGIONS = [
     },
     {
         "child": "WP-23.9", "region": "Bonelands", "dragon": "Skull Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
             "voxel/cemetary and church voxel set.zip",
             "voxel/characters/horror characters.fbx",
             "voxel/characters/Voxel Cathedral.zip",
+            "voxel/characters/knights.zip",
         ],
-        "readiness": "BLOCKED_ON_RIG_AND_CONTENT_FIT",
-        "blockers": ["Ossuroth rig/profile/animation proof", "Kael/tomb/guardian content fit"],
+        "readiness": "DRAGON_VALIDATED_REGION_BLOCKED_ON_CAST_FIT",
+        "blockers": ["palette-bound Kael selection", "wrapped guardian presentation", "Skinning Man presentation"],
     },
     {
         "child": "WP-23.10", "region": "Zenith Spire", "dragon": "Mecha Dragon",
@@ -154,7 +155,7 @@ def main() -> None:
             "bytes": DRAGON_PACK.stat().st_size,
             "sha256": digest(DRAGON_PACK),
         },
-        "validated_dragon_ids": ["Verdance", "Jadefang", "Nyxaroth", "Cogfang", "Grovemaw", "Rotwing"],
+        "validated_dragon_ids": ["Verdance", "Jadefang", "Nyxaroth", "Cogfang", "Grovemaw", "Rotwing", "Ossuroth"],
         "regions": REGIONS,
         "recommended_order": [
             "WP-23.1", "WP-23.2", "WP-23.5", "WP-23.6", "WP-23.3",
@@ -163,8 +164,8 @@ def main() -> None:
         "first_eligible_child": None,
         "next_focused_readiness_child": "WP-23.9",
         "next_focused_readiness_scope": (
-            "Audit Ossuroth/Skull Dragon, Kael, tomb, and guardian content fit; do not start "
-            "Bonelands regional gameplay from archive presence or generic substitutes"
+            "Bind supplied Kael candidate palettes and audit distinct wrapped-guardian and Skinning Man "
+            "presentation fits; do not start Bonelands gameplay from generic substitutes"
         ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)

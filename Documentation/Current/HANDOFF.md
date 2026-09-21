@@ -1,4 +1,4 @@
-# WYRMFALL handoff — September 20, 2026
+# WYRMFALL handoff — September 21, 2026
 
 ## Resume here
 
@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 77/77 tests with 0 failures.
+- Full currently source-declared scaffold native automation completed 76/76 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -475,3 +475,24 @@ a map, facts, travel, Echo, or substitute cast. See
 `Documentation/Current/tasks/WP-23.8.md`. The next bounded task is the WP-23.9
 Bonelands source-fit audit for Ossuroth, Kael, tomb, and guardian content;
 archive presence alone must not start regional gameplay.
+
+WP-23.9 Bonelands source fit, focused UE intake, and Ossuroth's bounded profile
+are now complete. The supplied Skull Dragon imported as one `Hip-Local` leader
+plus 38 followers on one skeleton with 20 animations and populated materials.
+After rejecting raw-component captures that did not reproduce runtime leader
+pose, the corrected runtime capture showed a complete blue-and-bone dragon
+silhouette. Ossuroth then passed 5/5 live PIE groups: exact assembly/living
+bond, Heartfold/blocked growth, mount/flight, GAS combat/direct control, and
+stable-identity recovery. The focused native policy test and the full 76/76
+currently source-declared scaffold suite passed after a clean UE 5.8.2 editor
+compile. Representative crypt, coffin, skull, skeleton, gargoyle, grave,
+statue, and cathedral assets passed focused intake. Commander, Champion, and
+Crusader remain Kael candidates because the comparison fixture did not bind
+their supplied palettes. Recognizable `TheMummy` and `Leatherface` source parts
+remain excluded and do not clear the wrapped guardian or Skinning Man. See
+`Documentation/Current/WP23_9_BONELANDS_READINESS.md`,
+`Documentation/Current/WP23_9_OSSUROTH_PROFILE_PROOF.md`, and
+`Documentation/Current/tasks/WP-23.9.md`. The next bounded task is a
+palette-bound Kael comparison plus exhaustive supplied-content audit for the
+two distinct non-franchise horror presentations; do not start Bonelands
+regional gameplay from generic substitutes.

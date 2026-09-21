@@ -3199,6 +3199,23 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
     TestTrue(TEXT("Rotwing can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Rotwing can take off in True Form"), Dragon->CanTakeOff(Reason));
 
+    // WP-23.9: Ossuroth uses the accepted 39-part Skull Dragon intake and a
+    // distinct heavy bone-dragon profile.
+    Dragon->SetDragonId(FName(TEXT("Ossuroth")));
+    TestTrue(TEXT("Ossuroth has an authoritative validated rig profile (WP-23.9)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Ossuroth binds exactly 38 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 38);
+    TestEqual(TEXT("Ossuroth companion capsule is 33x40"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(33.f, 40.f));
+    TestEqual(TEXT("Ossuroth true form capsule is 128x170"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(128.f, 170.f));
+    TestEqual(TEXT("Ossuroth true form fly speed is 1400"), Dragon->GetActiveRigProfile().FlightSpeed, 1400.f);
+    TestEqual(TEXT("Ossuroth mount socket offset is distinct (0, 0, 170)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 170.f));
+    TestTrue(TEXT("Ossuroth can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Ossuroth can take off in True Form"), Dragon->CanTakeOff(Reason));
+
     Dragon->Destroy();
     Player->Destroy();
     return true;
