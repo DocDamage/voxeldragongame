@@ -28,7 +28,7 @@ fail-closed under DRG-15.
 | 5 | WP-23.3 Hallowwood | **GROVEMAW COMPLETE; AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Grovemaw profile passed all five live-PIE groups and stable-identity recovery. Master Wizard and forest passed intake. An exhaustive 64-ZIP/10-RAR audit found supporting trace props but no exact authored carnival kit or valid non-franchise named-horror fits. See [profile proof](WP23_3_GROVEMAW_PROFILE_PROOF.md) and [focused readiness](WP23_3_HALLOWWOOD_READINESS.md). |
 | 6 | WP-23.8 Ashen Wastes | **ROTWING/AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Rotwing profile passed all five live-PIE groups and stable-identity recovery. Zombie is the selected Rotking base; ash/ruin and bunker props passed focused intake. An exhaustive 64-ZIP/10-RAR audit found no exact laboratory, Doctor Hollowmend, or false-rescuer model-name fit. See [profile proof](WP23_8_ROTWING_PROFILE_PROOF.md) and [focused readiness](WP23_8_ASHEN_WASTES_READINESS.md). |
 | 7 | WP-23.9 Bonelands | **OSSUROTH/CAST AUDIT COMPLETE; REGION BLOCKED** | The distinct 39-part Ossuroth profile passed all five live-PIE groups and stable-identity recovery. Tomb/cathedral assets passed intake and palette-bound review selected Commander as Kael's base. The exhaustive 64-ZIP/10-RAR audit found no wrapped guardian; the rendered generic Butcher does not clear Skinning Man. See [profile proof](WP23_9_OSSUROTH_PROFILE_PROOF.md) and [focused readiness](WP23_9_BONELANDS_READINESS.md). |
-| 8 | WP-23.4 Frosthold | BLOCKED | Validate Frostmane/White Dragon rig and locate suitable snow/ice region and ruler content. |
+| 8 | WP-23.4 Frosthold | **SOURCE/UE INTAKE COMPLETE; ASSEMBLY BLOCKED** | White Dragon source and UE import inventories pass; winter/fort/ruler candidates are imported and Captain is the strongest Alaric base. Rendered Frostmane remains fragmented, so no DRG-15 profile or regional gameplay is authorized. See [focused readiness](WP23_4_FROSTHOLD_READINESS.md). |
 | 9 | WP-23.7 Cinderreach | BLOCKED | Validate Pyraxis/Lava Dragon rig and locate suitable volcanic trial/forge/ruler content. |
 | 10 | WP-23.10 Zenith Spire | BLOCKED | Validate the unnamed Mecha Dragon rig and locate a playable city/colony plus ruler content. Robot and tiny-car archives alone do not satisfy Z1. |
 
@@ -36,8 +36,9 @@ Completed children are listed first. Hallowwood's bounded source-fit audit is
 finished and does not clear its regional entry gate. WP-23.8's bounded intake
 and exhaustive audit are also finished without clearing its regional entry
 gate. WP-23.9's bounded intake and cast audit are finished without clearing its
-two horror-presentation gates. WP-23.4 Frosthold is the next focused readiness
-target.
+two horror-presentation gates. WP-23.4 source and focused UE intake are also
+finished, but its fragmented Frostmane render blocks profile work and regional
+gameplay. WP-23.7 Cinderreach is the next focused readiness target.
 Blocked regions are not built in parallel, and later ordering may change when
 a blocker is cleared by real evidence.
 
@@ -90,6 +91,6 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Validate the supplied White Dragon as Frostmane and audit exact snow/ice region
-and ruler content for WP-23.4. Do not start a production map or regional
-gameplay from archive presence.
+Audit the supplied Lava Dragon as Pyraxis and exact volcanic trial, forge, and
+ruler content for WP-23.7. Do not start a production map or regional gameplay
+from archive presence.

@@ -498,6 +498,21 @@ parts remain excluded. See
 `Documentation/Current/WP23_9_BONELANDS_READINESS.md`,
 `Documentation/Current/WP23_9_OSSUROTH_PROFILE_PROOF.md`, and
 `Documentation/Current/tasks/WP-23.9.md`. Bonelands remains blocked on the two
-distinct non-franchise horror presentations. The next bounded task is WP-23.4
-Frosthold White Dragon/source-fit readiness; do not start regional gameplay
-from archive presence.
+distinct non-franchise horror presentations.
+
+WP-23.4 Frosthold source fit and focused UE intake are now complete. The White
+Dragon source contains 37 meshes, 37 materials, and 20 animations with all
+required motion categories; UE 5.8.2 imported one `Hip-Local` leader plus 36
+followers on a shared skeleton. Twelve winter/fortification meshes and three
+ruler candidates also imported. Palette-bound comparison makes the crowned
+Knight Captain the strongest distinct Alaric base candidate, while the Palace
+King repeats Jade Peaks' ruler language. The capture fixture itself passes,
+but manual review rejects Frostmane: leader-pose and synchronized supplied-
+animation attempts both leave visible detached parts. The environment capture
+also does not prove a complete storybook winter-castle layout. No profile,
+live PIE, map, facts, travel, Echo, save extension, or regional completion is
+claimed. See `Documentation/Current/WP23_4_FROSTHOLD_READINESS.md` and
+`Documentation/Current/tasks/WP-23.4.md`. Keep Frosthold gated while the import
+transform/assembly issue is investigated. The next bounded readiness task is
+WP-23.7 Cinderreach source fit; do not start regional gameplay from archive
+presence.

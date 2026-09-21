@@ -50,9 +50,19 @@ REGIONS = [
     {
         "child": "WP-23.4", "region": "Frosthold", "dragon": "White Dragon",
         "dragon_validated": False,
-        "candidates": ["voxel/characters/knights.zip"],
-        "readiness": "BLOCKED_ON_RIG_AND_REGION_ART",
-        "blockers": ["Frostmane rig/profile/animation proof", "snow/ice region and ruler content"],
+        "candidates": [
+            "voxel/characters/knights.zip",
+            "voxel/hexagon set.zip",
+            "voxel/Voxel_Water___Aquatic_Pack_-_115_Assets__Static___Animated_-8b7379eb.zip",
+            "voxel/Voxel_Grass___Mushrooms_Pack_-_84_Assets__Static___Animated_-ebf10438.zip",
+            "voxel/trees.zip",
+        ],
+        "readiness": "SOURCE_AND_UE_INTAKE_COMPLETE_ASSEMBLY_BLOCKED",
+        "blockers": [
+            "coherent Frostmane modular assembly and DRG-15 profile proof",
+            "clean animated King Alaric presentation review",
+            "complete rendered storybook winter-castle composition",
+        ],
     },
     {
         "child": "WP-23.5", "region": "Gloaming Marches", "dragon": "Dark Dragon",
@@ -163,10 +173,10 @@ def main() -> None:
             "WP-23.8", "WP-23.9", "WP-23.4", "WP-23.7", "WP-23.10",
         ],
         "first_eligible_child": None,
-        "next_focused_readiness_child": "WP-23.4",
+        "next_focused_readiness_child": "WP-23.7",
         "next_focused_readiness_scope": (
-            "Validate the supplied White Dragon as Frostmane and audit exact snow/ice region and ruler "
-            "content; do not start Frosthold gameplay from archive presence"
+            "Audit the supplied Lava Dragon as Pyraxis and exact volcanic trial, forge, and ruler "
+            "content; do not start Cinderreach gameplay from archive presence"
         ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)
