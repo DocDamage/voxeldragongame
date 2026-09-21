@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.3 Grovemaw profile**
+**September 20, 2026 · starter v0.2 · evidence reconciled through the WP-23.8 content audit**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -14,7 +14,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | Repository | `main`; current Git history is the checkpoint authority | [DocDamage/voxeldragongame](https://github.com/DocDamage/voxeldragongame) |
 | Engine | **PASS** | UE 5.8.2, CL 56702186 at `C:\Program Files\UE_5.8` |
 | Editor compile | **PASS** | `WYRMFALLEditor Win64 Development`, fresh build completed cleanly |
-| Native automation | **PASS: 76/76** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/Scaffold/index.json` |
+| Native automation | **PASS: 77/77** | All source-declared `WYRMFALL.Scaffold` tests passed; latest report `Saved/Automation/Scaffold/index.json` |
 | Portable checks | **PASS** | `py -3.12 tools/wyrm.py verify`; 124 tooling tests passed with two expected platform/privilege skips |
 | Physical controller | **PASS** | Physical Sony PlayStation 5 DualSense controller detected (VID: `0x054C`, PID: `0x0CE6`, USB Wired), enumerated via Win32 RawInput, and validated through `GameInput` & `GameInputWindows` plugins in UE 5.8 with Enhanced Input action bindings; [receipt](../../Saved/Diagnostics/controller_presence_probe.json), [report](WP16_CONNECTED_SLICE_PROOF.md) |
 | WP-00 readiness | **PARTIAL** | Real assets and candidate owners were inspected, but full RDY-02/03/04 acceptance, final scale/material/animation/collision suitability, and complete provenance remain open |
@@ -41,7 +41,7 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
-| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; WP-23.3 REGION BLOCKED** | Five dragon identities now have live proof. Grovemaw passed assembly, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and save identity. Master Wizard is the Osk base and forest passed intake; playground/traveling-carnival and all named-horror fits remain gated; [Grovemaw proof](WP23_3_GROVEMAW_PROFILE_PROOF.md), [Hallowwood readiness](WP23_3_HALLOWWOOD_READINESS.md), [ledger](WP23_READINESS.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; WP-23.3 and WP-23.8 AUDITED/REGION BLOCKED** | Six dragon identities now have live proof. Rotwing passed supplied 35-part assembly, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and stable-identity recovery. The Ashen Wastes audit selected the supplied Zombie as Rotking's base and accepted bunker/environment trace props; an exhaustive 64-ZIP/10-RAR audit found no exact laboratory, Doctor Hollowmend, or false-rescuer model-name fit; [Rotwing proof](WP23_8_ROTWING_PROFILE_PROOF.md), [Ashen Wastes readiness](WP23_8_ASHEN_WASTES_READINESS.md), [ledger](WP23_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
 | WP-23.6 Cogspire / Cogfang | **COMPLETE in real PIE** | Mainline completion remains unchanged. Both supplied-art optional investigations now grant permanent usable GAS Echoes—Deathmark and Carver's Precision—and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md), [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md) |
 
@@ -255,12 +255,18 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-WP-23.3 Grovemaw now passes its distinct DRG-15 profile and all five focused
-live-PIE groups. The selected Master Wizard Osk base and forest source passed
-intake, while the playground set was rejected as an exact traveling-carnival
-fit. The next bounded task is a supplied-content audit for that carnival and
-the three named horror presentations; regional gameplay remains blocked.
+WP-23.8 Rotwing passes its distinct DRG-15 profile and all five focused
+live-PIE groups. The Ashen Wastes source-fit and rendered intake audits are
+complete: the supplied Zombie is the selected Rotking base, 10 bunker props
+and the desert/toxic environment candidates are usable trace dressing, and the
+99-model bunker sample is available for later bounded composition. The region
+remains blocked because the exhaustive 64-ZIP/10-RAR audit found no exact
+authored laboratory, Doctor Hollowmend, or false-rescuer presentation. The next
+bounded task is the WP-23.9 Bonelands source-fit audit for Ossuroth, Kael, tomb,
+and guardian content; archive presence alone must not start regional gameplay.
 See the
+[Rotwing profile proof](WP23_8_ROTWING_PROFILE_PROOF.md),
+[Ashen Wastes readiness report](WP23_8_ASHEN_WASTES_READINESS.md),
 [Grovemaw profile proof](WP23_3_GROVEMAW_PROFILE_PROOF.md),
 [Hallowwood readiness report](WP23_3_HALLOWWOOD_READINESS.md),
 [Chef Aurelio proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md),

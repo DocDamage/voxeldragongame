@@ -6,7 +6,8 @@ bool FWyrmDragonRigProfile::IsValidDragonRig(FName InDragonId)
         InDragonId == FName(TEXT("Jadefang")) ||
         InDragonId == FName(TEXT("Nyxaroth")) ||
         InDragonId == FName(TEXT("Cogfang")) ||
-        InDragonId == FName(TEXT("Grovemaw"));
+        InDragonId == FName(TEXT("Grovemaw")) ||
+        InDragonId == FName(TEXT("Rotwing"));
 }
 
 bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfile& OutProfile)
@@ -181,6 +182,42 @@ bool FWyrmDragonRigProfile::GetRigProfile(FName InDragonId, FWyrmDragonRigProfil
         OutProfile.WingSpanSweepRadius = 340.f;
         OutProfile.LandingSearchDistance = 1200.f;
         OutProfile.MaxLandingSlopeAngle = 44.f;
+        OutProfile.FollowerMeshNames = {
+            TEXT("Chest-Local"), TEXT("Claw-Local"), TEXT("Head-Local"), TEXT("Jaw-Local"),
+            TEXT("LB_Claw-Local"), TEXT("LB_Foot-Local"), TEXT("LB_Leg1-Local"), TEXT("LB_Leg2-Local"),
+            TEXT("LB_Thigh-Local"), TEXT("LF_Claw-Local"), TEXT("LF_Foot-Local"), TEXT("LF_Leg-Local"),
+            TEXT("LF_Thigh-Local"), TEXT("L_Wing1-Local"), TEXT("L_Wing2-Local"), TEXT("L_Wing3-Local"),
+            TEXT("Neck-Local"), TEXT("RB_Foot-Local"), TEXT("RB_Leg1-Local"), TEXT("RB_Leg2-Local"),
+            TEXT("RB_Thigh-Local"), TEXT("RF_Claw-Local"), TEXT("RF_Foot-Local"), TEXT("RF_Leg-Local"),
+            TEXT("RF_Thigh-Local"), TEXT("R_Wing1-Local"), TEXT("R_Wing2-Local"), TEXT("R_Wing3-Local"),
+            TEXT("Tail_1-Local"), TEXT("Tail_2-Local"), TEXT("Tail_3-Local"), TEXT("Tail_4-Local"),
+            TEXT("ear_L-Local"), TEXT("ear_R-Local")
+        };
+        return true;
+    }
+    else if (InDragonId == FName(TEXT("Rotwing")))
+    {
+        OutProfile.DragonId = FName(TEXT("Rotwing"));
+        OutProfile.DisplayName = TEXT("Rotwing");
+        OutProfile.LeaderMeshPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_8/Rotwing/Zombie_Dragon/SkeletalMeshes/Hip-Local.Hip-Local");
+        OutProfile.FollowerMeshBasePath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_8/Rotwing/Zombie_Dragon/SkeletalMeshes");
+        OutProfile.SkeletonPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_8/Rotwing/Zombie_Dragon/SkeletalMeshes/Hip-Local_Skeleton.Hip-Local_Skeleton");
+        OutProfile.IdleAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_8/Rotwing/Zombie_Dragon/SkeletalMeshes/Zombie_DragonIdle_01.Zombie_DragonIdle_01");
+        OutProfile.FlightAnimPath = TEXT("/Game/WYRMFALL/Development/Intake/WP23_8/Rotwing/Zombie_Dragon/SkeletalMeshes/Zombie_DragonFlying_01.Zombie_DragonFlying_01");
+        OutProfile.CompanionMeshScale = 0.0088f;
+        OutProfile.CompanionCapsuleRadius = 31.f;
+        OutProfile.CompanionCapsuleHalfHeight = 37.f;
+        OutProfile.CompanionGroundSpeed = 410.f;
+        OutProfile.TrueFormMeshScale = 0.035f;
+        OutProfile.TrueFormCapsuleRadius = 122.f;
+        OutProfile.TrueFormCapsuleHalfHeight = 162.f;
+        OutProfile.TrueFormGroundSpeed = 510.f;
+        OutProfile.FlightSpeed = 1450.f;
+        OutProfile.MountSocketOffset = FVector(0.f, 0.f, 165.f);
+        OutProfile.TakeoffClearanceHeight = 510.f;
+        OutProfile.WingSpanSweepRadius = 345.f;
+        OutProfile.LandingSearchDistance = 1200.f;
+        OutProfile.MaxLandingSlopeAngle = 40.f;
         OutProfile.FollowerMeshNames = {
             TEXT("Chest-Local"), TEXT("Claw-Local"), TEXT("Head-Local"), TEXT("Jaw-Local"),
             TEXT("LB_Claw-Local"), TEXT("LB_Foot-Local"), TEXT("LB_Leg1-Local"), TEXT("LB_Leg2-Local"),

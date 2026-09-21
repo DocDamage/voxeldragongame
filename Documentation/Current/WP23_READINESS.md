@@ -11,11 +11,11 @@ files and verifies each named dragon GLTF inside
 `Saved/Diagnostics/WP23_readiness_inventory.json`.
 
 All ten source dragons are present: Green, Chinese, Wooden, White, Dark,
-Steampunk, Lava, Zombie, Skull, and Mecha. **Verdance/Green,
-Jadefang/Chinese, Nyxaroth/Dark, and Cogfang/Steampunk** have project rig
-profiles plus live-PIE Heartfold, control, combat, flight, and persistence
-evidence. The remaining six models are source candidates and stay fail-closed
-under DRG-15.
+Steampunk, Lava, Zombie, Skull, and Mecha. **Verdance/Green, Jadefang/Chinese,
+Nyxaroth/Dark, Cogfang/Steampunk, Grovemaw/Wooden, and Rotwing/Zombie** have
+project rig profiles plus live-PIE Heartfold, control, combat, flight, and
+persistence evidence. The remaining four models are source candidates and stay
+fail-closed under DRG-15.
 
 ## Readiness and production order
 
@@ -25,18 +25,19 @@ under DRG-15.
 | 2 | WP-23.1 Verdant Reach closure | **COMPLETE** | VR-01..08 passed and were rerun under current Schema 7 with supplied Ranger art, Meridess route parity, optional canopy hunter, Hunter's Veil, live navigation, and rendered QA. |
 | 3 | WP-23.5 Gloaming Marches | **COMPLETE** | All 20 supplied identities, optional Echo paths, validated bonded Nyxaroth, navigation, two-way travel, and Schema 7 recovery passed. Completion commits once after the full roster and safe-return context, without taxing either optional Echo. |
 | 4 | WP-23.6 Cogspire Harbor | **COMPLETE** | Mainline completion remains stable; both optional supplied-art investigations and permanent usable GAS Echoes pass and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md). |
-| 5 | WP-23.3 Hallowwood | **GROVEMAW COMPLETE; REGION BLOCKED** | The distinct 35-part Grovemaw profile passed all five live-PIE groups and stable-identity recovery. Master Wizard is the selected Osk base and the forest source passed. Playground art was rejected as an exact traveling-carnival fit; all three named horror presentations remain blocked. See [profile proof](WP23_3_GROVEMAW_PROFILE_PROOF.md) and [focused readiness](WP23_3_HALLOWWOOD_READINESS.md). |
-| 6 | WP-23.8 Ashen Wastes | BLOCKED | Validate Rotwing/Zombie Dragon rig; establish Rotking, laboratory, and bunker content fit. |
+| 5 | WP-23.3 Hallowwood | **GROVEMAW COMPLETE; AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Grovemaw profile passed all five live-PIE groups and stable-identity recovery. Master Wizard and forest passed intake. An exhaustive 64-ZIP/10-RAR audit found supporting trace props but no exact authored carnival kit or valid non-franchise named-horror fits. See [profile proof](WP23_3_GROVEMAW_PROFILE_PROOF.md) and [focused readiness](WP23_3_HALLOWWOOD_READINESS.md). |
+| 6 | WP-23.8 Ashen Wastes | **ROTWING/AUDIT COMPLETE; REGION BLOCKED** | The distinct 35-part Rotwing profile passed all five live-PIE groups and stable-identity recovery. Zombie is the selected Rotking base; ash/ruin and bunker props passed focused intake. An exhaustive 64-ZIP/10-RAR audit found no exact laboratory, Doctor Hollowmend, or false-rescuer model-name fit. See [profile proof](WP23_8_ROTWING_PROFILE_PROOF.md) and [focused readiness](WP23_8_ASHEN_WASTES_READINESS.md). |
 | 7 | WP-23.9 Bonelands | BLOCKED | Validate Ossuroth/Skull Dragon rig; establish Kael, tomb, and guardian content fit. |
 | 8 | WP-23.4 Frosthold | BLOCKED | Validate Frostmane/White Dragon rig and locate suitable snow/ice region and ruler content. |
 | 9 | WP-23.7 Cinderreach | BLOCKED | Validate Pyraxis/Lava Dragon rig and locate suitable volcanic trial/forge/ruler content. |
 | 10 | WP-23.10 Zenith Spire | BLOCKED | Validate the unnamed Mecha Dragon rig and locate a playable city/colony plus ruler content. Robot and tiny-car archives alone do not satisfy Z1. |
 
-Completed children are listed first. Hallowwood is the only selected readiness
-target: its Grovemaw and environment sources justify focused Unreal intake, but
-they do not clear the regional entry gate. Blocked regions are not built in
-parallel, and later ordering may change when a blocker is cleared by real
-evidence.
+Completed children are listed first. Hallowwood's bounded source-fit audit is
+finished and does not clear its regional entry gate. WP-23.8's bounded intake
+and exhaustive audit are also finished without clearing its regional entry
+gate. WP-23.9 Bonelands is the next selected readiness target.
+Blocked regions are not built in parallel, and later ordering may change when
+a blocker is cleared by real evidence.
 
 ## Travel/save contract for regional children
 
@@ -87,6 +88,6 @@ remains harmless and reproducible but is no longer a blocker.
 
 ## Next bounded task
 
-Audit the supplied content for an exact abandoned traveling-carnival fit and
-the three distinct Hallowwood horror presentations. Do not start a production
-map or regional gameplay from generic substitutes.
+Run the WP-23.9 Bonelands source-fit audit for Ossuroth/Skull Dragon, Kael,
+tomb, and guardian content. Do not start a production map or regional gameplay
+from archive presence or generic substitutes.

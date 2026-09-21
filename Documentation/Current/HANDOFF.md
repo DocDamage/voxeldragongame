@@ -25,7 +25,7 @@ settings out of commits.
 ## Fresh verified results
 
 - Editor target compiled cleanly.
-- Full scaffold native automation completed 76/76 tests with 0 failures.
+- Full scaffold native automation completed 77/77 tests with 0 failures.
 - Portable verification passed; 124 tooling tests passed with two expected skips.
 - WP-01 real PIE passed 7/7 terrain groups.
 - WP-06 real PIE passed 6/6 ranged/progression groups.
@@ -429,7 +429,7 @@ coordinator. See `Documentation/Current/WP23_6_COGSPIRE_COMPLETION_PROOF.md`,
 `Documentation/Current/WP23_6_COGSPIRE_READINESS.md`, and
 `Documentation/Current/WP23_READINESS.md`.
 
-The refreshed readiness evidence selects WP-23.3 Hallowwood for bounded work,
+The refreshed readiness evidence selected WP-23.3 Hallowwood for bounded work,
 not regional gameplay. UE 5.8.2 imported Wooden Dragon as one leader plus 34
 followers with 20 animations and rendered its complete living-wood assembly.
 The supplied Master Wizard is selected over the bright-hatted Old Man as Osk's
@@ -439,14 +439,39 @@ rejected for that gate. Generic bat and wolf models do not clear Hollow
 Harvestman, carnival presence, or unfinished puppet; those named presentation
 gates remain blocked. Grovemaw's distinct profile subsequently passed 5/5 live
 PIE groups: assembly/living bond, Heartfold/blocked growth, mount/flight, GAS
-combat/direct control, and stable-identity recovery. The full native suite
-remains 76/76. See
+combat/direct control, and stable-identity recovery. The full native suite at
+that checkpoint was 76/76. See
 `Documentation/Current/WP23_3_HALLOWWOOD_READINESS.md` and
 `Documentation/Current/WP23_3_GROVEMAW_PROFILE_PROOF.md` and
 `Documentation/Current/tasks/WP-23.3.md`.
 
-The next bounded task is a supplied-content audit for an exact abandoned
-traveling-carnival fit plus Hollow Harvestman, carnival presence, and unfinished
-puppet presentations. Stop before a production map, facts, travel, Echo, or
-regional gameplay, and do not relabel generic monsters or the rejected
-playground set.
+That supplied-content audit is now complete. It scanned 64 ZIP and 10 RAR
+archives. Ranger tents/banners, carts, wagons, park stands/bouncy horses, and
+gallows are supporting trace props, but no model member provides an exact
+authored carnival or a non-franchise Harvestman, carnival presence, or puppet.
+Recognizable movie-character clown/doll parts are excluded by the active art
+direction. WP-23.3 therefore remains region-blocked without adding a map,
+facts, travel, Echo, or substitute presentation.
+
+WP-23.8 source-fit and UE intake are now complete. The supplied Zombie Dragon
+imports as one `Hip-Local` leader plus 34 followers on a shared skeleton with
+20 animations, and its distinct Rotwing profile passed 5/5 live PIE groups:
+assembly/living bond, Heartfold/blocked growth, mount/flight, GAS combat/direct
+control, and stable-identity recovery. The focused native profile test and the
+full 77/77 native suite passed after a clean UE 5.8.2 editor compile. Rendered
+QA accepts Rotwing as a complete undead dragon and selects the supplied Zombie
+over the generic Hero as Rotking's base presentation. Ten bunker props, a
+desert ruin, and toxic puddle passed rendered intake as supporting Ashen Wastes
+dressing, and the source audit found 99 bunker models. They do not constitute
+an exact authored laboratory. No valid Doctor Hollowmend or false-rescuer
+presentation was found. An exhaustive follow-up scanned all 64 ZIP archives,
+one nested ZIP layer, all 10 RAR archives, and loose model filenames. It found
+zero laboratory, physician/scientist, or rescuer/survivor/captive model-name
+candidates; the only bunker hits were the known 99-prop sample duplicated in
+two supplied archives. WP-23.8 therefore remains region-blocked without adding
+a map, facts, travel, Echo, or substitute cast. See
+`Documentation/Current/WP23_8_ASHEN_WASTES_READINESS.md`,
+`Documentation/Current/WP23_8_ROTWING_PROFILE_PROOF.md`, and
+`Documentation/Current/tasks/WP-23.8.md`. The next bounded task is the WP-23.9
+Bonelands source-fit audit for Ossuroth, Kael, tomb, and guardian content;
+archive presence alone must not start regional gameplay.

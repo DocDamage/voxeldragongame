@@ -85,14 +85,16 @@ REGIONS = [
     },
     {
         "child": "WP-23.8", "region": "Ashen Wastes", "dragon": "Zombie Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
-            "voxel/cemetary and church voxel set.zip",
+            "Voxel+Dragons+Pack+Upload.zip",
+            "voxel/monogon voxels.zip",
+            "voxel/Voxel_Sand___Beach_Pack_-_35_Assets__Static___Animated_-b0ef1ece.zip",
+            "voxel/Voxel_Water___Aquatic_Pack_-_115_Assets__Static___Animated_-8b7379eb.zip",
             "voxel/characters/horror characters.fbx",
-            "voxel/characters/voxel_monsters.zip",
         ],
-        "readiness": "BLOCKED_ON_RIG_AND_CONTENT_FIT",
-        "blockers": ["Rotwing rig/profile/animation proof", "Rotking/laboratory/bunker content fit"],
+        "readiness": "DRAGON_VALIDATED_REGION_BLOCKED_ON_EXACT_CONTENT",
+        "blockers": ["exact authored laboratory", "Doctor Hollowmend presentation", "false-rescuer presentation"],
     },
     {
         "child": "WP-23.9", "region": "Bonelands", "dragon": "Skull Dragon",
@@ -152,17 +154,17 @@ def main() -> None:
             "bytes": DRAGON_PACK.stat().st_size,
             "sha256": digest(DRAGON_PACK),
         },
-        "validated_dragon_ids": ["Verdance", "Jadefang", "Nyxaroth", "Cogfang", "Grovemaw"],
+        "validated_dragon_ids": ["Verdance", "Jadefang", "Nyxaroth", "Cogfang", "Grovemaw", "Rotwing"],
         "regions": REGIONS,
         "recommended_order": [
             "WP-23.1", "WP-23.2", "WP-23.5", "WP-23.6", "WP-23.3",
             "WP-23.8", "WP-23.9", "WP-23.4", "WP-23.7", "WP-23.10",
         ],
         "first_eligible_child": None,
-        "next_focused_readiness_child": None,
+        "next_focused_readiness_child": "WP-23.9",
         "next_focused_readiness_scope": (
-            "Audit supplied content for an exact abandoned traveling-carnival and the three distinct "
-            "Hallowwood horror presentations; do not start regional gameplay from generic substitutes"
+            "Audit Ossuroth/Skull Dragon, Kael, tomb, and guardian content fit; do not start "
+            "Bonelands regional gameplay from archive presence or generic substitutes"
         ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)

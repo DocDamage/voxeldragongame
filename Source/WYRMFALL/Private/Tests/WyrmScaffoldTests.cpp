@@ -3111,17 +3111,17 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
         AWyrmDragonCharacter::StaticClass(), FVector(500.f, 5000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
 
     Dragon->BondWithHumanoid(Player);
-    Dragon->DragonId = FName(TEXT("Rotwing"));
-    TestFalse(TEXT("Rotwing cannot inherit another dragon's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
+    Dragon->DragonId = FName(TEXT("Frostmane"));
+    TestFalse(TEXT("Frostmane cannot inherit another dragon's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
 
     FString Reason;
-    TestFalse(TEXT("Rotwing Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+    TestFalse(TEXT("Frostmane Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
     TestTrue(TEXT("Heartfold rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated Heartfold profile")));
 
     Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
-    TestFalse(TEXT("Rotwing cannot inherit mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
+    TestFalse(TEXT("Frostmane cannot inherit mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Mount rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated mount profile")));
-    TestFalse(TEXT("Rotwing cannot inherit flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
+    TestFalse(TEXT("Frostmane cannot inherit flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
     TestTrue(TEXT("Flight rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated flight profile")));
 
     // WP-20: Jadefang has its own authoritative validated rig profile
@@ -3181,6 +3181,23 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
         Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 155.f));
     TestTrue(TEXT("Grovemaw can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Grovemaw can take off in True Form"), Dragon->CanTakeOff(Reason));
+
+    // WP-23.8: Rotwing uses the accepted 35-part Zombie Dragon intake and a
+    // distinct heavy undead profile. Bonding does not replace its presentation.
+    Dragon->SetDragonId(FName(TEXT("Rotwing")));
+    TestTrue(TEXT("Rotwing has an authoritative validated rig profile (WP-23.8)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Rotwing binds exactly 34 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 34);
+    TestEqual(TEXT("Rotwing companion capsule is 31x37"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(31.f, 37.f));
+    TestEqual(TEXT("Rotwing true form capsule is 122x162"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(122.f, 162.f));
+    TestEqual(TEXT("Rotwing true form fly speed is 1450"), Dragon->GetActiveRigProfile().FlightSpeed, 1450.f);
+    TestEqual(TEXT("Rotwing mount socket offset is distinct (0, 0, 165)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 165.f));
+    TestTrue(TEXT("Rotwing can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Rotwing can take off in True Form"), Dragon->CanTakeOff(Reason));
 
     Dragon->Destroy();
     Player->Destroy();

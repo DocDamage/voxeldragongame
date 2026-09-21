@@ -25,6 +25,26 @@ All archive paths are hashed in the machine receipt. Source ownership remains
 the user's supplied-project authorization recorded by the project; this audit
 adds no redistribution claim.
 
+## Exhaustive supplied-content audit
+
+`py -3.12 tools/wp23_3_hallowwood_content_audit.py` scanned all 64 supplied ZIP
+archives, including one nested ZIP level, and all 10 supplied RAR archives on
+the current host. It wrote
+`Saved/Diagnostics/WP23_3_hallowwood_content_audit.json` with
+`PASS_AUDIT_CONTENT_GATES_REMAIN_BLOCKED`:
+
+- No model member is named for an authored carnival, circus, carousel, Ferris
+  wheel, ringmaster, puppet, marionette, scarecrow, or Harvestman.
+- Ranger tent/banner, medieval carts, cemetery wagons, park stands/bouncy
+  horses, and dungeon gallows are real supporting trace pieces. A composition
+  made from them could strengthen a later location, but filenames alone do not
+  establish the required authored traveling-carnival fit.
+- The supplied horror FBX contains recognizable movie-character identifiers,
+  including the apparent clown and doll candidates. They are excluded for this
+  gate under `Documentation/DesignPack/docs/ART_DIRECTION.md`: franchise-
+  specific costumes or licensed likenesses must not be imported merely because
+  their inspiration is recognizable.
+
 ## UE 5.8.2 intake and rendered review
 
 The tracked inspector ran through `UnrealEditor-Cmd.exe` with `-nullrhi` and
@@ -70,17 +90,18 @@ Captures:
 | Grovemaw | **PASS LIVE PIE** | Distinct 34-follower profile, Heartfold, clearance, bond, mount/flight, GAS combat/direct control, and save identity passed; [proof](WP23_3_GROVEMAW_PROFILE_PROOF.md) |
 | Hallowwood environment | PASS FOCUSED INTAKE | Imported forest mesh/material/body setup and rendered scene fit pass; production layout/navigation remains later |
 | Osk Grownroot | MASTER WIZARD BASE SELECTED | Rendered 180 cm comparison favored the gray-haired Master Wizard; gameplay presentation remains later |
-| Abandoned-carnival trace | BLOCKED | Playground candidates were rendered and rejected as an exact traveling-carnival fit |
+| Abandoned-carnival trace | BLOCKED | Exhaustive archive audit found supporting tent/banner/cart/wagon/stand/horse/gallows props, but no exact authored traveling-carnival kit |
 | Hollow Harvestman | BLOCKED | Distinct supplied presentation fit |
 | Carnival presence | BLOCKED | Distinct supplied presentation fit; playground props alone are environment, not the presence |
 | Unfinished puppet | BLOCKED | Distinct supplied presentation fit |
 
 The generic bat and wolf cannot be relabeled as named horrors merely to clear
-the gate. WP-23.3 remains region-blocked until Grovemaw, Osk, the environment,
-and the selected encounter presentation all have real evidence.
+the gate. Recognizable movie-character clown/doll parts are also not valid
+substitutes. WP-23.3 remains region-blocked until the carnival and selected
+encounter presentations have real, non-franchise evidence.
 
 ## Next bounded task
 
-Audit supplied content for an exact abandoned traveling-carnival fit and the
-three distinct named horror presentations. Do not add a production Hallowwood
-map, travel, facts, Echoes, or regional completion from generic substitutes.
+Keep WP-23.3 gated. Continue with a source-fit audit for the next readiness-
+ranked child, WP-23.8 Ashen Wastes, without starting production regional
+gameplay from archive presence alone.
