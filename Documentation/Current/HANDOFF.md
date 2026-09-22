@@ -500,19 +500,106 @@ parts remain excluded. See
 `Documentation/Current/tasks/WP-23.9.md`. Bonelands remains blocked on the two
 distinct non-franchise horror presentations.
 
-WP-23.4 Frosthold source fit and focused UE intake are now complete. The White
-Dragon source contains 37 meshes, 37 materials, and 20 animations with all
-required motion categories; UE 5.8.2 imported one `Hip-Local` leader plus 36
-followers on a shared skeleton. Twelve winter/fortification meshes and three
-ruler candidates also imported. Palette-bound comparison makes the crowned
-Knight Captain the strongest distinct Alaric base candidate, while the Palace
-King repeats Jade Peaks' ruler language. The capture fixture itself passes,
-but manual review rejects Frostmane: leader-pose and synchronized supplied-
-animation attempts both leave visible detached parts. The environment capture
-also does not prove a complete storybook winter-castle layout. No profile,
-live PIE, map, facts, travel, Echo, save extension, or regional completion is
-claimed. See `Documentation/Current/WP23_4_FROSTHOLD_READINESS.md` and
-`Documentation/Current/tasks/WP-23.4.md`. Keep Frosthold gated while the import
-transform/assembly issue is investigated. The next bounded readiness task is
-WP-23.7 Cinderreach source fit; do not start regional gameplay from archive
-presence.
+WP-23.4 Frostmane is now an accepted bounded dragon profile. Source comparison
+and a corrected capture using the real `AWyrmDragonCharacter` hierarchy proved
+the earlier separate-actor fragmentation was a QA fixture false negative. The
+coherent 37-part profile passes the UE 5.8.2 editor build, all 76 native tests,
+and five live PIE groups covering bond, Heartfold, mount/flight, GAS combat and
+direct control, and stable save identity. Frosthold remains blocked: Knight
+Captain is only an Alaric base candidate, the complete winter-castle composition
+is unproved, and Waking Terror is unimplemented. See
+`Documentation/Current/WP23_4_FROSTMANE_PROFILE_PROOF.md`,
+`Documentation/Current/WP23_4_FROSTHOLD_READINESS.md`, and
+`Documentation/Current/tasks/WP-23.4.md`.
+
+WP-23.7 Cinderreach now includes bounded intake for the user's selected forge
+and Flayed Choir overseer base. The exact source hashes are recorded in
+`Documentation/Current/WP23_7_SELECTED_ASSET_INTAKE.md`. Blender source/fine/
+coarse comparison retained object separation; UE 5.8.2 imported the fine forge
+as exactly 141 separate static meshes and rendered a coherent blacksmith
+composition. The Harvester source and fine candidate imported as four static
+meshes each with no skeleton or animation. Orthographic comparison confirms
+the fine candidate retains the hood, hooks, bindings, hunch, and thorn mass,
+but it remains a static presentation candidate requiring refinement, rigging,
+animation, clean materials, and choir staging. The source files identify
+`fab-model-conversion` but embed no copyright/license record; source listing
+and applicable license remain required before redistribution or production
+acceptance.
+
+The focused Magnarok audit is now complete; see
+`Documentation/Current/WP23_7_MAGNAROK_INTAKE.md`. The supplied King Demon
+Vulture is selected as Magnarok's base. Blender 4.5.5 verified matching
+24-bone skeleton signatures across the base, 32-frame walk, and 20-frame run.
+The fine rig-preserving voxel pass retains the crest, wings, armor, talons, and
+mantle. UE 5.8.2 imports it at 185 cm with the supplied PBR maps, persists the
+skeleton as a separate package, reloads both clips in a fresh editor session,
+and renders actors assigned walk/run clips. A later fixed-phase review verifies
+source and fine-rig deformation in Blender but finds no distinct UE phases in
+the editor-only capture. A focused live-PIE fixture then starts the clips on
+runtime components and verifies moving foot/arm bones plus two different
+rendered poses; bounded UE walk/run deformation **PASSES**. See
+`Saved/Diagnostics/WP23_7_MagnarokIntake/motion_review.json` and
+`Saved/Diagnostics/WP23_7_MagnarokIntake/locomotion_pie.json`.
+The 539,950-vertex unrigged source was
+rejected as the runtime base. Source listing/license provenance remains
+incomplete. This clears base selection and locomotion intake only: idle,
+attack, hit, defeat, phase, and authored boss performance remain open.
+
+Pyraxis's explicit profile now passes the UE 5.8.2 editor-target build, all 76
+native tests, and five focused live PIE groups. See
+`Documentation/Current/WP23_7_PYRAXIS_PROFILE_PROOF.md` and
+`Saved/Diagnostics/WP23_7_pyraxis_profile_proof.json`. The 35-part assembly,
+living defeat/bond, Heartfold clearance, mount/flight, GAS attacks/direct
+control, and save-record identity all pass. The first forced non-unity/no-PCH
+build exposed unrelated pre-existing include errors; the normal editor build
+passed without editing those files. The ritual arena remains unproved. No
+Cinderreach authored trial, production map, facts, travel, Pain Reprisal, disk
+save, schema extension, or regional completion is claimed. Keep regional
+gameplay gated. The next bounded task is identifying suitable Magnarok
+boss-motion sources, without starting regional systems.
+
+The September 22 bounded source audit compared six owned local motion
+candidates against Magnarok's 24-bone rig; see
+`Documentation/Current/WP23_7_MAGNAROK_BOSS_MOTION_SOURCE_AUDIT.md` and
+`Saved/Diagnostics/WP23_7_MagnarokIntake/animation_source_audit.json`.
+No direct-use boss-performance clip was selected or imported. A loose
+`Idle2.fbx` has 20 normalized bone-name overlaps but a different spine/head
+chain and no recorded source listing/license. The Unreal/Manny-style libraries
+have only one normalized bone-name overlap and their attack/hit/death names
+are not presentation acceptance. Keep regional gameplay gated. The next
+bounded task is a provenance check, followed by at most one controlled idle
+retarget audition if that source can be established.
+
+The September 22 [Blender-only `Idle2` audition](WP23_7_MAGNAROK_IDLE2_AUDITION.md)
+rendered four sampled poses in front and oblique views. The selected rig's
+silhouette stayed intact, but the idle was barely perceptible at gameplay
+scale. Exact source listing/license remains unverified. The animation was
+not selected, exported, or imported into UE. Seek a source/license record or
+a specifically sourced, more readable idle before further UE intake.
+
+The September 22 [sourced idle shortlist](WP23_7_MAGNAROK_SOURCED_IDLE_CANDIDATES.md)
+identifies the locally held Quaternius UAL1 GLB and its publisher's CC0 listing.
+Blender sampled the neutral and spell idle actions on the source armature;
+neither has been retargeted or selected for Magnarok. The next bounded task is
+one two-camera Blender target-rig comparison, with no UE import or regional
+gameplay work.
+
+WP-23.10 Zenith Spire source fit and focused UE intake are now complete. Mecha
+Dragon contains 35 meshes, 35 materials, and 20 animations with all required
+motion categories; UE 5.8.2 imported one `Hip-Local` leader plus 34 followers
+on a shared skeleton. Six representative space-colony exterior models and nine
+representative modular robot OBJ pieces also imported. The exhaustive
+64-ZIP/10-RAR audit found only a 21-model exterior colony sample, a 79-piece
+robot construction kit, repeated generic ruler candidates, and no distinct
+Broodmother Cipher or infestation-dungeon presentation. A corrected
+runtime-equivalent fixture proves a coherent complete Mecha Dragon assembly;
+the earlier separate-actor result was a false negative.
+The colony sample has no enclosed arrival-to-objective-to-return route, and the
+robot pieces do not establish authored inhabitants or Overking Vantrix-9. No
+profile, PIE, city/colony map, facts, travel, Echo, save extension, or regional
+completion is claimed. See
+`Documentation/Current/WP23_10_ZENITH_READINESS.md` and
+`Documentation/Current/tasks/WP-23.10.md`. The archive-only regional readiness
+queue is exhausted. The shared assembly diagnosis is complete; profiles may be
+validated one dragon at a time, but independent regional presentation gates
+remain. Do not start blocked regional gameplay or substitute generic presentation.

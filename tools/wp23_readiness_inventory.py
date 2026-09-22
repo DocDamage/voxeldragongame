@@ -49,7 +49,7 @@ REGIONS = [
     },
     {
         "child": "WP-23.4", "region": "Frosthold", "dragon": "White Dragon",
-        "dragon_validated": False,
+        "dragon_validated": True,
         "candidates": [
             "voxel/characters/knights.zip",
             "voxel/hexagon set.zip",
@@ -57,9 +57,8 @@ REGIONS = [
             "voxel/Voxel_Grass___Mushrooms_Pack_-_84_Assets__Static___Animated_-ebf10438.zip",
             "voxel/trees.zip",
         ],
-        "readiness": "SOURCE_AND_UE_INTAKE_COMPLETE_ASSEMBLY_BLOCKED",
+        "readiness": "FROSTMANE_PROFILE_COMPLETE_REGION_BLOCKED",
         "blockers": [
-            "coherent Frostmane modular assembly and DRG-15 profile proof",
             "clean animated King Alaric presentation review",
             "complete rendered storybook winter-castle composition",
         ],
@@ -88,10 +87,20 @@ REGIONS = [
     },
     {
         "child": "WP-23.7", "region": "Cinderreach", "dragon": "Lava Dragon",
-        "dragon_validated": False,
-        "candidates": ["voxel/hexagon set.zip", "voxel/characters/knights.zip"],
-        "readiness": "BLOCKED_ON_RIG_AND_REGION_ART",
-        "blockers": ["Pyraxis rig/profile/animation proof", "volcanic trial/forge/ruler content"],
+        "dragon_validated": True,
+        "candidates": [
+            "voxel/characters/knights.zip",
+            "voxel/characters/Voxel Cathedral.zip",
+            "voxel/Free_Voxel_Dungeon___Execution_Starter_Kit_for_Indie_Games_-3cdb8f01.zip",
+            "voxel/Voxel_Sand___Beach_Pack_-_35_Assets__Static___Animated_-b0ef1ece.zip",
+            "voxel/Voxel_Water___Aquatic_Pack_-_115_Assets__Static___Animated_-8b7379eb.zip",
+        ],
+        "readiness": "PYRAXIS_PROFILE_AND_SELECTED_FORGE_OVERSEER_MAGNAROK_BASE_INTAKE_PASS_REGION_BLOCKED",
+        "blockers": [
+            "readable ritual-arena composition and production-map validation",
+            "Magnarok idle/attack/hit/defeat/phase and authored boss-performance coverage",
+            "refined rigged animated Flayed Choir overseer with supporting choir staging",
+        ],
     },
     {
         "child": "WP-23.8", "region": "Ashen Wastes", "dragon": "Zombie Dragon",
@@ -122,9 +131,18 @@ REGIONS = [
     {
         "child": "WP-23.10", "region": "Zenith Spire", "dragon": "Mecha Dragon",
         "dragon_validated": False,
-        "candidates": ["voxel/modular robots.zip", "voxel/tiny cars.zip"],
-        "readiness": "BLOCKED_ON_RIG_AND_COLONY_ART",
-        "blockers": ["Mecha Dragon rig/profile/animation proof", "playable city/colony and ruler content"],
+        "candidates": [
+            "voxel/monogon voxels.zip",
+            "voxel/modular robots/Modular_Robots.zip",
+            "voxel/tiny cars.zip",
+        ],
+        "readiness": "SOURCE_AND_UE_INTAKE_COMPLETE_ASSEMBLY_AND_PRESENTATION_BLOCKED",
+        "blockers": [
+            "coherent Mecha Dragon modular assembly and DRG-15 profile proof",
+            "playable future-city and enclosed colony route content",
+            "authored robot population and distinct Overking Vantrix-9 presentation",
+            "distinct Broodmother Cipher and infestation-dungeon presentation",
+        ],
     },
 ]
 
@@ -173,10 +191,10 @@ def main() -> None:
             "WP-23.8", "WP-23.9", "WP-23.4", "WP-23.7", "WP-23.10",
         ],
         "first_eligible_child": None,
-        "next_focused_readiness_child": "WP-23.7",
+        "next_focused_readiness_child": None,
         "next_focused_readiness_scope": (
-            "Audit the supplied Lava Dragon as Pyraxis and exact volcanic trial, forge, and ruler "
-            "content; do not start Cinderreach gameplay from archive presence"
+            "Archive-only regional readiness is exhausted; diagnose the shared White/Lava/Mecha "
+            "Dragon import/transform problem or obtain exact blocked presentation content before gameplay"
         ),
     }
     REPORT.parent.mkdir(parents=True, exist_ok=True)

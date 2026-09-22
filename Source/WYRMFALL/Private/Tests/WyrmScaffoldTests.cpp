@@ -3111,18 +3111,18 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
         AWyrmDragonCharacter::StaticClass(), FVector(500.f, 5000.f, 100.f), FRotator::ZeroRotator, SpawnParams);
 
     Dragon->BondWithHumanoid(Player);
-    Dragon->DragonId = FName(TEXT("Frostmane"));
-    TestFalse(TEXT("Frostmane cannot inherit another dragon's validated rig profile (DRG-15)"), Dragon->HasSupportedRigProfile());
+    Dragon->DragonId = FName(TEXT("UnvalidatedDragon"));
+    TestFalse(TEXT("An unvalidated dragon cannot inherit another dragon's rig profile"), Dragon->HasSupportedRigProfile());
 
     FString Reason;
-    TestFalse(TEXT("Frostmane Heartfold change is blocked pending its own profile (DRG-15)"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
-    TestTrue(TEXT("Heartfold rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated Heartfold profile")));
+    TestFalse(TEXT("Unvalidated dragon Heartfold change remains fail-closed"), Dragon->CanChangeForm(EWyrmDragonForm::TrueForm, Reason));
+    TestTrue(TEXT("Heartfold rejection identifies missing rig profile"), Reason.Contains(TEXT("no validated Heartfold profile")));
 
     Dragon->SetDragonForm(EWyrmDragonForm::TrueForm);
-    TestFalse(TEXT("Frostmane cannot inherit mount profile (DRG-15)"), Dragon->CanMount(Player, Reason));
-    TestTrue(TEXT("Mount rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated mount profile")));
-    TestFalse(TEXT("Frostmane cannot inherit flight profile (DRG-15)"), Dragon->CanTakeOff(Reason));
-    TestTrue(TEXT("Flight rejection identifies missing rig profile (DRG-15)"), Reason.Contains(TEXT("no validated flight profile")));
+    TestFalse(TEXT("Unvalidated dragon cannot inherit a mount profile"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Mount rejection identifies missing rig profile"), Reason.Contains(TEXT("no validated mount profile")));
+    TestFalse(TEXT("Unvalidated dragon cannot inherit a flight profile"), Dragon->CanTakeOff(Reason));
+    TestTrue(TEXT("Flight rejection identifies missing rig profile"), Reason.Contains(TEXT("no validated flight profile")));
 
     // WP-20: Jadefang has its own authoritative validated rig profile
     Dragon->SetDragonId(FName(TEXT("Jadefang")));
@@ -3215,6 +3215,40 @@ bool FWyrmDragonRigProfilePolicyTest::RunTest(const FString& Parameters)
         Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 170.f));
     TestTrue(TEXT("Ossuroth can mount in True Form"), Dragon->CanMount(Player, Reason));
     TestTrue(TEXT("Ossuroth can take off in True Form"), Dragon->CanTakeOff(Reason));
+
+    // WP-23.4: Frostmane uses the runtime-validated 37-part White Dragon
+    // assembly and an explicit cold-region profile rather than a fallback rig.
+    Dragon->SetDragonId(FName(TEXT("Frostmane")));
+    TestTrue(TEXT("Frostmane has an authoritative validated rig profile (WP-23.4)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Frostmane binds exactly 36 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 36);
+    TestEqual(TEXT("Frostmane companion capsule is 30x36"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(30.f, 36.f));
+    TestEqual(TEXT("Frostmane true form capsule is 120x160"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(120.f, 160.f));
+    TestEqual(TEXT("Frostmane true form fly speed is 1500"), Dragon->GetActiveRigProfile().FlightSpeed, 1500.f);
+    TestEqual(TEXT("Frostmane mount socket offset is (0, 0, 160)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 160.f));
+    TestTrue(TEXT("Frostmane can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Frostmane can take off in True Form"), Dragon->CanTakeOff(Reason));
+
+    // WP-23.7: Pyraxis uses the coherent 35-part Lava Dragon intake, with an
+    // explicit profile rather than inheriting another dragon's values.
+    Dragon->SetDragonId(FName(TEXT("Pyraxis")));
+    TestTrue(TEXT("Pyraxis has an authoritative validated rig profile (WP-23.7)"), Dragon->HasSupportedRigProfile());
+    TestEqual(TEXT("Pyraxis binds exactly 34 follower mesh names"), Dragon->GetActiveRigProfile().FollowerMeshNames.Num(), 34);
+    TestEqual(TEXT("Pyraxis companion capsule is 34x39"),
+        FVector2D(Dragon->GetActiveRigProfile().CompanionCapsuleRadius, Dragon->GetActiveRigProfile().CompanionCapsuleHalfHeight),
+        FVector2D(34.f, 39.f));
+    TestEqual(TEXT("Pyraxis true form capsule is 132x175"),
+        FVector2D(Dragon->GetActiveRigProfile().TrueFormCapsuleRadius, Dragon->GetActiveRigProfile().TrueFormCapsuleHalfHeight),
+        FVector2D(132.f, 175.f));
+    TestEqual(TEXT("Pyraxis true form fly speed is 1550"), Dragon->GetActiveRigProfile().FlightSpeed, 1550.f);
+    TestEqual(TEXT("Pyraxis mount socket offset is (0, 0, 175)"),
+        Dragon->GetActiveRigProfile().MountSocketOffset, FVector(0.f, 0.f, 175.f));
+    TestTrue(TEXT("Pyraxis can mount in True Form"), Dragon->CanMount(Player, Reason));
+    TestTrue(TEXT("Pyraxis can take off in True Form"), Dragon->CanTakeOff(Reason));
 
     Dragon->Destroy();
     Player->Destroy();

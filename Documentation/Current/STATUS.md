@@ -1,6 +1,6 @@
 # Current implementation status
 
-**September 21, 2026 · starter v0.2 · evidence reconciled through WP-23.4 focused intake**
+**September 22, 2026 · starter v0.2 · evidence reconciled through WP-23.7 Magnarok locomotion PIE proof**
 
 This file records observed results. Source presence, editor-world commandlets,
 native automation, and Play-In-Editor (PIE) are kept as separate evidence.
@@ -41,10 +41,12 @@ unchanged; active DesignPack guidance is amended when scope decisions change.
 | WP-21 Moonbound transformation proof | **PASS in real PIE (ECHO-07..09, SAVE-11)** | Ser Corvyn dual resolution parity (hostile defeat vs authored cure) with zero penalty and preserved loot safety; genuine wolf mesh presentation (`wolf1`) with 700 cm/s speed and passive stat retention; authoritative beast combat kit (Claw 25 dmg, Pounce 35 dmg); low-ceiling (<192cm) return clearance gating with return-pending state and beast attack suppression; and Schema 3 save persistence across save/reload; [report](WP21_MOONBOUND_PROOF.md) |
 | WP-22 Jade Peaks production-region slice | **PASS in real PIE (JP-01..06)** | Map loading, supplied assets, Jadefang continuity, disciple/Mirror Step, Schema 4 persistence, and the corrected six-landmark route passed. All six anchors project to navigation and all four ordered route legs are complete and non-partial; [functional receipt](../../Saved/Diagnostics/WP22_jade_peaks_proof.json), [proof](WP22_JADE_PEAKS_PROOF.md) |
 | WP-22 visual/editor QA | **PASS FOR WP-22-QA1; interactive walkthrough NOT RUN** | Manual review of five settled-PIE captures passed corrected lighting, terrain presentation, grounded prop scale, landmark separation, and route readability. The editor-control runtime failed to initialize, so no keyboard/gamepad walkthrough is claimed; [report](WP22_VISUAL_QA.md) |
-| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; WP-23.3, WP-23.4, WP-23.8, and WP-23.9 REGION BLOCKED** | Seven dragon identities have live proof. Frosthold's White Dragon source and UE intake inventories pass, winter/fort/ruler candidates are imported, and Captain is the strongest Alaric base candidate; however, the rendered 37-part Frostmane assembly is fragmented, so profile and regional work remain blocked; [Frosthold readiness](WP23_4_FROSTHOLD_READINESS.md), [ledger](WP23_READINESS.md) |
-| WP-23.4 Frosthold / Frostmane | **SOURCE AND UE INTAKE PASS; VISUAL ASSEMBLY BLOCKED** | White Dragon has 37 meshes, 37 materials, 20 animations, one imported shared skeleton, and complete motion categories. Both leader-pose and synchronized-frame fixtures show detached parts. No DRG-15 profile, live PIE, map, facts, travel, Waking Terror, or persistence acceptance is claimed; [readiness](WP23_4_FROSTHOLD_READINESS.md) |
+| WP-23 rest-of-world umbrella | **WP-23.0, WP-23.1, WP-23.2, WP-23.5, and WP-23.6 COMPLETE; ALL REMAINING REGIONS EVIDENCE-GATED** | Nine dragon identities have focused live proof. Runtime-equivalent diagnosis clears White/Lava/Mecha assembly; Pyraxis's explicit profile now passes, but exact regional presentation gates remain and no blocked regional gameplay was started; [Pyraxis proof](WP23_7_PYRAXIS_PROFILE_PROOF.md), [ledger](WP23_READINESS.md) |
+| WP-23.4 Frosthold / Frostmane | **FROSTMANE PROFILE COMPLETE; REGION BLOCKED** | White Dragon has a coherent 37-part runtime assembly and explicit DRG-15 profile. All 76 native tests and five live PIE groups pass. King Alaric and the full winter-castle composition remain presentation gates; no map, facts, travel, Waking Terror, schema extension, or regional completion is claimed; [profile proof](WP23_4_FROSTMANE_PROFILE_PROOF.md), [readiness](WP23_4_FROSTHOLD_READINESS.md) |
 | WP-23.5 Gloaming / Nyxaroth | **COMPLETE in real PIE** | All 20 supplied horror identities, optional Echoes, Nyxaroth continuity, navigation, two-way travel, and Schema 7 recovery are accepted. Regional completion requires the full roster, validated bonded Nyxaroth, and the authored safe-return context; it commits once and does not require either optional Echo; [closure proof](WP23_5_GLOAMING_COMPLETION_PROOF.md), [roster proof](WP23_5_REQUIRED_HORROR_ROSTER_PROOF.md) |
 | WP-23.6 Cogspire / Cogfang | **COMPLETE in real PIE** | Mainline completion remains unchanged. Both supplied-art optional investigations now grant permanent usable GAS Echoes—Deathmark and Carver's Precision—and restore through Schema 8 without becoming completion taxes; [Chef proof](WP23_6_CHEF_AURELIO_CARVERS_PRECISION_PROOF.md), [House Mark proof](WP23_6_HOUSE_MARK_DEATHMARK_PROOF.md), [closure proof](WP23_6_COGSPIRE_COMPLETION_PROOF.md), [save proof](WP23_6_COGSPIRE_SAVE_PROOF.md) |
+| WP-23.7 Cinderreach / Pyraxis | **PYRAXIS PROFILE + SELECTED FORGE/OVERSEER/MAGNAROK BASE INTAKE PASS; REGION BLOCKED** | The coherent 35-part Lava Dragon assembly now has an explicit DRG-15 profile: UE 5.8.2 build, 76 native tests, and five focused live-PIE groups pass. The forge passes 141-part modular intake, Harvester passes static comparison, and selected Magnarok base passes UE reload plus Blender and bounded live-PIE walk/run deformation. A focused owned-source audit selects no direct-use boss-performance clip. Full boss animation coverage, final overseer presentation, ritual arena, and gameplay remain open. No production map, authored trial, travel, Pain Reprisal, or disk-save acceptance is claimed; [profile proof](WP23_7_PYRAXIS_PROFILE_PROOF.md), [readiness](WP23_7_CINDERREACH_READINESS.md) |
+| WP-23.10 Zenith Spire / Mecha Dragon | **SOURCE/UE INTAKE AND RUNTIME ASSEMBLY PASS; PLAYABLE-COLONY/PRESENTATION GATES BLOCKED** | Mecha Dragon has a coherent 35-part runtime-equivalent assembly. Its profile is not yet implemented; robot sources are independent pieces, the colony sample is exterior-only, and no distinct Vantrix-9 or Broodmother presentation was found. No PIE profile, city/colony map, facts, travel, Echo, or persistence acceptance is claimed; [readiness](WP23_10_ZENITH_READINESS.md) |
 
 ## Important implementation facts
 
@@ -256,14 +258,24 @@ The WP-05 commandlet also passed, but it is editor-world evidence:
 
 ## Next bounded task
 
-WP-23.9's bounded intake is complete. Ossuroth passes its distinct DRG-15
-profile and all five focused live-PIE groups; cemetery/cathedral assets pass;
-and palette-bound rendered comparison selects the supplied Commander as Kael's
-base. The exhaustive 64-ZIP/10-RAR audit found no wrapped guardian, and the
-rendered Village Butcher is too generic to clear Skinning Man. Bonelands stays
-gated. The next bounded task is WP-23.4 Frosthold White Dragon/source-fit
-readiness; no production map or regional gameplay is authorized.
-See the
+Frostmane's explicit profile now passes the UE 5.8.2 editor build, all 76 native
+scaffold tests, and five live PIE groups. The corrected runtime-equivalent
+fixture also clears Pyraxis and Mecha Dragon assembly; Pyraxis now has an
+explicit profile with five focused live-PIE groups, while Mecha remains
+unprofiled. Cinderreach's selected forge and overseer pass bounded static intake,
+and the selected Magnarok base passes rig-preserving UE reload plus Blender
+and bounded live-PIE walk/run deformation. Full boss animation coverage and
+the overseer's final rig/animation/staging remain open. The next bounded task
+is a Blender-only target-rig comparison of two sourced Quaternius UAL1 idle
+loops. The loose `Idle2.fbx` remains unselected and no idle was imported into
+UE. Regional gameplay remains gated. See the
+[sourced idle candidates](WP23_7_MAGNAROK_SOURCED_IDLE_CANDIDATES.md),
+[idle audition](WP23_7_MAGNAROK_IDLE2_AUDITION.md),
+[Pyraxis profile proof](WP23_7_PYRAXIS_PROFILE_PROOF.md),
+[Magnarok intake](WP23_7_MAGNAROK_INTAKE.md),
+[selected Cinderreach intake](WP23_7_SELECTED_ASSET_INTAKE.md),
+[Frostmane profile proof](WP23_4_FROSTMANE_PROFILE_PROOF.md),
+[Zenith readiness report](WP23_10_ZENITH_READINESS.md),
 [Ossuroth profile proof](WP23_9_OSSUROTH_PROFILE_PROOF.md),
 [Bonelands readiness report](WP23_9_BONELANDS_READINESS.md),
 [Rotwing profile proof](WP23_8_ROTWING_PROFILE_PROOF.md),
